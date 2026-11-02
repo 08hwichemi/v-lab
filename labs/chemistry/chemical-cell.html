@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>화학 전지 실험실 · V-Lab</title>
+<link rel="stylesheet" href="../../assets/css/lab-theme.css">
+<style>
+:root{--bg:#f2f4f8;--card:#fff;--ink:#1d2433;--sub:#5b6577;--line:#dde2ea;--pri:#2f6fed;--pri2:#e8efff;--ok:#1f9d61;--warn:#c26a12;--bad:#d64545;--hh:58px}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px}
+header{height:var(--hh);background:#152238;color:#fff;padding:0 16px;display:flex;align-items:center;gap:14px}
+header h1{font-size:20px;margin:0;font-weight:800;letter-spacing:-.3px;white-space:nowrap}
+.studybtn{margin-left:auto;border:1px solid #3a4b6b;background:#1f3150;color:#e5ecf8;border-radius:9px;padding:8px 12px;font-weight:700;cursor:pointer;font-family:inherit;font-size:14px}
+.modes{display:flex;gap:6px;background:#0c1525;padding:4px;border-radius:12px}
+.modes button{border:0;background:transparent;color:#c9d4ea;padding:8px 16px;border-radius:9px;font-weight:700;cursor:pointer;font-size:15px;font-family:inherit}
+.modes button.on{background:#fff;color:#152238}
+.app{display:grid;grid-template-columns:300px minmax(0,1fr) 350px;gap:10px;padding:10px;height:calc(100vh - var(--hh))}
+.app>aside{overflow:auto;min-height:0}
+main{min-height:0;overflow:auto;display:flex;flex-direction:column;gap:10px}
+@media(max-width:1250px){.app{height:auto;grid-template-columns:290px minmax(0,1fr)}#side{grid-column:1/-1;max-height:none}.app>aside,main{overflow:visible}}
+@media(max-width:820px){.app{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.cardh{padding:7px 12px;font-weight:800;font-size:15px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.fsbtn{margin-left:auto;border:1px solid var(--line);background:#f6f8fb;border-radius:8px;padding:3px 9px;cursor:pointer;font-size:13px;font-weight:700;color:#334;font-family:inherit}
+.fsbtn:hover{background:#e8efff}
+.sec{padding:9px 12px;border-bottom:1px solid var(--line)}
+.sec:last-child{border-bottom:0}
+.sec h3{margin:0 0 6px;font-size:15px;display:flex;align-items:center;gap:6px}
+.num{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--pri);color:#fff;font-size:12.5px;flex:none}
+.lbl{font-size:13.5px;color:var(--sub);margin:7px 0 4px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 9px;font-size:14px;cursor:pointer;color:var(--ink);font-family:inherit}
+.chip:hover{border-color:#9db6f5}
+.chip.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.chip small{opacity:.7}
+.picked{display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid #cfdaf3;background:#f3f7ff;border-radius:9px;margin-top:5px;font-size:14.5px}
+.picked .k{color:var(--sub);font-weight:700;font-size:13.5px;flex:none}
+.picked b{flex:1}
+.picked button{border:0;background:#fff;border:1px solid var(--line);border-radius:7px;padding:3px 8px;cursor:pointer;font-family:inherit;font-size:13px;color:var(--pri);font-weight:700}
+.btn{border:0;background:var(--pri);color:#fff;border-radius:9px;padding:8px 10px;font-weight:700;cursor:pointer;font-size:14px;font-family:inherit}
+.btn.ghost{background:var(--pri2);color:var(--pri)}
+.btn.orange{background:#fff1e2;color:#a85707}
+.btn.full{width:100%;margin-top:7px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+input[type=range]{width:100%;accent-color:var(--pri)}
+.recipe{background:#f7f9fc;border:1px dashed #c9d3e3;border-radius:8px;padding:6px 8px;font-size:13.5px;line-height:1.5;margin-top:5px}
+.beakerbox{border:1px solid var(--line);border-radius:10px;padding:7px 8px;margin-top:6px}
+.beakerbox>b{font-size:14px}
+.stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.22fr);gap:10px;align-items:start}
+.lcol{display:flex;flex-direction:column;gap:10px;min-width:0}
+@media(max-width:1500px){.stage{grid-template-columns:1fr}}
+canvas{display:block;width:100%;height:auto}
+.meters{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.meter{background:#101a2b;color:#fff;border-radius:12px;padding:6px 12px}
+.meter .k{font-size:13px;color:#9fb0cc}
+.meter .v{font-family:ui-monospace,Consolas,Menlo,monospace;font-size:22px;font-weight:700;color:#7CFFB2;white-space:nowrap}
+.meter .v.i{color:#ffd166}.meter .v.t{color:#cfe0ff;font-size:17px;font-family:inherit;padding-top:3px}
+#warn{height:38px;flex:none;position:relative;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:0 6px 0 12px;font-size:14px}
+#warn.w{background:#fff4e6;border-color:#f5c58e;color:#7a4206}
+#warn.n{background:#eef5ff;border-color:#bcd3f7;color:#1f3f75}
+#warn .wtxt{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#warn .wtxt.slide{animation:wslide .45s ease}
+@keyframes wslide{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+#warn .wcnt{flex:none;font-size:12.5px;font-weight:700;opacity:.7}
+#warn .wmore{flex:none;border:1px solid currentColor;background:#fff;color:inherit;border-radius:8px;padding:3px 9px;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px}
+#warn .wpop{position:absolute;top:42px;left:0;right:0;z-index:30;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:8px;display:flex;flex-direction:column;gap:6px;max-height:340px;overflow:auto;color:var(--ink)}
+.mis.cur{border-color:#2f6fed;background:#f5f8ff}
+.ovbox .q{font-size:17px;font-weight:800;color:#5a3ea8;margin:12px 0 10px}
+.ovbox .opts{display:flex;flex-direction:column;gap:8px}
+.ovbox .opts button{border:2px solid #dde2ea;background:#f8faff;border-radius:12px;padding:12px 14px;text-align:left;font-size:16px;cursor:pointer;font-family:inherit;font-weight:700}
+.ovbox .opts button:hover{border-color:#2f6fed;background:#eef4ff}
+.ovbox .verdict{font-size:17px;font-weight:800;margin:10px 0}
+.ovbox .exp{font-size:15.5px;line-height:1.65;background:#f2fbf6;border-left:4px solid #1f9d61;padding:10px 12px;border-radius:8px}
+.ovbox .go{margin-top:16px;width:100%;font-size:16px;padding:11px}
+.wbox{border-radius:10px;padding:6px 11px;font-size:14px;line-height:1.4}
+.wbox.w{background:#fff4e6;border:1px solid #f5c58e;color:#7a4206}
+.wbox.n{background:#eef5ff;border:1px solid #bcd3f7;color:#1f3f75}
+#side{display:flex;flex-direction:column}
+.tabs{display:flex;border-bottom:1px solid var(--line);flex:none}
+.tabs button{flex:1;border:0;background:#f7f9fc;padding:10px 4px;font-weight:700;cursor:pointer;color:var(--sub);font-family:inherit;font-size:14.5px}
+.tabs button.on{background:#fff;color:var(--pri);box-shadow:inset 0 -3px 0 var(--pri)}
+.tabbody{padding:10px 12px;overflow:auto;flex:1;min-height:0}
+.mis{border:1px solid var(--line);border-radius:11px;padding:9px 10px;margin-bottom:8px}
+.mis.done{border-color:#9ad7b8;background:#f2fbf6}
+.mis .mt{font-weight:800;font-size:15px;display:flex;gap:6px;align-items:center}
+.mis .md{font-size:14px;color:#3a4558;line-height:1.55;margin:4px 0}
+.mis .grp{font-size:11.5px;background:#eef2f8;color:#56627a;border-radius:6px;padding:1px 6px;font-weight:700}
+.mis .pq{font-size:14px;font-weight:700;margin:5px 0 4px;color:#5a3ea8}
+.mis .ex{font-size:14px;background:#fff;border-left:3px solid var(--ok);padding:6px 8px;margin-top:6px;line-height:1.55}
+.badge{margin-left:auto;font-size:12px;padding:2px 7px;border-radius:20px;background:#eef1f6;color:#667;flex:none}
+.badge.ok{background:var(--ok);color:#fff}
+.prog{font-size:14px;margin-bottom:6px;color:var(--sub)}
+.prog .bar{height:7px;background:#e8ecf3;border-radius:5px;overflow:hidden;margin-top:4px}
+.prog .bar i{display:block;height:100%;background:var(--ok)}
+.misSec{font-weight:800;font-size:15px;margin:10px 0 8px}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{border:1px solid var(--line);padding:4px 5px;text-align:center}
+th{background:#f4f6fa}
+.th h4{margin:14px 0 6px;font-size:15.5px}
+.th h4:first-child{margin-top:0}
+.eq{font-family:"Cambria Math","Times New Roman",serif;font-size:16px;background:#f7f9fc;border-radius:8px;padding:6px 9px;margin:4px 0;line-height:1.6}
+.th p,.th li{font-size:14px;line-height:1.6;color:#2f3a4d}
+.th ul{padding-left:18px;margin:4px 0}
+.ebar{display:flex;align-items:center;gap:6px;font-size:13.5px;margin:3px 0}
+.ebar .nm{width:76px}
+.ebar .tr{flex:1;height:12px;background:#eef1f6;border-radius:4px;position:relative}
+.ebar .tr i{position:absolute;top:0;bottom:0;border-radius:4px}
+.ebar .vv{width:52px;text-align:right;font-family:ui-monospace,monospace}
+.small{font-size:13.5px;color:var(--sub)}
+.adv{margin-top:16px;padding:8px 10px;border-radius:10px;background:#fff4e6;border:1px solid #f5c58e;color:#7a4206;font-size:14px;font-weight:700}
+.ready{font-size:14.5px}
+#banner:empty{display:none}
+#banner{background:#152238;color:#fff;border-radius:12px;padding:9px 14px;font-size:15px;line-height:1.5;flex:none}
+#banner b{color:#ffe58a}
+.tipbtn{border:1px solid #f2d48a;background:#fff8e1;color:#8a5a00;border-radius:8px;padding:3px 9px;font-weight:800;cursor:pointer;font-family:inherit;font-size:13.5px;margin-left:6px}
+.tipbox{margin-top:6px;background:#fff8e1;border:1px solid #f2d48a;color:#6b4a00;border-radius:8px;padding:6px 10px;font-size:14px;line-height:1.5}
+#banner .tipbox{background:#2a3a58;border-color:#46597d;color:#ffe9a8}
+.bbtn{border:0;background:#ffe58a;color:#152238;border-radius:8px;padding:4px 10px;font-weight:800;cursor:pointer;font-family:inherit;font-size:14px;margin-left:6px}
+.ov{position:fixed;inset:0;background:rgba(12,20,35,.62);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.ov.hide{display:none}
+.ovbox{background:#fff;border-radius:18px;max-width:660px;width:100%;padding:26px 26px 22px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.ovbox h2{margin:0 0 6px;font-size:23px}
+.ovbox p{margin:0 0 16px;color:#5b6577;font-size:15px;line-height:1.5}
+.ovchoices{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.ovchoices{grid-template-columns:1fr 1fr}}
+/* 노트북(좁은 PC): 실험 창은 세로로, 패널은 각자 스크롤 */
+@media(max-width:1500px) and (min-width:1251px){.stage{grid-template-columns:1fr}}
+/* 태블릿 */
+@media(max-width:1250px){
+  header{height:auto;min-height:var(--hh);flex-wrap:wrap;padding:8px 12px}
+  .app{height:auto}
+  .stage{grid-template-columns:1fr}
+  #side{min-height:420px}
+  .tabbody{max-height:70vh}
+}
+@media(max-width:1250px) and (min-width:900px){ .stage{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} }
+/* 세로 태블릿·휴대폰 */
+@media(max-width:820px){
+  #ctrl .sec{padding:8px 10px}
+  .chip{padding:8px 10px;min-height:36px}
+  .btn{min-height:38px}
+}
+/* 휴대폰 */
+@media(max-width:600px){
+  body{font-size:14px}
+  header{gap:6px;padding:8px 10px}
+  header h1{font-size:17px;flex:1 1 100%}
+  .studybtn{margin-left:0;font-size:12.5px;padding:6px 9px}
+  .modes{margin-left:auto}
+  .modes button{padding:6px 10px;font-size:13.5px}
+  .app{padding:6px;gap:8px}
+  main{gap:8px}
+  .meters{gap:5px}
+  .meter{padding:5px 8px}
+  .meter .k{font-size:11.5px}
+  .meter .v{font-size:16px}
+  .meter .v.t{font-size:12.5px}
+  .cardh{font-size:14px;padding:6px 10px}
+  .fsbtn{font-size:12px;padding:2px 7px}
+  #banner{font-size:13.5px;padding:8px 10px}
+  #warn{font-size:12.5px;height:36px}
+  .ovbox{padding:18px 16px}
+  .ovbox h2{font-size:19px}
+  .tabs button{font-size:13px;padding:9px 2px}
+  .mis .md,.mis .ex{font-size:13.5px}
+}
+.ovchoices button{border:2px solid #dde2ea;background:#f8faff;border-radius:14px;padding:18px;text-align:left;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;gap:8px}
+.ovchoices button:hover{border-color:#2f6fed;background:#eef4ff}
+.ovchoices b{font-size:17px;color:#152238}
+.ovchoices button.sel{border-color:#2f6fed;background:#e8efff;box-shadow:0 0 0 2px #2f6fed inset}
+.stepT{font-weight:800;font-size:15.5px;margin:12px 0 8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ovchoices button{align-items:center;text-align:center;padding:16px}
+.infol{border:1px solid #c9d6f3;background:#f3f7ff;color:#2f6fed;border-radius:20px;padding:3px 10px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.infol:hover{background:#e3ecff}
+.info h3{margin:16px 0 6px;font-size:16px}
+.info p,.info li{font-size:15px;line-height:1.65;color:#2f3a4d;margin:4px 0}
+.info ul{padding-left:20px;margin:4px 0}
+.info svg{width:100%;height:auto;background:#f7f9fc;border-radius:12px;margin-top:6px}
+.ovchoices span{font-size:14px;color:#4b5566;line-height:1.5}
+/* 전체 화면 */
+.card.fs{position:fixed;inset:0;z-index:80;border-radius:0;display:flex;flex-direction:column;background:#fbfcfe}
+.card.fs canvas{flex:1;min-height:0;width:100%;height:100%;object-fit:contain}
+.card.fs .cardh{font-size:17px}
+
+/* ===== V-Lab 공용 테마에 맞춘 덮어쓰기 ===== */
+:root{--bg:#fff;--card:#fff;--ink:#111;--sub:#6B7280;--line:#E6E8EC;--pri:#3182F6;--pri2:#EAF2FF;--ok:#12A66B;--warn:#F5A623;--bad:#E5484D}
+body{font-family:var(--font);letter-spacing:-0.012em;-webkit-font-smoothing:antialiased}
+header{background:#fff;color:#111;border-bottom:1px solid var(--line)}
+header h1{font-weight:600;font-size:18px;letter-spacing:-.02em}
+body.vlab-embed header h1{display:none}
+.studybtn{background:#fff;color:#111;border:1px solid var(--line);border-radius:8px;font-weight:600}
+.studybtn:hover{background:#F7F8FA}
+.modes{background:var(--line-2,#F0F1F3);border-radius:8px}
+.modes button{color:#3F4652;border-radius:6px;font-weight:600}
+.modes button.on{background:#fff;color:#111;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.app{padding:14px 16px;gap:14px}
+.card{border-radius:12px}
+.cardh,.sec h3,.misSec,.mis .mt,.ovbox h2,.stepT,.th h4,.info h3{font-weight:600}
+.chip,.btn,.fsbtn,.picked,.recipe,.beakerbox,.wbox,.tipbtn,.tipbox,.bbtn,.infol,.mis,.ovbox .opts button{border-radius:8px}
+.chip:hover{border-color:var(--pri)}
+.btn{font-weight:600}
+.btn.ghost{background:var(--pri2);color:var(--pri)}
+.meter{background:#111;border-radius:10px}
+.meter .v{font-family:var(--mono);color:#7CFFB2}
+.tabs button{background:#F7F8FA;font-weight:600}
+.tabs button.on{background:#fff;color:#111;box-shadow:inset 0 -2px 0 var(--pri)}
+#banner{background:#111;border-radius:10px}
+#banner .tipbox{background:#2a2a2a;border-color:#444}
+.ovbox{border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.ovchoices button,.ovchoices button.sel{border-radius:10px}
+.ovchoices button.sel{border-color:var(--pri);background:var(--pri2);box-shadow:0 0 0 2px var(--pri) inset}
+.ovbox .q,.mis .pq{color:#111}
+.badge.ok{background:var(--ok)}
+.prog .bar i{background:var(--ok)}
+.eq{background:#F7F8FA;border-radius:8px}
+th{background:#F7F8FA}
+.card.fs{background:#fff}
+</style>
+</head>
+<body>
+<script>if(/embed/.test(location.hash))document.body.classList.add("vlab-embed");</script>
+<header>
+  <h1>⚡ 화학 전지 실험실</h1>
+  <button class="studybtn" id="studyBtn">📚 처음 화면</button>
+  <div class="modes" id="modes">
+    <button data-mode="volta">볼타 전지</button>
+    <button data-mode="daniel">다니엘 전지</button>
+  </div>
+</header>
+<div id="popOv" class="ov hide" style="z-index:60"><div class="ovbox" id="popBox"></div></div>
+<div id="infoOv" class="ov hide" style="z-index:70"><div class="ovbox" id="infoBox" style="max-width:760px;max-height:92vh;overflow:auto"></div></div>
+<div id="studyOv" class="ov"><div class="ovbox">
+  <h2>⚡ 화학 전지 실험실</h2>
+  <div class="stepT">1. 어떤 전지를 만들까요? <button class="infol" data-info="volta">볼타 전지란?</button><button class="infol" data-info="daniel">다니엘 전지란?</button></div>
+  <div class="ovchoices">
+    <button data-pickmode="volta"><b>🔋 볼타 전지</b></button>
+    <button data-pickmode="daniel"><b>⚗️ 다니엘 전지</b></button>
+  </div>
+  <div class="stepT">2. 어떻게 공부할까요?</div>
+  <div class="ovchoices">
+    <button data-study="mission"><b>🎯 미션 · 도전</b></button>
+    <button data-study="free"><b>🧪 자유 실험</b></button>
+  </div>
+  <button class="btn go" id="startBtn" disabled>시작하기</button>
+</div></div>
+
+<div class="app">
+  <aside id="ctrl" class="card"></aside>
+
+  <main>
+    <div id="banner"></div>
+    <div id="warn"></div>
+    <div class="stage">
+      <div class="lcol">
+        <div class="card" id="cardMacro">
+          <div class="cardh">🧪 실험대 <button class="fsbtn" data-shot="macro" data-name="bench">📷 이미지 저장</button><button class="fsbtn" data-fs="cardMacro" style="margin-left:0">⛶ 크게 보기</button></div>
+          <canvas id="macro"></canvas>
+        </div>
+        <div class="meters">
+          <div class="meter"><div class="k">전압계</div><div class="v" id="mV">—</div></div>
+          <div class="meter"><div class="k">전류계</div><div class="v i" id="mI">—</div></div>
+          <div class="meter"><div class="k">회로 상태</div><div class="v t" id="mS">—</div></div>
+        </div>
+        <div class="card" id="cardGraph">
+          <div class="cardh">📈 전압·전류 <span style="font-weight:600;font-size:13.5px"><span style="color:#2f6fed">━ 전압(V)</span> <span style="color:#e67700">━ 전류(mA)</span></span><button class="fsbtn" data-shot="graph" data-name="voltage-graph">📷 이미지 저장</button><button class="fsbtn" data-fs="cardGraph" style="margin-left:0">⛶ 크게 보기</button></div>
+          <canvas id="graph"></canvas>
+        </div>
+      </div>
+      <div class="card" id="cardMicro">
+        <div class="cardh">🔬 금속판 표면 확대 <button class="fsbtn" data-shot="micro" data-name="surface-zoom">📷 이미지 저장</button><button class="fsbtn" data-fs="cardMicro" style="margin-left:0">⛶ 크게 보기</button></div>
+        <canvas id="micro"></canvas>
+      </div>
+    </div>
+  </main>
+
+  <aside id="side" class="card">
+    <div class="tabs" id="tabs">
+      <button data-tab="mis" class="on">🎯 미션</button>
+      <button data-tab="rec">📋 기록</button>
+      <button data-tab="th">📘 개념<br><small>(전기화학)</small></button>
+    </div>
+    <div class="tabbody" id="tabbody"></div>
+  </aside>
+</div>
+
+<script>
+/* ================= 데이터 ================= */
+const F = 96485, K59 = 0.05916;
+const METALS = {
+  Mg:{name:'마그네슘',E:-2.37,n:2,M:24.31,plate:'#c3c8ce',ion:'Mg²⁺',ic:'#9aa0a6'},
+  Al:{name:'알루미늄',E:-1.66,n:3,M:26.98,plate:'#d5d9de',ion:'Al³⁺',ic:'#b8bec6'},
+  Zn:{name:'아연',E:-0.76,n:2,M:65.38,plate:'#9aa4ae',ion:'Zn²⁺',ic:'#b49ee6'},
+  Fe:{name:'철',E:-0.44,n:2,M:55.85,plate:'#6f747b',ion:'Fe²⁺',ic:'#86cf80'},
+  Pb:{name:'납',E:-0.13,n:2,M:207.2,plate:'#5b6270',ion:'Pb²⁺',ic:'#c7c48f'},
+  Cu:{name:'구리',E:0.34,n:2,M:63.55,plate:'#c8733a',ion:'Cu²⁺',ic:'#2f7ee0'},
+  Ag:{name:'은',E:0.80,n:1,M:107.87,plate:'#e1e5ea',ion:'Ag⁺',ic:'#8d99a8'}
+};
+const ORDER = ['Mg','Al','Zn','Fe','Pb','Cu','Ag'];
+const SALTS = {
+  Mg:{f:'MgSO₄',Mr:120.37,per:1,an:'SO4'}, Al:{f:'Al₂(SO₄)₃',Mr:342.15,per:2,an:'SO4'},
+  Zn:{f:'ZnSO₄',Mr:161.45,per:1,an:'SO4'}, Fe:{f:'FeSO₄',Mr:151.91,per:1,an:'SO4'},
+  Pb:{f:'Pb(NO₃)₂',Mr:331.2,per:1,an:'NO3'}, Cu:{f:'CuSO₄',Mr:159.61,per:1,an:'SO4'},
+  Ag:{f:'AgNO₃',Mr:169.87,per:1,an:'NO3'}
+};
+const ACIDS = { H2SO4:{f:'H₂SO₄',name:'묽은 황산',Mr:98.08,h:2,an:'SO4'}, HCl:{f:'HCl',name:'묽은 염산',Mr:36.46,h:1,an:'Cl'} };
+const ETA_H = {Mg:0.30,Al:0.28,Zn:0.30,Fe:0.12,Pb:0.40,Cu:0.15,Ag:0.10};   // 수소 과전압(시뮬레이션용 근사값, V)
+// 금속판이 산과 직접 반응하는 세기(국부 반응). 이온화 경향 순서를 따르되 가장 느린 납도 보이게 설정
+const LOCALV = {Mg:1.2,Al:0.8,Zn:0.5,Fe:0.3,Pb:0.15,Cu:0,Ag:0};      // 확대 화면 사건 수(/s, [H⁺]=2 M 기준)
+const LOCAL = Object.fromEntries(Object.entries(LOCALV).map(([k,v])=>[k,v*0.003])); // 질량 변화용(A)
+// 반응 속도 표시용 전류: 순서는 유지하고 차이는 줄여서(제곱근) 느린 반응도 눈에 보이게 함. 전류계 값은 실제 계산값 그대로
+const IREF=0.066; const Ik=I=>I>0?IREF*Math.sqrt(I/IREF):0;
+const RATE=I=>I>2e-5?clamp(0.7*Math.sqrt(I/IREF),0.45,1.5):0;
+const BRIDGES = {
+  KNO3:{name:'KNO₃ 염다리',r:8,cat:'K',an:'NO3'},
+  KCl:{name:'KCl 염다리',r:8,cat:'K',an:'Cl'},
+  none:{name:'연결 안 함',r:Infinity}
+};
+const LOADS = {none:'없음',bulb:'꼬마전구',wire:'도선만'};
+const SPEEDS = [0,1,150,300,600];
+
+/* ================= 상태 ================= */
+const S = {mode:'daniel',L:{metal:null,sol:null,c:1},R:{metal:null,sol:null,c:1},acid:{type:null,c:1},
+  bridge:null,load:null,amm:false,volt:true,nCells:1,speed:1,running:true,study:null};
+const DR = {L:{sol:null,c:1},R:{sol:null,c:1},acid:{type:null,c:1}};
+let D, O = {};
+let tab = 'mis';
+const MS = {};
+const RECS = [];
+const AUTO = {on:false,int:2,rows:[],acc:0,seg:0,lastCond:''};
+
+/* ================= 유틸 ================= */
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+const lcm=(a,b)=>a*b/gcd(a,b);
+const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+function sciT(x,p=2){ if(!isFinite(x))return '∞'; if(x===0)return '0'; const ax=Math.abs(x);
+  if(ax>=0.001&&ax<1e4) return String(+x.toPrecision(p+1));
+  const e=Math.floor(Math.log10(ax)), m=x/Math.pow(10,e);
+  return m.toFixed(1)+'×10'+String(e).split('').map(c=>SUP[c]).join(''); }
+function fmtC(c){ return c>=0.1? c.toFixed(2) : c>=0.001? String(+c.toPrecision(2)) : sciT(c,1); }
+function fmtT(t){ if(t<60) return t.toFixed(1)+' s'; if(t<3600){const m=Math.floor(t/60);return m+'분 '+Math.floor(t-m*60)+'초';}
+  const h=Math.floor(t/3600); return h+'시간 '+Math.floor((t-h*3600)/60)+'분'; }
+const cToSl=c=>Math.round(1000*Math.log(c/0.001)/Math.log(2000));
+const slToC=v=>+(0.001*Math.pow(2000,v/1000)).toPrecision(2);
+const aToSl=c=>Math.round(1000*Math.log(c/0.05)/Math.log(60));
+const slToA=v=>+(0.05*Math.pow(60,v/1000)).toPrecision(2);
+function solReady(sd){ return S.mode==='volta'? !!S.acid.type : !!S[sd].sol; }
+function ready(){ return !!(S.L.metal&&S.R.metal&&solReady('L')&&solReady('R')&&(S.mode==='volta'||S.bridge)&&S.load); }
+const BR=()=>BRIDGES[S.bridge]||{};
+
+/* ================= 동역학 상태 ================= */
+function resetDyn(){
+  D={t:0,theta:0,dep:0,depType:null,usedDep:false,peakTheta:0,ionsL:{},ionsR:{},ionsV:{},H:0,
+     dm:{L:0,R:0},coat:{L:0,R:0},depM:{L:null,R:null},hist:[]};
+  if(S.L.sol) D.ionsL[S.L.sol]=S.L.c;
+  if(S.R.sol) D.ionsR[S.R.sol]=S.R.c;
+  if(S.acid.type) D.H=S.acid.c*ACIDS[S.acid.type].h;
+  O=compute(); D.vmax=O.notReady?0:Math.abs(O.E||0);
+  microReset(); macroFx.length=0;
+}
+
+/* ================= 전지 계산 ================= */
+function compute(){
+  if(!ready()) return {warn:[],note:[],notReady:true,emf:0,r:Infinity,E:0,Rint:Infinity,I:0,Vt:0,Vread:null,Iamm:null,bright:0,anodeSide:null};
+  const o={warn:[],note:[]};
+  if(S.mode==='volta') cellVolta(o); else cellDaniel(o);
+  solve(o); return o;
+}
+function cellVolta(o){
+  const mL=S.L.metal,mR=S.R.metal,H=Math.max(D.H,1e-7); o.H=H;
+  o.r=0.6/(H+0.05)+1+4*D.theta;
+  if(mL===mR){o.emf=0;o.anodeSide=null;o.warn.push('두 금속판이 같은 금속이면 전위차가 생기지 않아요 (0 V).');return;}
+  const aS=METALS[mL].E<METALS[mR].E?'L':'R', an=aS==='L'?mL:mR, ca=aS==='L'?mR:mL;
+  Object.assign(o,{anodeSide:aS,anM:an,caM:ca});
+  o.cA=(D.ionsV[an]||0)+1e-4;
+  o.Ean=METALS[an].E+K59/METALS[an].n*Math.log10(o.cA);
+  o.pH2=1e-6+0.999*D.theta;
+  o.EcN=K59/2*Math.log10(H*H/o.pH2); o.eta=ETA_H[ca]; o.pol=0.30*D.theta;
+  o.Ecath=o.EcN-o.eta-o.pol;
+  if(METALS[an].E>=0){o.noRxn=true;o.emf=0;o.anodeSide=null;
+    o.warn.push(`${METALS[an].name}과(와) ${METALS[ca].name}은(는) 모두 수소보다 이온화 경향이 작아서 H⁺와 반응하지 않아요. 전지 반응이 일어나지 않습니다.`);return;}
+  o.emf=Math.max(0,o.Ecath-o.Ean);
+  if(an==='Al') o.note.push('알루미늄은 표면 산화막(Al₂O₃) 때문에 실제 실험에서는 이론값보다 낮은 전압이 측정되는 경우가 많아요.');
+  if(an==='Mg') o.note.push('마그네슘은 산과 직접 격렬하게 반응해서 금속판 자체에서도 기포가 많이 생겨요(국부 반응). 금속이 빨리 소모돼요.');
+}
+function half(sd){
+  // red: 용액에 실제로 있는 양이온 중 가장 환원되기 쉬운 것 / ox: 금속판(표면) 금속의 산화
+  const s=S[sd],ions=D['ions'+sd],m=s.metal,so=s.sol;
+  const kind= m===so?'match':(METALS[so].E>METALS[m].E?'direct':'inert');
+  let red=null;
+  for(const k in ions){ const c=ions[k]||0; if(c<=2e-6) continue; const E=METALS[k].E+K59/METALS[k].n*Math.log10(c); if(!red||E>red.E) red={couple:k,c,E,kind}; }
+  const om= kind==='direct'?so:m;                       // 직접 반응하면 판 표면이 용액 금속으로 덮임
+  const oc=Math.max(ions[om]||0,1e-6);
+  return {red,ox:{couple:om,c:oc,E:METALS[om].E+K59/METALS[om].n*Math.log10(oc),kind},kind};
+}
+function totC(ions){let t=0;for(const k in ions)t+=ions[k]*METALS[k].n/2;return t;}
+function zeroReason(L,R){
+  const same=S.L.metal===S.R.metal&&S.L.sol===S.R.sol&&Math.abs(S.L.c-S.R.c)<1e-9;
+  if(same) return '두 반쪽 전지의 금속판과 용액이 완전히 같아서 전위차가 없어요 (0 V).';
+  const P=L.ox.E<=R.ox.E?'L':'R', Q=P==='L'?'R':'L', pm=S[P].metal;   // P: 더 잘 녹는 쪽 금속판
+  const ions=Object.keys(D['ions'+Q]).filter(k=>(D['ions'+Q][k]||0)>2e-6);
+  const nm=Q==='L'?'왼쪽':'오른쪽', so=S[Q].sol, left=D['ions'+Q][so]||0;
+  if(D.t>0&&left<S[Q].c*0.01) return `전지가 다 닳았어요 (0 V). ${nm} 비커의 ${METALS[so].ion}이 거의 모두 ${METALS[so].name}으로 석출되어(${sciT(Math.max(left,1e-7),1)} M 남음), 전자를 받아 줄 이온이 없어요. 반응이 멈추니 염다리 이온도 더 이상 이동하지 않아요.`;
+  const il=ions.map(k=>METALS[k].ion).join(', ')||'금속 이온';
+  const ml=ions.map(k=>METALS[k].name).join(', ')||'그 금속';
+  return `전압이 0 V예요. ${nm==='왼쪽'?'오른쪽':'왼쪽'} ${METALS[pm].name}판이 전자를 내놓더라도, ${nm} 비커 용액에는 ${il}만 있어요. 이 이온이 전자를 받아 금속이 되려면 그 금속(${ml})이 ${METALS[pm].name}보다 이온화 경향이 작아야 하는데, 크거나 같아요. 전자를 받아 줄 이온이 없으니 반응이 일어나지 않아요. (실제 실험에서는 물이나 H⁺가 전자를 받아 수소 기체가 생기면서 작은 전압이 측정될 수 있어요.)`;
+}
+function cellDaniel(o){
+  const L=half('L'),R=half('R');
+  const eA=L.red?L.red.E-R.ox.E:-9, eB=R.red?R.red.E-L.ox.E:-9;   // eA: 왼쪽이 (+)극, eB: 오른쪽이 (+)극
+  if(Math.max(eA,eB)<=1e-6){ o.emf=0; o.anodeSide=null; o.hL=L.ox; o.hR=R.ox; o.warn.push(zeroReason(L,R)); }
+  else if(eA>=eB){ o.anodeSide='R'; o.hL=L.red; o.hR=R.ox; o.emf=eA; }
+  else { o.anodeSide='L'; o.hL=L.ox; o.hR=R.red; o.emf=eB; }
+  o.halves={L,R};
+  if(o.anodeSide){ const cs=other(o.anodeSide), c0=S[cs].c, cn=D['ions'+cs][S[cs].sol]||0;
+    if(D.t>0&&cn<c0*0.1) o.note.push(`(+)극 쪽 ${METALS[S[cs].sol].ion}이 처음의 ${Math.max(1,Math.round(cn/c0*100))}%만 남았어요. 이온이 줄어들수록 전압이 낮아지고, 다 쓰이면 전지가 멈춰요.`); }
+  if(o.anodeSide){ const cs=(o.anodeSide==='L'?o.hR:o.hL).couple; if(cs==='Mg'||cs==='Al') o.note.push(`이온화 경향에 따라 ${METALS[cs].ion}이 ${METALS[cs].name}으로 석출되는 것으로 나타냈어요. 실제 수용액에서는 ${METALS[cs].ion} 대신 물이 환원되어 수소 기체가 생겨요.`); }
+  if(o.anodeSide){ o.Ean=(o.anodeSide==='L'?o.hL:o.hR).E; o.Ecath=(o.anodeSide==='L'?o.hR:o.hL).E; }
+  let rb=BR().r;
+  const ag=(S.L.sol==='Ag'||S.R.sol==='Ag'||(D.ionsL.Ag||0)>1e-4||(D.ionsR.Ag||0)>1e-4);
+  if(S.bridge==='KCl'&&ag){rb*=4;o.agcl=true;
+    o.warn.push('KCl 염다리의 Cl⁻이 Ag⁺와 만나 흰색 AgCl 앙금이 생겼어요. 염다리 끝이 막혀 저항이 커집니다 → 은 전극에는 KNO₃ 염다리를 쓰세요.');}
+  o.r=rb+0.6/(totC(D.ionsL)+0.01)+0.6/(totC(D.ionsR)+0.01);
+  [['L',L],['R',R]].forEach(([sd,h])=>{ const s=S[sd],side=sd==='L'?'왼쪽 비커':'오른쪽 비커', isCat=o.anodeSide&&o.anodeSide!==sd;
+    if(h.kind==='direct') o.warn.push(`${side}: ${METALS[s.metal].name}판을 ${SALTS[s.sol].f} 용액에 넣어서 금속판 표면에서 직접 반응이 일어나요(${METALS[s.sol].name} 석출). 전자가 도선을 거치지 않으니 전지로서 효율이 떨어져요.`);
+    if(h.kind==='inert'&&isCat) o.note.push(`${side}: ${METALS[s.metal].name}판은 반응하지 않고, 용액 속 ${METALS[o['h'+sd].couple].ion}이 판 위에 ${METALS[o['h'+sd].couple].name}으로 석출돼요.`);
+    if(h.kind==='inert'&&o.anodeSide===sd) o.note.push(`${side}: ${METALS[s.metal].name}판이 녹아 ${METALS[s.metal].ion}이 새로 생겨요(용액에는 원래 없던 이온).`);
+  });
+  if(S.L.metal===S.R.metal&&L.kind==='match'&&R.kind==='match'&&o.anodeSide)
+    o.note.push('같은 금속, 다른 농도 → 농도차 전지예요. 묽은 쪽이 (−)극이 됩니다.');
+  if(S.L.metal==='Al'||S.R.metal==='Al') o.note.push('알루미늄은 산화막 때문에 실제로는 이론값보다 낮은 전압이 나오는 경우가 많아요.');
+}
+function solve(o){
+  const n=S.nCells,E=o.emf*n,r=o.r*n; o.E=E;o.Rint=r;
+  let I=0,Vt=E,Rs=0; o.open=false;o.short=false;
+  if(!isFinite(r)){o.open=true;I=0;Vt=0;
+    o.warn.push('두 용액이 연결되지 않아 회로가 끊겼어요. 이온이 이동할 통로(염다리)가 필요해요.');}
+  else{
+    const L=S.load;
+    if(L==='none'){I=0;o.loopOpen=true;}
+    else{
+      Rs={wire:0.05,bulb:8}[L]+(S.amm?0.1:0);
+      I = E/(r+Rs);
+      Vt=E-I*r;
+      if(L==='wire'&&I>2e-5){o.short=true;o.warn.push('⚠ 저항 없이 도선만 연결하면 단락이 되어 큰 전류가 흐르고 전지가 빨리 소모돼요.');}
+    }
+  }
+  o.I=I;o.Vt=Vt;
+  o.Vread = S.volt ? (o.open?0:E) : null;
+  o.Iamm = S.amm ? I : null;
+  o.bright=(S.load==='bulb'&&I>0.002)?0.8:0;
+  if(S.mode==='volta'&&o.anodeSide&&D.theta>0.45&&I>0.002)
+    o.note.push('(+)극 표면이 H₂ 기포로 덮이고 있어요 → 분극 현상! 전압이 떨어지는 것을 그래프로 확인해 보세요.');
+}
+
+/* ================= 시뮬레이션 단계 ================= */
+function step(dt){
+  if(!ready()) return;
+  const o=compute(); D.t+=dt; const I=Ik(o.I||0);
+  if(S.mode==='volta'){
+    if(o.anodeSide){
+      const an=o.anM,nA=METALS[an].n,V=0.05;
+      const Iloc=LOCAL[an]*Math.min(D.H,6)/2, It=I+Iloc;
+      D.ionsV[an]=(D.ionsV[an]||0)+It/(nA*F*V)*dt;
+      D.H=Math.max(1e-7,D.H-It/(F*V)*dt);
+      D.dm[o.anodeSide]-=It/(nA*F)*METALS[an].M*dt;
+      const k=D.dep>0?(D.depType==='H2O2'?0.6:0.15):0;
+      D.theta+=(0.9*I*(1-D.theta)-0.004*D.theta-k*D.theta)*dt;
+      D.theta=clamp(D.theta,0,0.97);
+      if(D.dep>0){D.dep-=dt*(D.depType==='H2O2'?0.004:0.0004);if(D.dep<=0){D.dep=0;D.depType=null;}}
+      D.peakTheta=Math.max(D.peakTheta,D.theta);
+    }
+  } else {
+    if(o.anodeSide&&I>0){
+      const a=o.anodeSide,c=a==='L'?'R':'L',ha=a==='L'?o.hL:o.hR,hc=a==='L'?o.hR:o.hL,V=0.025;
+      const ia=D['ions'+a],ic=D['ions'+c];
+      ia[ha.couple]=(ia[ha.couple]||0)+I/(METALS[ha.couple].n*F*V)*dt;
+      ic[hc.couple]=Math.max(1e-7,(ic[hc.couple]||0)-I/(METALS[hc.couple].n*F*V)*dt);
+      D.dm[a]-=I/(METALS[ha.couple].n*F)*METALS[ha.couple].M*dt;
+      D.dm[c]+=I/(METALS[hc.couple].n*F)*METALS[hc.couple].M*dt; D.depM[c]=hc.couple;
+    }
+    ['L','R'].forEach(sd=>{ const s=S[sd];
+      if(s.metal!==s.sol&&METALS[s.sol].E>METALS[s.metal].E){
+        const ions=D['ions'+sd],cs=ions[s.sol]||0;
+        if(cs>1e-6){const dc=cs*0.0005*dt; ions[s.sol]=cs-dc; ions[s.metal]=(ions[s.metal]||0)+dc*METALS[s.sol].n/METALS[s.metal].n;}
+        D.coat[sd]=Math.min(1,D.coat[sd]+0.01*dt);
+      }
+    });
+  }
+}
+
+/* ================= 확대 화면 (금속판 표면) ================= */
+const MW=760,MH=830;
+const WIN={L:{x0:8,x1:356},R:{x0:404,x1:752}};
+const SY0=124,SY1=668,AR=8.5,SP=17,NC=12,BASE=5;
+const ROWS=[]; for(let y=SY0+10;y<=SY1-8;y+=SP) ROWS.push(y);
+const colX=(sd,c)=>sd==='L'?WIN.L.x0+10+c*SP:WIN.R.x1-10-c*SP;
+const dirOf=sd=>sd==='L'?1:-1;
+const other=s=>s==='L'?'R':'L';
+const BLEG={L:318,R:442}, BTOP=58, BBOT=205;
+const BPATH=[[BLEG.L,BBOT],[BLEG.L,BTOP],[BLEG.R,BTOP],[BLEG.R,BBOT]];
+const WIRE=[[18,SY0],[18,22],[742,22],[742,SY0]];
+const M={parts:[],el:[],grid:{L:[],R:[]},pan:{L:0,R:0},bub:[],tube:[],tubeKey:'',evAcc:0,locAcc:0,eAcc:0,difT:0,init:null,st:null,need:{an:0,cat:0},pairs:{}};
+function gs(){ let u=0; for(let i=0;i<6;i++) u+=Math.random(); return (u-3)*1.414; }
+function newStats(){ const s=()=>({diss:0,dep:0,loc:0,inn:{},out:{},br:{}}); return {L:s(),R:s()}; }
+function initGrid(sd){ const m=S[sd].metal; return ROWS.map(()=>{ const row=Array(NC).fill(null); if(m) for(let c=0;c<BASE;c++) row[c]={m,nw:false}; return row; }); }
+function topOf(g,r){ for(let c=NC-1;c>=0;c--) if(g[r][c]) return c; return -1; }
+function rowAt(y){ return clamp(Math.round((y-ROWS[0])/SP),0,ROWS.length-1); }
+function surfX(sd,r){ const t=topOf(M.grid[sd],r); const x=t<0?colX(sd,0)-dirOf(sd)*SP:colX(sd,t); return x+M.pan[sd]+dirOf(sd)*AR; }
+function cnt(c){ if(c<5e-5) return 0; return clamp(Math.round(5.5*Math.log10(c/0.0003)),1,20); }
+function bulk(sd){
+  const b={}; let ions,an;
+  if(S.mode==='daniel'){ if(!S[sd].sol) return b; ions=D['ions'+sd]; an=SALTS[S[sd].sol].an; }
+  else { if(!S.acid.type) return b; ions=D.ionsV; an=ACIDS[S.acid.type].an; b.H=cnt(D.H); }
+  for(const k in ions) b[k]=cnt(ions[k]);
+  const ch0= S.mode==='daniel' ? cnt(S[sd].c)*METALS[S[sd].sol].n : cnt(S.acid.c*ACIDS[S.acid.type].h);
+  b[an]=Math.min(22,Math.round(ch0/(an==='SO4'?2:1)));
+  return b;
+}
+function mkP(sp,sd,x,y,o){ return Object.assign({sp,side:sd,x,y,vx:gs()*4,vy:gs()*4,st:'free',a:1,age:0},o||{}); }
+function placeFree(sp,sd){
+  const r=spInfo(sp).r;
+  for(let k=0;k<40;k++){
+    const y=lerp(SY0+r+4,SY1-r-4,Math.random()), s=surfX(sd,rowAt(y));
+    const x= sd==='L'? lerp(s+r+4,WIN.L.x1-r-4,Math.random()) : lerp(WIN.R.x0+r+4,s-r-4,Math.random());
+    if(!M.parts.some(q=>q.side===sd&&Math.hypot(q.x-x,q.y-y)<r+spInfo(q.sp).r+3)) return mkP(sp,sd,x,y);
+  }
+  return mkP(sp,sd,(WIN[sd].x0+WIN[sd].x1)/2,(SY0+SY1)/2);
+}
+const counted=p=>p.st!=='exit';
+function countSide(sd){ const m={}; M.parts.forEach(p=>{ if(p.side===sd&&counted(p)) m[p.sp]=(m[p.sp]||0)+1; }); return m; }
+function microReset(){
+  M.parts=[];M.el=[];M.bub=[];M.pan={L:0,R:0};M.grid={L:initGrid('L'),R:initGrid('R')};
+  M.evAcc=0;M.locAcc=0;M.eAcc=0;M.wasActive=false;M.need={an:0,cat:0};M.st=newStats();M.tubeKey='';M.pairs={};
+  ['L','R'].forEach(sd=>{ const b=bulk(sd); for(const sp in b) for(let i=0;i<b[sp];i++) M.parts.push(placeFree(sp,sd)); });
+  M.init=ready()?{L:countSide('L'),R:countSide('R')}:null;
+}
+function panCheck(sd){
+  const g=M.grid[sd], tops=g.map((_,r)=>topOf(g,r)), avg=tops.reduce((a,b)=>a+b,0)/tops.length;
+  if(avg<2.2){ // 표면이 깎여 들어가면 확대 위치를 판 안쪽으로 이동
+    g.forEach(row=>{ row.pop(); row.unshift({m:S[sd].metal,nw:false}); });
+    M.parts.forEach(p=>{ if(p.side===sd&&p.st==='toPlate') p.tc++; });
+    M.pan[sd]-=dirOf(sd)*SP;
+  } else if(avg>NC-3.2){ // 석출로 두꺼워지면 확대 위치를 바깥쪽으로 이동
+    g.forEach(row=>{ row.shift(); row.push(null); });
+    M.parts.forEach(p=>{ if(p.side===sd&&p.st==='toPlate') p.tc--; });
+    M.pan[sd]+=dirOf(sd)*SP;
+  }
+}
+function anodeSpecies(o){return S.mode==='volta'?o.anM:(o.anodeSide==='L'?o.hL:o.hR).couple;}
+function cathodeSpecies(o){return S.mode==='volta'?'H':(o.anodeSide==='L'?o.hR:o.hL).couple;}
+function dissolve(a,sp){
+  const g=M.grid[a]; let best=-1,bt=-2;
+  for(let k=0;k<4;k++){ const r=Math.floor(Math.random()*ROWS.length),t=topOf(g,r); if(t>bt){bt=t;best=r;} }
+  if(bt<0) return null;
+  g[best][bt]=null;
+  const x=colX(a,bt)+M.pan[a], y=ROWS[best];
+  const p=mkP(sp,a,x,y,{vx:dirOf(a)*16,vy:gs()*3});
+  M.parts.push(p); M.st[a].diss++;
+  panCheck(a);
+  return {x,y,row:best};
+}
+function anodeEvent(o){
+  const a=o.anodeSide, sp=anodeSpecies(o);
+  if(!dissolve(a,sp)) return;
+  if(S.mode==='daniel'&&BR().cat) M.need.an+=METALS[sp].n;
+  for(let k=0;k<METALS[sp].n;k++) M.el.push({p:-k*0.08});
+}
+function localEvent(o){
+  const a=o.anodeSide, r=dissolve(a,o.anM); if(!r) return;
+  M.st[a].loc++;
+  const cand=M.parts.filter(p=>p.side===a&&p.sp==='H'&&p.st==='free').sort((p,q)=>Math.hypot(p.x-r.x,p.y-r.y)-Math.hypot(q.x-r.x,q.y-r.y)).slice(0,2);
+  if(cand.length===2){ const id='l'+Math.random(); cand.forEach(p=>{p.st='toBub';p.tr=r.row;p.pid=id;p.loc=true;}); }
+}
+function tryCathode(o){
+  const c=other(o.anodeSide);
+  if(S.mode==='daniel'){
+    const sp=cathodeSpecies(o), z=METALS[sp].n, g=M.grid[c];
+    while(M.eAcc>=z){
+      const cand=M.parts.filter(p=>p.side===c&&p.sp===sp&&p.st==='free'&&p.a>0.9); if(!cand.length){ M.want={side:c,sp}; break; }
+      let best=-1,bt=99; for(let k=0;k<4;k++){ const r=Math.floor(Math.random()*ROWS.length),t=topOf(g,r); if(t<bt){bt=t;best=r;} }
+      if(bt>=NC-1) break;
+      const col=bt+1; g[best][col]={m:sp,nw:true,pend:true};
+      const tx=colX(c,col)+M.pan[c], ty=ROWS[best];
+      cand.sort((p,q)=>Math.hypot(p.x-tx,p.y-ty)-Math.hypot(q.x-tx,q.y-ty));
+      const p=cand[0]; p.st='toPlate'; p.tr=best; p.tc=col;
+      M.eAcc-=z;
+    }
+  } else {
+    while(M.eAcc>=2){
+      const cand=M.parts.filter(p=>p.side===c&&p.sp==='H'&&p.st==='free'&&p.a>0.9); if(cand.length<2){ M.want={side:c,sp:'H'}; break; }
+      const r=Math.floor(Math.random()*ROWS.length), ty=ROWS[r], sx=surfX(c,r);
+      cand.sort((p,q)=>Math.hypot(p.x-sx,p.y-ty)-Math.hypot(q.x-sx,q.y-ty));
+      const id='c'+Math.random(); cand.slice(0,2).forEach(p=>{p.st='toBub';p.tr=r;p.pid=id;});
+      M.eAcc-=2;
+    }
+  }
+}
+function addBubble(side,row,rise){
+  const y=ROWS[row];
+  if(rise){ M.bub.push({side,y,n:1,att:false,vy:-20}); return; }
+  const b=M.bub.find(b=>b.att&&b.side===side&&Math.abs(b.y-y)<12&&b.n<5);
+  if(b) b.n++; else M.bub.push({side,y,n:1,att:true,vy:0});
+}
+const bubR=b=>5+2.6*Math.sqrt(b.n);
+function buildTube(){
+  M.tube=[]; M.tubeKey=S.mode+S.bridge;
+  if(S.mode==='daniel'&&BR().cat) for(let i=0;i<10;i++){ M.tube.push({sp:'K',s:(i+0.3)/10,a:1}); M.tube.push({sp:BR().an,s:(i+0.75)/10,a:1}); }
+}
+function tubeUpdate(dt,o,active){
+  if(!M.tube.length) return;
+  const I=o.I||0, cEnd=o.anodeSide?(o.anodeSide==='L'?1:0):null;
+  const vK=active?0.015+Math.min(0.3,0.025*M.need.cat):0, vA=active?0.015+Math.min(0.3,0.025*M.need.an):0;
+  M.tube.forEach(b=>{ if(b.a<1)b.a=Math.min(1,b.a+dt*1.5);
+    if(cEnd!=null){ const end=b.sp==='K'?cEnd:1-cEnd; b.s+=(end>0.5?1:-1)*(b.sp==='K'?vK:vA)*dt; }
+    if(cEnd==null||!active){ b.ph=(b.ph||Math.random()*6.28)+dt*0.6; b.s+=Math.sin(b.ph)*0.004*dt; }
+    b.s=clamp(b.s,0.012,0.988); });
+  // 같은 종류끼리 간격 유지
+  ['K','an'].forEach(t=>{ const arr=M.tube.filter(b=>t==='K'?b.sp==='K':b.sp!=='K').sort((x,y)=>x.s-y.s);
+    for(let i=1;i<arr.length;i++){ const d=arr[i].s-arr[i-1].s; if(d<0.06){ const m=Math.min(0.06-d,dt*0.08)/2; arr[i].s+=m; arr[i-1].s-=m; } } });
+  if(cEnd==null) return;
+  const exitTo=(cond,needKey,sd,end)=>{
+    if(M.need[needKey]<=0) return;
+    const c=M.tube.filter(b=>cond(b)&&Math.abs(b.s-end)<0.1);
+    if(!c.length) return;
+    const b=c[0]; M.tube.splice(M.tube.indexOf(b),1);
+    M.parts.push(mkP(b.sp,sd,BLEG[sd],BBOT+14,{vx:gs()*2,vy:12}));
+    M.st[sd].br[b.sp]=(M.st[sd].br[b.sp]||0)+1; M.need[needKey]--;
+    M.tube.push({sp:b.sp,s:1-end,a:0});
+  };
+  for(let k=0;k<3;k++){ exitTo(b=>b.sp==='K','cat',other(o.anodeSide),cEnd); exitTo(b=>b.sp!=='K','an',o.anodeSide,1-cEnd); }
+}
+function diffuse(){
+  ['L','R'].forEach(sd=>{
+    if(!solReady(sd)) return;
+    const b=bulk(sd), now=countSide(sd), keys=new Set([...Object.keys(b),...Object.keys(now)]);
+    for(const sp of keys){
+      const base=b[sp]||0, n=now[sp]||0;
+      if(base>0&&n<Math.max(1,Math.round(base*0.45))){ // 용액 쪽에서 확산되어 들어옴
+        const r=spInfo(sp).r, x=sd==='L'?WIN.L.x1-r-3:WIN.R.x0+r+3;
+        M.parts.push(mkP(sp,sd,x,lerp(SY0+60,SY1-r-6,Math.random()),{vx:-dirOf(sd)*14,a:0}));
+        M.st[sd].inn[sp]=(M.st[sd].inn[sp]||0)+1; continue;
+      }
+      const lim=base+(base?6:(METALS[sp]&&sp===S[sd].sol?0:4));   // 다 소모된 금속 이온은 창에서도 사라짐
+      if(n>lim){ // 많아지면 용액 쪽으로 확산되어 빠져나감
+        const k=Math.min(3,Math.ceil((n-lim)/3));
+        const fr=M.parts.filter(p=>p.side===sd&&p.sp===sp&&p.st==='free'&&p.age>2.5).sort((p,q)=>Math.abs(q.x-surfX(sd,rowAt(q.y)))-Math.abs(p.x-surfX(sd,rowAt(p.y))));
+        fr.slice(0,k).forEach(p=>{ p.st='exit'; M.st[sd].out[sp]=(M.st[sd].out[sp]||0)+1; });
+      }
+    }
+  });
+}
+function microUpdate(dt){
+  if(dt<=0) return;
+  const o=O,I=o.I||0;
+  if(M.tubeKey!==S.mode+S.bridge) buildTube();
+  if(ready()&&!M.init) M.init={L:countSide('L'),R:countSide('R')};
+  const active=!!o.anodeSide&&I>2e-5&&!o.open;
+  if(active&&!M.wasActive) M.evAcc=1;   // 전류가 흐르기 시작하면 바로 첫 반응
+  M.wasActive=active;
+  M.evAcc+=(active?RATE(I):0)*dt;
+  while(M.evAcc>=1){M.evAcc-=1;anodeEvent(o);}
+  if(S.mode==='volta'&&o.anodeSide){ M.locAcc+=Math.min(1.5,LOCALV[o.anM]*Math.min(D.H,4)/2)*dt; while(M.locAcc>=1){M.locAcc-=1;localEvent(o);} }
+  const esp=active?0.6+0.4*RATE(I):0;
+  M.el.forEach(e=>e.p+=esp*dt);
+  const arrived=M.el.filter(e=>e.p>=1).length; M.el=M.el.filter(e=>e.p<1);
+  M.want=null;
+  if(o.anodeSide){ M.eAcc+=arrived; tryCathode(o); } else { M.el=[]; }
+  M.inT=(M.inT||0)+dt;
+  if(M.want&&M.inT>0.35){ M.inT=0; const {side:sd,sp}=M.want, entering=M.parts.filter(p=>p.side===sd&&p.sp===sp&&p.a<0.9).length;
+    if(entering<3){ const r=spInfo(sp).r, x=sd==='L'?WIN.L.x1-r-3:WIN.R.x0+r+3;
+      M.parts.push(mkP(sp,sd,x,lerp(SY0+40,SY1-r-6,Math.random()),{vx:-dirOf(sd)*16,a:0}));
+      M.st[sd].inn[sp]=(M.st[sd].inn[sp]||0)+1; } }
+  M.difT+=dt; if(M.difT>0.6){M.difT=0;diffuse();}
+  tubeUpdate(dt,o,active);
+  ['L','R'].forEach(sd=>{ M.pan[sd]*=Math.pow(0.03,dt); if(Math.abs(M.pan[sd])<0.05)M.pan[sd]=0; });
+  // 입자 운동
+  const kOU=Math.exp(-dt/1.3), sOU=6*Math.sqrt(1-kOU*kOU);
+  const toAn=o.anodeSide==='L'?-1:1;
+  for(let i=M.parts.length-1;i>=0;i--){
+    const p=M.parts[i]; p.age+=dt; if(p.a<1&&p.st!=='exit') p.a=Math.min(1,p.a+dt*1.4);
+    if(p.st==='toPlate'||p.st==='toBub'){
+      const tx=p.st==='toPlate'?colX(p.side,p.tc)+M.pan[p.side]:surfX(p.side,p.tr)+dirOf(p.side)*6, ty=ROWS[p.tr];
+      const dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy)||1;
+      p.vx+=dx/d*220*dt+gs()*2*Math.sqrt(dt); p.vy+=dy/d*220*dt+gs()*2*Math.sqrt(dt);
+      const damp=Math.pow(0.2,dt); p.vx*=damp; p.vy*=damp;
+      const v=Math.hypot(p.vx,p.vy); if(v>85){p.vx*=85/v;p.vy*=85/v;}
+      if(d<3.5||(d<10&&v*dt>=d)){
+        M.parts.splice(i,1);
+        if(p.st==='toPlate'){ const cell=M.grid[p.side][p.tr][p.tc]; if(cell) cell.pend=false; M.st[p.side].dep++; D.depM[p.side]=p.sp; if(S.mode==='daniel'&&BR().cat) M.need.cat+=METALS[p.sp].n; }
+        else { M.pairs[p.pid]=(M.pairs[p.pid]||0)+1; if(M.pairs[p.pid]===2){ delete M.pairs[p.pid]; addBubble(p.side,p.tr,!!p.loc); if(!p.loc) M.st[p.side].dep++; } }
+        continue;
+      }
+      p.x+=p.vx*dt; p.y+=p.vy*dt; continue;
+    }
+    p.vx=p.vx*kOU+sOU*gs(); p.vy=p.vy*kOU+sOU*gs();
+    if(S.mode==='volta'&&active){ if(p.sp==='SO4'||p.sp==='Cl') p.vx+=toAn*6*dt; else if(p.sp==='H') p.vx-=toAn*6*dt; }
+    if(p.st==='exit'){
+      const ex=p.side==='L'?WIN.L.x1+6:WIN.R.x0-6; p.vx+=(ex>p.x?1:-1)*30*dt;
+      const dd=Math.abs(ex-p.x); p.a=Math.min(p.a,clamp(dd/45,0,1));
+      if(dd<10||p.a<=0.02){ M.parts.splice(i,1); continue; }
+    }
+    p.x+=p.vx*dt; p.y+=p.vy*dt;
+  }
+  // 입자끼리 겹치지 않게
+  for(let i=0;i<M.parts.length;i++){ const p=M.parts[i]; if(p.st==='toPlate'||p.st==='toBub') continue; const rp=spInfo(p.sp).r;
+    for(let j=i+1;j<M.parts.length;j++){ const q=M.parts[j]; if(q.side!==p.side||q.st==='toPlate'||q.st==='toBub') continue;
+      const dx=q.x-p.x,dy=q.y-p.y,d=Math.hypot(dx,dy)||0.01,mn=rp+spInfo(q.sp).r+3;
+      if(d<mn){ const m=(mn-d)*0.25/d; p.x-=dx*m;p.y-=dy*m;q.x+=dx*m;q.y+=dy*m; } } }
+  // 경계
+  M.parts.forEach(p=>{ if(p.st==='toPlate'||p.st==='toBub') return; const r=spInfo(p.sp).r, s=surfX(p.side,rowAt(p.y));
+    const x0=p.side==='L'?s+r+1:WIN.R.x0+r+2, x1=p.side==='L'?WIN.L.x1-r-2:s-r-1;
+    if(p.st!=='exit'){ if(p.x<x0){p.x+= (x0-p.x)*0.5;p.vx=Math.abs(p.vx);} if(p.x>x1){p.x-=(p.x-x1)*0.5;p.vx=-Math.abs(p.vx);} }
+    if(p.y<SY0+r+2){p.y=SY0+r+2;p.vy=Math.abs(p.vy);} if(p.y>SY1-r-2){p.y=SY1-r-2;p.vy=-Math.abs(p.vy);} });
+  // 기포
+  if(S.mode==='volta'&&o.anodeSide){
+    const c=other(o.anodeSide), att=M.bub.filter(b=>b.att&&b.side===c), Tn=Math.round(D.theta*16);
+    if(att.length>Tn+1){ const b=att.sort((x,y)=>y.n-x.n)[0]; b.att=false; b.vy=-20; }
+    if(att.length<Tn-1) M.bub.push({side:c,y:ROWS[Math.floor(Math.random()*ROWS.length)],n:2+Math.floor(Math.random()*3),att:true,vy:0});
+    att.forEach(b=>{ if(b.n>=5&&Math.random()<0.25*dt){b.att=false;b.vy=-20;} if(D.dep>0&&b.pop==null&&Math.random()<(D.depType==='H2O2'?1:0.35)*dt) b.pop=0.6; });
+  }
+  M.bub.forEach(b=>{ if(b.pop!=null) b.pop-=dt; else if(!b.att){ b.y+=b.vy*dt; b.vy-=10*dt; } });
+  M.bub=M.bub.filter(b=>(b.pop==null||b.pop>0)&&b.y>SY0+bubR(b));
+}
+function spInfo(sp){
+  if(METALS[sp]) return {r:8,col:METALS[sp].ic,lab:sp,ch:METALS[sp].n===1?'+':METALS[sp].n+'+',name:METALS[sp].ion};
+  return {SO4:{r:11,col:'#f2c94c',lab:'SO₄',ch:'2−',name:'SO₄²⁻'},NO3:{r:10,col:'#f2994a',lab:'NO₃',ch:'−',name:'NO₃⁻'},Cl:{r:9.5,col:'#6fcf97',lab:'Cl',ch:'−',name:'Cl⁻'},
+          H:{r:6,col:'#eb5757',lab:'H',ch:'+',name:'H⁺'},K:{r:9.5,col:'#bb6bd9',lab:'K',ch:'+',name:'K⁺'}}[sp];
+}
+function drawIon(c,x,y,sp,alpha=1,scale=1){
+  const s=spInfo(sp),r=s.r*scale; c.globalAlpha=alpha;
+  c.fillStyle=s.col;c.strokeStyle='rgba(20,30,50,.75)';c.lineWidth=1.1;
+  c.beginPath();c.arc(x,y,r,0,7);c.fill();c.stroke();
+  c.fillStyle='#111';c.font=`700 ${r>=9?9:8}px sans-serif`;c.textAlign='center';c.textBaseline='middle';
+  c.fillText(s.lab,x,y+0.5);
+  c.font='800 8px sans-serif';c.fillText(s.ch,x+r+2,y-r+1);
+  c.globalAlpha=1;
+}
+function solCol(ions,alphaMul=1){
+  let r=222,g=238,b=252,a=0.55,k;
+  const cu=ions.Cu||0,fe=ions.Fe||0;
+  if(cu>0.0005){k=Math.min(1,Math.pow(cu/1.0,0.85));r=lerp(222,40,k);g=lerp(238,118,k);b=lerp(252,228,k);a=0.55+0.3*k;}
+  else if(fe>0.0005){k=Math.min(1,Math.pow(fe/1.0,0.85));r=lerp(222,165,k);g=lerp(238,222,k);b=lerp(252,150,k);a=0.55+0.25*k;}
+  return `rgba(${r|0},${g|0},${b|0},${a*alphaMul})`;
+}
+function ionsOf(sd){ return S.mode==='volta'?D.ionsV:D['ions'+sd]; }
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+function drawMicro(){
+  const c=mx,o=O; c.clearRect(0,0,MW,MH); c.fillStyle='#fbfcfe';c.fillRect(0,0,MW,MH);
+  const both=solReady('L')&&solReady('R');
+  // 창
+  ['L','R'].forEach(sd=>{
+    const w=WIN[sd],metal=S[sd].metal,solOK=solReady(sd);
+    c.fillStyle=solOK?solCol(ionsOf(sd),0.5):'#f1f3f6'; c.fillRect(w.x0,SY0,w.x1-w.x0,SY1-SY0);
+    c.strokeStyle='#9aa6b6';c.lineWidth=2;c.strokeRect(w.x0,SY0,w.x1-w.x0,SY1-SY0);
+    const tx0=sd==='L'?30:470, tw=260;
+    c.fillStyle='#152238';rr(c,tx0,SY0-26,tw,26,7);c.fill();c.fillRect(tx0,SY0-8,tw,8);
+    c.fillStyle='#fff';c.font='800 15px sans-serif';c.textBaseline='middle';c.textAlign='left';
+    c.fillText(`${sd==='L'?'①':'②'} ${sd==='L'?'왼쪽':'오른쪽'}${metal?' · '+METALS[metal].name+'('+metal+')':' 금속판'}`,tx0+10,SY0-12);
+    if(o.anodeSide){ const an=sd===o.anodeSide; c.textAlign='right';c.fillStyle=an?'#ff9a8f':'#9cc4ff';c.font='800 13.5px sans-serif';
+      c.fillText(an?'(−)극·산화':'(+)극·환원',tx0+tw-8,SY0-12); }
+    if(!solOK){ c.fillStyle='#8a94a6';c.font='700 16px sans-serif';c.textAlign='center';
+      c.fillText(S.mode==='volta'?'전해질을 부어 주세요':'용액을 부어 주세요',(w.x0+w.x1)/2+dirOf(sd)*40,(SY0+SY1)/2); }
+    if(!metal){ c.save();c.translate(sd==='L'?w.x0+30:w.x1-30,(SY0+SY1)/2);c.rotate(-Math.PI/2);c.fillStyle='#8a94a6';c.font='700 14px sans-serif';c.textAlign='center';c.fillText('금속판을 골라 주세요',0,0);c.restore(); }
+  });
+  // 염다리(가운데 연결)
+  if(both){
+    if(S.mode==='daniel'&&BR().cat){
+      c.lineJoin='round';c.lineCap='butt';
+      c.strokeStyle='#c3ccd8';c.lineWidth=32;c.beginPath();BPATH.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.stroke();
+      c.strokeStyle='#f4f7fb';c.lineWidth=26;c.stroke();
+      c.fillStyle='#55627a';c.font='800 13.5px sans-serif';c.textAlign='center';c.textBaseline='middle';
+      M.tube.forEach(b=>{ const [x,y]=polyPt(BPATH,b.s); drawIon(c,x,y,b.sp,b.a*0.95,0.95); });
+      if(o.anodeSide&&(o.I||0)>2e-5&&!o.open){
+        const cs=other(o.anodeSide), an=BR().an, toR=cs==='R';
+        c.font='800 13.5px sans-serif';c.textAlign='center';
+        c.fillStyle='#8e44ad';c.fillText(toR?'K⁺ →':'← K⁺',MW/2,BTOP+44);
+        c.fillStyle='#c0620b';c.fillText(toR?`← ${spInfo(an).name}`:`${spInfo(an).name} →`,MW/2,BTOP+62);
+      }
+      if(o.agcl){c.fillStyle='#fff';c.strokeStyle='#999';[BLEG.L,BLEG.R].forEach(x=>{for(let k=0;k<4;k++){c.beginPath();c.arc(x-8+k*5,BBOT+2+(k%2)*3,3.5,0,7);c.fill();c.stroke();}});}
+    } else if(S.mode==='daniel'&&S.bridge==='none'){
+      c.fillStyle='#b23';c.font='800 13px sans-serif';c.textAlign='center';c.textBaseline='middle';
+      ['연','결','없','음'].forEach((t,i)=>c.fillText(t,MW/2,250+i*15));
+    } else if(S.mode==='volta'){
+      c.setLineDash([5,4]);c.strokeStyle='#7c93b5';c.lineWidth=1.5;c.strokeRect(WIN.L.x1,250,WIN.R.x0-WIN.L.x1,40);c.setLineDash([]);
+      c.fillStyle='#55627a';c.font='800 10.5px sans-serif';c.textAlign='center';c.textBaseline='middle';
+      ['같은','용액'].forEach((t,i)=>c.fillText(t,MW/2,263+i*14));
+    }
+  }
+  // 금속판 원자
+  ['L','R'].forEach(sd=>{
+    if(!S[sd].metal) return;
+    const g=M.grid[sd], coat=D.coat[sd]||0, coatM=S.mode==='daniel'&&S[sd].sol&&S[sd].sol!==S[sd].metal?S[sd].sol:null;
+    g.forEach((row,r)=>{ const t=topOf(g,r); row.forEach((cell,ci)=>{ if(!cell) return;
+      const x=colX(sd,ci)+M.pan[sd], y=ROWS[r];
+      if(sd==='L'&&x<WIN.L.x0-AR||sd==='R'&&x>WIN.R.x1+AR) return;
+      if(cell.pend){ c.setLineDash([2,3]);c.strokeStyle='rgba(30,80,170,.55)';c.lineWidth=1;c.beginPath();c.arc(x,y,AR,0,7);c.stroke();c.setLineDash([]);return; }
+      let m=cell.m; if(coatM&&ci===t&&((r*7)%10)/10<coat) m=coatM;
+      c.fillStyle=METALS[m].plate;c.strokeStyle=cell.nw?'rgba(25,70,160,.9)':'rgba(40,40,50,.55)';c.lineWidth=cell.nw?1.6:1;
+      c.beginPath();c.arc(x,y,AR,0,7);c.fill();c.stroke();
+      c.fillStyle='rgba(0,0,0,.55)';c.font='700 7.5px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(m,x,y+0.5);
+    }); });
+  });
+  // 기포
+  M.bub.forEach(b=>{ const r=bubR(b), dir=dirOf(b.side), row=rowAt(b.y);
+    const x=b.att?surfX(b.side,row)+dir*(r+1):surfX(b.side,row)+dir*(r+6+Math.sin(b.y/12)*4);
+    c.globalAlpha=b.pop!=null?Math.max(0,b.pop/0.6):0.92;
+    c.fillStyle='rgba(255,255,255,.88)';c.strokeStyle='#5f86b0';c.lineWidth=1.4;c.beginPath();c.arc(x,b.y,r,0,7);c.fill();c.stroke();
+    if(r>8){c.fillStyle='#2e5682';c.font='700 9px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('H₂',x,b.y);}
+    c.globalAlpha=1; });
+  // 이온
+  M.parts.forEach(p=>drawIon(c,p.x,p.y,p.sp,p.a));
+  // 도선 & 전자
+  if(S.L.metal&&S.R.metal){
+    c.strokeStyle='#2b3445';c.lineWidth=3;c.beginPath();WIRE.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.stroke();
+    M.el.forEach(e=>{ if(e.p<0) return; const s=o.anodeSide==='L'?e.p:1-e.p; const [x,y]=polyPt(WIRE,s);
+      c.fillStyle='#ffd400';c.strokeStyle='#8a6d00';c.lineWidth=1;c.beginPath();c.arc(x,y,5,0,7);c.fill();c.stroke();
+      c.fillStyle='#5a4600';c.font='700 7px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('e',x,y); });
+    c.fillStyle='#fff';c.strokeStyle='#2b3445';c.lineWidth=1.5;c.fillRect(MW/2-50,11,100,21);c.strokeRect(MW/2-50,11,100,21);
+    c.fillStyle='#2b3445';c.font='700 13px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('외부 회로(도선)',MW/2,22);
+    c.font='700 13px sans-serif';
+    if(o.anodeSide&&(o.I||0)>2e-5&&!o.open){ const r2l=o.anodeSide==='R';
+      c.fillStyle='#8a6d00';c.fillText(r2l?'← 전자(e⁻) 이동':'전자(e⁻) 이동 →',170,38);
+      c.fillStyle='#b03a2e';c.fillText(r2l?'전류 방향 →':'← 전류 방향',590,38); }
+    else if(o.anodeSide&&!o.open){ c.fillStyle='#7a4206';c.fillText('전류가 흐르지 않아요 — 꼬마전구 등을 연결하면 반응이 시작돼요',MW/2,92); }
+    else if(o.open){ c.fillStyle='#b23';c.fillText('이온 통로가 없어 회로가 끊겼어요',MW/2,92); }
+  }
+  if(o.anodeSide){
+    const a=o.anodeSide,ca=other(a),aSp=anodeSpecies(o),na=METALS[aSp].n;
+    let caTxt; if(S.mode==='volta') caTxt='2H⁺ + 2e⁻ → H₂'; else { const cs=cathodeSpecies(o),nc=METALS[cs].n; caTxt=`${METALS[cs].ion} + ${nc===1?'':nc}e⁻ → ${cs}`; }
+    eqBox(c,a,`${aSp} → ${METALS[aSp].ion} + ${na===1?'':na}e⁻`,'#b03a2e');
+    eqBox(c,ca,caTxt,'#1d5fbf');
+  }
+  ['L','R'].forEach(sd=>countPanel(c,sd,o));
+  summaryLine(c,o);
+}
+function eqBox(c,sd,t,col){
+  const w=WIN[sd]; c.font='800 15px sans-serif'; const tw=c.measureText(t).width+16;
+  const x=sd==='L'?w.x1-tw-40:w.x0+40, y=SY1-36;
+  c.fillStyle='rgba(255,255,255,.92)';c.strokeStyle=col;c.lineWidth=1.5;rr(c,x,y,tw,28,6);c.fill();c.stroke();
+  c.fillStyle=col;c.textAlign='left';c.textBaseline='middle';c.fillText(t,x+8,y+14.5);
+}
+function countPanel(c,sd,o){
+  const w=WIN[sd],y0=SY1+8,h=MH-y0-34;
+  c.fillStyle='#fff';c.strokeStyle='#dde2ea';c.lineWidth=1;rr(c,w.x0,y0,w.x1-w.x0,h,8);c.fill();c.stroke();
+  c.fillStyle='#152238';c.font='800 14px sans-serif';c.textAlign='left';c.textBaseline='middle';
+  c.fillText(`${sd==='L'?'①':'②'} 표면 근처 이온 수`,w.x0+10,y0+15);
+  if(!ready()||!M.init) return;
+  const now=countSide(sd), ini=M.init[sd]||{};
+  const ord=k=>METALS[k]?0:k==='H'?1:k==='K'?2:3;
+  const keys=[...new Set([...Object.keys(ini),...Object.keys(now)])].sort((a,b)=>ord(a)-ord(b));
+  let x=w.x0+12,y=y0+42;
+  keys.forEach(k=>{ const n=now[k]||0,d=n-(ini[k]||0),s=spInfo(k);
+    const txt=`${s.name} ${n}`; c.font='700 15px sans-serif'; const tw=c.measureText(txt).width;
+    const dt=d===0?'':(d>0?` ▲${d}`:` ▼${-d}`); c.font='800 14px sans-serif'; const dw=c.measureText(dt).width;
+    if(x+tw+dw+28>w.x1){x=w.x0+12;y+=26;}
+    c.fillStyle=s.col;c.strokeStyle='#445';c.lineWidth=1;c.beginPath();c.arc(x+7,y,7,0,7);c.fill();c.stroke();
+    c.fillStyle='#222';c.font='700 15px sans-serif';c.fillText(txt,x+18,y);
+    c.fillStyle=d>0?'#1f9d61':'#d64545';c.font='800 14px sans-serif';c.fillText(dt,x+18+tw,y);
+    x+=tw+dw+32; });
+  chargeLine(c,sd,o,w,y0+h-16);
+}
+function chargeLine(c,sd,o,w,y){
+  if(!o.anodeSide) return;
+  const an=sd===o.anodeSide, st=M.st[sd];
+  c.fillStyle=an?'#fdecea':'#e8f0fd';rr(c,w.x0+6,y-13,w.x1-w.x0-12,26,6);c.fill();
+  c.font='700 13px sans-serif';c.textAlign='left';c.textBaseline='middle';
+  let txt,ok=true;
+  if(S.mode==='daniel'&&BR().cat){
+    if(an){ const sp=anodeSpecies(o),na=METALS[sp].n,ext=st.diss-st.loc,rx=na*ext,bi=Object.values(st.br).reduce((a,b)=>a+b,0),sum=rx-bi; ok=sum===0;
+      txt=`전하: ${METALS[sp].ion} +${rx}, ${spInfo(BR().an).name} −${bi} → 합 ${sum>0?'+':''}${sum}`; }
+    else { const sp=cathodeSpecies(o),nc=METALS[sp].n,rx=nc*st.dep,bi=Object.values(st.br).reduce((a,b)=>a+b,0),sum=bi-rx; ok=sum===0;
+      txt=`전하: ${METALS[sp].ion} −${rx}, K⁺ +${bi} → 합 ${sum>0?'+':''}${sum}`; }
+    txt+=ok?'  ✓ 균형':' (맞춰지는 중)';
+  } else if(S.mode==='volta'){
+    txt=an?`전하: ${METALS[anodeSpecies(o)].ion} 증가(+) → 음이온이 다가와 균형`:`전하: H⁺ 감소(−) → H⁺가 다가와 균형`;
+  } else return;
+  c.fillStyle=an?'#b03a2e':'#1d5fbf';c.fillText(txt,w.x0+12,y+0.5);
+}
+function summaryLine(c,o){
+  if(!o.anodeSide||!M.st) return;
+  const a=o.anodeSide,cS=other(a),aSp=anodeSpecies(o),na=METALS[aSp].n;
+  const ext=M.st[a].diss-M.st[a].loc, eOut=ext*na;
+  let eIn,txt;
+  if(S.mode==='volta'){ eIn=M.st[cS].dep*2; txt=`전자 수 보존: ${aSp} ${ext}개 × ${na}e⁻ = ${eOut}e⁻ 방출  →  H₂ ${M.st[cS].dep}개 × 2e⁻ = ${eIn}e⁻ 받음`; }
+  else { const cs=cathodeSpecies(o),nc=METALS[cs].n; eIn=M.st[cS].dep*nc; txt=`전자 수 보존: ${aSp} ${ext}개 × ${na}e⁻ = ${eOut}e⁻ 방출  →  ${cs} ${M.st[cS].dep}개 × ${nc}e⁻ = ${eIn}e⁻ 받아 석출`; }
+  const tr=eOut-eIn; if(tr>0) txt+=`  (이동 중 ${tr}e⁻)`;
+  c.fillStyle='#152238';rr(c,8,MH-28,MW-16,25,6);c.fill();
+  c.fillStyle='#ffe58a';c.font='700 14px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(txt,MW/2,MH-14.5);
+}
+function polyPt(P,s){ let seg=[],L=0;
+  for(let i=1;i<P.length;i++){const l=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]);seg.push(l);L+=l;}
+  let d=clamp(s,0,1)*L;
+  for(let i=0;i<seg.length;i++){ if(d<=seg[i]||i===seg.length-1){const t=seg[i]?Math.min(1,d/seg[i]):0;
+    return [P[i][0]+(P[i+1][0]-P[i][0])*t,P[i][1]+(P[i+1][1]-P[i][1])*t];} d-=seg[i]; }
+}
+
+/* ================= 거시 화면 ================= */
+const XW=560,XH=400,RAIL=62,PT=150,PB=370,LIQ=238;
+const macroFx=[]; let mPhase=0, bPhase=0;
+const BUBPOS=[]; for(let i=0;i<70;i++) BUBPOS.push({s:i%2?1:-1,y:LIQ+12+Math.random()*(PB-LIQ-18),r:2+Math.random()*2.6});
+function mgeo(){
+  if(S.mode==='daniel') return {b:[[30,240],[320,530]],xL:95,xR:465,bx:[205,355]};
+  return {b:[[110,450]],xL:175,xR:385};
+}
+function drawBeaker(c,x0,x1,col){
+  const yt=200,yb=383;
+  if(col){ c.fillStyle=col;c.fillRect(x0+2,LIQ,x1-x0-4,yb-LIQ-1); }
+  c.strokeStyle='#8a97a8';c.lineWidth=2.5;c.beginPath();c.moveTo(x0,yt);c.lineTo(x0,yb);c.lineTo(x1,yb);c.lineTo(x1,yt);c.stroke();
+  c.strokeStyle='rgba(180,195,215,.6)';c.lineWidth=3;c.beginPath();c.moveTo(x0+8,LIQ+10);c.lineTo(x0+8,yb-12);c.stroke();
+  if(col){c.strokeStyle='rgba(70,110,160,.4)';c.lineWidth=1;c.beginPath();c.moveTo(x0+2,LIQ);c.lineTo(x1-2,LIQ);c.stroke();}
+  for(let k=1;k<=3;k++){c.strokeStyle='#b5bfcc';c.lineWidth=1;c.beginPath();c.moveTo(x1-14,yb-k*40);c.lineTo(x1-4,yb-k*40);c.stroke();}
+}
+const VS=30;
+function nz(k,q){const v=Math.sin(k*12.9898+q*78.233)*43758.5453;return v-Math.floor(v);}
+function drawPlate(c,x,sd){
+  const metal=S[sd].metal, dm=D.dm[sd]||0, col=METALS[metal].plate, sub=solReady(sd);
+  c.fillStyle=col;c.fillRect(x-11,PT,22,(sub?LIQ:PB)-PT);
+  c.strokeStyle='#4b5360';c.lineWidth=1.2;c.strokeRect(x-11,PT,22,(sub?LIQ:PB)-PT);
+  c.fillStyle='rgba(255,255,255,.35)';c.fillRect(x-9,PT+2,3,(sub?LIQ:PB)-PT-4);
+  if(sub){
+    const er=dm<0?Math.min(9,-dm*VS):0, gr=dm>0?Math.min(13,dm*VS):0, sd2=sd==='L'?1:5;
+    const ys=[]; for(let y=LIQ;y<=PB;y+=4) ys.push(y);
+    const Lx=ys.map((y,k)=>x-11+er*(0.5+nz(k,sd2))-gr*(0.7+0.6*nz(k,sd2+1)));
+    const Rx=ys.map((y,k)=>x+11-er*(0.5+nz(k,sd2+2))+gr*(0.7+0.6*nz(k,sd2+3)));
+    const pb=PB-er*0.6+gr*0.5;
+    c.beginPath();c.moveTo(x-11,LIQ);ys.forEach((y,k)=>c.lineTo(Lx[k],Math.min(y,pb)));c.lineTo(Lx[Lx.length-1],pb);
+    c.lineTo(Rx[Rx.length-1],pb);for(let k=ys.length-1;k>=0;k--)c.lineTo(Rx[k],Math.min(ys[k],pb));c.lineTo(x+11,LIQ);c.closePath();
+    if(gr>0){ const dmM=D.depM[sd]||metal; c.fillStyle=METALS[dmM].plate;c.fill();
+      c.save();c.clip();c.fillStyle='rgba(60,30,10,.18)';for(let k=0;k<60;k++){c.beginPath();c.arc(x-11-gr+nz(k,9)*(22+2*gr),LIQ+nz(k,7)*(PB-LIQ),1.3,0,7);c.fill();}c.restore();
+      c.strokeStyle='#4b5360';c.stroke();
+      c.globalAlpha=0.55;c.fillStyle=col;c.fillRect(x-11,LIQ,22,PB-LIQ);c.globalAlpha=1;
+    } else { c.fillStyle=col;c.fill();c.strokeStyle='#4b5360';c.stroke();
+      if(er>0){ c.save();c.clip();c.fillStyle='rgba(30,30,40,.3)';for(let k=0;k<Math.min(70,er*8);k++){c.beginPath();c.arc(x-11+nz(k,3)*22,LIQ+nz(k,4)*(PB-LIQ),1.2,0,7);c.fill();}c.restore(); } }
+    const coat=D.coat[sd]||0;
+    if(coat>0&&S.mode==='daniel'&&S[sd].sol&&S[sd].sol!==metal){ c.globalAlpha=0.8*coat;c.fillStyle=METALS[S[sd].sol].plate;
+      for(let k=0;k<26;k++){const yy=LIQ+4+k*5;c.fillRect(x-11,yy,22*(0.4+0.6*((k*7)%5)/5),3);} c.globalAlpha=1; }
+  }
+  c.fillStyle='#d0392b';c.fillRect(x-6,PT-8,12,10);
+  c.font='700 14px sans-serif';c.textBaseline='middle';
+  const t=`${METALS[metal].name}(${metal})`, tw0=c.measureText(t).width;
+  let left=x<XW/2; if(left&&x-17-tw0<4) left=false; else if(!left&&x+17+tw0>XW-4) left=true;   // 글자가 잘리면 판 안쪽으로
+  c.textAlign=left?'right':'left'; const tx=left?x-17:x+17;
+  c.fillStyle='rgba(255,255,255,.85)'; const tw=c.measureText(t).width; c.fillRect(left?tx-tw-4:tx-4,172,tw+8,18);
+  c.fillStyle='#222';c.fillText(t,tx,181);
+  if(ready()&&D.t>0){ const z=Math.abs(dm)<0.0005; c.font='600 12.5px sans-serif'; c.fillStyle=z?'#5b6577':(dm<0?'#b03a2e':'#1d5fbf');
+    c.fillText(z?'+0.000 g':(dm>0?'+':'')+dm.toFixed(3)+' g',tx,197); }
+  if(sub){ const zx=sd==='L'?x+6:x-40, zy=LIQ+40;
+    c.setLineDash([4,3]);c.strokeStyle='#e0672b';c.lineWidth=1.8;c.strokeRect(zx,zy,34,60);c.setLineDash([]);
+    c.fillStyle='#e0672b';c.beginPath();c.arc(sd==='L'?zx+34:zx,zy,9,0,7);c.fill();
+    c.fillStyle='#fff';c.font='800 13px sans-serif';c.textAlign='center';c.fillText(sd==='L'?'①':'②',sd==='L'?zx+34:zx,zy+0.5); }
+}
+function drawBulb(c,x,y,b){
+  if(b>0.01){const g=c.createRadialGradient(x,y-20,2,x,y-20,20+50*b);g.addColorStop(0,`rgba(255,230,120,${0.9*b})`);g.addColorStop(1,'rgba(255,230,120,0)');c.fillStyle=g;c.beginPath();c.arc(x,y-20,20+50*b,0,7);c.fill();}
+  c.fillStyle=b>0.01?`rgb(255,${lerp(250,220,b)|0},${lerp(250,120,b)|0})`:'#f3f6fa';c.strokeStyle='#596273';c.lineWidth=1.5;
+  c.beginPath();c.arc(x,y-21,14,0,7);c.fill();c.stroke();
+  c.fillStyle='#a5adb9';c.fillRect(x-7,y-9,14,9);c.strokeRect(x-7,y-9,14,9);
+  c.strokeStyle=b>0.01?'#e07b00':'#777';c.lineWidth=1.3;c.beginPath();c.moveTo(x-5,y-10);c.lineTo(x-3,y-24);c.lineTo(x,y-19);c.lineTo(x+3,y-24);c.lineTo(x+5,y-10);c.stroke();
+}
+function drawAmm(c,x,y,I){
+  c.fillStyle='#fff';c.strokeStyle='#2b3445';c.lineWidth=2;c.beginPath();c.arc(x,y,16,0,7);c.fill();c.stroke();
+  c.fillStyle='#2b3445';c.font='800 15px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('A',x,y+1);
+  c.fillStyle='#1b2333';rr(c,x-36,y-44,72,20,5);c.fill();c.fillStyle='#ffd166';c.font='700 14px ui-monospace,monospace';
+  c.fillText(I==null?'---':(I*1000).toFixed(1)+' mA',x,y-33.5);
+}
+function drawVolt(c,x,y,V){
+  c.fillStyle='#1b2333';rr(c,x-42,y-17,84,34,7);c.fill();
+  c.fillStyle='#7CFFB2';c.font='700 15px ui-monospace,monospace';c.textAlign='center';c.textBaseline='middle';
+  c.fillText(V==null?'---':V.toFixed(3)+' V',x,y+1);
+  c.fillStyle='#9fb0cc';c.font='700 8.5px sans-serif';c.fillText('전압계',x,y-11);
+}
+function drawMacro(){
+  const c=gx,o=O; c.clearRect(0,0,XW,XH); c.fillStyle='#fbfcfe';c.fillRect(0,0,XW,XH);
+  c.fillStyle='#e7ebf1';c.fillRect(0,385,XW,15);
+  const g=mgeo();
+  if(S.mode==='daniel'){
+    drawBeaker(c,g.b[0][0],g.b[0][1],S.L.sol?solCol(D.ionsL):null); drawBeaker(c,g.b[1][0],g.b[1][1],S.R.sol?solCol(D.ionsR):null);
+    if(S.L.sol&&S.R.sol){
+      if(BR().cat){
+        const [a,b]=g.bx; c.lineJoin='round';
+        c.strokeStyle='#aeb9c7';c.lineWidth=18;c.beginPath();c.moveTo(a,335);c.lineTo(a,180);c.lineTo(b,180);c.lineTo(b,335);c.stroke();
+        c.strokeStyle='#eef2f7';c.lineWidth=13;c.stroke();
+        c.fillStyle='#55627a';c.font='700 13px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(BR().name,280,168);
+        if(o.anodeSide&&(o.I||0)>2e-5){ const P=[[a,330],[a,180],[b,180],[b,330]], toR=o.anodeSide==='L';
+          if(RUN) bPhase+=0.004*RATE(o.I||0);
+          for(let k=0;k<6;k++){ const s=(bPhase+k/6)%1;
+            const [x1,y1]=polyPt(P,toR?s:1-s); c.fillStyle='#bb6bd9';c.beginPath();c.arc(x1,y1,3.6,0,7);c.fill();
+            const [x2,y2]=polyPt(P,toR?1-((s+0.08)%1):(s+0.08)%1); c.fillStyle='#f2994a';c.beginPath();c.arc(x2,y2,3.6,0,7);c.fill(); }
+          c.font='700 12px sans-serif';c.fillStyle='#8e44ad';c.fillText(toR?'K⁺ →':'← K⁺',280,194);c.fillStyle='#c0620b';c.fillText(toR?`← ${BR().an==='Cl'?'Cl⁻':'NO₃⁻'}`:`${BR().an==='Cl'?'Cl⁻':'NO₃⁻'} →`,280,207); }
+        if(o.agcl){ c.fillStyle='#fff';c.strokeStyle='#aaa';[a,b].forEach(x=>{for(let k=0;k<6;k++){c.beginPath();c.arc(x-5+((k*5)%10),326+((k*3)%8),3,0,7);c.fill();c.stroke();}}); }
+      } else if(S.bridge==='none'){ c.fillStyle='#b23';c.font='700 13px sans-serif';c.textAlign='center';c.fillText('염다리 없음',280,250); }
+    }
+    [['L',0],['R',1]].forEach(([sd,i])=>{ const [x0,x1]=g.b[i],s=S[sd]; c.fillStyle=s.sol?'#223':'#8a94a6';c.font='700 13.5px sans-serif';c.textAlign='center';c.textBaseline='middle';
+      c.fillText(s.sol?`${SALTS[s.sol].f} ${fmtC(D['ions'+sd][s.sol]||0)} M`:'빈 비커',sd==='L'?(g.xL+15+x1)/2:(x0+g.xR-15)/2,372); });
+  } else {
+    drawBeaker(c,g.b[0][0],g.b[0][1],S.acid.type?solCol(D.ionsV,true):null);
+    c.fillStyle=S.acid.type?'#223':'#8a94a6';c.font='700 13.5px sans-serif';c.textAlign='center';c.textBaseline='middle';
+    c.fillText(S.acid.type?`${ACIDS[S.acid.type].name} ${ACIDS[S.acid.type].f} ${fmtC(S.acid.c)} M`:'빈 비커',280,372);
+    if(D.usedDepMn){ c.fillStyle='#222'; for(let k=0;k<45;k++){c.beginPath();c.arc(130+((k*53)%300),377-((k*7)%6),2.2,0,7);c.fill();} }
+    if(D.depType){ c.fillStyle='#5a3ea8';c.font='700 13px sans-serif';c.fillText(`감극제 ${D.depType==='MnO2'?'MnO₂':'H₂O₂'} 작용 중`,280,355); }
+  }
+  if(S.L.metal) drawPlate(c,g.xL,'L');
+  if(S.R.metal) drawPlate(c,g.xR,'R');
+  if(!S.L.metal&&!S.R.metal&&!solReady('L')&&!solReady('R')){
+    c.fillStyle='#55627a';c.font='700 14px sans-serif';c.textAlign='center';c.textBaseline='middle';
+    c.fillText(S.mode==='volta'?'금속판 2개와 전해질을 골라 전지를 만들어 보세요':'금속판 2개와 용액 2개를 골라 전지를 만들어 보세요',280,110);
+  }
+  if(S.mode==='volta'&&o.anodeSide){
+    const cx=o.anodeSide==='L'?g.xR:g.xL, n=Math.round(D.theta*BUBPOS.length);
+    c.fillStyle='rgba(255,255,255,.85)';c.strokeStyle='#7b9cc0';c.lineWidth=1;
+    for(let i=0;i<n;i++){const b=BUBPOS[i];c.beginPath();c.arc(cx+b.s*(12+b.r),b.y,b.r,0,7);c.fill();c.stroke();}
+    if(RUN){ const ax=o.anodeSide==='L'?g.xL:g.xR;
+      if(Math.random()<Math.min(0.6,LOCALV[o.anM]*Math.min(D.H,4)*0.12)) macroFx.push({x:ax+(Math.random()<.5?-1:1)*13,y:PB-10-Math.random()*100,r:1.5+Math.random()*1.5});
+      if(Math.random()<0.35*RATE(o.I||0)) macroFx.push({x:cx+(Math.random()<.5?-1:1)*14,y:PB-10-Math.random()*100,r:1.5+Math.random()*2}); }
+  }
+  for(let i=macroFx.length-1;i>=0;i--){const b=macroFx[i];if(RUN)b.y-=1.2;c.fillStyle='rgba(255,255,255,.9)';c.strokeStyle='#8fb0d0';c.beginPath();c.arc(b.x+Math.sin(b.y/8),b.y,b.r,0,7);c.fill();c.stroke();if(b.y<LIQ)macroFx.splice(i,1);}
+  if(macroFx.length>120) macroFx.splice(0,macroFx.length-120);
+  if(!(S.L.metal&&S.R.metal)) return;
+  // 회로
+  const xL=g.xL,xR=g.xR;
+  c.strokeStyle='#2b3445';c.lineWidth=3;c.lineJoin='miter';
+  c.beginPath();c.moveTo(xL,PT-8);c.lineTo(xL,RAIL);c.lineTo(xR,RAIL);c.lineTo(xR,PT-8);c.stroke();
+  const comps=[]; if(S.amm)comps.push('A'); if(S.load==='bulb')comps.push('bulb');
+  if(S.load==='none'||!S.load){ c.fillStyle='#fbfcfe';c.fillRect(255,RAIL-6,50,12);c.strokeStyle='#2b3445';c.lineWidth=3;c.beginPath();c.moveTo(255,RAIL);c.lineTo(296,RAIL-16);c.stroke();
+    c.fillStyle='#2b3445';c.beginPath();c.arc(255,RAIL,3.5,0,7);c.arc(305,RAIL,3.5,0,7);c.fill();
+    c.fillStyle='#55627a';c.font='700 12.5px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(S.load?'연결 안 됨':'회로 연결 방법을 골라 주세요',280,RAIL+18); }
+  const slots=(S.load==='none'||!S.load)?comps.map((k,i)=>xL+(255-xL)*(i+1)/(comps.length+1)):comps.map((k,i)=>xL+(xR-xL)*(i+1)/(comps.length+1));
+  comps.forEach((k,i)=>{ const x=slots[i];
+    if(k==='bulb')drawBulb(c,x,RAIL,o.bright); else if(k==='A')drawAmm(c,x,RAIL,o.Iamm); });
+  if(S.load==='wire'){c.fillStyle='#d64545';c.font='700 12.5px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('도선만 연결(단락)',280,RAIL-10);}
+  if(S.volt){ const y=125, redLeft=o.anodeSide==='R';
+    c.lineWidth=2.5;c.strokeStyle=redLeft?'#d0392b':'#222';c.beginPath();c.moveTo(xL,y);c.lineTo(238,y);c.stroke();
+    c.strokeStyle=redLeft?'#222':'#d0392b';c.beginPath();c.moveTo(322,y);c.lineTo(xR,y);c.stroke();
+    c.fillStyle='#2b3445';c.beginPath();c.arc(xL,y,4,0,7);c.arc(xR,y,4,0,7);c.fill();
+    drawVolt(c,280,y,o.Vread);
+    c.font='800 13px sans-serif';c.textAlign='center';c.fillStyle='#d0392b';c.fillText('+',redLeft?232:328,y-14);c.fillStyle='#222';c.fillText('−',redLeft?328:232,y-14); }
+  if(o.anodeSide&&(o.I||0)>1e-5&&!o.open){
+    const P=o.anodeSide==='L'?[[xL,PT],[xL,RAIL],[xR,RAIL],[xR,PT]]:[[xR,PT],[xR,RAIL],[xL,RAIL],[xL,PT]];
+    if(RUN) mPhase+=0.008*RATE(o.I||0);
+    c.fillStyle='#ffd400';c.strokeStyle='#8a6d00';c.lineWidth=1;
+    for(let k=0;k<14;k++){const [x,y]=polyPt(P,(mPhase+k/14)%1);c.beginPath();c.arc(x,y,3.2,0,7);c.fill();c.stroke();}
+  }
+  if(o.anodeSide){ [['L',xL],['R',xR]].forEach(([sd,x])=>{ const an=sd===o.anodeSide; c.fillStyle=an?'#b03a2e':'#1d5fbf';
+    c.beginPath();c.arc(x+(x<280?-22:22),PT+8,9,0,7);c.fill(); c.fillStyle='#fff';c.font='800 12px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(an?'−':'+',x+(x<280?-22:22),PT+8.5); }); }
+  if(S.nCells>1){ c.fillStyle='#152238';rr(c,8,8,150,24,7);c.fill();c.fillStyle='#fff';c.font='700 13px sans-serif';c.textAlign='left';c.textBaseline='middle';
+    c.fillText(`🔋 같은 전지 ${S.nCells}개 직렬 연결`,16,20.5); }
+}
+
+/* ================= 그래프 ================= */
+const GW=640,GH=250;
+function pushHist(){ D.hist.push({t:D.t,v:O.Vread,i:(O.I||0)*1000}); if(D.hist.length>1400) D.hist=D.hist.filter((_,i)=>i%2===0); }
+function drawGraph(){
+  const c=gg; c.clearRect(0,0,GW,GH); c.fillStyle='#fff';c.fillRect(0,0,GW,GH);
+  const pl=54,pr=60,pt=14,pb=30,w=GW-pl-pr,h=GH-pt-pb, H=D.hist;
+  c.strokeStyle='#e6eaf0';c.lineWidth=1;
+  for(let k=0;k<=4;k++){const y=pt+h*k/4;c.beginPath();c.moveTo(pl,y);c.lineTo(pl+w,y);c.stroke();}
+  c.strokeStyle='#9aa4b2';c.strokeRect(pl,pt,w,h);
+  if(H.length<2){c.fillStyle='#8a94a6';c.font='600 13px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('전지를 완성하면 그래프가 그려져요',pl+w/2,pt+h/2);return;}
+  const t0=H[0].t,t1=Math.max(H[H.length-1].t,t0+1);
+  let vmax=0.2,vmin=0,imax=1; H.forEach(p=>{if(p.v!=null){vmax=Math.max(vmax,p.v);vmin=Math.min(vmin,p.v);}imax=Math.max(imax,p.i);});
+  vmax*=1.12;imax*=1.15;
+  const X=t=>pl+(t-t0)/(t1-t0)*w, YV=v=>pt+h-(v-vmin)/(vmax-vmin)*h, YI=i=>pt+h-i/imax*h;
+  c.font='600 14px sans-serif';c.textBaseline='middle';
+  for(let k=0;k<=4;k++){ const f=k/4;
+    c.fillStyle='#2f6fed';c.textAlign='right';c.fillText((vmin+(vmax-vmin)*(1-f)).toFixed(2),pl-6,pt+h*f);
+    c.fillStyle='#e67700';c.textAlign='left';c.fillText((imax*(1-f)).toFixed(imax<10?1:0),pl+w+6,pt+h*f); }
+  c.fillStyle='#5b6577';c.textAlign='center';c.textBaseline='alphabetic';
+  c.fillText('시간 →',pl+w/2,GH-9);
+  c.save();c.translate(14,pt+h/2);c.rotate(-Math.PI/2);c.fillStyle='#2f6fed';c.fillText('전압 (V)',0,0);c.restore();
+  c.save();c.translate(GW-12,pt+h/2);c.rotate(Math.PI/2);c.fillStyle='#e67700';c.fillText('전류 (mA)',0,0);c.restore();
+  c.lineWidth=1.8;c.strokeStyle='#e67700';c.beginPath();H.forEach((p,i)=>{const x=X(p.t),y=YI(p.i);i?c.lineTo(x,y):c.moveTo(x,y);});c.stroke();
+  c.lineWidth=2.4;c.strokeStyle='#2f6fed';c.beginPath();let st=false;H.forEach(p=>{if(p.v==null){st=false;return;}const x=X(p.t),y=YV(p.v);st?c.lineTo(x,y):c.moveTo(x,y);st=true;});c.stroke();
+}
+
+/* ================= 계기판 & 경고 ================= */
+let lastWarn='';
+function updateMeters(){
+  const o=O;
+  document.getElementById('mV').textContent=!S.volt?'연결 안 됨':o.Vread==null?'—':o.Vread.toFixed(3)+' V';
+  document.getElementById('mI').textContent=!S.amm?'연결 안 됨':o.Iamm==null?'—':(o.Iamm*1000).toFixed(1)+' mA';
+  document.getElementById('mS').textContent=o.notReady?'준비 중':o.open?'끊김(이온 통로 없음)':(o.I||0)>2e-5?'전류가 흐름':'열린 회로';
+  let html, list=[];
+  if(o.notReady){
+    const ck=(ok,t)=>`${ok?'✅':'⬜'} ${t}`;
+    const items=[ck(!!S.L.metal,'왼쪽 금속판'), ck(!!S.R.metal,'오른쪽 금속판')];
+    if(S.mode==='volta') items.push(ck(!!S.acid.type,'전해질'));
+    else { items.push(ck(!!S.L.sol,'왼쪽 용액')); items.push(ck(!!S.R.sol,'오른쪽 용액')); items.push(ck(!!S.bridge,'염다리')); }
+    items.push(ck(!!S.load,'회로 연결'));
+    list=[{t:'n',x:`<b>준비</b> &nbsp;${items.join(' &nbsp; ')}`}];
+  } else list=[...new Set(o.warn)].map(x=>({t:'w',x:'⚠ '+x.replace(/^⚠\s*/,'')})).concat([...new Set(o.note)].map(x=>({t:'n',x:'💡 '+x})));
+  const el=document.getElementById('warn');
+  const sig=list.map(i=>i.x).join('§');
+  if(sig!==UI.warnSig){ UI.warnSig=sig; UI.warnIdx=0; }
+  UI.warnList=list; if(UI.warnIdx>=list.length) UI.warnIdx=0;
+  const cur=list[UI.warnIdx];
+  const key=sig+'|'+UI.warnOpen+'|'+UI.warnIdx;
+  if(key===lastWarn) return; lastWarn=key;
+  el.className=cur?cur.t:'';
+  if(!list.length){ el.innerHTML='<span class="wtxt" style="color:#8a94a6">알림 없음</span>'; UI.warnOpen=false; return; }
+  el.innerHTML=`<span class="wtxt ${UI.warnSlide?'slide':''}">${cur.x}</span>${list.length>1?`<span class="wcnt">${UI.warnIdx+1}/${list.length}</span>`:''}${list.length>1||cur.x.length>60?`<button class="wmore" data-wmore="1">${UI.warnOpen?'접기 ▲':(list.length>1?'모두 보기':'자세히')+' ▼'}</button>`:''}
+    ${UI.warnOpen?`<div class="wpop">${list.map(i=>`<div class="wbox ${i.t}">${i.x}</div>`).join('')}</div>`:''}`;
+  UI.warnSlide=false;
+}
+let lastLegend='';
+function updateLegend(){
+  const sps=new Set(M.parts.map(p=>p.sp)); if(solReady('L')&&solReady('R')) M.tube.forEach(b=>sps.add(b.sp));
+  const names={SO4:'황산 이온 SO₄²⁻',NO3:'질산 이온 NO₃⁻',Cl:'염화 이온 Cl⁻',H:'수소 이온 H⁺',K:'칼륨 이온 K⁺'};
+  let h=[...sps].map(sp=>{const s=spInfo(sp);return `<span><i style="background:${s.col}"></i>${METALS[sp]?METALS[sp].name+' 이온 '+METALS[sp].ion:names[sp]}</span>`;}).join('');
+  if(S.L.metal||S.R.metal) h+='<span><i style="background:#ccc;border-style:dashed"></i>금속 원자(판)</span><span><i style="background:#ffd400"></i>전자 e⁻</span>';
+  if(S.mode==='volta') h+='<span><i style="background:#fff;border-color:#5f86b0"></i>수소 기체 H₂</span>';
+  if(S.mode==='daniel') h+='<span><i style="background:#ddd;border:2px solid #1f4ea0"></i>새로 석출된 원자</span>';
+  if(h!==lastLegend){document.getElementById('legend').innerHTML=h;lastLegend=h;}
+}
+
+/* ================= 조작 패널 ================= */
+function chip(act,label,on,cls=''){return `<button class="chip ${cls} ${on?'on':''}" data-act="${act}">${label}</button>`;}
+function recipeSalt(sol,c){ const s=SALTS[sol]; const g=c*0.1*s.Mr/s.per;
+  return `${s.f} <b>${g<0.01?g.toFixed(4):g<1?g.toFixed(3):g.toFixed(2)} g</b>을 녹여 100 mL로 만든 뒤 25 mL를 부어요.`; }
+function recipeAcid(t,c){ const a=ACIDS[t]; const g=c*0.1*a.Mr;
+  return `${a.f} <b>${g.toFixed(2)} g</b>을 100 mL로 묽힌 뒤 50 mL를 부어요. <b>물에 산을</b> 조금씩!`; }
+const UI={ed:{},tip:{},warnOpen:false,warnIdx:0,warnList:[],warnSlide:false,warnHover:false};
+const DROP=0.05, RECOVER=0.02;   // 전압 감소가 눈에 보이면 '떨어진 상태', 조금이라도 다시 오르면 '회복'
+const dropped=()=>O&&!O.notReady&&O.Vread!=null&&(D.vmax||0)-Math.abs(O.Vread)>=DROP;
+function markRecover(kind){ if(S.mode!=='volta'||!dropped()) return; const v=Math.abs(O.Vread);
+  if(kind==='shake'&&!D.usedDep){ D.vShake=v; D.vShakeMax=v; } if(kind==='dep'){ D.vDep=v; D.vDepMax=v; } }
+const isOpen=(k,has)=>!has||UI.ed[k];
+function picked(label,val,act){ return `<div class="picked"><span class="k">${label}</span><b>${val}</b><button data-act="${act}">변경</button></div>`; }
+function concBlock(key,c,isAcid){
+  const presets=isAcid?[0.1,0.5,1,2,3]:[0.001,0.01,0.1,1,2];
+  return `<div class="lbl">농도 <b id="cv${key}">${fmtC(c)}</b> M</div>
+    <input type="range" min="0" max="1000" value="${isAcid?aToSl(c):cToSl(c)}" data-sl="${key}">
+    <div class="chips">${presets.map(v=>chip(isAcid?`dca:${v}`:`dc:${key}:${v}`,v+' M',Math.abs(c-v)<1e-9)).join('')}</div>`;
+}
+function saltBlock(sd){
+  const d=DR[sd], s=S[sd], name=sd==='L'?'왼쪽 비커':'오른쪽 비커';
+  if(!isOpen('s'+sd,!!s.sol)) return picked(name,`${SALTS[s.sol].f} ${fmtC(s.c)} M`,`ed:s${sd}`);
+  const changed=d.sol&&(d.sol!==s.sol||d.c!==s.c);
+  let h=`<div class="beakerbox"><b>${name}</b>`;
+  h+= (d.sol&&!UI.ed['d'+sd]) ? picked('용질',SALTS[d.sol].f,`ed:d${sd}`)
+      : `<div class="chips" style="margin-top:5px">${ORDER.map(m=>chip(`dsol:${sd}:${m}`,SALTS[m].f,d.sol===m)).join('')}</div>`;
+  if(d.sol) h+=concBlock(sd,d.c,false)+`<div class="recipe" id="rc${sd}">${recipeSalt(d.sol,d.c)}</div>
+    <button class="btn full" data-act="pour:${sd}" ${changed?'':'disabled'}>🧪 비커에 붓기</button>`;
+  return h+'</div>';
+}
+function acidBlock(){
+  const d=DR.acid, s=S.acid;
+  if(!isOpen('sA',!!s.type)) return picked('전해질',`${ACIDS[s.type].f} ${fmtC(s.c)} M`,'ed:sA');
+  const changed=d.type&&(d.type!==s.type||d.c!==s.c);
+  let h= (d.type&&!UI.ed.dA) ? picked('산',`${ACIDS[d.type].name} ${ACIDS[d.type].f}`,'ed:dA')
+      : `<div class="chips">${Object.keys(ACIDS).map(k=>chip(`dacid:${k}`,`${ACIDS[k].name} ${ACIDS[k].f}`,d.type===k)).join('')}</div>`;
+  if(d.type) h+=concBlock('A',d.c,true)+`<div class="recipe" id="rcA">${recipeAcid(d.type,d.c)}</div>
+    <button class="btn full" data-act="pour:A" ${changed?'':'disabled'}>🧪 비커에 붓기</button>`;
+  return h;
+}
+function metalBlock(sd){
+  const name=sd==='L'?'왼쪽 금속판':'오른쪽 금속판', m=S[sd].metal;
+  if(!isOpen('m'+sd,!!m)) return picked(name,`${METALS[m].name} ${m}`,`ed:m${sd}`);
+  return `<div class="lbl">${name}</div><div class="chips">${ORDER.map(x=>chip(`metal:${sd}:${x}`,`${METALS[x].name}<small> ${x}</small>`,m===x)).join('')}</div>`;
+}
+function renderCtrl(){
+  const v=S.mode==='volta'; let n=1, h='';
+  h+=`<div class="sec"><h3><span class="num">${n++}</span>금속판</h3>${metalBlock('L')}${metalBlock('R')}</div>`;
+  if(v) h+=`<div class="sec"><h3><span class="num">${n++}</span>전해질</h3>${acidBlock()}</div>`;
+  else{
+    h+=`<div class="sec"><h3><span class="num">${n++}</span>용액</h3>${saltBlock('L')}${saltBlock('R')}</div>`;
+    h+=`<div class="sec"><h3><span class="num">${n++}</span>염다리</h3>${(!S.bridge||UI.ed.br)?`<div class="chips">${Object.keys(BRIDGES).map(k=>chip(`bridge:${k}`,BRIDGES[k].name,S.bridge===k)).join('')}</div>`:picked('연결',BR().name,'ed:br')}</div>`;
+  }
+  h+=`<div class="sec"><h3><span class="num">${n++}</span>회로</h3>
+    <div class="lbl" style="margin-top:0">두 금속판 사이를</div><div class="chips">${Object.keys(LOADS).map(k=>chip(`load:${k}`,k==='none'?'연결 안 함':k==='bulb'?'꼬마전구로 연결':'도선으로 연결',S.load===k)).join('')}</div>
+    <div class="chips" style="margin-top:5px">${chip('volt',(S.volt?'✓ ':'')+'전압계',S.volt)}${chip('amm',(S.amm?'✓ ':'')+'전류계',S.amm)}</div>
+    <div class="lbl">전지 개수(직렬)</div><div class="chips">${[1,2,3].map(k=>chip(`cells:${k}`,k+'개',S.nCells===k)).join('')}</div></div>`;
+  h+=`<div class="sec"><h3><span class="num">${n++}</span>실험</h3>
+    <div class="chips">${SPEEDS.map(k=>chip(`speed:${k}`,k===0?'⏸ 일시정지':'×'+k,k===0?!S.running:(S.running&&S.speed===k))).join('')}</div>
+    ${v?`<div class="row" style="margin-top:7px"><button class="btn orange" data-act="shake">🫨 판 흔들기</button><button class="btn orange" data-act="dep:MnO2">MnO₂</button><button class="btn orange" data-act="dep:H2O2">H₂O₂</button></div>`:''}
+    <div class="row" style="margin-top:7px"><button class="btn ghost" data-act="reset">⟲ 처음부터</button><button class="btn ghost" data-act="record">📋 기록</button><button class="btn ghost" data-act="clear">🧹 비우기</button></div>
+  </div>`;
+  document.getElementById('ctrl').innerHTML=h;
+  document.querySelectorAll('#modes button').forEach(b=>b.classList.toggle('on',b.dataset.mode===S.mode));
+}
+function clearAll(){
+  S.L={metal:null,sol:null,c:1}; S.R={metal:null,sol:null,c:1}; S.acid={type:null,c:1}; S.bridge=null; S.load=null;
+  DR.L={sol:null,c:1}; DR.R={sol:null,c:1}; DR.acid={type:null,c:1}; UI.ed={};
+  resetDyn();
+}
+// 전지 종류별 실험 상태를 따로 보관했다가, 다시 돌아오면 그대로 이어서 진행
+const SAVED={volta:null,daniel:null};
+function switchMode(m){
+  if(m===S.mode) return;
+  SAVED[S.mode]={S:{L:{...S.L},R:{...S.R},acid:{...S.acid},bridge:S.bridge,load:S.load,amm:S.amm,volt:S.volt,nCells:S.nCells},
+    DR:JSON.parse(JSON.stringify(DR)), ed:{...UI.ed}, D, M:{...M}};
+  S.mode=m;
+  const sv=SAVED[m];
+  if(sv){ Object.assign(S,sv.S); S.L={...sv.S.L}; S.R={...sv.S.R}; S.acid={...sv.S.acid};
+    Object.assign(DR,JSON.parse(JSON.stringify(sv.DR))); UI.ed={...sv.ed}; D=sv.D; Object.assign(M,sv.M);
+    O=compute(); macroFx.length=0; lastWarn=''; }
+  else clearAll();
+  renderCtrl(); renderTab(); renderBanner(); maybePredict();
+}
+document.getElementById('modes').onclick=e=>{const b=e.target.closest('button'); if(b) switchMode(b.dataset.mode);};
+const ctrl=document.getElementById('ctrl');
+ctrl.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]'); if(!b||b.disabled) return;
+  if(needPredict()&&b.dataset.act!=='record'){ maybePredict(); return; }
+  const [a,x,y]=b.dataset.act.split(':');
+  if(a==='ed'){ UI.ed[x]=true; }
+  else if(a==='metal'){ S[x].metal=y; UI.ed['m'+x]=false; resetDyn(); }
+  else if(a==='dsol'){ DR[x].sol=y; UI.ed['d'+x]=false; }
+  else if(a==='dc'){DR[x].c=+y;}
+  else if(a==='dacid'){ DR.acid.type=x; UI.ed.dA=false; }
+  else if(a==='dca'){DR.acid.c=+x;}
+  else if(a==='pour'){ if(x==='A'){S.acid={...DR.acid};UI.ed.sA=false;} else {S[x].sol=DR[x].sol;S[x].c=DR[x].c;UI.ed['s'+x]=false;} resetDyn(); }
+  else if(a==='bridge'){ S.bridge=x; UI.ed.br=false; }
+  else if(a==='load')S.load=x;
+  else if(a==='amm')S.amm=!S.amm;
+  else if(a==='volt')S.volt=!S.volt;
+  else if(a==='cells')S.nCells=+x;
+  else if(a==='speed'){ if(+x===0) S.running=false; else {S.running=true;S.speed=+x;} }
+  else if(a==='reset')resetDyn();
+  else if(a==='clear')clearAll();
+  else if(a==='record')record();
+  else if(a==='shake'){ markRecover('shake'); D.theta*=0.3; M.bub.forEach(b=>{if(b.att&&Math.random()<0.75){b.att=false;b.vy=-35;}}); }
+  else if(a==='dep'){ markRecover('dep'); D.dep=1; D.depType=x; D.usedDep=true; if(x==='MnO2')D.usedDepMn=true; }
+  renderCtrl();
+});
+ctrl.addEventListener('input',e=>{
+  const s=e.target.dataset.sl; if(!s) return;
+  if(needPredict()){ maybePredict(); renderCtrl(); return; } const v=+e.target.value;
+  if(s==='A'){DR.acid.c=slToA(v);document.getElementById('cvA').textContent=fmtC(DR.acid.c);if(DR.acid.type)document.getElementById('rcA').innerHTML=recipeAcid(DR.acid.type,DR.acid.c);}
+  else {DR[s].c=slToC(v);document.getElementById('cv'+s).textContent=fmtC(DR[s].c);if(DR[s].sol)document.getElementById('rc'+s).innerHTML=recipeSalt(DR[s].sol,DR[s].c);}
+});
+ctrl.addEventListener('change',e=>{ if(e.target.dataset.sl) renderCtrl(); });
+/* 이미지 저장: 누르는 순간의 화면을 PNG 파일로 */
+document.querySelectorAll('[data-shot]').forEach(btn=>btn.addEventListener('click',()=>{
+  const cv=document.getElementById(btn.dataset.shot), d=new Date(), z=n=>String(n).padStart(2,'0');
+  const fn=`chemical-cell-${S.mode}-${btn.dataset.name}-${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}${z(d.getSeconds())}.png`;
+  const a=document.createElement('a'); a.href=cv.toDataURL('image/png'); a.download=fn; document.body.appendChild(a); a.click(); a.remove();
+  const t=btn.textContent; btn.textContent='✓ 저장됨'; setTimeout(()=>btn.textContent=t,1500);
+}));
+/* 전체 화면 */
+document.querySelectorAll('[data-fs]').forEach(btn=>btn.addEventListener('click',()=>{
+  const card=document.getElementById(btn.dataset.fs), on=!card.classList.contains('fs');
+  document.querySelectorAll('.card.fs').forEach(c=>c.classList.remove('fs'));
+  if(on){ card.classList.add('fs'); btn.textContent='✕ 닫기'; if(card.requestFullscreen) card.requestFullscreen().catch(()=>{}); }
+  else { btn.textContent='⛶ 크게 보기'; if(document.fullscreenElement) document.exitFullscreen().catch(()=>{}); }
+}));
+document.addEventListener('fullscreenchange',()=>{ if(!document.fullscreenElement) document.querySelectorAll('.card.fs').forEach(c=>{ c.classList.remove('fs'); const b=c.querySelector('[data-fs]'); if(b) b.textContent='⛶ 크게 보기'; }); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.card.fs').forEach(c=>{ c.classList.remove('fs'); const b=c.querySelector('[data-fs]'); if(b) b.textContent='⛶ 크게 보기'; }); });
+
+/* ================= 미션 ================= */
+const ab=x=>Math.abs(x||0);
+function hm(s,m,c){return s.metal===m&&s.sol===m&&(c==null||ab(Math.log10(s.c/c))<0.03);}
+function pair(a,ca,b,cb){return (hm(S.L,a,ca)&&hm(S.R,b,cb))||(hm(S.R,a,ca)&&hm(S.L,b,cb));}
+function pairV(a,b){return (S.L.metal===a&&S.R.metal===b)||(S.L.metal===b&&S.R.metal===a);}
+function ionShift(){ // (−)극 표면 금속 이온 증가, (+)극 표면 금속 이온 감소
+  const o=O; if(!o.anodeSide||!M.init) return false;
+  const a=o.anodeSide,c=other(a),as=anodeSpecies(o),cs=cathodeSpecies(o);
+  return (countSide(a)[as]||0)-(M.init[a][as]||0)>=3 && (M.init[c][cs]||0)-(countSide(c)[cs]||0)>=3;
+}
+const MISSIONS=[
+ {id:'m1',mode:'daniel',g:'다니엘',t:'다니엘 전지 조립하기',d:'아연판 | ZnSO₄ 1 M, 구리판 | CuSO₄ 1 M, KNO₃ 염다리로 다니엘 전지를 만들고, 전압계로 전압을 측정하세요.',
+  chk:o=>S.mode==='daniel'&&pair('Zn',1,'Cu',1)&&S.bridge!=='none'&&S.volt&&S.nCells===1&&ab(o.Vread)>1.05&&ab(o.Vread)<1.15,
+  ex:'표준 상태(1 M, 25 ℃)에서 다니엘 전지의 기전력은 E° = E°(+) − E°(−) = 0.34 − (−0.76) = 1.10 V예요.'},
+ {id:'m2',mode:'daniel',g:'다니엘',t:'(+)극 찾기',d:'Zn–Cu 다니엘 전지에 꼬마전구를 연결해 전류를 흘리고, 확대 화면에서 <b>어느 금속판에 원자가 새로 쌓이는지</b> 관찰하세요.',
+  obs:o=>S.mode==='daniel'&&pair('Zn',null,'Cu',null)&&o.I>0.005&&(M.st.L.dep+M.st.R.dep)>=1,
+  hint:'꼬마전구를 연결해 전류를 흘리고, 어느 판에 새 원자가 쌓이는지 확대 화면에서 확인해 보세요.',
+  pr:{q:'Zn–Cu 다니엘 전지에서 금속이 석출되는 (+)극은?',o:['아연판','구리판'],a:1},
+  chk:o=>S.mode==='daniel'&&pair('Zn',null,'Cu',null)&&o.I>0.005&&(M.st.L.dep+M.st.R.dep)>=4,
+  ex:'구리판이 (+)극(환원 전극)이에요. Cu²⁺가 전자를 받아 구리 원자로 석출돼요. 아연판은 (−)극(산화 전극)으로, 아연 원자가 Zn²⁺로 녹아 나가요. 전자는 도선을 통해 아연판 → 구리판으로 이동해요.'},
+ {id:'m3',mode:'daniel',g:'다니엘',t:'표면의 이온 수 변화',d:'전류가 흐를 때 확대 화면 아래의 입자 수를 보세요. (−)극 표면의 금속 이온 수와 (+)극 표면의 금속 이온 수는 각각 어떻게 변할까요?',
+  obs:o=>S.mode==='daniel'&&o.I>0.005&&(M.st.L.diss+M.st.R.diss)>=2,
+  hint:'꼬마전구를 연결해 전류를 흘리고, 확대 화면 아래 이온 수의 ▲▼ 변화를 확인해 보세요.',
+  pr:{q:'(−)극 표면의 금속 이온 수는?',o:['늘어난다','줄어든다','변화 없다'],a:0},
+  chk:o=>S.mode==='daniel'&&o.I>0.005&&ionShift(),
+  ex:'(−)극에서는 금속 원자가 이온이 되어 녹아 나오므로 표면 근처의 금속 이온이 늘어나요. (+)극에서는 금속 이온이 전자를 받아 원자로 석출되므로 표면 근처의 금속 이온이 줄어들어요. 이렇게 생긴 전하 불균형은 염다리의 이온이 이동해서 맞춰 줘요.'},
+ {id:'m4',mode:'daniel',g:'다니엘',t:'염다리의 역할',d:'다니엘 전지에서 염다리를 빼면(연결 안 함) 전압계 값은 어떻게 될까요?',
+  obs:o=>S.mode==='daniel'&&S.bridge==='none'&&S.volt&&o.emf>0.5,
+  hint:'염다리를 [연결 안 함]으로 바꾸고 전압계 값을 확인해 보세요.',
+  pr:{q:'염다리를 빼면?',o:['변화 없다','0 V가 된다','2배가 된다'],a:1},
+  chk:o=>S.mode==='daniel'&&S.bridge==='none'&&S.volt&&o.emf>0.5,
+  ex:'염다리가 없으면 이온이 이동하지 못해 회로가 닫히지 않아요. 염다리는 산화 전극 쪽에 많아지는 양이온과 환원 전극 쪽에 남는 음이온의 전하 불균형을 이온 이동으로 해소해서 반응이 계속되게 해요.'},
+ {id:'m5',mode:'daniel',g:'다니엘',t:'금속을 바꾸면?',d:'구리 반쪽 전지를 은판 | AgNO₃ 1 M으로 바꾸고(아연 쪽은 그대로) 전압계로 측정하세요.',
+  obs:o=>S.mode==='daniel'&&pair('Zn',null,'Ag',null)&&S.volt&&ab(o.Vread)>1,
+  hint:'아연판 | ZnSO₄와 은판 | AgNO₃로 전지를 만들고 전압계로 측정해 보세요.',
+  pr:{q:'Zn–Ag 전지의 전압은 Zn–Cu보다?',o:['커진다','작아진다','같다'],a:0},
+  chk:o=>S.mode==='daniel'&&pair('Zn',1,'Ag',1)&&S.volt&&S.nCells===1&&ab(o.Vread)>1.5,
+  ex:'E° = 0.80 − (−0.76) = 1.56 V. 두 금속의 표준 환원 전위 차이가 클수록 기전력이 커요. Ag⁺ 반쪽 반응식에 2를 곱해도 E°는 변하지 않아요(세기 성질). 전류를 흘려 보면 Zn 원자 1개가 녹을 때 Ag 원자 2개가 석출되는 것도 확대 화면에서 볼 수 있어요.'},
+ {id:'m8',mode:'volta',g:'볼타',t:'볼타 전지 만들기',obs:o=>S.mode==='volta'&&pairV('Zn','Cu')&&S.volt&&ab(o.Vread)>0.2,hint:'아연판과 구리판을 고르고, 묽은 황산을 붓고, 전압계를 연결해 보세요.',d:'아연판과 구리판을 묽은 황산에 넣고 전압계를 연결해 처음 전압을 측정하세요.',
+  chk:o=>S.mode==='volta'&&pairV('Zn','Cu')&&S.acid.type==='H2SO4'&&S.volt&&ab(o.Vread)>0.8,
+  ex:'(−)극: Zn → Zn²⁺ + 2e⁻, (+)극(구리판 표면): 2H⁺ + 2e⁻ → H₂. 구리 자체는 반응하지 않고 전자를 H⁺에 전달하는 통로 역할만 해요.'},
+ {id:'m9',mode:'volta',g:'볼타',t:'볼타 전지를 오래 쓰면?',d:'볼타 전지를 만들고 전압계로 시간에 따른 전압 변화를 그래프에서 관찰하세요.',tip:'그래프와 함께 ② 확대 화면의 (+)극 표면에서 무엇이 생기는지도 살펴보세요.',
+  obs:o=>S.mode==='volta'&&o.anodeSide&&S.volt&&(D.vmax||0)-ab(o.Vread)>=DROP,
+  hint:'그래프에서 전압이 처음과 달라질 때까지 지켜본 뒤 다시 눌러 보세요. 회로가 연결되어 전류가 흘러야 변화가 생겨요. (속도를 높여도 좋아요)',
+  pr:{q:'볼타 전지를 계속 사용하면 전압은?',o:['일정하다','점점 감소한다','점점 증가한다'],a:1},
+  chk:o=>false,
+  ex:'(+)극 표면에 생긴 H₂ 기포가 구리판을 덮으면 H⁺가 전자를 받기 어려워지고(저항 증가), 표면의 H₂ 때문에 역반응 경향이 생겨 전압이 떨어져요. 이것이 분극 현상이에요.'},
+ {id:'m10',mode:'volta',g:'볼타',t:'감극제로 회복시키기',d:'회로를 연결해 전압이 떨어지기 시작하면, 감극제(MnO₂ 또는 H₂O₂)를 넣어 전압을 회복시키세요.',
+  hint:'그래프에서 전압이 떨어지는 것을 확인한 뒤 감극제를 넣고, 전압이 다시 올라가는지 보세요.',
+  chk:o=>S.mode==='volta'&&D.vDep!=null&&D.vDepMax-D.vDep>=RECOVER,
+  ex:'감극제(산화제)는 (+)극에 생긴 H₂를 산화시켜 물로 바꿔요(예: H₂O₂ + H₂ → 2H₂O). 기포가 사라지니 전압이 회복돼요.'},
+ {id:'m11',mode:'volta',g:'볼타',t:'볼타 전지의 (+)극 바꾸기',tip:'볼타 전지의 (+)극에서 실제로 전자를 받는 것은 금속판일까요, 용액 속 이온일까요?',d:'구리판 대신 은판을 쓰고, 분극이 일어나기 전의 처음 전압을 전압계로 측정하세요.',
+  obs:o=>S.mode==='volta'&&pairV('Zn','Ag')&&S.volt&&(D.vmax||0)>0.85,
+  hint:'아연판과 은판을 묽은 황산에 넣고 전압계를 연결해 처음 전압을 확인해 보세요.',
+  pr:{q:'(+)극을 Cu → Ag로 바꾸면 처음 전압은?',o:['약 0.46 V 커진다','거의 같다','0 V가 된다'],a:1},
+  chk:o=>S.mode==='volta'&&pairV('Zn','Ag')&&S.volt&&(D.vmax||0)>0.85,
+  ex:'볼타 전지의 (+)극에서는 금속 이온이 아니라 H⁺가 환원돼요. 그래서 (+)극 금속의 종류는 전압에 거의 영향을 주지 않고(수소 과전압 차이만큼만 조금 달라져요), (−)극 금속이 전압을 결정해요. 다니엘 전지와 비교해 보세요!'},
+ {id:'m13',mode:'daniel',g:'다니엘',t:'은 석출시키기',tip:'은과 구리 중 이온화 경향이 더 작은 쪽의 이온이 전자를 받아요.',d:'Ag⁺이 들어 있는 용액(AgNO₃)을 이용해 은(Ag)을 석출시켜 보세요. 구리판 | CuSO₄와 짝을 지어 봐요.',
+  obs:o=>S.mode==='daniel'&&o.anodeSide&&cathodeSpecies(o)==='Ag'&&o.I>0.005&&M.st[other(o.anodeSide)].dep>=1,
+  hint:'한쪽은 은판 | AgNO₃, 다른 쪽은 구리판 | CuSO₄로 만들고 꼬마전구를 연결해 은 원자가 쌓이는지 확인해 보세요.',
+  pr:{q:'구리판 | CuSO₄와 은판 | AgNO₃로 전지를 만들면 은이 석출되는 쪽은?',o:['구리판 쪽','은판 쪽'],a:1},
+  chk:o=>false,
+  ex:'은은 구리보다 이온화 경향이 작아서 Ag⁺가 전자를 받아 은으로 석출돼요((+)극). 이때 구리판은 (−)극이 되어 Cu²⁺로 녹아요. 구리가 늘 (+)극인 것은 아니고, 짝이 되는 금속에 따라 달라져요. 확대 화면에서 Cu 1개가 녹을 때 Ag 2개가 석출되는 것도 확인해 보세요.'},
+ {id:'m14',mode:'daniel',g:'다니엘',t:'철 석출시키기',tip:'철 이온이 전자를 받으려면, 반대쪽 금속이 철보다 전자를 더 잘 내놓아야 해요.',d:'철판 | FeSO₄ 쪽에서 철(Fe)이 석출되도록 반대쪽 반쪽 전지를 골라 전지를 만들어 보세요.',
+  obs:o=>S.mode==='daniel'&&o.anodeSide&&cathodeSpecies(o)==='Fe'&&o.I>0.005&&M.st[other(o.anodeSide)].dep>=1,
+  hint:'한쪽을 철판 | FeSO₄로 두고, 반대쪽 금속을 골라 꼬마전구를 연결해 철 원자가 쌓이는지 확인해 보세요.',
+  pr:{q:'Fe²⁺를 철로 석출시키려면 반대쪽에 둘 금속으로 알맞은 것은?',o:['아연(Zn)','구리(Cu)'],a:0},
+  chk:o=>false,
+  ex:'Fe²⁺가 전자를 받으려면 반대쪽 금속이 철보다 이온화 경향이 커서 전자를 내줘야 해요. 아연은 철보다 반응성이 커서 (−)극이 되고, Fe²⁺는 (+)극에서 철로 석출돼요. 구리와 짝지으면 오히려 철이 (−)극이 되어 녹아요.'}
+];
+const CHALLENGES=[
+ {id:'c1',mode:'daniel',g:'도전',t:'최고 전압 만들기',d:'전지 1개로 3.0 V 이상의 전압을 만들어 보세요.',tip:'두 금속의 이온화 경향 차이가 클수록 전압이 커져요.',
+  chk:o=>S.mode==='daniel'&&S.nCells===1&&S.volt&&ab(o.Vread)>=3.0,
+  ex:'Mg | Mg²⁺ ‖ Ag⁺ | Ag : E° = 0.80 − (−2.37) = 3.17 V. 이온화 경향이 가장 큰 금속과 가장 작은 금속의 조합이에요.'},
+ {id:'c2',mode:'daniel',g:'도전',t:'정확히 0.500 V 맞추기',d:'다니엘형 전지 1개로 전압계가 <b>0.495 ~ 0.505 V</b>를 가리키게 만들어 보세요.',tip:'먼저 금속 조합으로 0.5 V 근처를 만든 뒤, 용액의 농도를 바꿔 미세하게 맞춰 보세요.',
+  chk:o=>S.mode==='daniel'&&S.nCells===1&&S.volt&&ab(o.Vread)>=0.495&&ab(o.Vread)<=0.505,
+  ex:'예: Pb | Pb²⁺ ‖ Cu²⁺ | Cu 는 E° = 0.47 V예요. 여기서 Pb²⁺를 묽히면 전압이 조금 커져서 0.500 V에 맞출 수 있어요(Pb²⁺ 0.1 M이면 약 0.50 V).'},
+ {id:'c3',mode:'daniel',g:'도전',t:'아주 작은 전압 만들기',d:'0보다 크고 <b>0.050 V 이하</b>인 전압을 만들어 보세요.',tip:'양쪽에 같은 금속을 쓰고, 용액의 농도만 조금 다르게 해 보세요.',
+  chk:o=>S.mode==='daniel'&&S.nCells===1&&S.volt&&ab(o.Vread)>0.001&&ab(o.Vread)<=0.05,
+  ex:'같은 금속으로 농도차 전지를 만들고 농도 차이를 작게 하면 돼요. 예를 들어 Cu 0.1 M ‖ Cu 1 M 이면 약 0.03 V예요.'},
+ {id:'c4',mode:'volta',g:'도전',t:'감극제 없이 되살리기',d:'볼타 전지에서 전압이 떨어지기 시작하면, 감극제를 쓰지 않고 전압을 다시 올려 보세요.',hint:'그래프에서 전압이 떨어지는 것을 확인한 뒤에 시도해 보세요. (감극제를 이미 넣었다면 [처음부터]를 누르세요)',tip:'(+)극 판에 달라붙은 것을 떼어 낼 방법이 있을까요?',
+  chk:o=>S.mode==='volta'&&!D.usedDep&&D.vShake!=null&&D.vShakeMax-D.vShake>=RECOVER,
+  ex:'(+)극 판을 흔들면 붙어 있던 H₂ 기포가 떨어져 나가서 전압이 잠깐 회복돼요. 하지만 전류가 계속 흐르면 기포가 다시 쌓여 전압이 또 떨어져요. 그래서 실제 전지에는 감극제를 넣어요.'}
+];
+const ALLM=[...MISSIONS,...CHALLENGES];
+const modeM=()=>MISSIONS.filter(m=>m.mode===S.mode), modeC=()=>CHALLENGES.filter(m=>m.mode===S.mode);
+ALLM.forEach(m=>MS[m.id]={done:false,pred:null});
+const curMission=()=>[...modeM(),...modeC()].find(m=>!MS[m.id].done);
+const popOpen=()=>!document.getElementById('popOv').classList.contains('hide');
+const needPredict=()=>{ const m=curMission(); return S.study==='mission'&&m&&m.pr&&MS[m.id].pred==null; };
+function completeMission(m){ MS[m.id].done=true; renderTab(); renderBanner(); showConcept(m,true); }
+function checkMissions(){}
+function checkObservation(){
+  const m=curMission(); if(!m) return;
+  let ok=false; try{ ok=!O.notReady&&(m.obs?m.obs(O):m.chk(O)); }catch(e){}
+  if(ok) completeMission(m);
+  else showPop(`<h2>👀 아직 확인할 수 없어요</h2><p>${m.hint||m.d}</p><button class="btn go" data-close="1">실험 계속하기</button>`);
+}
+function showPop(html){ document.getElementById('popBox').innerHTML=html; document.getElementById('popOv').classList.remove('hide'); }
+function hidePop(){ document.getElementById('popOv').classList.add('hide'); }
+function showPredict(m){
+  showPop(`<h2>🤔 먼저 예측해 보세요</h2><p><b>${m.t}</b><br>${m.d}</p><div class="q">${m.pr.q}</div>
+    <div class="opts">${m.pr.o.map((t,i)=>`<button data-pick="${m.id}:${i}">${t}</button>`).join('')}</div>
+    <p class="small" style="margin:12px 0 0">⏸ 예측하는 동안에는 실험 시간이 잠시 멈춰요.</p>
+    <button class="btn ghost go" data-close="1" style="margin-top:10px">잠시 닫기 (실험 화면 보기)</button>`);
+}
+function showConcept(m,justDone){
+  const st=MS[m.id]; let v='';
+  if(m.pr&&st.pred!=null) v= st.pred===m.pr.a?`<div class="verdict" style="color:#1f9d61">🎉 미션 성공! (내 예측: ${m.pr.o[st.pred]})</div>`
+                                            :`<div class="verdict" style="color:#d64545">❌ 내 예측: ${m.pr.o[st.pred]} → 정답: ${m.pr.o[m.pr.a]}</div>`;
+  showPop(`<h2>${justDone?'✅ 미션 완료':'💡 개념'} — ${m.t}</h2>${v}<div class="exp">${m.ex}</div>
+    <button class="btn go" data-close="${justDone?'next':'1'}">${justDone?(curMission()?'다음 미션 →':'완료!'):'닫기'}</button>`);
+}
+function maybePredict(){ if(needPredict()) showPredict(curMission()); }
+document.getElementById('popOv').addEventListener('click',e=>{
+  const p=e.target.closest('[data-pick]'); if(p){ const [id,i]=p.dataset.pick.split(':'); MS[id].pred=+i; hidePop(); renderBanner(); renderTab(); return; }
+  const c=e.target.closest('[data-close]'); if(c){ hidePop(); if(c.dataset.close==='next') maybePredict(); }
+});
+document.getElementById('warn').addEventListener('click',e=>{ if(e.target.closest('[data-wmore]')){ UI.warnOpen=!UI.warnOpen; lastWarn=''; } });
+// 알림이 여러 개면 5초마다 자동으로 넘김 (마우스를 올리거나 펼쳐 둔 동안은 멈춤)
+document.getElementById('warn').addEventListener('mouseenter',()=>UI.warnHover=true);
+document.getElementById('warn').addEventListener('mouseleave',()=>UI.warnHover=false);
+setInterval(()=>{ if(UI.warnList.length>1&&!UI.warnOpen&&!UI.warnHover){ UI.warnIdx=(UI.warnIdx+1)%UI.warnList.length; UI.warnSlide=true; } },5000);
+document.getElementById('banner').addEventListener('click',e=>{
+  if(e.target.closest('[data-predict]')) maybePredict();
+  if(e.target.closest('[data-observe]')) checkObservation();
+  const t=e.target.closest('[data-tip]'); if(t){ UI.tip[t.dataset.tip]=!UI.tip[t.dataset.tip]; renderBanner(); renderTab(); }
+});
+function misCard(m,cur){
+  const st=MS[m.id], isCur=m===cur, locked=!st.done&&!isCur;
+  let h=`<div class="mis ${st.done?'done':''} ${isCur?'cur':''}"><div class="mt"><span class="grp">${m.g}</span>${m.t}<span class="badge ${st.done?'ok':''}">${st.done?'완료 ✓':isCur?'지금 미션':'🔒'}</span></div>`;
+  if(isCur) h+=`<div class="md">${m.d}${m.tip?` <button class="tipbtn" data-tip="${m.id}">💡 힌트</button>${UI.tip[m.id]?`<div class="tipbox">${m.tip}</div>`:''}`:''}${m.pr&&st.pred!=null?`<br><b style="color:#5a3ea8">내 예측: ${m.pr.o[st.pred]}</b>`:''}</div>${m.pr&&st.pred==null?'<button class="chip" data-repredict="1">🤔 예측하기</button>':'<button class="chip" data-observe="1">👀 관찰 결과 확인</button>'}`;
+  if(st.done) h+=`<button class="chip" data-concept="${m.id}" style="margin-top:4px">💡 개념 보기</button>`;
+  return h+'</div>';
+}
+function misHTML(){
+  const MM=modeM(), CC=modeC(), dn=MM.filter(m=>MS[m.id].done).length, cn=CC.filter(m=>MS[m.id].done).length, cur=curMission();
+  let h=`<div class="prog">${S.mode==='volta'?'볼타':'다니엘'} 전지 · 교육용 미션 <b>${dn}</b> / ${MM.length} · 도전 <b>${cn}</b> / ${CC.length}<div class="bar"><i style="width:${(dn+cn)/(MM.length+CC.length)*100}%"></i></div></div>
+   <div class="misSec">🎯 교육용 미션</div>`;
+  MM.forEach(m=>h+=misCard(m,cur));
+  h+=`<div class="misSec">🏆 도전</div>`;
+  CC.forEach(m=>h+=misCard(m,cur));
+  return h;
+}
+function renderBanner(){
+  const el=document.getElementById('banner');
+  if(S.study!=='mission'){ el.innerHTML=''; return; }
+  const m=curMission();
+  let act='';
+  if(m) act= (m.pr&&MS[m.id].pred==null)?' <button class="bbtn" data-predict="1">🤔 예측하기</button>'
+                  :`${m.pr?` <span style="color:#d7c8ff">(내 예측: ${m.pr.o[MS[m.id].pred]})</span>`:''} <button class="bbtn" data-observe="1">👀 관찰 결과 확인</button>`;
+  el.innerHTML=m?`🎯 <b>${m.t}</b> — ${m.d}${act}${m.tip?` <button class="tipbtn" data-tip="${m.id}">💡 힌트</button>${UI.tip[m.id]?`<div class="tipbox">💡 ${m.tip}</div>`:''}`:''}`:'🏆 이 전지의 모든 미션과 도전을 완료했어요! 자유롭게 실험해 보세요.';
+}
+/* ================= 기록 ================= */
+function circuitDesc(){ const p=[]; if(S.load&&S.load!=='none')p.push(LOADS[S.load]); if(S.volt)p.push('전압계'); if(S.amm)p.push('전류계'); if(S.nCells>1)p.push('전지 '+S.nCells+'개'); return p.join(', ')||'없음'; }
+function record(){
+  if(O.notReady){ tab='rec';renderTab(); return; }
+  const o=O,v=S.mode==='volta';
+  RECS.push({no:RECS.length+1,mode:v?'볼타':'다니엘',
+    L:v?S.L.metal:`${S.L.metal} | ${SALTS[S.L.sol].f} ${fmtC(D.ionsL[S.L.sol]||0)} M`,
+    R:v?S.R.metal:`${S.R.metal} | ${SALTS[S.R.sol].f} ${fmtC(D.ionsR[S.R.sol]||0)} M`,
+    el:v?`${ACIDS[S.acid.type].f} ${fmtC(S.acid.c)} M`:BR().name,
+    cir:circuitDesc(),V:o.Vread==null?'—':o.Vread.toFixed(3),I:o.Iamm==null?'—':(o.Iamm*1000).toFixed(1)});
+  tab='rec';renderTab();
+}
+function condText(){ const v=S.mode==='volta'; if(O.notReady) return '';
+  return v?`볼타 | ${S.L.metal}–${S.R.metal} | ${ACIDS[S.acid.type].f} ${fmtC(S.acid.c)} M | ${circuitDesc()}`
+          :`다니엘 | ${S.L.metal}(${SALTS[S.L.sol].f} ${fmtC(S.L.c)} M) – ${S.R.metal}(${SALTS[S.R.sol].f} ${fmtC(S.R.c)} M) | ${BR().name} | ${circuitDesc()}`; }
+function condShort(){ if(O.notReady) return '';
+  const ld={none:'연결 안 함',bulb:'꼬마전구',wire:'도선'}[S.load]||'';
+  const hs=s=>s.metal===s.sol?`${s.metal} ${fmtC(s.c)}M`:`${s.metal}/${SALTS[s.sol].f} ${fmtC(s.c)}M`;
+  return S.mode==='volta'?`볼타 ${S.L.metal}–${S.R.metal} · ${ACIDS[S.acid.type].f} ${fmtC(S.acid.c)}M · ${ld}`
+    :`다니엘 ${hs(S.L)} ‖ ${hs(S.R)} · ${{KNO3:'KNO₃',KCl:'KCl',none:'염다리 없음'}[S.bridge]} · ${ld}`; }
+function autoTick(rdt){
+  if(!AUTO.on||O.notReady) return;
+  const c=condText(); if(c!==AUTO.lastCond){ AUTO.seg++; AUTO.lastCond=c; AUTO.acc=AUTO.int; }
+  AUTO.acc+=rdt; if(AUTO.acc<AUTO.int) return; AUTO.acc=0;
+  AUTO.rows.push({seg:AUTO.seg,cond:c,cs:condShort(),t:D.t,V:O.Vread==null?'—':O.Vread.toFixed(3),I:(O.I*1000).toFixed(1)});
+  if(tab==='rec') renderTab();
+}
+function autoHTML(){
+  let h=`<div class="misSec" style="margin-top:4px">⏺ 자동 기록</div>
+   <div class="row" style="margin-bottom:6px"><button class="btn ${AUTO.on?'orange':''}" data-auto="toggle">${AUTO.on?'⏹ 자동 기록 멈추기':'⏺ 자동 기록 시작'}</button>
+   <span class="small">간격</span>${[1,2,5].map(k=>`<button class="chip ${AUTO.int===k?'on':''}" data-auto="int:${k}">${k}초</button>`).join('')}</div>
+   <div class="small" style="margin-bottom:6px">실험이 진행되는 동안 정한 간격마다 전압과 전류를 자동으로 적어요. 조건을 바꾸면 새 묶음으로 시작해요. 시간은 실험 속도를 반영한 실험 시간이에요.</div>`;
+  if(AUTO.rows.length){
+    h+=`<div class="row" style="margin-bottom:6px"><button class="btn ghost" data-autocsv>⬇ 자동 기록 CSV</button><button class="btn ghost" data-autoclr>자동 기록 지우기</button></div><div style="overflow:auto;max-height:320px"><table><tr><th>시간(s)</th><th>전압(V)</th><th>전류(mA)</th></tr>`;
+    let seg=-1; AUTO.rows.slice(-150).forEach(r=>{ if(r.seg!==seg){ seg=r.seg; h+=`<tr><td colspan="3" style="background:#eef3ff;text-align:left;font-weight:700">${r.cond}</td></tr>`; }
+      h+=`<tr><td>${r.t<100?r.t.toFixed(1):Math.round(r.t)}</td><td><b>${r.V}</b></td><td>${r.I}</td></tr>`; });
+    h+='</table></div>';
+  }
+  return h;
+}
+function autoCsv(){
+  const rows=[['묶음','조건','실험 시간(s)','전압(V)','전류(mA)'],...AUTO.rows.map(r=>[r.seg,r.cond,r.t.toFixed(1),r.V,r.I])];
+  const txt='\ufeff'+rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/csv'}));a.download='화학전지_자동기록.csv';a.click();
+}
+function recHTML(){ return manualHTML()+autoHTML(); }
+function esc(t){ return String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+function manualHTML(){
+  if(!RECS.length) return `<div class="misSec" style="margin-top:0">📋 직접 기록</div><div class="small">실험 중 [📋 기록] 버튼을 누르면 그 순간의 측정값이 저장돼요. 여러 금속 조합의 전압을 기록해서 반응성 순서를 정리해 보세요.</div>`;
+  return `<div class="misSec" style="margin-top:0">📋 직접 기록</div><div class="row" style="margin-bottom:8px"><button class="btn ghost" data-csv>⬇ CSV로 저장</button><button class="btn ghost" data-clr>기록 지우기</button></div>
+   <div style="overflow:auto"><table><tr><th>#</th><th>전지</th><th>왼쪽</th><th>오른쪽</th><th>전해질/연결</th><th>회로</th><th>전압(V)</th><th>전류(mA)</th></tr>
+   ${RECS.map(r=>`<tr><td>${r.no}</td><td>${r.mode}</td><td>${r.L}</td><td>${r.R}</td><td>${r.el}</td><td>${r.cir}</td><td><b>${r.V}</b></td><td>${r.I}</td></tr>`).join('')}</table></div>`;
+}
+function csv(){
+  const rows=[['번호','전지','왼쪽','오른쪽','전해질/연결','회로','전압(V)','전류(mA)'],...RECS.map(r=>[r.no,r.mode,r.L,r.R,r.el,r.cir,r.V,r.I])];
+  const txt='﻿'+rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/csv'}));a.download='화학전지_측정기록.csv';a.click();
+}
+/* ================= 이론 ================= */
+const ion=m=>METALS[m].ion, co=k=>k===1?'':k;
+function thHTML(){
+  const o=O; let h='<div class="th">';
+  h+=`<h4>① 핵심 개념</h4><ul>
+   <li><b>(−)극 = 산화 전극</b>: 전자를 내놓고 금속이 이온으로 녹아요(질량 감소, 표면 근처 금속 이온 증가).</li>
+   <li><b>(+)극 = 환원 전극</b>: 전자를 받아 이온이 환원돼요(다니엘 전지: 금속 석출, 볼타 전지: H₂ 발생).</li>
+   <li><b>전자</b>는 도선으로만, <b>이온</b>은 용액·염다리로만 이동해요.</li>
+   <li><b>염다리</b>: 양이온은 (+)극 쪽, 음이온은 (−)극 쪽으로 이동해 두 용액의 전하 균형을 맞춰요.</li>
+   <li><b>이동한 전자 수는 보존</b>돼요. Zn 1개가 내놓은 전자 2개로 Cu²⁺ 1개, 또는 Ag⁺ 2개가 석출돼요.</li>
+   <li><b>분극</b>: 볼타 전지의 (+)극이 H₂ 기포로 덮여 전압이 떨어지는 현상. <b>감극제</b>(MnO₂, H₂O₂ 등 산화제)로 막아요.</li>
+   <li><b>국부 반응</b>: 볼타 전지의 아연판에서도 H⁺와 직접 반응해 기포가 생겨요. 이때 나온 전자는 도선으로 가지 않아요.</li></ul>`;
+  h+='<h4>② 표준 환원 전위 E° (25 ℃)</h4>';
+  const list=[...ORDER.map(m=>[`${ion(m)}/${m}`,METALS[m].E]),['2H⁺/H₂',0]].sort((x,y)=>x[1]-y[1]);
+  list.forEach(([n,e])=>{ const L=(Math.min(e,0)+2.5)/3.4*100,W=Math.abs(e)/3.4*100;
+    h+=`<div class="ebar"><span class="nm">${n}</span><span class="tr"><i style="left:${L}%;width:${W}%;background:${e<0?'#e9a19a':'#9cc2f2'}"></i><i style="left:${2.5/3.4*100}%;width:1px;background:#666"></i></span><span class="vv">${e>0?'+':''}${e.toFixed(2)}</span></div>`; });
+  h+=`<p class="small">값이 작을수록(음수) 전자를 잃기 쉬워 (−)극이 되고, 클수록(양수) 환원되기 쉬워 (+)극이 돼요.</p>`;
+  h+='<h4>③ 현재 전지의 반응식과 표준 기전력</h4>';
+  let adv='';
+  if(o.notReady) h+='<p class="small">금속판과 용액을 모두 고르면 이 전지의 반응식이 여기에 나타나요.</p>';
+  else if(S.mode==='daniel'){
+    if(o.anodeSide){
+      const A=(o.anodeSide==='L'?o.hL:o.hR),C=(o.anodeSide==='L'?o.hR:o.hL),a=A.couple,c=C.couple;
+      const na=METALS[a].n,nc=METALS[c].n,N=lcm(na,nc),ka=N/na,kc=N/nc,E0=METALS[c].E-METALS[a].E,conc=a===c;
+      h+=`<div class="eq">(−)극 산화: ${a} → ${ion(a)} + ${co(na)}e⁻ &nbsp;<span class="small">E° = ${METALS[a].E.toFixed(2)} V</span></div>
+      <div class="eq">(+)극 환원: ${ion(c)} + ${co(nc)}e⁻ → ${c} &nbsp;<span class="small">E° = ${METALS[c].E>0?'+':''}${METALS[c].E.toFixed(2)} V</span></div>
+      <div class="eq">전체: ${conc?`${ion(c)}(진한 쪽) → ${ion(c)}(묽은 쪽)`:`${co(ka)}${a} + ${co(kc)}${ion(c)} → ${co(ka)}${ion(a)} + ${co(kc)}${c}`} &nbsp;<span class="small">(이동 전자 ${N}개)</span></div>
+      <div class="eq">E° = E°(+) − E°(−) = ${METALS[c].E.toFixed(2)} − (${METALS[a].E.toFixed(2)}) = <b>${E0.toFixed(2)} V</b></div>`;
+      if(A.kind!=='match'||C.kind!=='match') h+=`<p class="small">※ 금속판과 용액의 금속 이온이 다른 반쪽 전지가 있어서, 실제로 반응하는 금속-이온 쌍으로 나타냈어요.</p>`;
+      const pa=S[o.anodeSide].metal, pc=S[o.anodeSide==='L'?'R':'L'].metal;
+      adv=`<h4>전지의 선 표시법</h4>
+      <div class="eq">${pa}(s) | ${ion(a)}(aq, ${fmtC(A.c)} M) ‖ ${ion(c)}(aq, ${fmtC(C.c)} M) | ${pc}(s)</div>
+      <ul><li>왼쪽에 (−)극(산화 전극), 오른쪽에 (+)극(환원 전극)을 써요.</li><li><b>|</b> 는 상(고체·용액·기체)의 경계, <b>‖</b> 는 염다리를 뜻해요.</li><li>용액의 농도를 괄호 안에 함께 적어요.</li></ul>
+      <h4>네른스트 식 (25 ℃) — 농도에 따른 전압</h4>
+      <div class="eq">E = E° − (0.0592 / n) log Q</div>
+      <div class="eq">Q = [${ion(a)}]${ka>1?'<sup>'+ka+'</sup>':''} / [${ion(c)}]${kc>1?'<sup>'+kc+'</sup>':''} = ${sciT(A.c)}${ka>1?'<sup>'+ka+'</sup>':''} / ${sciT(C.c)}${kc>1?'<sup>'+kc+'</sup>':''}</div>
+      <div class="eq">E = ${E0.toFixed(3)} − (0.0592/${N}) × log(${sciT(Math.pow(A.c,ka)/Math.pow(C.c,kc))}) = <b>${o.emf.toFixed(3)} V</b></div>
+      <h4>깁스 자유 에너지와 평형 상수</h4>
+      <div class="eq">ΔG = −nFE = −${N} × 96485 × ${o.emf.toFixed(3)} = <b>${(-N*F*o.emf/1000).toFixed(1)} kJ</b></div>
+      <div class="eq">ΔG° = −nFE° = ${(-N*F*E0/1000).toFixed(1)} kJ, &nbsp; K = 10<sup>nE°/0.0592</sup> = 10<sup>${(N*E0/K59).toFixed(1)}</sup></div>
+      <p class="small">ΔG &lt; 0 이므로 자발적으로 일어나는 반응이에요. 반응이 진행될수록 Q가 커져 E가 줄고, Q = K가 되면 E = 0 (전지 수명 끝).</p>`;
+    } else h+='<p>두 반쪽 전지의 전위가 같아서 전지 반응이 일어나지 않아요.</p>';
+  } else {
+    if(o.anodeSide){
+      const a=o.anM,c=o.caM,na=METALS[a].n;
+      h+=`<div class="eq">(−)극 ${METALS[a].name}판: ${a} → ${ion(a)} + ${co(na)}e⁻ &nbsp;<span class="small">E° = ${METALS[a].E.toFixed(2)} V</span></div>
+      <div class="eq">(+)극 ${METALS[c].name}판 표면: 2H⁺ + 2e⁻ → H₂↑ &nbsp;<span class="small">E° = 0.00 V</span></div>
+      <div class="eq">전체: ${a} + 2H⁺ → ${ion(a)} + H₂ ${na!==2?'<span class="small">(계수는 전자 수에 맞춰 조정)</span>':''}</div>
+      <div class="eq">E° = 0.00 − (${METALS[a].E.toFixed(2)}) = <b>${(-METALS[a].E).toFixed(2)} V</b></div>
+      <p class="small">(+)극의 ${METALS[c].name}은(는) 반응하지 않아요. 전자를 받아 H⁺에 전달하는 통로예요. 지금 (+)극 표면을 H₂ 기포가 덮은 비율은 약 <b>${(D.theta*100).toFixed(0)}%</b>예요.</p>`;
+      adv=`<h4>전지의 선 표시법</h4>
+      <div class="eq">${a}(s) | ${ion(a)}(aq), H⁺(aq) | H₂(g) | ${c}(s)</div>
+      <ul><li>왼쪽에 (−)극(산화 전극), 오른쪽에 (+)극(환원 전극)을 써요. <b>|</b> 는 상의 경계예요.</li><li>볼타 전지는 두 금속판이 같은 용액에 들어 있어서 염다리 표시(‖)가 없어요. (+)극에서는 H⁺가 환원되어 H₂(g)가 생기고, ${METALS[c].name}판은 전자를 전달하는 전극 역할만 해요.</li></ul>
+      <h4>볼타 전지의 전압 계산과 분극</h4>
+      <div class="eq">E(+) = 0 + (0.0592/2) log([H⁺]²/P<sub>H₂</sub>) − η<sub>과전압</sub> − η<sub>분극</sub></div>
+      <div class="eq">= ${o.EcN.toFixed(3)} − ${o.eta.toFixed(2)} − ${o.pol.toFixed(3)} = <b>${o.Ecath.toFixed(3)} V</b></div>
+      <p class="small">[H⁺] = ${sciT(o.H)} M, 판 표면 P<sub>H₂</sub> ≈ ${sciT(o.pH2)} atm, ${METALS[c].name}의 수소 과전압 η ≈ ${o.eta.toFixed(2)} V(시뮬레이션 근삿값)</p>
+      <div class="eq">E(−) = ${METALS[a].E.toFixed(2)} + (0.0592/${na}) log[${ion(a)}] = ${o.Ean.toFixed(3)} V</div>
+      <div class="eq">전압 = E(+) − E(−) = <b>${o.emf.toFixed(3)} V</b></div>
+      <p class="small">처음에는 판 표면에 H₂가 거의 없어서(P<sub>H₂</sub>가 매우 작음) 전압이 표준 기전력보다 크게 측정돼요. 교과서에 따라 볼타 전지의 처음 전압을 약 1.1 V로 소개하기도 하는데, 이 시뮬레이션은 약 0.9 V에서 시작해서 분극이 일어나면 0.5 V 안팎까지 떨어지도록 만들었어요.</p>`;
+    } else h+='<p>지금 조합에서는 전지 반응이 일어나지 않아요.</p>';
+  }
+  if(adv) h+=`<div class="adv">⚠ 여기부터는 대학 전공 과정 내용이에요.</div>${adv}`;
+  return h+'</div>';
+}
+function renderTab(){
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+  document.getElementById('tabbody').innerHTML= tab==='mis'?misHTML(): tab==='rec'?recHTML(): thHTML();
+}
+document.getElementById('tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;tab=b.dataset.tab;renderTab();};
+document.getElementById('tabbody').addEventListener('click',e=>{
+  const cc=e.target.closest('[data-concept]'); if(cc){ showConcept(ALLM.find(m=>m.id===cc.dataset.concept),false); return; }
+  if(e.target.closest('[data-repredict]')){ maybePredict(); return; }
+  if(e.target.closest('[data-observe]')){ checkObservation(); return; }
+  const tp=e.target.closest('[data-tip]'); if(tp){ UI.tip[tp.dataset.tip]=!UI.tip[tp.dataset.tip]; renderBanner(); renderTab(); return; }
+  if(e.target.closest('[data-csv]')) csv();
+  const au=e.target.closest('[data-auto]'); if(au){ const v=au.dataset.auto; if(v==='toggle'){ AUTO.on=!AUTO.on; AUTO.lastCond=''; } else AUTO.int=+v.split(':')[1]; renderTab(); return; }
+  if(e.target.closest('[data-autocsv]')) autoCsv();
+  if(e.target.closest('[data-autoclr]')){ AUTO.rows=[]; AUTO.lastCond=''; renderTab(); return; }
+  if(e.target.closest('[data-clr]')){RECS.length=0;renderTab();}
+});
+
+/* ================= 캔버스 & 루프 ================= */
+function hi(cv,w,h){const d=Math.max(2,Math.min(3,window.devicePixelRatio||1));cv.width=w*d;cv.height=h*d;const c=cv.getContext('2d');c.setTransform(d,0,0,d,0,0);return c;}
+const gx=hi(document.getElementById('macro'),XW,XH);
+const mx=hi(document.getElementById('micro'),MW,MH);
+const gg=hi(document.getElementById('graph'),GW,GH);
+
+function applyStudy(v){
+  S.study=v; document.getElementById('studyOv').classList.add('hide');
+  document.querySelector('#tabs [data-tab="mis"]').style.display=v==='mission'?'':'none';
+  tab=v==='mission'?'mis':'th'; renderTab(); renderBanner(); maybePredict();
+  document.getElementById('studyBtn').textContent=(v==='mission'?'📚 미션·도전':'📚 자유 실험')+' (바꾸기)';
+}
+
+const INFO={
+ volta:{t:'🔋 볼타 전지란?',svg:`<svg viewBox="0 0 520 265"><rect x="150" y="10" width="220" height="40" rx="8" fill="#fff" stroke="#2b3445" stroke-width="2"/><text x="260" y="36" text-anchor="middle" font-size="15" font-weight="700">꼬마전구 · 전압계</text>
+  <polyline points="190,90 190,30 150,30" fill="none" stroke="#2b3445" stroke-width="3"/><polyline points="330,90 330,30 370,30" fill="none" stroke="#2b3445" stroke-width="3"/>
+  <path d="M110 80 V235 H410 V80" fill="none" stroke="#8a97a8" stroke-width="3"/><rect x="113" y="120" width="294" height="112" fill="#dbeefe"/>
+  <rect x="180" y="90" width="20" height="135" fill="#9aa4ae" stroke="#4b5360"/><rect x="320" y="90" width="20" height="135" fill="#c8733a" stroke="#4b5360"/>
+  <text x="150" y="110" text-anchor="end" font-size="14" font-weight="700">아연판 (−)극</text><text x="370" y="110" font-size="14" font-weight="700">구리판 (+)극</text>
+  <circle cx="352" cy="170" r="5" fill="#fff" stroke="#6f93b8"/><circle cx="350" cy="195" r="4" fill="#fff" stroke="#6f93b8"/><circle cx="356" cy="150" r="4" fill="#fff" stroke="#6f93b8"/><text x="372" y="182" font-size="13" fill="#2e5682">H₂</text>
+  <text x="260" y="256" text-anchor="middle" font-size="14" font-weight="700">묽은 황산 (H₂SO₄)</text></svg>`,
+  html:`<h3>개념</h3><p>이온화 경향이 다른 두 금속을 <b>하나의 전해질 용액</b>(묽은 황산)에 넣고 도선으로 연결한 전지예요. 반응성이 큰 아연이 전자를 내놓고, 그 전자가 도선을 따라 구리판으로 가서 용액의 H⁺에게 전달돼요.</p>
+  <ul><li>(−)극 아연판: Zn → Zn²⁺ + 2e⁻ (아연이 녹아요)</li><li>(+)극 구리판: 2H⁺ + 2e⁻ → H₂ (구리판 표면에 기포가 생겨요)</li></ul>
+  <h3>한계: 분극</h3><p>(+)극 구리판에 수소 기체가 달라붙으면 H⁺가 전자를 받기 어려워져 전압이 금방 떨어져요. 이를 막기 위해 산화제(감극제)를 넣기도 해요.</p>
+  <h3>역사</h3><p>1800년 이탈리아의 물리학자 <b>알레산드로 볼타</b>가 아연과 구리 원판 사이에 소금물에 적신 천을 끼워 여러 층으로 쌓은 '볼타 파일'을 발표했어요. 처음으로 전류를 계속 흘려 주는 장치였고, 전압의 단위 <b>볼트(V)</b>는 그의 이름에서 왔어요.</p>`},
+ daniel:{t:'⚗️ 다니엘 전지란?',svg:`<svg viewBox="0 0 520 250"><rect x="150" y="10" width="220" height="40" rx="8" fill="#fff" stroke="#2b3445" stroke-width="2"/><text x="260" y="36" text-anchor="middle" font-size="15" font-weight="700">꼬마전구 · 전압계</text>
+  <polyline points="110,90 110,30 150,30" fill="none" stroke="#2b3445" stroke-width="3"/><polyline points="410,90 410,30 370,30" fill="none" stroke="#2b3445" stroke-width="3"/>
+  <path d="M40 90 V235 H200 V90" fill="none" stroke="#8a97a8" stroke-width="3"/><rect x="43" y="125" width="154" height="107" fill="#e8eef7"/>
+  <path d="M320 90 V235 H480 V90" fill="none" stroke="#8a97a8" stroke-width="3"/><rect x="323" y="125" width="154" height="107" fill="#5d93e6"/>
+  <path d="M175 200 V75 H345 V200" fill="none" stroke="#aeb9c7" stroke-width="16" stroke-linejoin="round"/><path d="M175 200 V75 H345 V200" fill="none" stroke="#eef2f7" stroke-width="11" stroke-linejoin="round"/>
+  <text x="260" y="68" text-anchor="middle" font-size="13" font-weight="700" fill="#55627a">염다리 (KNO₃)</text>
+  <rect x="100" y="90" width="20" height="135" fill="#9aa4ae" stroke="#4b5360"/><rect x="400" y="90" width="20" height="135" fill="#c8733a" stroke="#4b5360"/>
+  <text x="90" y="112" text-anchor="end" font-size="13" font-weight="700">아연판 (−)극</text><text x="430" y="112" font-size="13" font-weight="700">구리판 (+)극</text>
+  <text x="120" y="226" text-anchor="middle" font-size="13" font-weight="700">ZnSO₄ 수용액</text><text x="400" y="226" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">CuSO₄ 수용액</text></svg>`,
+  html:`<h3>개념</h3><p>아연판은 ZnSO₄ 수용액에, 구리판은 CuSO₄ 수용액에 <b>각각 따로</b> 넣고, 두 용액을 <b>염다리</b>로 이은 전지예요. 아연이 녹으며 내놓은 전자가 도선을 따라 구리판으로 가고, 거기서 Cu²⁺가 전자를 받아 구리로 석출돼요.</p>
+  <ul><li>(−)극 아연판: Zn → Zn²⁺ + 2e⁻ (아연판이 얇아져요)</li><li>(+)극 구리판: Cu²⁺ + 2e⁻ → Cu (구리판이 두꺼워지고 파란색이 옅어져요)</li><li>염다리: 이온이 이동해서 두 용액의 전하 균형을 맞춰요.</li></ul>
+  <p>(+)극에서 기체가 생기지 않아 분극이 일어나지 않으므로, 볼타 전지보다 전압(약 1.1 V)이 오래 유지돼요.</p>
+  <h3>역사</h3><p>1836년 영국의 화학자 <b>존 프레더릭 대니얼</b>이 볼타 전지의 분극 문제를 해결하려고 고안했어요. 처음에는 염다리 대신 이온만 통과시키는 초벌구이 그릇(다공성 칸막이)을 썼어요. 전압이 안정적이어서 19세기 전신(전보) 장치의 전원으로 널리 쓰였어요.</p>`}
+};
+document.getElementById('studyOv').addEventListener('click',e=>{ const b=e.target.closest('[data-info]'); if(!b) return; e.stopPropagation(); const d=INFO[b.dataset.info];
+  document.getElementById('infoBox').innerHTML=`<div class="info"><h2>${d.t}</h2>${d.svg}${d.html}</div><button class="btn go" data-infoclose="1">닫기</button>`;
+  document.getElementById('infoOv').classList.remove('hide'); });
+document.getElementById('infoOv').addEventListener('click',e=>{ if(e.target.closest('[data-infoclose]')||e.target.id==='infoOv') document.getElementById('infoOv').classList.add('hide'); });
+const pre={mode:null,study:null};
+function syncStart(){ document.querySelectorAll('[data-pickmode]').forEach(b=>b.classList.toggle('sel',b.dataset.pickmode===pre.mode));
+  document.querySelectorAll('[data-study]').forEach(b=>b.classList.toggle('sel',b.dataset.study===pre.study));
+  document.getElementById('startBtn').disabled=!(pre.mode&&pre.study); }
+document.getElementById('studyOv').addEventListener('click',e=>{
+  const m=e.target.closest('[data-pickmode]'); if(m){ pre.mode=m.dataset.pickmode; syncStart(); }
+  const st=e.target.closest('[data-study]'); if(st){ pre.study=st.dataset.study; syncStart(); }
+  if(e.target.closest('#startBtn')&&pre.mode&&pre.study){
+    if(pre.mode!==S.mode) switchMode(pre.mode);
+    applyStudy(pre.study);
+  }
+});
+document.getElementById('studyBtn').onclick=()=>{ pre.mode=S.mode; pre.study=S.study; syncStart(); document.getElementById('studyOv').classList.remove('hide'); };
+resetDyn(); renderCtrl(); renderTab();
+let last=performance.now(), slow=0, RUN=false;
+function frame(now){
+  const rdt=Math.min(0.1,(now-last)/1000); last=now;
+  const run=S.running&&!popOpen()&&document.getElementById('studyOv').classList.contains('hide'); RUN=run;
+  if(run&&ready()){ const sim=rdt*S.speed, n=Math.min(400,Math.max(1,Math.ceil(sim/0.25))), h=sim/n; for(let k=0;k<n;k++) step(h); }
+  O=compute();
+  if(ready()&&S.volt&&O.Vread!=null){ const v=Math.abs(O.Vread); D.vmax=Math.max(D.vmax||0,v); if(D.vShake!=null) D.vShakeMax=Math.max(D.vShakeMax,v); if(D.vDep!=null) D.vDepMax=Math.max(D.vDepMax,v); }
+  if(run&&ready()){ pushHist(); autoTick(rdt); }
+  microUpdate(run?rdt:0);
+  drawMacro(); drawMicro(); drawGraph(); updateMeters();
+  slow+=rdt; if(slow>0.4){slow=0;checkMissions();if(tab==='th')renderTab();}
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

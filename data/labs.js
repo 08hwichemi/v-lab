@@ -124,6 +124,45 @@ window.VLAB = {
       tags: ["VSEPR", "전자쌍 반발", "분자 모양", "결합각", "극성", "3D"],
       thumbnail: "assets/img/thumbs/vsepr-lab/0.png",
       added: "2026-10-29"
+    },
+    {
+      id: "metal-ionization",
+      subject: "chemistry",
+      title: "금속의 이온화 경향 실험실",
+      summary: "여러 금속을 여러 수용액·묽은 염산에 넣어 반응 여부(금속 석출, 기포, 용액 색 변화)를 관찰하고, 전자저울로 질량 변화를 재고, 결과표와 순서 정하기로 금속의 이온화 경향 순서를 스스로 찾아냅니다. 원자·이온 수준 돋보기, 이온 수 그래프, 반응식 해석, 미션이 들어 있습니다.",
+      file: "labs/chemistry/metal-ionization.html",
+      author: "홍채린",
+      grade: ["고1", "고2"],
+      unit: "화학Ⅰ · 산화 환원 반응",
+      tags: ["이온화 경향", "산화 환원", "금속의 반응성", "석출", "실험 노트"],
+      thumbnail: "assets/img/thumbs/metal-ionization/0.png",
+      added: "2026-11-02"
+    },
+    {
+      id: "chemical-cell",
+      subject: "chemistry",
+      title: "화학 전지 실험실",
+      summary: "볼타 전지와 다니엘 전지를 직접 조립합니다. 전극 금속·전해질·농도·염다리·저항을 고르고 전압계·전류계를 읽으며, 금속판 표면 확대 화면과 전압·전류 그래프로 산화 전극과 환원 전극에서 일어나는 일을 확인합니다. 미션·확인 문제와 전기화학 개념 정리가 들어 있습니다.",
+      file: "labs/chemistry/chemical-cell.html",
+      author: "홍채린",
+      grade: ["고1", "고2"],
+      unit: "화학Ⅰ · 산화 환원 반응 · 화학 전지",
+      tags: ["화학 전지", "볼타 전지", "다니엘 전지", "염다리", "표준 환원 전위", "분극"],
+      thumbnail: "assets/img/thumbs/chemical-cell/0.png",
+      added: "2026-11-02"
+    },
+    {
+      id: "constellation",
+      subject: "earth",
+      title: "별자리 탐험",
+      summary: "실제 별 목록으로 그린 밤하늘 위에 별자리 틀을 옮기고 돌려 제자리를 찾습니다. 계절별·북쪽·남반구 하늘과 황도 13궁, 대표 별·별무리·은하·성단·행성 정보, 내 위치와 날짜·시간의 진짜 하늘을 보여 주는 '오늘 밤' 모드, 별자리 이야기와 미션이 들어 있습니다.",
+      file: "labs/earth/constellation.html",
+      author: "홍채린",
+      grade: ["고1", "고2"],
+      unit: "지구과학Ⅰ · 별과 우주",
+      tags: ["별자리", "계절별 별자리", "황도 12궁", "천구", "밤하늘 관측"],
+      thumbnail: "assets/img/thumbs/constellation/0.png",
+      added: "2026-11-02"
     }
   ]
 };

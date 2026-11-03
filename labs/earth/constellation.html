@@ -4,7 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>별자리 탐험 · V-Lab</title>
-<link rel="stylesheet" href="../../assets/css/lab-theme.css">
+<style>
+/* V-Lab 공용 글꼴·색 토큰만 가져옴 (공용 클래스는 이 파일의 클래스 이름과 겹치므로 lab-theme.css 전체는 쓰지 않음) */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+:root{--font: 'IBM Plex Sans KR', 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; --bg: #ffffff; --panel: #ffffff; --panel-2: #F7F8FA; --line: #E6E8EC; --line-2: #F0F1F3; --text: #111111; --text-2: #3F4652; --muted: #6B7280; --accent: #3182F6; --accent-soft: #EAF2FF; --ok: #12A66B; --warn: #F5A623; --err: #E5484D; --radius: 12px; --radius-sm: 8px;}
+</style>
 <style>
 :root{
   --bg:#050816; --glass:rgba(12,20,48,.78); --glass2:rgba(20,32,70,.85); --line:rgba(150,180,255,.18);
@@ -106,7 +110,8 @@ body.nopanel #pOpen{display:block}
 .rb.hint{background:rgba(255,212,121,.16)}
 
 /* banner */
-#banner{position:fixed;left:50%;top:84px;transform:translateX(-50%);z-index:14;border-radius:14px;padding:10px 14px;display:none;align-items:center;gap:10px;max-width:min(560px,calc(100vw - 380px))}
+#banner{position:fixed;left:10px;right:360px;top:84px;margin:0 auto;width:max-content;z-index:14;border-radius:14px;padding:10px 14px;display:none;align-items:center;gap:10px;max-width:min(560px,calc(100vw - 390px))}
+body.nopanel #banner{right:10px;max-width:min(560px,calc(100vw - 20px))}
 #banner.show{display:flex}
 #banner .bt{font-size:13.5px;line-height:1.55;flex:1 1 auto;min-width:0;word-break:keep-all}
 #banner .bbtn{display:flex;gap:6px;flex:none}
@@ -195,7 +200,7 @@ body.red #redlay{display:block}
   body.nopanel #tbar{bottom:14px}
   #tbar .tname{display:none}
   .rb{min-width:38px;height:38px;font-size:15px;padding:0 6px}
-  #banner{left:8px;right:8px;transform:none;max-width:none;top:148px;flex-direction:column;align-items:stretch;gap:8px;padding:12px 14px}
+  #banner{left:8px;right:8px;transform:none;width:auto;max-width:none;top:148px;flex-direction:column;align-items:stretch;gap:8px;padding:12px 14px}
   #banner .bbtn{justify-content:flex-end}
   #zoom{display:none}
   #mini-toast{bottom:calc(46vh + 66px)}
@@ -206,6 +211,7 @@ body.red #redlay{display:block}
   .nsun{font-size:11px;line-height:1.45}
   body.tonight #banner{bottom:calc(46vh + 10px)}
   body.tonight.nopanel #banner{bottom:14px}
+  body.nopanel #banner{right:8px;max-width:none}
   body.nopanel #mini-toast{bottom:76px}
   .card{padding:18px 16px 14px}
   #toast{font-size:14px;padding:11px 16px}
@@ -334,7 +340,7 @@ const DATA = {"stars":[[0.269,-48.81,5.71,0.91],[0.334,-50.337,5.53,1.61],[0.399
 <script>
 // ===== 콘텐츠 데이터: {용어} 또는 {표시|용어} 는 용어 풀이 툴팁으로 바뀝니다 =====
 const NAME_FIX = { Cyg: '백조자리', Her: '헤르쿨레스자리' };
-const NAME_NOTE = { Cyg: '공식 이름은 고니자리예요.', Her: '허큘리스자리라고도 해요.', Cen: '학명 Centaurus · 신화 속 반인반마는 켄타우로스' };
+const NAME_NOTE = { Cyg: '천문연구원 표기는 고니자리, 교과서·천문학회 용어집은 백조자리예요.', Her: '허큘리스자리라고도 해요.', Cen: '학명 Centaurus · 신화 속 반인반마는 켄타우로스' };
 
 const THEMES = [
   { id: 'tonight', ko: '오늘 밤', sky: '오늘 밤 하늘', en: 'Tonight', icon: '🌙', months: '지금 내 위치에서 보이는 하늘' },
@@ -399,7 +405,7 @@ const CON_TEXT = {
   // ---------------- 겨울 ----------------
   Tau: { myth: '제우스가 페니키아의 공주 <b>에우로페</b>에게 다가가려고 변신한 <b>하얀 황소</b>예요. 에우로페가 황소 등에 올라타자 황소는 바다를 건너 크레타섬까지 헤엄쳐 갔어요. 그녀의 이름은 오늘날 유럽(Europe)의 어원이 되었어요.', east: '어깨 부분의 {플레이아데스 성단}을 우리 조상들은 <b>좀생이별</b>이라 부르며, 좀생이별과 달의 위치로 한 해 농사를 점쳤어요.', tip: '붉은 알데바란은 황소의 눈이고, 얼굴의 V자는 히아데스 {성단}이에요.' },
   Gem: { myth: '스파르타의 쌍둥이 형제 <b>카스토르</b>와 <b>폴룩스</b>예요. 폴룩스는 제우스의 아들이라 죽지 않는 몸이었고, 카스토르는 인간이었어요. 전투에서 카스토르가 죽자 폴룩스는 자신의 영원한 생명을 형과 나누게 해 달라고 빌었고, 제우스는 둘을 나란히 하늘에 올려 주었어요.', tip: '나란히 빛나는 두 별의 머리를 찾으세요. 흰빛이 카스토르, 주황빛이 조금 더 밝은 폴룩스예요.' },
-  Ori: { myth: '바다의 신 포세이돈의 아들인 거인 <b>사냥꾼 오리온</b>이에요. 모든 짐승을 사냥하겠다고 자랑하다가 전갈에게 쏘여 죽었어요. 그래서 오리온은 지금도 전갈자리를 피해 하늘 반대편에 있어요.', east: '허리띠의 세 별을 우리 조상들은 <b>삼태성</b> 또는 삼성(參星)이라 불렀어요.', tip: '허리띠의 세 별이 나란히 놓인 커다란 모래시계 모양이에요. 붉은 베텔게우스와 푸른 리겔을 비교해 보세요. 칼 부분에 오리온 대{성운}(M42)이 있어요.' },
+  Ori: { myth: '바다의 신 포세이돈의 아들인 거인 <b>사냥꾼 오리온</b>이에요. 모든 짐승을 사냥하겠다고 자랑하다가 전갈에게 쏘여 죽었어요. 그래서 오리온은 지금도 전갈자리를 피해 하늘 반대편에 있어요.', east: '허리띠의 세 별을 우리 조상들은 <b>삼성(參星)</b>이라 불렀어요. 흔히 ‘삼태성’이라고도 하지만, 원래 삼태성(三台星)은 큰곰자리 쪽의 별들이에요.', tip: '허리띠의 세 별이 나란히 놓인 커다란 모래시계 모양이에요. 붉은 베텔게우스와 푸른 리겔을 비교해 보세요. 칼 부분에 오리온 대{성운}(M42)이 있어요.' },
   CMa: { myth: '사냥꾼 오리온을 따라다니는 <b>큰 사냥개</b>예요. 어떤 사냥감도 반드시 잡는다는 개 라일랍스라는 이야기도 있어요.', east: '고대 이집트에서는 시리우스가 새벽 동쪽 하늘에 처음 보이는 무렵 나일강이 범람했기 때문에, 이 별을 달력의 기준으로 삼았어요.', tip: '밤하늘에서 가장 밝은 별 시리우스가 개의 코 부분에 있어요. 오리온 허리띠를 왼쪽 아래로 이어 보세요.' },
   CMi: { myth: '오리온의 <b>작은 사냥개</b>예요. 큰개자리와 함께 주인을 따라 하늘을 달리고 있어요.', tip: '1등성 프로키온과 그 옆의 별 하나, 단 두 개의 별로 이루어진 아주 단순한 별자리예요.' },
   Aur: { myth: '다리가 불편했던 아테네의 왕 <b>에릭토니오스</b>가 쉽게 다니려고 처음으로 <b>마차</b>를 발명했고, 이를 칭찬한 제우스가 그를 하늘에 올렸어요. 품에 안은 염소는 아기 제우스에게 젖을 먹인 염소 <b>아말테이아</b>예요.', tip: '오각형 모양이에요. 노란 1등성 카펠라는 라틴어로 ‘작은 암염소’라는 뜻이에요.' },
@@ -472,7 +478,7 @@ const STARS = [
   { hip: 24436, ko: '리겔', en: 'Rigel', con: 'Ori', theme: 'winter', origin: '아랍어 ‘거인의 왼발’에서 왔어요.', temp: 12100, color: '청백색', spec: 'B8 Ia', mag: 0.13, dist: '약 860', fact: '푸르게 빛나는 {초거성}이에요. 붉은 베텔게우스와 나란히 있어서 {표면 온도}에 따라 별의 색이 다르다는 것을 한눈에 비교할 수 있어요.' },
   { hip: 37279, ko: '프로키온', en: 'Procyon', con: 'CMi', theme: 'winter', origin: '그리스어 ‘개보다 앞서는 자’로, 시리우스(개의 별)보다 먼저 떠올라서 붙은 이름이에요.', temp: 6530, color: '노란빛 흰색', spec: 'F5 IV–V', mag: 0.34, dist: '11.5', fact: '{겨울철 대삼각형}의 한 꼭짓점이에요. 시리우스처럼 {백색왜성} 동반성이 있어요.' },
   { hip: 21421, ko: '알데바란', en: 'Aldebaran', con: 'Tau', theme: 'winter', origin: '아랍어 ‘뒤따르는 자’로, {플레이아데스 성단}을 뒤따라 떠오르기 때문이에요.', temp: 3900, color: '주황색', spec: 'K5 III', mag: 0.86, dist: '65', fact: '황소의 붉은 눈에 해당하는 {거성}이에요. 히아데스 성단 앞에 겹쳐 보이지만, 실제로는 성단보다 훨씬 가까이 있어요.' },
-  { hip: 24608, ko: '카펠라', en: 'Capella', con: 'Aur', theme: 'winter', origin: '라틴어 ‘작은 암염소’예요. 아기 제우스에게 젖을 먹인 염소 아말테이아를 뜻해요.', temp: 5000, color: '노란색', spec: 'G3 III + G8 III', mag: 0.08, dist: '43', fact: '노란 {거성} 두 개가 서로 도는 {쌍성}이에요. 색이 태양과 비슷해요.' },
+  { hip: 24608, ko: '카펠라', en: 'Capella', con: 'Aur', theme: 'winter', origin: '라틴어 ‘작은 암염소’예요. 아기 제우스에게 젖을 먹인 염소 아말테이아를 뜻해요.', temp: 5000, color: '노란색', spec: 'K0 III + G1 III', mag: 0.08, dist: '43', fact: '노란 {거성} 두 개가 서로 도는 {쌍성}이에요. 색이 태양과 비슷해요.' },
   { hip: 36850, ko: '카스토르', en: 'Castor', con: 'Gem', theme: 'winter', origin: '쌍둥이 형제 중 인간이었던 형 카스토르의 이름이에요.', temp: 10300, color: '흰색', spec: 'A1V', mag: 1.58, dist: '51', fact: '하나처럼 보이지만 실제로는 별 6개가 서로 묶여 도는 6중성계예요.' },
   { hip: 37826, ko: '폴룩스', en: 'Pollux', con: 'Gem', theme: 'winter', origin: '쌍둥이 형제 중 죽지 않는 동생 폴리데우케스(폴룩스)의 이름이에요.', temp: 4670, color: '주황색', spec: 'K0 III', mag: 1.14, dist: '34', fact: '쌍둥이의 동생인데 형 카스토르보다 더 밝아요. 주변을 도는 {외계행성}이 발견되었어요.' },
   { hip: 49669, ko: '레굴루스', en: 'Regulus', con: 'Leo', theme: 'spring', origin: '라틴어 ‘작은 왕’이에요. 사자의 심장에 있는 왕의 별이에요.', temp: 12500, color: '청백색', spec: 'B8 IVn', mag: 1.35, dist: '79', fact: '{황도} 거의 바로 위에 있는 1등성이라 달이 자주 이 별을 가려요. 매우 빠르게 {자전}해서 납작한 모양이에요.' },
@@ -496,15 +502,15 @@ const ASTERISMS = [
   { id: 'spring_tri', theme: 'spring', ko: '봄철 대삼각형', en: 'Spring Triangle', hips: [69673, 65474, 57632], path: [0, 1, 2, 0], how: '아크투루스, 스피카, 데네볼라를 차례로 클릭하세요.', info: '목동자리 아크투루스, 처녀자리 스피카, 사자자리 데네볼라가 만드는 커다란 정삼각형이에요.' },
   { id: 'spring_curve', theme: 'spring', ko: '봄철 대곡선', en: 'Spring Arc', hips: [62956, 65378, 67301, 69673, 65474], path: [0, 1, 2, 3, 4], curve: true, how: '북두칠성 손잡이의 세 별(알리오스·미자르·알카이드), 아크투루스, 스피카를 클릭하세요.', info: '북두칠성의 손잡이 곡선을 그대로 이어가면 아크투루스를 지나 스피카에 닿아요. “Arc to Arcturus, spike to Spica”라고 외워요.' },
   { id: 'summer_tri', theme: 'summer', ko: '여름철 대삼각형', en: 'Summer Triangle', hips: [91262, 102098, 97649], path: [0, 1, 2, 0], how: '베가, 데네브, 알타이르를 클릭하세요.', info: '거문고자리 베가(직녀), 백조자리 데네브, 독수리자리 알타이르(견우)가 만드는 삼각형이에요. 견우와 직녀 사이로 은하수가 흘러요.' },
-  { id: 'autumn_sq', theme: 'autumn', ko: '가을철 대사각형', en: 'Great Square of Pegasus', hips: [677, 113881, 113963, 1067], path: [0, 1, 2, 3, 0], how: '알페라츠, 쉐아트, 마르카브, 알게니브를 클릭하세요.', info: '페가수스의 몸통을 이루는 큰 사각형이에요. 가을 하늘에는 밝은 별이 적어서, 이 사각형이 별자리를 찾는 길잡이가 돼요.' },
+  { id: 'autumn_sq', theme: 'autumn', ko: '가을철 대사각형', en: 'Great Square of Pegasus', hips: [677, 113881, 113963, 1067], path: [0, 1, 2, 3, 0], how: '알페라츠, 셰아트, 마르카브, 알게니브를 클릭하세요.', info: '페가수스의 몸통을 이루는 큰 사각형이에요. 가을 하늘에는 밝은 별이 적어서, 이 사각형이 별자리를 찾는 길잡이가 돼요.' },
   { id: 'winter_tri', theme: 'winter', ko: '겨울철 대삼각형', en: 'Winter Triangle', hips: [27989, 32349, 37279], path: [0, 1, 2, 0], how: '베텔게우스, 시리우스, 프로키온을 클릭하세요.', info: '오리온자리 베텔게우스, 큰개자리 시리우스, 작은개자리 프로키온이 만드는 거의 정삼각형이에요.' },
   { id: 'winter_hex', theme: 'winter', ko: '겨울철 대육각형', en: 'Winter Hexagon', hips: [32349, 24436, 21421, 24608, 37826, 37279], path: [0, 1, 2, 3, 4, 5, 0], how: '시리우스, 리겔, 알데바란, 카펠라, 폴룩스, 프로키온을 클릭하세요.', info: '겨울 하늘의 1등성 여섯 개가 만드는 커다란 육각형이에요. 가운데에 베텔게우스가 있어요.' },
   { id: 'big_dipper', theme: 'north', ko: '북두칠성', en: 'Big Dipper', hips: [54061, 53910, 58001, 59774, 62956, 65378, 67301], path: [6, 5, 4, 3, 2, 1, 0, 3], how: '국자 모양의 일곱 별을 모두 클릭하세요.', info: '큰곰자리의 엉덩이와 꼬리에 해당하는 일곱 별이에요. 별자리가 아니라 {별무리}예요. 손잡이 가운데 미자르 옆에는 작은 별 알코르가 붙어 있어 옛날 군인들의 시력 검사에 쓰였대요.' },
   { id: 'find_polaris', theme: 'north', ko: '북극성 찾기', en: 'Finding Polaris', hips: [53910, 54061, 11767], path: [0, 1, 2], dashed: true, how: '국자 끝의 두 별 메라크와 두베, 그리고 북극성을 클릭하세요.', info: '북두칠성 국자 끝의 두 별(메라크→두베)을 잇고 그 거리의 약 5배를 늘이면 북극성이 나와요. 그래서 두 별을 {지극성}이라고 불러요. 북두칠성이 낮게 뜨는 가을·겨울에는 ‘카시오페이아로 북극성 찾기’를 써 보세요.' },
-  { id: 'cas_polaris', theme: 'north', ko: '카시오페이아로 북극성 찾기', en: 'Polaris via Cassiopeia', hips: [746, 3179, 4427, 6686, 8886, 11767], cas: true, how: 'W자의 다섯 별(카프·쉐다르·나비·루크바·세긴)과 북극성을 클릭하세요.', info: 'W자의 바깥쪽 두 선(카프→쉐다르, 세긴→루크바)을 길게 늘이면 한 점에서 만나요. 그 점과 W의 가운데 별(나비)을 이은 선을 약 5배 늘이면 북극성이 나와요. 북두칠성이 지평선 가까이 낮게 있는 <b>가을·겨울 저녁</b>에는 높이 떠 있는 카시오페이아로 북극성을 찾는 것이 편해요.' },
+  { id: 'cas_polaris', theme: 'north', ko: '카시오페이아로 북극성 찾기', en: 'Polaris via Cassiopeia', hips: [746, 3179, 4427, 6686, 8886, 11767], cas: true, how: 'W자의 다섯 별(카프·셰다르·나비·루크바·세긴)과 북극성을 클릭하세요.', info: 'W자의 바깥쪽 두 선(카프→셰다르, 세긴→루크바)을 길게 늘이면 한 점에서 만나요. 그 점과 W의 가운데 별(나비)을 이은 선을 약 5배 늘이면 북극성이 나와요. 북두칠성이 지평선 가까이 낮게 있는 <b>가을·겨울 저녁</b>에는 높이 떠 있는 카시오페이아로 북극성을 찾는 것이 편해요.' },
   { id: 'find_south', theme: 'south', ko: '남쪽 찾기', en: 'Finding South', hips: [61084, 60718, 71683, 68702], path: [0, 1], pointer: [2, 3], dashed: true, south: true, how: '남십자자리의 가크룩스와 아크룩스, 그리고 알파·베타 센타우리를 클릭하세요.', info: '남반구에는 북극성 같은 별이 없어요. 대신 남십자의 긴 축(가크룩스→아크룩스)을 약 4.5배 늘이면 {천구의 남극} 근처에 닿아요. 옆의 알파·베타 센타우리는 남십자를 가리키는 ‘지시별’이에요.' }
 ];
-const EXTRA_STAR_NAMES = { 746: '카프', 3179: '쉐다르', 4427: '나비', 6686: '루크바', 8886: '세긴', 54061: '두베', 53910: '메라크', 58001: '페크다', 59774: '메그레즈', 62956: '알리오스', 65378: '미자르', 67301: '알카이드', 113963: '마르카브', 113881: '쉐아트', 1067: '알게니브', 61084: '가크룩스', 68702: '하다르(베타 센타우리)' };
+const EXTRA_STAR_NAMES = { 746: '카프', 3179: '셰다르', 4427: '나비', 6686: '루크바', 8886: '세긴', 54061: '두베', 53910: '메라크', 58001: '페크다', 59774: '메그레즈', 62956: '알리오스', 65378: '미자르', 67301: '알카이드', 113963: '마르카브', 113881: '셰아트', 1067: '알게니브', 61084: '가크룩스', 68702: '하다르(베타 센타우리)' };
 
 const PLANETS = [
   { id: 'mercury', clue: '수성은 태양에 가장 가까워서 해 질 무렵이나 해 뜨기 전 지평선 가까이에서만 잠깐 보여요. 황도선 위, 태양 근처를 살펴보세요.', ko: '수성', en: 'Mercury', color: '#c9b9a6', size: 2.2, mag: '-0.4 ~ 1', naked: true, dia: '4,879 km (지구의 0.38배)', period: '88일', moons: '0개', name: '동양에서는 {오행} 중 물(水)의 별, 서양에서는 발 빠른 전령의 신 메르쿠리우스예요. 하늘에서 가장 빨리 움직이는 행성이라 붙은 이름이에요.', fact: '태양에 가장 가까운 {내행성}이라 해 뜨기 직전이나 해 진 직후 지평선 근처에서만 잠깐 보여요.' },
@@ -689,7 +695,7 @@ const CON = {};
 for (const id in DATA.cons) {
   const d = DATA.cons[id];
   const vs = [...new Set(d.seg.flat())];
-  CON[id] = { id, ko: NAME_FIX[id] || d.ko, en: d.en, map: d.map, base: !!d.base, seg: d.seg, verts: vs, text: CON_TEXT[id] || {} };
+  CON[id] = { id, ko: NAME_FIX[id] || d.ko, en: id === 'Ser' ? 'Serpens' : d.en, map: d.map, base: !!d.base, seg: d.seg, verts: vs, text: CON_TEXT[id] || {} };
 }
 const ALL_IDS = Object.keys(CON);
 const SEOUL_LIMIT = -(90 - 37.57);
@@ -788,6 +794,14 @@ try {
     S.hintsBy = Object.assign({ easy: {}, hard: {} }, sv.hintsBy || (sv.hints ? { [sv.diff || 'easy']: sv.hints } : {}));
   }
 } catch (e) { }
+// 저장 데이터가 손상돼 있어도 앱이 멈추지 않도록 값 검사
+if (!['easy', 'hard'].includes(S.diff)) S.diff = 'easy';
+if (S.mode !== 'all') S.mode = 'base';
+if (!S.fold || typeof S.fold !== 'object') S.fold = {};
+for (const k of ['volM', 'volS']) S[k] = Number.isFinite(+S[k]) ? clamp(+S[k], 0, 100) : (k === 'volM' ? 70 : 80);
+if (!S.prog || typeof S.prog !== 'object') S.prog = { easy: EMPTY(), hard: EMPTY() };
+if (!S.hintsBy || typeof S.hintsBy !== 'object') S.hintsBy = { easy: {}, hard: {} };
+for (const d of ['easy', 'hard']) { if (!S.prog[d] || typeof S.prog[d] !== 'object') S.prog[d] = EMPTY(); for (const k in EMPTY()) if (!S.prog[d][k] || typeof S.prog[d][k] !== 'object') S.prog[d][k] = {}; if (!S.hintsBy[d] || typeof S.hintsBy[d] !== 'object') S.hintsBy[d] = {}; }
 function useDiff() { S.found = S.prog[S.diff]; S.hints = S.hintsBy[S.diff]; }
 useDiff();
 function save() {
@@ -883,12 +897,12 @@ for (const T of THEMES) {
 // ----- 오늘 밤 하늘 -----
 const NIGHT = { city: 0, lat: CITIES[0].lat, lon: CITIES[0].lon, day: null, min: 180 };
 {
-  const n = new Date(), h = n.getHours();
-  const ev = new Date(n); if (h < 6) ev.setDate(ev.getDate() - 1);
-  NIGHT.day = `${ev.getFullYear()}-${String(ev.getMonth() + 1).padStart(2, '0')}-${String(ev.getDate()).padStart(2, '0')}`;
-  NIGHT.min = (h >= 18 || h < 6) ? Math.round((((h + 24 - 18) % 24) * 60 + n.getMinutes()) / 10) * 10 : 180;
+  const n = new Date(Date.now() + 9 * 3600e3), h = n.getUTCHours();   // 한국 표준시
+  const ev = new Date(n); if (h < 6) ev.setUTCDate(ev.getUTCDate() - 1);
+  NIGHT.day = `${ev.getUTCFullYear()}-${String(ev.getUTCMonth() + 1).padStart(2, '0')}-${String(ev.getUTCDate()).padStart(2, '0')}`;
+  NIGHT.min = (h >= 18 || h < 6) ? Math.round((((h + 24 - 18) % 24) * 60 + n.getUTCMinutes()) / 10) * 10 : 180;
 }
-function nightDate() { const [y, mo, d] = NIGHT.day.split('-').map(Number); return new Date(y, mo - 1, d, 18, NIGHT.min); }
+function nightDate() { const [y, mo, d] = NIGHT.day.split('-').map(Number); return new Date(Date.UTC(y, mo - 1, d, 18 - 9, NIGHT.min)); }   // KST 18:00 + min (기기 시간대와 무관)
 MAPS.tonight = { id: 'tonight', clip: 90 };
 function updateTonight() {
   const m = MAPS.tonight, dt = nightDate();
@@ -1664,7 +1678,7 @@ cv.addEventListener('wheel', e => {
   zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0015)));
 }, { passive: false });
 addEventListener('keydown', e => {
-  if (e.target.tagName === 'INPUT') return;
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
   if (e.key === 'Escape') { if ($('#modal').classList.contains('show')) closeCard(); else if (tpl) clearTemplate(); else clearMissions(); return; }
   if (!tpl) return;
   const k = e.key.toLowerCase(), st = e.shiftKey ? 10 : 2, mv = 3 / cam.s * (e.shiftKey ? 5 : 1);
@@ -1695,6 +1709,7 @@ function setTheme(id) {
   if (MAP.id === id) return;
   camSaved[MAP.id] = { ...cam };
   MAP = MAPS[id]; S.theme = id; save();
+  if (id !== 'tonight') document.body.classList.remove('red');
   cam = camSaved[id] ? { ...camSaved[id] } : homeCam(MAP); camAnim = null;
   tpl = null; $('#tbar').classList.remove('show'); clearMissions();
   syncNight(); renderThemes(); renderPanel();
@@ -1729,7 +1744,7 @@ function renderThemes() {
   requestAnimationFrame(updateThemeArrows);
   $('#themes').querySelectorAll('.tbtn').forEach(b => b.onclick = () => {
     if (b.dataset.th === MAP.id) { togglePanel(); return; } // 지금 하늘 탭을 한 번 더 누르면 목록이 올라오거나 내려감
-    setTheme(b.dataset.th); togglePanel(true);
+    setTheme(b.dataset.th); togglePanel(!(mobile() && b.dataset.th === 'tonight'));
   });
 }
 document.querySelectorAll('.ptab').forEach(b => b.onclick = () => { S.tab = b.dataset.tab; renderPanel(); $('#pbody').scrollTop = 0; });
@@ -1753,6 +1768,7 @@ function renderPanel() {
       const part = MAP.partial.filter(c => S.mode === 'all' || CON[c].base);
       if (part.length) h += `<div class="sec">🌄 지평선 근처 · 일부만 보여요</div><div class="note">${part.map(c => CON[c].ko).join(', ')}</div>`;
       if (MAGLIM < 9) h += `<div class="note">🌆 하늘이 아직 밝아서 어두운 별은 보이지 않아요. 시간을 늦춰 보세요.</div>`;
+      if (MAP.sunAlt > -6) h = h.replace(/class="row /g, 'style="opacity:.45;pointer-events:none" class="row ').replace(/(<div class="prog">.*?<\/div>)/, '$1<div class="note" style="color:#ffc7a8">🌞 아직 해가 떠 있거나 하늘이 밝아요. 시간을 늦추면 별자리를 찾을 수 있어요.</div>');
     }
   } else if (S.tab === 'star') {
     const l = STARS.filter(s => MAP.id === 'tonight' ? MAP.vis[s.i] : s.theme === MAP.id), n = l.filter(s => S.found.s[s.hip]).length;
@@ -1912,7 +1928,7 @@ function togglePanelRaw(on) {
 }
 
 // ================= 오늘 밤 조절 막대 =================
-function fmtNight() { const d = MAPS.tonight.date; return `${d.getMonth() + 1}월 ${d.getDate()}일 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; }
+function fmtNight() { const [y, mo, d] = NIGHT.day.split('-').map(Number); const k = new Date(Date.UTC(y, mo - 1, d, 18, NIGHT.min)); return `${k.getUTCMonth() + 1}월 ${k.getUTCDate()}일 ${String(k.getUTCHours()).padStart(2, '0')}:${String(k.getUTCMinutes()).padStart(2, '0')}`; }   // KST 벽시계
 function sunStatus(m) {
   const a = m.sunAlt;
   if (a > 0) return '☀️ 해가 떠 있는 낮 시간이라 별을 볼 수 없어요';
@@ -1952,9 +1968,9 @@ $('#nCity').onchange = e => {
 $('#nDate').onchange = e => { if (e.target.value) { NIGHT.day = e.target.value; scheduleNight(); } };
 $('#nTime').oninput = e => { NIGHT.min = +e.target.value; $('#nClock').textContent = `${String((18 + Math.floor(NIGHT.min / 60)) % 24).padStart(2, '0')}:${String(NIGHT.min % 60).padStart(2, '0')}`; scheduleNight(); };
 $('#nNow').onclick = () => {
-  const n = new Date(), h = n.getHours(), ev = new Date(n); if (h < 6) ev.setDate(ev.getDate() - 1);
-  NIGHT.day = `${ev.getFullYear()}-${String(ev.getMonth() + 1).padStart(2, '0')}-${String(ev.getDate()).padStart(2, '0')}`;
-  if (h >= 18 || h < 6) NIGHT.min = ((h + 6) % 24) * 60 + Math.floor(n.getMinutes() / 10) * 10;
+  const n = new Date(Date.now() + 9 * 3600e3), h = n.getUTCHours(), ev = new Date(n); if (h < 6) ev.setUTCDate(ev.getUTCDate() - 1);   // 한국 표준시
+  NIGHT.day = `${ev.getUTCFullYear()}-${String(ev.getUTCMonth() + 1).padStart(2, '0')}-${String(ev.getUTCDate()).padStart(2, '0')}`;
+  if (h >= 18 || h < 6) NIGHT.min = ((h + 6) % 24) * 60 + Math.floor(n.getUTCMinutes() / 10) * 10;
   else { NIGHT.min = 180; miniToast('지금은 낮이라 오늘 밤 9시로 맞췄어요'); }
   scheduleNight();
 };
@@ -1981,7 +1997,7 @@ function starCard(s, fresh) {
   return `<div style="font-size:13px;color:var(--gold)">${fresh ? '✦ 대표 별을 찾았어요' : '📖 이미 찾은 별이에요'}</div><h2><span class="swatch" style="width:16px;height:16px;color:rgb(${c});background:rgb(${c})"></span>${s.ko}</h2><div class="sub">${s.en} · ${CON[s.con].ko}</div>
   <div class="box"><h4>🏷️ 이름의 유래</h4><p>${s.origin}</p></div>
   <div class="facts"><div><small>{표면 온도}</small>약 ${s.temp.toLocaleString()} K<br><small style="margin:2px 0 0">≈ ${(s.temp - 273).toLocaleString()} °C</small></div><div><small>색</small><span class="swatch" style="color:rgb(${c});background:rgb(${c})"></span>${s.color}</div><div><small>{겉보기 등급}</small>${s.mag}등급</div><div><small>거리</small>${s.dist} {광년}</div><div><small>{분광형}</small>${s.spec}</div><div><small>별자리</small>${CON[s.con].ko}</div></div>
-  <div class="tempbar"><i style="left:calc(${pos}% - 2px)"></i></div><div class="templab"><span>3,000 K 붉은 별</span><span>태양 5,800 K</span><span>30,000 K 푸른 별</span></div>
+  <div class="tempbar"><i style="left:calc(${pos}% - 2px)"></i></div><div class="templab" style="position:relative"><span>2,500 K 붉은 별</span><span style="position:absolute;left:34%;transform:translateX(-50%)">☉ 태양 5,800 K</span><span>30,000 K 푸른 별</span></div>
   <p>${s.fact}</p>`;
 }
 function planetCard(p, fresh) {
@@ -2362,7 +2378,7 @@ function endingFrame(now) {
   if (t >= E.credT) drawCredits(E, t - E.credT);
 }
 $('#eFast').onclick = () => { if (END) { END.fast = !END.fast; $('#eFast').textContent = END.fast ? '▶ 보통' : '⏩ 빠르게'; } };
-$('#eClose').onclick = () => { const replay = END && END.replay; END = null; $('#ending').classList.remove('show'); if (!replay) setTimeout(() => openCard(nextChallengeCard()), 400); };
+$('#eClose').onclick = () => { const replay = END && END.replay; if (!replay && !S.endingSeen) { S.endingSeen = true; save(); } END = null; $('#ending').classList.remove('show'); if (!replay) setTimeout(() => openCard(nextChallengeCard()), 400); };
 function replayEnding(creditsOnly) {
   closeCard(); startEnding(); END.replay = true;
   if (creditsOnly) { END.t = END.credT; END.last = performance.now(); }
@@ -2373,7 +2389,6 @@ function nextChallengeCard() {
   if (S.mode === 'base') return `<div style="text-align:center"><div style="font-size:42px">🏅</div><h2>어려움까지 클리어!</h2><p>정말 대단해요. 마지막 도전은 <b>88개 모두 찾기</b>예요. ⚙️ 메뉴에서 미션을 바꿔 보세요.</p></div>`;
   return `<div style="text-align:center"><div style="font-size:42px">👑</div><h2>온 하늘의 별자리 박사!</h2><p>88개 별자리를 모두 찾았어요. 이제 진짜 밤하늘에서 ‘오늘 밤’ 탭으로 직접 관측해 보세요.</p></div>`;
 }
-window.__ending = startEnding;
 
 // ================= 시작 =================
 function pickGroup(id, key) {

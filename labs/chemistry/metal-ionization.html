@@ -403,7 +403,7 @@ table.mx th{background:#F7F8FA}
     <h3>4. 이온화 경향으로 반응을 예측해요</h3>
     <p><b>① 금속 + 다른 금속 이온이 든 수용액</b><br>
     금속 A가 금속 B보다 이온화 경향이 크면, A는 전자를 잃고 이온이 되어 녹아 나가고, B 이온은 전자를 얻어 금속 B로 석출돼요.</p>
-    <div class="ceq">A가 B보다 이온화 경향이 클 때: A + Bⁿ⁺ → Aⁿ⁺ + B  (반응함)<br>B 금속 + Aⁿ⁺ → 반응 안 함</div>
+    <div class="ceq">A가 B보다 이온화 경향이 클 때: A + Bⁿ⁺ → Aⁿ⁺ + B  (반응함 · 계수 생략)<br>B 금속 + Aⁿ⁺ → 반응 안 함</div>
     <p>그래서 <b>금속과 용액을 서로 바꿔 넣어 보면</b> 두 금속 중 어느 쪽의 이온화 경향이 큰지 알 수 있어요.</p>
     <p><b>② 금속 + 산(묽은 염산 등)</b><br>
     수소(H)보다 이온화 경향이 큰 금속은 산 속의 H⁺에게 전자를 주어 <b>수소 기체(H₂)</b>를 발생시켜요. 수소보다 이온화 경향이 작은 금속은 반응하지 않아요.</p>
@@ -496,7 +496,7 @@ const SOLS={
   HCl:{f:'HCl',name:'묽은 염산',cat:'H',an:'Cl',an_n:1,def:1.0},
   H2O:{f:'H₂O',name:'증류수',cat:null,an:null,an_n:0,def:0}
 };
-const SOL_ORDER=['MgSO4','AlNO3','ZnSO4','FeSO4','PbNO3','CuSO4','AgNO3','HCl','H2O'];
+const SOL_ORDER=['MgSO4','ZnSO4','FeSO4','PbNO3','CuSO4','AgNO3','HCl','H2O'];   // Al³⁺는 수용액에서 금속으로 환원되지 않으므로(물이 먼저 환원됨) 질산 알루미늄은 빼 둠
 const ANIONS={SO4:{f:'SO₄²⁻',z:2,c:'#fcd34d'},NO3:{f:'NO₃⁻',z:1,c:'#fda4af'},Cl:{f:'Cl⁻',z:1,c:'#86efac'},OH:{f:'OH⁻',z:1,c:'#5eead4'}};
 const ION_COLOR={Na:'#c4b5fd',Mg:'#a7f3d0',Al:'#bae6fd',Zn:'#e2e8f0',Fe:'#bef264',Pb:'#cbd5e1',Cu:'#3b82f6',Ag:'#f8fafc',H:'#fb7185'};
 const LINE_COLOR={Na:'#7c3aed',Mg:'#059669',Al:'#0284c7',Zn:'#64748b',Fe:'#65a30d',Pb:'#334155',Cu:'#2563eb',Ag:'#d97706',H:'#e11d48',SO4:'#ca8a04',NO3:'#f87171',Cl:'#16a34a',OH:'#0d9488'};
@@ -557,6 +557,7 @@ function truth(M,sol){
   if(!cat)return M==='Mg'?'either':'x';
   if(cat==='H'){if(M==='Pb')return 'either';return METALS[M].E<0?'o':'x';}
   if(cat===M)return 'x';
+  if(M==='Pb'&&SOLS[sol].an==='SO4')return 'either';   // PbSO₄ 막 때문에 반응이 곧 멈춤
   return METALS[cat].E>METALS[M].E?'o':'x';
 }
 function rateConst(p,k){
@@ -809,7 +810,7 @@ function drawBeaker(o,dragging){
    if(!dragging){const px=x0+tw+8*k,py=y+h+7*k;const open=BM.b===b;c.fillStyle=open?'rgba(96,165,250,.45)':'rgba(96,165,250,.18)';rr(c,px,py,pw,ph,ph/2);c.fill();c.strokeStyle='rgba(147,197,253,.85)';c.lineWidth=1;c.stroke();
      c.fillStyle='#dbeafe';c.font=fnt(9.5,700);c.textAlign='center';c.fillText(pt2,px+pw/2,py+ph/2+3.6*k);o.pill={x:px,y:py,w:pw,h:ph};}}
   c.textAlign='center';c.font=fnt(10.5);c.fillStyle='#b8c9d8';
-  const sl=b.sol?(b.sol==='H2O'?'증류수':`${SOLS[b.sol].f} ${b.conc}M`)+` · ${Math.round(b.vol)}mL`:'비어 있음';
+  const sl=b.sol?(b.sol==='H2O'?'증류수':`${SOLS[b.sol].f} ${b.conc} M`):'비어 있음';
   c.fillText(sl,x+w/2,y+h+40*k);
   if(p){c.fillStyle='#fcd34d';c.fillText('+ '+(isUnk(p.key)?'금속 '+p.key:METALS[p.metal].name),x+w/2,y+h+57*k);}
   if(b.paused||(p&&b.runPiece===p.id&&b.vol>=10)){const ts=b.paused?'⏸ 일시정지 '+(p&&b.runPiece===p.id?fmtT(b.t):''):'⏱ '+fmtT(b.t);c.font=fnt(10,700);const tw=c.measureText(ts).width+12*k;
@@ -940,7 +941,7 @@ function updatePPEChip(){const n=PPE.filter(q=>S.ppe[q.key]).length;const el=$('
 function nextNum(){let n=1;while(S.beakers.some(b=>b.id===n)||S.archive.some(b=>b.id===n))n++;return n;}
 const hasRun=b=>b.hist&&b.hist.length>1;
 const tooEarly=b=>!!(b.piece&&b.runPiece===b.piece.id&&b.vol>=10&&!b.tested&&!b.paused&&(b.obsReal||0)<10);
-function emptyBeaker(b){if(!b||S.beakers.indexOf(b)<0)return;if(tooEarly(b))toast('👀 변화를 조금 더 관찰해 봅시다! 아직 반응을 충분히 보지 않았어요.','warn');if(!hasRun(b)){doEmpty(b,false);return;}openConfirm(b);}
+function emptyBeaker(b){if(!b||S.beakers.indexOf(b)<0)return;if(tooEarly(b))toast('👀 아직 반응을 충분히 보지 않아서 이 조합은 결과표에 기록되지 않아요.','warn');if(!hasRun(b)){doEmpty(b,false);return;}openConfirm(b);}
 function doEmpty(b,keep,quiet){
   const i=S.beakers.indexOf(b);if(i<0)return;S.beakers.splice(i,1);b.bubbles=[];
   if(keep){b.archived=true;S.archive.push(b);}
@@ -1055,11 +1056,12 @@ function place(t,h){
   if(!validTarget(t,h)){
     if(t.holding&&h.kind==='beaker')toast('비커 하나에는 금속 한 조각만 넣어요.','warn');
     else if(t.holding&&h.kind==='dish')toast('사용한 금속이나 다른 종류의 접시에는 되돌릴 수 없어요. 폐기통을 쓰세요.','warn');
+    else if(t.holding&&h.kind==='bal')toast('전자저울에 이미 금속이 있어요. 먼저 핀셋으로 집어내세요.','warn');
     return;
   }
   const p=t.holding;
   if(h.kind==='beaker'){const b=h.o.b;b.piece=p;t.holding=null;S.selected=b;p.lastB={uid:b.uid,id:b.id};b.pieceIds.add(p.id);
-    if(isUnk(p.key))b.alias[p.metal]=p.key;
+    if(isUnk(p.key)&&SOLS[b.sol].cat!==p.metal)b.alias[p.metal]=p.key;
     if(p.metal==='Na'&&!isUnk(p.key)&&b.vol>0)toast('⚠️ 나트륨은 물과 격렬하게 반응해요. 보안경 착용!','warn');else toast(`🧪 ${pname(p)}(${p.id})을 비커 ${b.id}에 넣었어요.`);
     checkActive(b);renderObs(true);}
   else if(h.kind==='bal'){S.bal=p;t.holding=null;weigh(p);}
@@ -1076,7 +1078,7 @@ function place(t,h){
 }
 function weigh(p){
   const m=pieceMass(p);let st='반응 전';
-  if(pristine(p)){p.pre=m;}
+  if(pristine(p)){if(p.polished)st='사포질 후';p.pre=m;}
   else{st='반응 후';if(p.pre!=null){if(m<p.pre-0.0005)S.flags.massDec=true;else if(m>p.pre+0.0005)S.flags.massInc=true;}}
   const nm=isUnk(p.key)?'금속 '+p.key:METALS[p.metal].name;
   S.logs.unshift({id:p.id,nm,st,m,pre:p.pre,buid:st==='반응 후'&&p.lastB?p.lastB.uid:null,bnum:st==='반응 후'&&p.lastB?p.lastB.id:null});if(S.logs.length>40)S.logs.pop();
@@ -1122,7 +1124,7 @@ bench.addEventListener('pointermove',e=>{
 function endPointer(e){
   if(drag&&e.pointerId===drag.id){const t=drag.tool;const h=targetAt(t.x,t.y);place(t,h);t.dragging=false;t.returning=true;t.dwell=0;drag=null;hover=null;return;}
   if(bdrag&&e.pointerId===bdrag.id){const h=hover;const b=bdrag.o.b;bdrag=null;hover=null;
-    if(h&&h.kind==='waste'){emptyBeaker(b);return;}
+    if(h&&h.kind==='waste'){layout();emptyBeaker(b);return;}
     if(h&&h.kind==='beaker'){const i=S.beakers.indexOf(b),j=S.beakers.indexOf(h.o.b);[S.beakers[i],S.beakers[j]]=[S.beakers[j],S.beakers[i]];}
     S.selected=b;layout();renderObs(true);return;}
   if(press&&e.pointerId===press.id){if(!press.moved)clickAt(press.x,press.y);press=null;}
@@ -1142,7 +1144,7 @@ function updateTools(rdt){
   for(const t of Object.values(tools)){
     if(t.returning){t.x=lerp(t.x,t.hx,Math.min(1,rdt*12));t.y=lerp(t.y,t.hy,Math.min(1,rdt*12));if(Math.hypot(t.x-t.hx,t.y-t.hy)<0.8){t.x=t.hx;t.y=t.hy;t.returning=false;}}
   }
-  if(drag){const t=drag.tool;if(hover&&isSource(t,hover)){t.dwell+=rdt;const need=hover.kind==='dish'?0.15:hover.kind==='bal'?0.2:0.3;t.dwellNeed=need;if(t.dwell>=need){pick(t,hover);t.dwell=0;}}else t.dwell=0;}
+  if(drag){const t=drag.tool;if(hover&&isSource(t,hover)&&hover.kind!=='beaker'){t.dwell+=rdt;const need=hover.kind==='dish'?0.15:hover.kind==='bal'?0.2:0.3;t.dwellNeed=need;if(t.dwell>=need){pick(t,hover);t.dwell=0;}}else t.dwell=0;}
   if(G.sandFx>0)G.sandFx=Math.max(0,G.sandFx-rdt*1.5);if(G.ppeFlash>0)G.ppeFlash=Math.max(0,G.ppeFlash-rdt);
   for(const d of S.dishes)for(const p of d.pieces)if(p.polishAnim>0)p.polishAnim=Math.max(0,p.polishAnim-rdt);
   const hp=tools.tweezers.holding;if(hp&&hp.polishAnim>0)hp.polishAnim=Math.max(0,hp.polishAnim-rdt*1.2);
@@ -1181,7 +1183,7 @@ function microReset(b){
       micro.atoms.push({x:x0+col*sp+(row?sp/2:0),y:MH-13-row*21,sp:p.metal,alive:true,row,e:m});}
     const top=micro.atoms.length>per?MH-13-21:MH-13;micro.surf=micro.atoms.length?top-RA:MH-12;
     const ox=METALS[p.metal].oxide;
-    if(ox&&!p.polished&&micro.atoms.length){const gw=30,ng=ox.gaps,gaps=[];for(let i=0;i<ng;i++){const cx=MW*(i+0.5)/ng+(rng(p.seed+i)()-.5)*MW/ng*0.5;gaps.push([cx-gw/2,cx+gw/2]);}
+    if(ox&&!p.polished&&micro.atoms.length&&!hidden(p)){const gw=30,ng=ox.gaps,gaps=[];for(let i=0;i<ng;i++){const cx=MW*(i+0.5)/ng+(rng(p.seed+i)()-.5)*MW/ng*0.5;gaps.push([cx-gw/2,cx+gw/2]);}
       const inG=x=>gaps.some(g=>x>g[0]-6&&x<g[1]+6);
       // 겉으로 드러난 원자(위에 다른 원자가 없는 원자)가 산소와 만나 산화돼 있어요
       const exposed=micro.atoms.filter(a=>!micro.atoms.some(t=>t.row===a.row+1&&Math.abs(t.x-a.x)<=13));
@@ -1361,10 +1363,10 @@ function renderObs(force){
   if(!b)info='<span class="dim">비커를 선택하세요.</span>';
   else{const p=b.piece;const rel=S.level===0;
     info=`<div class="row"><span>용액</span><b>${b.sol?(SOLS[b.sol].name+' '+(b.sol==='H2O'?'':SOLS[b.sol].f+' '+b.conc+' M')):'없음'} · ${Math.round(b.vol)} mL</b></div>
-    <div class="row"><span>금속</span><b>${p?(isUnk(p.key)?'금속 '+p.key:METALS[p.metal].name+' '+METALS[p.metal].sym)+` (${p.id})${METALS[p.metal].oxide&&!isUnk(p.key)?(p.polished?' · 사포로 닦음':' · 산화막 있음'):''}`:'없음'}</b></div>
+    <div class="row"><span>금속</span><b>${p?(isUnk(p.key)?'금속 '+p.key+(S.unknownSolved?' = '+METALS[p.metal].name+' '+METALS[p.metal].sym:''):METALS[p.metal].name+' '+METALS[p.metal].sym)+` (${p.id})${METALS[p.metal].oxide&&!isUnk(p.key)?(p.polished?' · 사포로 닦음':' · 산화막 있음'):''}`:'없음'}</b></div>
     <div class="row"><span>경과 시간</span><b>${p&&b.runPiece===p.id&&b.vol>=10?fmtT(b.t):'—'}${b.paused?' · ⏸ 일시정지':''}</b></div>`;
     const ch=[];for(const q in b.ions){if(b.ions[q]<1e-4)continue;ch.push(`<span>${ionL(b,q)} ${rel?(b.ions[q]/(b.unit||1)).toFixed(1)+'개':b.ions[q].toFixed(2)+' mmol'}</span>`);}
-    for(const q in b.precip){if(b.precip[q]<1e-4)continue;ch.push(`<span>${PPT[q].f}↓ ${rel?'':b.precip[q].toFixed(2)+' mmol'}</span>`);}
+    for(const q in b.precip){if(b.precip[q]<1e-4)continue;ch.push(`<span>${PPT[q].f}↓ ${rel?'':(q==='Ag'?b.precip[q]/2:b.precip[q]).toFixed(2)+' mmol'}</span>`);}
     if(b.h2>1e-3)ch.push(`<span>H₂↑ ${rel?'발생':b.h2.toFixed(2)+' mmol'}</span>`);
     if(ch.length)info+=`<div class="ionchips">${ch.join('')}</div>`;
     if(rel&&ch.length)info+=`<div class="small" style="margin-top:4px">이온 수는 처음 양이온 수를 10으로 놓은 상대값이에요.</div>`;
@@ -1377,9 +1379,9 @@ function renderObs(force){
 function eqHTML(b){
   if(!b)return '<p class="dim">비커를 선택하세요.</p>';
   const p=b.piece;
-  if(!b.sol&&!p)return '<p class="dim">스포이트로 용액을 넣고, 핀셋으로 금속을 넣어 보세요.</p>';
+  if(!b.sol&&!p)return '<p class="dim">시약장에서 수용액을 꺼내고, 핀셋으로 금속을 넣어 보세요.</p>';
   if(!p)return '<p class="dim">핀셋으로 금속 조각을 넣어 보세요.</p>';
-  if(!b.sol)return '<p class="dim">스포이트로 용액을 넣어 보세요.</p>';
+  if(!b.sol)return '<p class="dim">시약장에서 수용액을 꺼내 보세요.</p>';
   if(b.runReused)return '<div class="note">이 비커의 용액은 앞선 반응으로 성분이 바뀌었어요. 정확한 비교를 위해 새 비커를 쓰는 것이 좋아요.</div>'+eqCore(b,p);
   return eqCore(b,p);
 }
@@ -1404,7 +1406,8 @@ function eqCore(b,p){
       <li>환원제: ${sy(M)} · 산화제: ${io(N)} · 구경꾼 이온: ${ANIONS[an].f}</li>
       <li>양이온 수: ${io(N)} ${bb}개 감소, ${io(M)} ${a}개 증가 → 전체 양이온 수 <b>${a===bb?'일정':(a<bb?'감소':'증가')}</b></li>
       <li>금속 질량: ${sy(M)} ${a}mol(${(a*Mt.M).toFixed(1)} g) 용해, ${sy(N)} ${bb}mol(${(bb*METALS[N].M).toFixed(1)} g) 석출 → <b>${bb*METALS[N].M>a*Mt.M?'증가':'감소'}</b></li></ul>`;
-      if(M==='Al')h+=`<div class="note">알루미늄은 산화막을 벗겨도 황산염 용액에서는 반응이 느린 편이에요(염화 이온이 있으면 빨라져요).</div>`;
+      if(M==='Al'&&an==='SO4')h+=`<div class="note">알루미늄은 산화막을 벗겨도 황산염 용액에서는 반응이 느린 편이에요(염화 이온이 있으면 빨라져요).</div>`;
+      if(M==='Pb'&&an==='SO4')h+=`<div class="note">실제로는 생긴 Pb²⁺이 SO₄²⁻과 만나 물에 잘 녹지 않는 PbSO₄ 막을 만들어 반응이 곧 느려져요.</div>`;
       h+=e2(METALS[N].E,`${io(N)}/${sy(N)}`,L);}
   }else if(R.type==='acid'){
     const m=Mt.m,L=lcm(m,2),a=L/m;
@@ -1443,7 +1446,7 @@ function eqCore(b,p){
 let nbDirty=true;
 function renderMatrix(){
   const rows=[...METAL_ORDER,...UNK_KEYS];
-  let h='<colgroup><col class="rhc">'+SOL_ORDER.map(()=>'<col>').join('')+'</colgroup><tr><th class="rh">금속＼<br>용액</th>'+SOL_ORDER.map(s=>{const c=SOLS[s].cat;return `<th title="${SOLS[s].name} ${SOLS[s].f}">${c?(c==='H'?'HCl':METALS[c].sym+SUPC[METALS[c].m]):'H₂O'}</th>`;}).join('')+'</tr>';
+  let h='<colgroup><col class="rhc">'+SOL_ORDER.map(()=>'<col>').join('')+'</colgroup><tr><th class="rh">금속＼<br>용액</th>'+SOL_ORDER.map(s=>{const c=SOLS[s].cat;return `<th title="${SOLS[s].name} ${SOLS[s].f}">${c?(c==='H'?'H⁺':METALS[c].sym+SUPC[METALS[c].m]):'H₂O'}</th>`;}).join('')+'</tr>';
   for(const r of rows){h+=`<tr><th class="rh">${isUnk(r)?'금속 '+r:METALS[r].name}</th>`;
     for(const s of SOL_ORDER){const key=r+'|'+s;const v=S.nb[key]||'';const g=S.nbGrade&&S.nbGrade[key];
       const cls=[S.tested.has(key)?'tested':'',g||''].join(' ');h+=`<td class="${cls}"><button data-k="${key}">${v==='o'?'<span class="O">O</span>':v==='x'?'<span class="X">X</span>':''}</button></td>`;}
@@ -1510,7 +1513,7 @@ const MISSIONS=[
   {id:'m6',t:'나트륨의 함정',d:'나트륨을 황산 구리(Ⅱ) 수용액에 넣으면 구리가 석출될까요? 예상한 뒤 직접 확인하세요.',hint:'나트륨 접시를 꺼내 핀셋으로 CuSO₄ 수용액에 넣어요. 돋보기를 꼭 켜 보세요!',ok:()=>F.naCu,
    exp:'나트륨은 구리 이온보다 물과 먼저 반응해요: 2Na + 2H₂O → 2NaOH + H₂. 생긴 OH⁻이 Cu²⁺과 만나 푸른색 Cu(OH)₂ 침전이 생기고, 구리는 석출되지 않아요.'},
   {id:'m7',t:'양이온 수를 세어라',d:()=>`이온 수 그래프와 돋보기로 전체 양이온 수가 일정한 반응과 감소하는 반응을 찾으세요. (일정 ${F.catSame?'✔':'…'} / 감소 ${F.catDec?'✔':'…'})`,hint:'금속 이온의 전하를 비교해 보세요. 2가 → 2가, 1가 → 2가는 어떻게 다를까요?',ok:()=>F.catSame&&F.catDec,
-   exp:'Zn + Cu²⁺(전하 2→2): 양이온 수 일정. Cu + 2Ag⁺(1가 2개 → 2가 1개): 감소. 주고받는 전자 수가 같아야 하므로 이온의 전하가 양이온 수 변화를 결정해요. (3Mg + 2Al³⁺처럼 증가하는 경우도 있어요!)'},
+   exp:'Zn + Cu²⁺(전하 2→2): 양이온 수 일정. Cu + 2Ag⁺(1가 2개 → 2가 1개): 감소. 주고받는 전자 수가 같아야 하므로 이온의 전하가 양이온 수 변화를 결정해요.'},
   {id:'m8',t:'미지 금속 X·Y·Z',d:'회색 금속 X, Y, Z의 정체를 밝히세요. 후보: 마그네슘, 아연, 철, 납, 은 중 서로 다른 3가지.',hint:'묽은 염산으로 수소보다 큰지 먼저 나누고, 금속 이온 수용액으로 순서를 좁혀 보세요. 실험 횟수가 적을수록 멋진 탐구예요!',ok:()=>S.unknownSolved,
    exp:'관찰 증거(기포, 석출, 색 변화, 질량 변화)로 이온화 경향의 상대적 위치를 정하고 후보를 좁혔어요. 이것이 바로 과학적 추론이에요!',custom:true},
   {id:'m9',t:'이온화 경향 완성',d:'실험 노트 ②에서 이온화 경향 순서를 완성하세요.',hint:'반응한 조합에서는 "넣은 금속 > 용액 속 금속 이온의 금속"이에요.',ok:()=>F.order,
@@ -1529,10 +1532,12 @@ function renderMissions(){
       h+=`<div class="unk">${UNK_KEYS.map(u=>`<span>금속 ${u}</span><select data-u="${u}" ${S.unknownSolved?'disabled':''}>${opts}</select>`).join('')}</div>
       <div class="small" style="margin-top:6px">미지 금속으로 실험한 조합: <b>${S.unkTries.size}</b>개</div>
       <div class="btnrow"><button class="sbtn" id="unkSubmit" ${S.unknownSolved?'disabled':''}>정답 제출</button><button class="sbtn gray" id="unkNew">새 미지 금속</button></div><div class="small" id="unkMsg"></div>`;}
-    if(!done)h+=`<details><summary>힌트 보기</summary>${m.hint}</details>`;else h+=`<div class="exp">📘 ${m.exp}</div>`;h+='</div>';}
+    if(!done)h+=`<details data-m="${m.id}"><summary>힌트 보기</summary>${m.hint}</details>`;else h+=`<div class="exp">📘 ${m.exp}</div>`;h+='</div>';}
   if(h===lastMs)return;
   const keep={},keepH={};document.querySelectorAll('#msList select[data-u]').forEach(s=>keep[s.dataset.u]=s.value);document.querySelectorAll('#msList select[data-h]').forEach(s=>keepH[s.dataset.h]=s.value);
+  const openIds=new Set([...document.querySelectorAll('#msList details[open]')].map(d=>d.dataset.m));const mH=($('#h2Msg')||{}).innerHTML||'',mU=($('#unkMsg')||{}).innerHTML||'';
   $('#msList').innerHTML=h;lastMs=h;
+  document.querySelectorAll('#msList details').forEach(d=>{if(openIds.has(d.dataset.m))d.open=true;});if($('#h2Msg'))$('#h2Msg').innerHTML=mH;if($('#unkMsg'))$('#unkMsg').innerHTML=mU;
   document.querySelectorAll('#msList select[data-u]').forEach(s=>{if(S.unknownSolved)s.value=S.unknown[s.dataset.u];else if(keep[s.dataset.u])s.value=keep[s.dataset.u];});
   document.querySelectorAll('#msList select[data-h]').forEach(s=>{if(F.noH2)s.value=s.dataset.h==='1'?'Cu':'Ag';else if(keepH[s.dataset.h])s.value=keepH[s.dataset.h];});
   const hb=$('#h2Submit');if(hb)hb.onclick=()=>{const v=[...document.querySelectorAll('#msList select[data-h]')].map(s=>s.value);const msg=$('#h2Msg');
@@ -1554,6 +1559,10 @@ function renderMissions(){
   const nb=$('#unkNew');if(nb)nb.onclick=()=>{shuffleUnknown();S.dishes=S.dishes.filter(d=>!isUnk(d.key));for(const b of S.beakers){if(b.piece&&isUnk(b.piece.key))b.piece=null;b.alias={};}
     for(const t of Object.values(tools))if(t.holding&&t.holding.key&&isUnk(t.holding.key))t.holding=null;if(S.bal&&isUnk(S.bal.key))S.bal=null;
     for(const kk of [...S.tested.keys()])if(isUnk(kk.split('|')[0]))S.tested.delete(kk);
+    for(const kk of Object.keys(S.nb))if(isUnk(kk.split('|')[0]))delete S.nb[kk];
+    S.logs=S.logs.filter(l=>!isUnk(String(l.id).split('-')[0]));
+    for(const b of S.beakers)if(b.runPiece&&isUnk(String(b.runPiece).split('-')[0]))Object.assign(b,{runPiece:null,t:0,hist:[],xiBy:{},tested:false});
+    renderLog();
     lastMs='';layout();renderMissions();renderMatrix();toast('새로운 미지 금속 X, Y, Z가 준비됐어요.');};
 }
 
@@ -1562,7 +1571,7 @@ function toast(msg,type){const el=document.createElement('div');el.className='t 
 function addDish(type,key,conc){
   if(!ppeOK()){warnPPE();return;}
   if(S.dishes.some(d=>d.type===type&&d.key===key&&(type==='metal'||d.conc===conc))){toast('이미 실험대에 같은 접시가 있어요.');return;}
-  if(S.dishes.length>=10){toast('접시가 너무 많아요. 안 쓰는 접시의 ✕를 눌러 치우세요.','warn');return;}
+  if(S.dishes.length>=11){toast('접시가 너무 많아요. 안 쓰는 접시의 ✕를 눌러 치우세요.','warn');return;}
   const d={type,key,conc,pieces:[]};if(type==='metal')for(let i=0;i<3;i++)d.pieces.push(newPiece(key));
   S.dishes.push(d);layout();
   if(type==='metal'&&key==='Na')toast('⚠️ 나트륨은 공기·물과 반응하지 않도록 석유 속에 보관해요. 작은 조각만 사용!','warn');
@@ -1638,6 +1647,7 @@ function loadSaved(){
   if(!saveOK)return false;let raw;try{raw=localStorage.getItem(SAVE_KEY);}catch(_){return false;}if(!raw)return false;
   try{
     const d=JSON.parse(raw,(k,v)=>v&&typeof v==='object'&&v.__set?new Set(v.__set):v&&typeof v==='object'&&v.__map?new Map(v.__map):v);
+    if(!d||typeof d!=='object'||Array.isArray(d)||d.v!==1)return false;
     const fixP=p=>{if(p){p.trees={};p.polishAnim=0;}return p;};
     const fixB=b=>{b.bubbles=[];b.bubAcc=0;fixP(b.piece);b.pieceIds=b.pieceIds instanceof Set?b.pieceIds:new Set();return b;};
     S.speed=d.speed??10;S.dishes=d.dishes||[];S.dishes.forEach(x=>x.pieces.forEach(fixP));
@@ -1654,7 +1664,7 @@ function loadSaved(){
     $('#memo').value=d.memo||'';S.sandAsked=!!d.sandAsked;S.student=Object.assign({school:'',sid:'',name:''},d.student||{});
     document.querySelectorAll('#speedSeg button').forEach(x=>x.classList.toggle('on',+x.dataset.s===S.speed));
     lastSaved=new Date(d.saved||Date.now());return true;
-  }catch(e){console.warn('저장된 실험을 불러오지 못했어요',e);return false;}
+  }catch(e){console.warn('저장된 실험을 불러오지 못했어요',e);S.dishes=[];S.beakers=[];S.archive=[];S.bal=null;tools.tweezers.holding=null;return false;}
 }
 function startOver(){$('#gcTitle').textContent='모든 실험 기록을 지우고 처음부터 시작할까요?';
   $('#gcMsg').innerHTML='<p>실험대, 실험 노트, 미션, 관찰 기록, 학생 정보가 모두 지워지고 되돌릴 수 없어요. 필요하면 먼저 실험 노트를 내보내 두세요.</p>';
@@ -1682,7 +1692,7 @@ function buildReport(){
   // ① 결과표
   H('① 반응 결과표');
   const rows=[...METAL_ORDER,...UNK_KEYS],c0=150,cw=(W-2*M-c0)/SOL_ORDER.length,rh=50;
-  const hdr=s=>{const ct=SOLS[s].cat;return ct?(ct==='H'?'HCl':METALS[ct].sym+SUPC[METALS[ct].m]):'H₂O';};
+  const hdr=s=>{const ct=SOLS[s].cat;return ct?(ct==='H'?'H⁺':METALS[ct].sym+SUPC[METALS[ct].m]):'H₂O';};
   c.fillStyle='#e2e8f0';c.fillRect(M,y,W-2*M,rh);T('금속＼용액',M+c0/2,y+32,19,800,'#334155','center');
   SOL_ORDER.forEach((s,j)=>T(hdr(s),M+c0+cw*j+cw/2,y+33,22,800,'#334155','center'));
   let yy=y+rh;
@@ -1762,7 +1772,7 @@ async function exportPDF(){const btn=$('#exPdf');btn.disabled=true;try{const blo
 buildShelf();
 S.selected=null;
 const restored=loadSaved();
-layout();if(restored)renderOrder();else shuffleOrder();renderLog();renderMatrix();if(restored&&S.nbGrade)gradeMatrix();renderMissions();renderObs(true);
+layout();if(restored&&S.orderList.length===ORDER_TRUE.length)renderOrder();else shuffleOrder();renderLog();renderMatrix();if(restored&&S.nbGrade)gradeMatrix();renderMissions();renderObs(true);
 $('#stSchool').value=S.student.school;$('#stId').value=S.student.sid;$('#stName').value=S.student.name;
 [['stSchool','school'],['stId','sid'],['stName','name']].forEach(([id,k])=>$('#'+id).oninput=e=>{S.student[k]=e.target.value;});
 $('#exPng').onclick=exportPNG;$('#exPdf').onclick=exportPDF;$('#startOver').onclick=startOver;

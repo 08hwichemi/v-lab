@@ -336,6 +336,7 @@ const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const lerp=(a,b,t)=>a+(b-a)*t;
 const gcd=(a,b)=>b?gcd(b,a%b):a;
 const lcm=(a,b)=>a*b/gcd(a,b);
+const jo=(w,y,n)=>{const c=w.charCodeAt(w.length-1);if(c<0xAC00||c>0xD7A3)return w+y;const f=(c-0xAC00)%28;return w+((f===0||(y==='으로'&&f===8))?n:y);};   // 받침에 맞는 조사
 const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
 function sciT(x,p=2){ if(!isFinite(x))return '∞'; if(x===0)return '0'; const ax=Math.abs(x);
   if(ax>=0.001&&ax<1e4) return String(+x.toPrecision(p+1));
@@ -382,7 +383,7 @@ function cellVolta(o){
   o.EcN=K59/2*Math.log10(H*H/o.pH2); o.eta=ETA_H[ca]; o.pol=0.30*D.theta;
   o.Ecath=o.EcN-o.eta-o.pol;
   if(METALS[an].E>=0){o.noRxn=true;o.emf=0;o.anodeSide=null;
-    o.warn.push(`${METALS[an].name}과(와) ${METALS[ca].name}은(는) 모두 수소보다 이온화 경향이 작아서 H⁺와 반응하지 않아요. 전지 반응이 일어나지 않습니다.`);return;}
+    o.warn.push(`${jo(METALS[an].name,'과','와')} ${jo(METALS[ca].name,'은','는')} 모두 수소보다 이온화 경향이 작아서 H⁺와 반응하지 않아요. 전지 반응이 일어나지 않습니다.`);return;}
   o.emf=Math.max(0,o.Ecath-o.Ean);
   if(an==='Al') o.note.push('알루미늄은 표면 산화막(Al₂O₃) 때문에 실제 실험에서는 이론값보다 낮은 전압이 측정되는 경우가 많아요.');
   if(an==='Mg') o.note.push('마그네슘은 산과 직접 격렬하게 반응해서 금속판 자체에서도 기포가 많이 생겨요(국부 반응). 금속이 빨리 소모돼요.');
@@ -393,7 +394,7 @@ function half(sd){
   const kind= m===so?'match':(METALS[so].E>METALS[m].E?'direct':'inert');
   let red=null;
   for(const k in ions){ const c=ions[k]||0; if(c<=2e-6) continue; const E=METALS[k].E+K59/METALS[k].n*Math.log10(c); if(!red||E>red.E) red={couple:k,c,E,kind}; }
-  const om= kind==='direct'?so:m;                       // 직접 반응하면 판 표면이 용액 금속으로 덮임
+  const om=m;                                           // 직접 반응(판 표면이 용액 금속으로 덮임)은 경고로만 알리고, 산화 반쪽 반응은 판의 금속으로 나타냄
   const oc=Math.max(ions[om]||0,1e-6);
   return {red,ox:{couple:om,c:oc,E:METALS[om].E+K59/METALS[om].n*Math.log10(oc),kind},kind};
 }
@@ -404,7 +405,7 @@ function zeroReason(L,R){
   const P=L.ox.E<=R.ox.E?'L':'R', Q=P==='L'?'R':'L', pm=S[P].metal;   // P: 더 잘 녹는 쪽 금속판
   const ions=Object.keys(D['ions'+Q]).filter(k=>(D['ions'+Q][k]||0)>2e-6);
   const nm=Q==='L'?'왼쪽':'오른쪽', so=S[Q].sol, left=D['ions'+Q][so]||0;
-  if(D.t>0&&left<S[Q].c*0.01) return `전지가 다 닳았어요 (0 V). ${nm} 비커의 ${METALS[so].ion}이 거의 모두 ${METALS[so].name}으로 석출되어(${sciT(Math.max(left,1e-7),1)} M 남음), 전자를 받아 줄 이온이 없어요. 반응이 멈추니 염다리 이온도 더 이상 이동하지 않아요.`;
+  if(D.t>0&&left<S[Q].c*0.01) return `전지가 다 닳았어요 (0 V). ${nm} 비커의 ${METALS[so].ion}이 거의 모두 ${jo(METALS[so].name,'으로','로')} 석출되어(${sciT(Math.max(left,1e-7),1)} M 남음), 전자를 받아 줄 이온이 없어요. 반응이 멈추니 염다리 이온도 더 이상 이동하지 않아요.`;
   const il=ions.map(k=>METALS[k].ion).join(', ')||'금속 이온';
   const ml=ions.map(k=>METALS[k].name).join(', ')||'그 금속';
   return `전압이 0 V예요. ${nm==='왼쪽'?'오른쪽':'왼쪽'} ${METALS[pm].name}판이 전자를 내놓더라도, ${nm} 비커 용액에는 ${il}만 있어요. 이 이온이 전자를 받아 금속이 되려면 그 금속(${ml})이 ${METALS[pm].name}보다 이온화 경향이 작아야 하는데, 크거나 같아요. 전자를 받아 줄 이온이 없으니 반응이 일어나지 않아요. (실제 실험에서는 물이나 H⁺가 전자를 받아 수소 기체가 생기면서 작은 전압이 측정될 수 있어요.)`;
@@ -418,7 +419,7 @@ function cellDaniel(o){
   o.halves={L,R};
   if(o.anodeSide){ const cs=other(o.anodeSide), c0=S[cs].c, cn=D['ions'+cs][S[cs].sol]||0;
     if(D.t>0&&cn<c0*0.1) o.note.push(`(+)극 쪽 ${METALS[S[cs].sol].ion}이 처음의 ${Math.max(1,Math.round(cn/c0*100))}%만 남았어요. 이온이 줄어들수록 전압이 낮아지고, 다 쓰이면 전지가 멈춰요.`); }
-  if(o.anodeSide){ const cs=(o.anodeSide==='L'?o.hR:o.hL).couple; if(cs==='Mg'||cs==='Al') o.note.push(`이온화 경향에 따라 ${METALS[cs].ion}이 ${METALS[cs].name}으로 석출되는 것으로 나타냈어요. 실제 수용액에서는 ${METALS[cs].ion} 대신 물이 환원되어 수소 기체가 생겨요.`); }
+  if(o.anodeSide){ const cs=(o.anodeSide==='L'?o.hR:o.hL).couple; if(cs==='Mg'||cs==='Al') o.note.push(`이온화 경향에 따라 ${METALS[cs].ion}이 ${jo(METALS[cs].name,'으로','로')} 석출되는 것으로 나타냈어요. 실제 수용액에서는 ${METALS[cs].ion} 대신 물이 환원되어 수소 기체가 생겨요.`); }
   if(o.anodeSide){ o.Ean=(o.anodeSide==='L'?o.hL:o.hR).E; o.Ecath=(o.anodeSide==='L'?o.hR:o.hL).E; }
   let rb=BR().r;
   const ag=(S.L.sol==='Ag'||S.R.sol==='Ag'||(D.ionsL.Ag||0)>1e-4||(D.ionsR.Ag||0)>1e-4);
@@ -427,7 +428,7 @@ function cellDaniel(o){
   o.r=rb+0.6/(totC(D.ionsL)+0.01)+0.6/(totC(D.ionsR)+0.01);
   [['L',L],['R',R]].forEach(([sd,h])=>{ const s=S[sd],side=sd==='L'?'왼쪽 비커':'오른쪽 비커', isCat=o.anodeSide&&o.anodeSide!==sd;
     if(h.kind==='direct') o.warn.push(`${side}: ${METALS[s.metal].name}판을 ${SALTS[s.sol].f} 용액에 넣어서 금속판 표면에서 직접 반응이 일어나요(${METALS[s.sol].name} 석출). 전자가 도선을 거치지 않으니 전지로서 효율이 떨어져요.`);
-    if(h.kind==='inert'&&isCat) o.note.push(`${side}: ${METALS[s.metal].name}판은 반응하지 않고, 용액 속 ${METALS[o['h'+sd].couple].ion}이 판 위에 ${METALS[o['h'+sd].couple].name}으로 석출돼요.`);
+    if(h.kind==='inert'&&isCat) o.note.push(`${side}: ${METALS[s.metal].name}판은 반응하지 않고, 용액 속 ${METALS[o['h'+sd].couple].ion}이 판 위에 ${jo(METALS[o['h'+sd].couple].name,'으로','로')} 석출돼요.`);
     if(h.kind==='inert'&&o.anodeSide===sd) o.note.push(`${side}: ${METALS[s.metal].name}판이 녹아 ${METALS[s.metal].ion}이 새로 생겨요(용액에는 원래 없던 이온).`);
   });
   if(S.L.metal===S.R.metal&&L.kind==='match'&&R.kind==='match'&&o.anodeSide)
@@ -460,7 +461,7 @@ function solve(o){
 /* ================= 시뮬레이션 단계 ================= */
 function step(dt){
   if(!ready()) return;
-  const o=compute(); D.t+=dt; const I=Ik(o.I||0);
+  const o=compute(); D.t+=dt; const I=o.I||0;   // 패러데이 법칙: 전류계가 보여 주는 전류 그대로
   if(S.mode==='volta'){
     if(o.anodeSide){
       const an=o.anM,nA=METALS[an].n,V=0.05;
@@ -1031,7 +1032,7 @@ function drawMacro(){
   const slots=(S.load==='none'||!S.load)?comps.map((k,i)=>xL+(255-xL)*(i+1)/(comps.length+1)):comps.map((k,i)=>xL+(xR-xL)*(i+1)/(comps.length+1));
   comps.forEach((k,i)=>{ const x=slots[i];
     if(k==='bulb')drawBulb(c,x,RAIL,o.bright); else if(k==='A')drawAmm(c,x,RAIL,o.Iamm); });
-  if(S.load==='wire'){c.fillStyle='#d64545';c.font='700 12.5px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('도선만 연결(단락)',280,RAIL-10);}
+  if(S.load==='wire'){c.fillStyle='#d64545';c.font='700 12.5px sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('도선만 연결(단락)',280,RAIL+26);}
   if(S.volt){ const y=125, redLeft=o.anodeSide==='R';
     c.lineWidth=2.5;c.strokeStyle=redLeft?'#d0392b':'#222';c.beginPath();c.moveTo(xL,y);c.lineTo(238,y);c.stroke();
     c.strokeStyle=redLeft?'#222':'#d0392b';c.beginPath();c.moveTo(322,y);c.lineTo(xR,y);c.stroke();
@@ -1082,7 +1083,7 @@ function updateMeters(){
   const o=O;
   document.getElementById('mV').textContent=!S.volt?'연결 안 됨':o.Vread==null?'—':o.Vread.toFixed(3)+' V';
   document.getElementById('mI').textContent=!S.amm?'연결 안 됨':o.Iamm==null?'—':(o.Iamm*1000).toFixed(1)+' mA';
-  document.getElementById('mS').textContent=o.notReady?'준비 중':o.open?'끊김(이온 통로 없음)':(o.I||0)>2e-5?'전류가 흐름':'열린 회로';
+  document.getElementById('mS').textContent=o.notReady?'준비 중':o.open?'끊김(이온 통로 없음)':(o.I||0)>2e-5?'전류가 흐름':(S.load&&S.load!=='none')?'연결됨 · 전류 없음(0 V)':'열린 회로';
   let html, list=[];
   if(o.notReady){
     const ck=(ok,t)=>`${ok?'✅':'⬜'} ${t}`;
@@ -1121,12 +1122,12 @@ function chip(act,label,on,cls=''){return `<button class="chip ${cls} ${on?'on':
 function recipeSalt(sol,c){ const s=SALTS[sol]; const g=c*0.1*s.Mr/s.per;
   return `${s.f} <b>${g<0.01?g.toFixed(4):g<1?g.toFixed(3):g.toFixed(2)} g</b>을 녹여 100 mL로 만든 뒤 25 mL를 부어요.`; }
 function recipeAcid(t,c){ const a=ACIDS[t]; const g=c*0.1*a.Mr;
-  return `${a.f} <b>${g.toFixed(2)} g</b>을 100 mL로 묽힌 뒤 50 mL를 부어요. <b>물에 산을</b> 조금씩!`; }
+  return `${fmtC(c)} M ${a.name} <b>50 mL</b>를 부어요. 진한 산을 묽혀 만들 때는 <b>물에 산을</b> 조금씩! ([H⁺]는 산이 완전히 이온화한다고 가정해요)`; }
 const UI={ed:{},tip:{},warnOpen:false,warnIdx:0,warnList:[],warnSlide:false,warnHover:false};
 const DROP=0.05, RECOVER=0.02;   // 전압 감소가 눈에 보이면 '떨어진 상태', 조금이라도 다시 오르면 '회복'
 const dropped=()=>O&&!O.notReady&&O.Vread!=null&&(D.vmax||0)-Math.abs(O.Vread)>=DROP;
 function markRecover(kind){ if(S.mode!=='volta'||!dropped()) return; const v=Math.abs(O.Vread);
-  if(kind==='shake'&&!D.usedDep){ D.vShake=v; D.vShakeMax=v; } if(kind==='dep'){ D.vDep=v; D.vDepMax=v; } }
+  if(kind==='shake'&&!D.usedDep){ D.vShake=v; D.vShakeMax=v; } if(kind==='dep'&&!(D.dep>0&&D.vDep!=null)){ D.vDep=v; D.vDepMax=v; } }
 const isOpen=(k,has)=>!has||UI.ed[k];
 function picked(label,val,act){ return `<div class="picked"><span class="k">${label}</span><b>${val}</b><button data-act="${act}">변경</button></div>`; }
 function concBlock(key,c,isAcid){
@@ -1204,7 +1205,7 @@ document.getElementById('modes').onclick=e=>{const b=e.target.closest('button');
 const ctrl=document.getElementById('ctrl');
 ctrl.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]'); if(!b||b.disabled) return;
-  if(needPredict()&&b.dataset.act!=='record'){ maybePredict(); return; }
+  if(needPredict()&&!['record','speed','reset'].includes(b.dataset.act.split(':')[0])){ maybePredict(); return; }
   const [a,x,y]=b.dataset.act.split(':');
   if(a==='ed'){ UI.ed[x]=true; }
   else if(a==='metal'){ S[x].metal=y; UI.ed['m'+x]=false; resetDyn(); }
@@ -1217,7 +1218,7 @@ ctrl.addEventListener('click',e=>{
   else if(a==='load')S.load=x;
   else if(a==='amm')S.amm=!S.amm;
   else if(a==='volt')S.volt=!S.volt;
-  else if(a==='cells')S.nCells=+x;
+  else if(a==='cells'){const k=+x/S.nCells;S.nCells=+x;if(D.vmax)D.vmax*=k;['vShake','vShakeMax','vDep','vDepMax'].forEach(q=>{if(D[q]!=null)D[q]*=k;});}
   else if(a==='speed'){ if(+x===0) S.running=false; else {S.running=true;S.speed=+x;} }
   else if(a==='reset')resetDyn();
   else if(a==='clear')clearAll();
@@ -1298,7 +1299,7 @@ const MISSIONS=[
   chk:o=>false,
   ex:'(+)극 표면에 생긴 H₂ 기포가 구리판을 덮으면 H⁺가 전자를 받기 어려워지고(저항 증가), 표면의 H₂ 때문에 역반응 경향이 생겨 전압이 떨어져요. 이것이 분극 현상이에요.'},
  {id:'m10',mode:'volta',g:'볼타',t:'감극제로 회복시키기',d:'회로를 연결해 전압이 떨어지기 시작하면, 감극제(MnO₂ 또는 H₂O₂)를 넣어 전압을 회복시키세요.',
-  hint:'그래프에서 전압이 떨어지는 것을 확인한 뒤 감극제를 넣고, 전압이 다시 올라가는지 보세요.',
+  hint:'그래프에서 전압이 떨어지는 것을 확인한 뒤 감극제를 넣고, 전압이 다시 올라가는지 보세요. 전압이 떨어지기 전에 이미 넣었다면 [처음부터]를 누르고 전압이 떨어진 뒤 다시 넣으세요.',
   chk:o=>S.mode==='volta'&&D.vDep!=null&&D.vDepMax-D.vDep>=RECOVER,
   ex:'감극제(산화제)는 (+)극에 생긴 H₂를 산화시켜 물로 바꿔요(예: H₂O₂ + H₂ → 2H₂O). 기포가 사라지니 전압이 회복돼요.'},
  {id:'m11',mode:'volta',g:'볼타',t:'볼타 전지의 (+)극 바꾸기',tip:'볼타 전지의 (+)극에서 실제로 전자를 받는 것은 금속판일까요, 용액 속 이온일까요?',d:'구리판 대신 은판을 쓰고, 분극이 일어나기 전의 처음 전압을 전압계로 측정하세요.',
@@ -1433,7 +1434,7 @@ function autoTick(rdt){
 function autoHTML(){
   let h=`<div class="misSec" style="margin-top:4px">⏺ 자동 기록</div>
    <div class="row" style="margin-bottom:6px"><button class="btn ${AUTO.on?'orange':''}" data-auto="toggle">${AUTO.on?'⏹ 자동 기록 멈추기':'⏺ 자동 기록 시작'}</button>
-   <span class="small">간격</span>${[1,2,5].map(k=>`<button class="chip ${AUTO.int===k?'on':''}" data-auto="int:${k}">${k}초</button>`).join('')}</div>
+   <span class="small">간격(실제 시간)</span>${[1,2,5].map(k=>`<button class="chip ${AUTO.int===k?'on':''}" data-auto="int:${k}">${k}초마다</button>`).join('')}</div>
    <div class="small" style="margin-bottom:6px">실험이 진행되는 동안 정한 간격마다 전압과 전류를 자동으로 적어요. 조건을 바꾸면 새 묶음으로 시작해요. 시간은 실험 속도를 반영한 실험 시간이에요.</div>`;
   if(AUTO.rows.length){
     h+=`<div class="row" style="margin-bottom:6px"><button class="btn ghost" data-autocsv>⬇ 자동 기록 CSV</button><button class="btn ghost" data-autoclr>자동 기록 지우기</button></div><div style="overflow:auto;max-height:320px"><table><tr><th>시간(s)</th><th>전압(V)</th><th>전류(mA)</th></tr>`;
@@ -1472,6 +1473,7 @@ function thHTML(){
    <li><b>전자</b>는 도선으로만, <b>이온</b>은 용액·염다리로만 이동해요.</li>
    <li><b>염다리</b>: 양이온은 (+)극 쪽, 음이온은 (−)극 쪽으로 이동해 두 용액의 전하 균형을 맞춰요.</li>
    <li><b>이동한 전자 수는 보존</b>돼요. Zn 1개가 내놓은 전자 2개로 Cu²⁺ 1개, 또는 Ag⁺ 2개가 석출돼요.</li>
+   <li>이 실험실의 <b>전압계</b>는 전지의 <b>기전력</b>(전류가 흐르지 않을 때의 전압)을 보여 줘요. 실제로 꼬마전구를 켠 채 재면 내부 저항 때문에 이보다 작은 값(단자 전압)이 읽혀요.</li>
    <li><b>분극</b>: 볼타 전지의 (+)극이 H₂ 기포로 덮여 전압이 떨어지는 현상. <b>감극제</b>(MnO₂, H₂O₂ 등 산화제)로 막아요.</li>
    <li><b>국부 반응</b>: 볼타 전지의 아연판에서도 H⁺와 직접 반응해 기포가 생겨요. 이때 나온 전자는 도선으로 가지 않아요.</li></ul>`;
   h+='<h4>② 표준 환원 전위 E° (25 ℃)</h4>';
@@ -1509,9 +1511,9 @@ function thHTML(){
       const a=o.anM,c=o.caM,na=METALS[a].n;
       h+=`<div class="eq">(−)극 ${METALS[a].name}판: ${a} → ${ion(a)} + ${co(na)}e⁻ &nbsp;<span class="small">E° = ${METALS[a].E.toFixed(2)} V</span></div>
       <div class="eq">(+)극 ${METALS[c].name}판 표면: 2H⁺ + 2e⁻ → H₂↑ &nbsp;<span class="small">E° = 0.00 V</span></div>
-      <div class="eq">전체: ${a} + 2H⁺ → ${ion(a)} + H₂ ${na!==2?'<span class="small">(계수는 전자 수에 맞춰 조정)</span>':''}</div>
+      <div class="eq">전체: ${(()=>{const k=lcm(na,2);return `${co(k/na)}${a} + ${k}H⁺ → ${co(k/na)}${ion(a)} + ${co(k/2)}H₂`})()}</div>
       <div class="eq">E° = 0.00 − (${METALS[a].E.toFixed(2)}) = <b>${(-METALS[a].E).toFixed(2)} V</b></div>
-      <p class="small">(+)극의 ${METALS[c].name}은(는) 반응하지 않아요. 전자를 받아 H⁺에 전달하는 통로예요. 지금 (+)극 표면을 H₂ 기포가 덮은 비율은 약 <b>${(D.theta*100).toFixed(0)}%</b>예요.</p>`;
+      <p class="small">(+)극의 ${jo(METALS[c].name,'은','는')} 반응하지 않아요. 전자를 받아 H⁺에 전달하는 통로예요. 지금 (+)극 표면을 H₂ 기포가 덮은 비율은 약 <b>${(D.theta*100).toFixed(0)}%</b>예요.</p>`;
       adv=`<h4>전지의 선 표시법</h4>
       <div class="eq">${a}(s) | ${ion(a)}(aq), H⁺(aq) | H₂(g) | ${c}(s)</div>
       <ul><li>왼쪽에 (−)극(산화 전극), 오른쪽에 (+)극(환원 전극)을 써요. <b>|</b> 는 상의 경계예요.</li><li>볼타 전지는 두 금속판이 같은 용액에 들어 있어서 염다리 표시(‖)가 없어요. (+)극에서는 H⁺가 환원되어 H₂(g)가 생기고, ${METALS[c].name}판은 전자를 전달하는 전극 역할만 해요.</li></ul>

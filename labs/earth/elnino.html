@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>엘니뇨 · 라니냐 가상 실험실 · V-Lab</title>
+<style>
+/* V-Lab 공용 글꼴·색 토큰만 가져옴 (공용 클래스는 이 파일의 클래스 이름과 겹치므로 lab-theme.css 전체는 쓰지 않음) */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+:root{--font: 'IBM Plex Sans KR', 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; --bg: #ffffff; --panel: #ffffff; --panel-2: #F7F8FA; --line: #E6E8EC; --line-2: #F0F1F3; --text: #111111; --text-2: #3F4652; --muted: #6B7280; --accent: #3182F6; --accent-soft: #EAF2FF; --ok: #12A66B; --warn: #F5A623; --err: #E5484D; --radius: 12px; --radius-sm: 8px;}
+</style>
+<style>
+:root{
+  --bg:#0e1a2b; --panel:#15253b; --panel2:#1c3150; --border:#2a4466;
+  --text:#e9eff8; --muted:#9db0c8; --accent:#ffb347;
+  --warm:#ff6b4a; --cool:#4aa8ff; --ok:#5fd38d;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+.wrap{max-width:1200px;margin:0 auto;padding:0 16px 40px}
+header{padding:28px 0 8px}
+header .tag{display:inline-block;font-size:13px;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:2px 10px;margin-bottom:8px}
+h1{margin:0 0 6px;font-size:clamp(24px,4vw,34px)}
+header p{margin:0;color:var(--muted)}
+h2{font-size:20px;margin:0 0 12px}
+h3{font-size:16px;margin:0 0 8px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;margin-top:16px}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+#scene{width:100%;display:block;border-radius:10px;cursor:crosshair;background:#0b1626}
+.hint{font-size:13px;color:var(--muted);margin-top:8px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--border);background:var(--panel2);color:var(--text);padding:8px 12px;transition:.15s}
+button:hover{border-color:var(--accent)}
+button.active{background:var(--accent);color:#1b1206;border-color:var(--accent);font-weight:700}
+button.primary{background:var(--ok);color:#06210f;border-color:var(--ok);font-weight:700}
+label.sl{display:block;margin:14px 0 4px;font-weight:600}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.scale{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.checks{display:flex;flex-direction:column;gap:4px;margin-top:12px;font-size:14px}
+.status{text-align:center;padding:10px;border-radius:10px;font-size:20px;font-weight:800;margin:4px 0 12px;transition:.4s}
+.status.normal{background:#1f3b2c;color:#8ff0b5}
+.status.elnino{background:#4a1f17;color:#ffb09c}
+.status.lanina{background:#16304f;color:#9cd0ff}
+.readout{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ro{background:var(--panel2);border-radius:10px;padding:8px 10px}
+.ro .k{font-size:12px;color:var(--muted)}
+.ro .v{font-size:18px;font-weight:700}
+.bar{height:10px;background:#0b1626;border-radius:6px;overflow:hidden;margin-top:4px}
+.bar>i{display:block;height:100%;background:var(--cool);transition:width .3s}
+.impact{margin-top:12px;font-size:14px;background:var(--panel2);border-radius:10px;padding:10px 12px}
+.impact ul{margin:4px 0 0;padding-left:18px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media (max-width:900px){.row2{grid-template-columns:1fr}}
+#graph{width:100%;height:220px;display:block}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{border-bottom:1px solid var(--border);padding:6px 4px;text-align:center}
+th{color:var(--muted);font-weight:600}
+.tablewrap{max-height:240px;overflow:auto}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0}
+.steps li{counter-increment:s;position:relative;padding:8px 0 8px 38px;border-bottom:1px dashed var(--border)}
+.steps li::before{content:counter(s);position:absolute;left:0;top:8px;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#1b1206;font-weight:800;text-align:center;line-height:26px}
+textarea{width:100%;min-height:70px;background:#0b1626;color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px;font:inherit;resize:vertical}
+.q{margin-bottom:16px}
+.q .opts{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.q .opts button{text-align:left}
+.q .opts button.right{background:#1f4a32;border-color:var(--ok)}
+.q .opts button.wrong{background:#4a2020;border-color:var(--warm)}
+.fb{font-size:14px;margin-top:6px;color:var(--muted);min-height:1em}
+.concept{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:800px){.concept{grid-template-columns:1fr}}
+.concept .c{background:var(--panel2);border-radius:10px;padding:12px;font-size:14px}
+.concept .c b{font-size:16px}
+section{margin-top:16px}
+footer{color:var(--muted);font-size:13px;text-align:center;margin-top:24px}
+
+/* ===== V-Lab 공용 테마에 맞춘 덮어쓰기 ===== */
+body{font-family:var(--font);letter-spacing:-0.012em;-webkit-font-smoothing:antialiased}
+body.vlab-embed header{display:none}
+
+:root{--bg:#fff;--panel:#fff;--panel2:#F7F8FA;--border:#E6E8EC;--text:#111;--muted:#6B7280;--accent:#3182F6;--warm:#E5484D;--cool:#1E5EB8;--ok:#12A66B}
+.wrap{max-width:none;padding:0 16px 32px}
+header{padding:16px 0 4px}header .tag{display:none}
+h1{font-size:22px;font-weight:600;letter-spacing:-.02em}h2,h3{font-weight:600}
+.card{border-radius:12px}
+button{border-radius:8px;font-weight:600;background:#fff;color:#111;border-color:var(--border)}
+button:hover{background:#F7F8FA;border-color:var(--border)}
+button.active{background:#111;color:#fff;border-color:#111}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+#scene{background:#0b1626;border:1px solid var(--border)}
+.status{font-weight:600}.status.normal{background:#EDFAF3;color:#0B7A4B}.status.elnino{background:#FDEEEE;color:#B42318}.status.lanina{background:#EAF2FF;color:#1E5EB8}
+.ro{border:1px solid var(--border)}.bar{background:var(--border)}.bar>i{background:var(--accent)}
+.impact{border:1px solid var(--border)}
+textarea{background:#fff;color:#111;border-color:var(--border);border-radius:8px}
+.q .opts button.right{background:#EDFAF3;border-color:var(--ok)}.q .opts button.wrong{background:#FDEEEE;border-color:var(--warm)}
+.steps li::before{background:var(--accent);color:#fff;font-weight:600}
+.concept .c{border:1px solid var(--border)}
+</style>
+</head>
+<body>
+<script>if(/embed/.test(location.hash))document.body.classList.add("vlab-embed");</script>
+<div class="wrap">
+
+<header>
+  <span class="tag">지구과학 가상 실험실</span>
+  <h1>🌊 엘니뇨 · 라니냐 가상 실험실</h1>
+  <p>적도 태평양의 <b>무역풍 세기</b>를 조절하면서 해수면 온도, 수온약층, 용승, 대기 순환(워커 순환), 강수 지역이 어떻게 바뀌는지 관찰해 보세요.</p>
+</header>
+
+<div class="grid">
+  <div class="card">
+    <h2>적도 태평양 단면도 <span style="font-size:14px;color:var(--muted);font-weight:400">(서쪽 ← → 동쪽)</span></h2>
+    <canvas id="scene"></canvas>
+    <div class="hint">🌡️ 바다를 클릭하면 그 위치에 <b>수온 측정기</b>가 설치됩니다. 상태가 바뀌는 동안 수온이 어떻게 변하는지 지켜보세요.</div>
+  </div>
+
+  <div class="card">
+    <h3>실험 조건</h3>
+    <div class="btns" id="presets">
+      <button data-w="60" class="active">평상시</button>
+      <button data-w="15">엘니뇨</button>
+      <button data-w="100">라니냐</button>
+    </div>
+    <label class="sl" for="wind">무역풍 세기: <span id="windVal">60</span>%</label>
+    <input type="range" id="wind" min="0" max="100" value="60">
+    <div class="scale"><span>약함</span><span>평상시</span><span>강함</span></div>
+
+    <div class="checks">
+      <label><input type="checkbox" id="chkWalker" checked> 워커 순환(대기) 표시</label>
+      <label><input type="checkbox" id="chkCurrent" checked> 해류·용승 표시</label>
+      <label><input type="checkbox" id="chkLabel" checked> 이름표 표시</label>
+    </div>
+
+    <div class="btns" style="margin-top:12px">
+      <button id="pauseBtn">⏸ 일시정지</button>
+      <button id="recordBtn" class="primary">📋 데이터 기록</button>
+    </div>
+
+    <div style="margin-top:14px;font-size:13px;color:var(--muted)">모의 시간: <b id="months" style="color:var(--text)">0</b>개월 경과 <span id="adjust"></span></div>
+    <div class="status normal" id="status">평상시</div>
+
+    <div class="readout">
+      <div class="ro"><div class="k">서태평양 수온</div><div class="v" id="tw">-</div></div>
+      <div class="ro"><div class="k">동태평양 수온</div><div class="v" id="te">-</div></div>
+      <div class="ro"><div class="k">Niño 3.4 수온 편차</div><div class="v" id="anom">-</div></div>
+      <div class="ro"><div class="k">수온약층 깊이 차(서-동)</div><div class="v" id="thd">-</div></div>
+      <div class="ro"><div class="k">인도네시아·호주 강수</div><div class="bar"><i id="rainW"></i></div></div>
+      <div class="ro"><div class="k">페루 연안 강수</div><div class="bar"><i id="rainE"></i></div></div>
+    </div>
+    <div class="impact" id="impact"></div>
+  </div>
+</div>
+
+<div class="row2">
+  <div class="card">
+    <h3>📈 Niño 3.4 해역 수온 편차 그래프</h3>
+    <canvas id="graph"></canvas>
+    <div class="hint">편차가 <b style="color:var(--warm)">+0.5 °C 이상</b>이면 엘니뇨, <b style="color:var(--cool)">−0.5 °C 이하</b>이면 라니냐 경향입니다. (실제로는 이 상태가 몇 달 이상 지속되어야 판정)</div>
+  </div>
+  <div class="card">
+    <h3>📋 실험 데이터 기록표</h3>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>#</th><th>무역풍</th><th>서 수온</th><th>동 수온</th><th>편차</th><th>측정기</th><th>상태</th></tr></thead>
+        <tbody id="log"><tr><td colspan="7" style="color:var(--muted)">‘데이터 기록’ 버튼을 눌러 값을 저장하세요.</td></tr></tbody>
+      </table>
+    </div>
+    <div class="btns" style="margin-top:10px"><button id="clearBtn">기록 지우기</button><button id="csvBtn">CSV로 저장</button></div>
+  </div>
+</div>
+
+<section class="card">
+  <h2>🔬 탐구 활동</h2>
+  <ol class="steps">
+    <li><b>평상시 관찰</b> — ‘평상시’를 누르고 데이터를 기록하세요. 따뜻한 물은 어느 쪽에 모여 있나요? 수온약층은 어느 쪽이 더 깊나요?</li>
+    <li><b>무역풍 약화</b> — 무역풍을 20% 이하로 낮추고 그래프가 안정될 때까지 기다린 뒤 기록하세요. 동태평양 수온, 용승, 물고기 수는 어떻게 변하나요?</li>
+    <li><b>무역풍 강화</b> — 무역풍을 90% 이상으로 높이고 기록하세요. 평상시와 비교해 무엇이 더 강해졌나요?</li>
+    <li><b>측정기 비교</b> — 페루 앞바다 깊이 약 50 m에 측정기를 놓고, 세 가지 상태에서 수온을 비교해 보세요.</li>
+  </ol>
+  <div style="margin-top:14px">
+    <h3>✏️ 탐구 질문</h3>
+    <p style="margin:4px 0">1. 무역풍이 약해지면 왜 동태평양의 수온이 올라갈까요? ‘용승’과 ‘따뜻한 해수의 이동’이라는 말을 넣어 설명해 보세요.</p>
+    <textarea placeholder="여기에 답을 적어 보세요."></textarea>
+    <p style="margin:10px 0 4px">2. 엘니뇨 시기에 인도네시아에는 가뭄, 페루에는 홍수가 나는 까닭을 워커 순환(상승·하강 기류)과 연결해 설명해 보세요.</p>
+    <textarea placeholder="여기에 답을 적어 보세요."></textarea>
+  </div>
+</section>
+
+<section class="card">
+  <h2>📚 핵심 개념 정리</h2>
+  <div class="concept">
+    <div class="c"><b>평상시</b><br>강한 무역풍이 따뜻한 표층수를 서쪽으로 밀어 서태평양에 따뜻한 해수가 쌓입니다. 동태평양(페루 연안)에서는 차가운 심층수가 <b>용승</b>해 수온이 낮고 영양염이 풍부해 좋은 어장이 됩니다.</div>
+    <div class="c"><b>엘니뇨</b><br>무역풍이 약해지면 따뜻한 해수가 동쪽으로 퍼지고 용승이 약해져 동태평양 수온이 평년보다 높아집니다. 상승 기류 지역이 동쪽으로 옮겨가 페루에는 폭우, 인도네시아·호주에는 가뭄이 나타나기 쉽습니다.</div>
+    <div class="c"><b>라니냐</b><br>무역풍이 평상시보다 강해져 용승이 더 활발해지고 동태평양 수온이 평년보다 낮아집니다. 서태평양에는 강수가 많아지고 동태평양은 더 건조해집니다.</div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>✅ 확인 문제</h2>
+  <div id="quiz"></div>
+  <div id="score" style="font-weight:700"></div>
+</section>
+
+<footer>엘니뇨 가상 실험실 · 단순화된 교육용 모형으로, 실제 수치와는 차이가 있을 수 있습니다.</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $ = id => document.getElementById(id);
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const lerp = (a,b,t) => a + (b-a)*t;
+
+// ---------- 모형 ----------
+const W_NORMAL = 0.6;
+const sim = { wind: 0.6, anomaly: 0, months: 0, paused: false, probe: null, t: 0 };
+const opts = { walker: true, current: true, label: true };
+
+function targetAnomaly(w){ return (W_NORMAL - w) * 5.5; }
+function state(a){
+  const tw = 29.0 - Math.max(0,a)*0.4 + Math.max(0,-a)*0.25;
+  const te = 24.5 + a*1.15;
+  const thW = 150 - a*12;
+  const thE = Math.max(20, 50 + a*24);
+  const conv = clamp(a >= 0 ? 0.2 + a*0.14 : 0.2 + a*0.04, 0.1, 0.62);
+  const rainW = clamp(0.75 - a*0.28, 0.05, 1);
+  const rainE = clamp(0.12 + a*0.3, 0.03, 1);
+  const upwell = clamp(sim.wind*1.4 - 0.1, 0, 1.3);
+  return { tw, te, thW, thE, conv, rainW, rainE, upwell };
+}
+function label(a){
+  if (a >= 0.5) return ["엘니뇨","elnino"];
+  if (a <= -0.5) return ["라니냐","lanina"];
+  return ["평상시","normal"];
+}
+
+// ---------- 캔버스 ----------
+const cv = $("scene"), ctx = cv.getContext("2d");
+let W = 800, H = 480, DPR = 1;
+let seaY, xL, xR, botY;
+function resize(){
+  DPR = window.devicePixelRatio || 1;
+  W = cv.clientWidth || 800;
+  H = Math.max(320, Math.round(W * 0.6));
+  cv.style.height = H + "px";
+  cv.width = W*DPR; cv.height = H*DPR;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  seaY = H*0.42; botY = H - 8;
+  xL = W*0.09; xR = W*0.91;
+  gResize();
+}
+const depthY = d => seaY + d/250 * (botY - seaY);
+const yDepth = y => (y - seaY) / (botY - seaY) * 250;
+function frac(x){ return clamp((x - xL)/(xR - xL), 0, 1); }
+function thermAt(s, f){ return lerp(s.thW, s.thE, Math.pow(f, 1.15)); }
+function sstAt(s, f){ return lerp(s.tw, s.te, Math.pow(f, 1.6)); }
+function tempAt(s, f, d){
+  const ts = sstAt(s,f), th = thermAt(s,f), tdeep = 9;
+  return tdeep + (ts - tdeep) / (1 + Math.exp((d - th)/14));
+}
+function tColor(T, light){
+  const h = lerp(215, 5, clamp((T-18)/12, 0, 1));
+  return `hsl(${h},72%,${light||48}%)`;
+}
+
+// 입자
+const rnd = Math.random;
+const walkers = Array.from({length:46}, () => ({u: rnd()}));
+const ups = Array.from({length:34}, () => ({p: rnd(), x: rnd()}));
+const curs = Array.from({length:50}, () => ({x: rnd(), d: 6 + rnd()*30}));
+const drops = Array.from({length:70}, () => ({x: rnd(), y: rnd(), side: rnd()}));
+
+function draw(s, dt){
+  // 하늘
+  const sky = ctx.createLinearGradient(0,0,0,seaY);
+  sky.addColorStop(0,"#0d2340"); sky.addColorStop(1,"#3b6fa0");
+  ctx.fillStyle = sky; ctx.fillRect(0,0,W,seaY);
+
+  // 바다(심층)
+  ctx.fillStyle = "#0a2244"; ctx.fillRect(0,seaY,W,H-seaY);
+  // 표층 (기둥별 수온 색)
+  const step = 3;
+  for (let x = 0; x < W; x += step){
+    const f = frac(x);
+    const th = depthY(thermAt(s,f));
+    const g = ctx.createLinearGradient(0,seaY,0,th+18);
+    g.addColorStop(0, tColor(sstAt(s,f), 50));
+    g.addColorStop(0.85, tColor(sstAt(s,f)-2.5, 40));
+    g.addColorStop(1, "#0a2244");
+    ctx.fillStyle = g; ctx.fillRect(x, seaY, step+0.5, th+18-seaY);
+  }
+  // 깊이 어둡게
+  const dk = ctx.createLinearGradient(0,seaY,0,H);
+  dk.addColorStop(0,"rgba(0,0,20,0)"); dk.addColorStop(1,"rgba(0,0,20,.45)");
+  ctx.fillStyle = dk; ctx.fillRect(0,seaY,W,H-seaY);
+
+  // 수온약층 선
+  ctx.save(); ctx.setLineDash([8,6]); ctx.lineWidth = 2; ctx.strokeStyle = "rgba(255,255,255,.85)";
+  ctx.beginPath();
+  for (let x = xL; x <= xR; x += 6){ const y = depthY(thermAt(s,frac(x))); x===xL ? ctx.moveTo(x,y) : ctx.lineTo(x,y); }
+  ctx.stroke(); ctx.restore();
+
+  // 해류 · 용승
+  if (opts.current){
+    // 표층 해류
+    const v = (sim.wind - 0.3) * 0.12;
+    ctx.fillStyle = "rgba(255,255,255,.7)";
+    curs.forEach(c => {
+      if (!sim.paused) { c.x -= v*dt; if (c.x < 0) c.x += 1; if (c.x > 1) c.x -= 1; }
+      const x = lerp(xL, xR, c.x), y = depthY(c.d);
+      ctx.beginPath(); ctx.arc(x, y, 1.6, 0, 7); ctx.fill();
+      const dir = v >= 0 ? 1 : -1;
+      if (Math.abs(v) > 0.01){ ctx.fillRect(x, y-0.6, dir*Math.min(10, Math.abs(v)*140), 1.2); }
+    });
+    // 용승
+    const n = Math.round(ups.length * clamp(sim.wind, 0, 1));
+    ups.forEach((u,i) => {
+      if (!sim.paused) { u.p += sim.wind*0.28*dt; if (u.p > 1){ u.p = 0; u.x = rnd(); } }
+      if (i >= n) return;
+      const x = lerp(xR - (xR-xL)*0.14, xR - 6, u.x);
+      const y = lerp(depthY(150), seaY + 4, u.p);
+      ctx.fillStyle = `rgba(150,215,255,${0.9 - u.p*0.5})`;
+      ctx.beginPath(); ctx.moveTo(x, y-5); ctx.lineTo(x-3, y+2); ctx.lineTo(x+3, y+2); ctx.closePath(); ctx.fill();
+    });
+    // 물고기 (영양염 ↔ 용승)
+    const fish = Math.round(clamp(s.upwell, 0, 1.3) * 5);
+    for (let i = 0; i < fish; i++){
+      const fx = xR - (xR-xL)*(0.04 + 0.025*i) - (i%2)*8;
+      const fy = depthY(28 + (i%3)*14) + Math.sin(sim.t*2 + i)*3;
+      drawFish(fx, fy);
+    }
+  }
+
+  // 육지
+  drawLand();
+
+  // 대기: 워커 순환
+  const cx = lerp(xL, xR, s.conv);
+  const xE = xR - 20, ySurf = seaY - 26, yTop = H*0.07;
+  if (opts.walker){
+    const strength = clamp(sim.wind, 0, 1);
+    const pts = [[xE,ySurf],[cx,ySurf],[cx,yTop],[xE,yTop],[xE,ySurf]];
+    const segs = []; let tot = 0;
+    for (let i = 0; i < 4; i++){ const L = Math.hypot(pts[i+1][0]-pts[i][0], pts[i+1][1]-pts[i][1]); segs.push(L); tot += L; }
+    ctx.save(); ctx.strokeStyle = `rgba(255,255,255,${0.12 + strength*0.25})`; ctx.lineWidth = 1.5; ctx.setLineDash([4,6]);
+    ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]); for (let i = 1; i < 5; i++) ctx.lineTo(pts[i][0],pts[i][1]); ctx.stroke(); ctx.restore();
+    walkers.forEach(w => {
+      if (!sim.paused) w.u = (w.u + dt*0.07*(0.15+strength)) % 1;
+      let d = w.u*tot, i = 0;
+      while (i < 3 && d > segs[i]) { d -= segs[i]; i++; }
+      const t = d / segs[i];
+      const x = lerp(pts[i][0], pts[i+1][0], t), y = lerp(pts[i][1], pts[i+1][1], t);
+      ctx.fillStyle = `rgba(255,230,160,${0.25 + strength*0.7})`;
+      ctx.beginPath(); ctx.arc(x, y, 2.3, 0, 7); ctx.fill();
+    });
+    if (opts.label){
+      txt("상승 기류", cx, yTop - 4 + 20, "#ffe6a0", 12, "center");
+      txt("하강 기류(건조)", xE - 6, (yTop+ySurf)/2, "#ffe6a0", 12, "right");
+    }
+  }
+
+  // 무역풍 화살표
+  const wl = 8 + sim.wind*42;
+  ctx.strokeStyle = "#fff"; ctx.fillStyle = "#fff"; ctx.lineWidth = 2.5;
+  for (let i = 0; i < 4; i++){
+    const x0 = lerp(xL + 40, xR - 30, (i+0.6)/4.2), y0 = seaY - 10;
+    if (sim.wind < 0.03) continue;
+    ctx.globalAlpha = 0.35 + sim.wind*0.65;
+    ctx.beginPath(); ctx.moveTo(x0 + wl/2, y0); ctx.lineTo(x0 - wl/2, y0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x0 - wl/2 - 6, y0); ctx.lineTo(x0 - wl/2 + 2, y0 - 5); ctx.lineTo(x0 - wl/2 + 2, y0 + 5); ctx.closePath(); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  if (opts.label) txt(`무역풍 (${Math.round(sim.wind*100)}%)`, (xL+xR)/2 + 60, seaY - 22, "#fff", 12, "center");
+
+  // 구름 · 비
+  drawCloud(cx, H*0.17, 1);
+  if (s.rainE > 0.45 && Math.abs(cx - (xR-60)) > 90) drawCloud(xR - 60, H*0.2, 0.6);
+  drops.forEach(d => {
+    if (!sim.paused) { d.y += dt*1.6; if (d.y > 1) { d.y = 0; d.x = rnd(); } }
+    const big = d.side < 0.8;
+    const bx = big ? cx : xR - 60, spread = big ? 70 : 40;
+    if (!big && s.rainE <= 0.45) return;
+    const x = bx + (d.x - 0.5)*spread*2;
+    const y = lerp(H*0.22, seaY - 2, d.y);
+    ctx.strokeStyle = "rgba(170,210,255,.7)"; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x-2, y+7); ctx.stroke();
+  });
+
+  // 해수면 선
+  ctx.strokeStyle = "rgba(255,255,255,.5)"; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0,seaY); ctx.lineTo(W,seaY); ctx.stroke();
+
+  // 표시
+  if (opts.label){
+    txt(`${s.tw.toFixed(1)}°C`, xL + 40, seaY + 20, "#fff", 14, "center", true);
+    txt(`${s.te.toFixed(1)}°C`, xR - 40, seaY + 20, "#fff", 14, "center", true);
+    const mid = (xL+xR)/2;
+    txt("수온약층", mid, depthY(thermAt(s, 0.5)) - 6, "#fff", 12, "center");
+    txt("따뜻한 해수", xL + 70, depthY(s.thW*0.55), "rgba(255,255,255,.85)", 12, "center");
+    txt("차가운 심층수", mid, depthY(215), "rgba(200,225,255,.8)", 12, "center");
+    if (opts.current && sim.wind > 0.2) txt("용승", xR - (xR-xL)*0.07, depthY(115), "#bfe6ff", 12, "center", true);
+  }
+  // 깊이 눈금
+  ctx.fillStyle = "rgba(255,255,255,.6)"; ctx.font = "11px sans-serif"; ctx.textAlign = "left";
+  [0,100,200].forEach(d => { const y = depthY(d); ctx.fillRect(xL - 2, y, 5, 1); if (d) ctx.fillText(d+"m", xL + 6, y + 4); });
+
+  // 측정기
+  if (sim.probe){
+    const p = sim.probe, x = lerp(xL, xR, p.f), y = depthY(p.d);
+    const T = tempAt(s, p.f, p.d);
+    ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(x, seaY); ctx.lineTo(x, y); ctx.stroke();
+    ctx.fillStyle = tColor(T, 55); ctx.beginPath(); ctx.arc(x, y, 6, 0, 7); ctx.fill(); ctx.stroke();
+    const lbl = `${T.toFixed(1)}°C · ${Math.round(p.d)}m`;
+    ctx.font = "bold 13px sans-serif";
+    const tw = ctx.measureText(lbl).width + 12;
+    const bx = clamp(x + 10, 4, W - tw - 4);
+    ctx.fillStyle = "rgba(0,0,0,.7)"; roundRect(bx, y - 24, tw, 20, 5); ctx.fill();
+    ctx.fillStyle = "#fff"; ctx.textAlign = "left"; ctx.fillText(lbl, bx + 6, y - 9);
+  }
+}
+
+function drawLand(){
+  // 서쪽: 인도네시아·호주
+  ctx.fillStyle = "#3f6b3a";
+  ctx.beginPath();
+  ctx.moveTo(0, seaY - 30);
+  ctx.quadraticCurveTo(W*0.04, seaY - 48, xL - 4, seaY - 6);
+  ctx.lineTo(xL + 10, depthY(60)); ctx.lineTo(xL + 22, H); ctx.lineTo(0, H); ctx.closePath(); ctx.fill();
+  // 동쪽: 남아메리카 + 안데스
+  ctx.fillStyle = "#6b5a3a";
+  ctx.beginPath();
+  ctx.moveTo(W, seaY - 70);
+  ctx.lineTo(W - W*0.03, seaY - 95); ctx.lineTo(W - W*0.055, seaY - 40);
+  ctx.quadraticCurveTo(xR + 4, seaY - 12, xR + 2, seaY);
+  ctx.lineTo(xR - 10, depthY(60)); ctx.lineTo(xR - 24, H); ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
+  // 해저 경사 어둡게
+  ctx.fillStyle = "rgba(0,0,0,.25)";
+  ctx.fillRect(0, seaY, xL + 30, H - seaY); ctx.fillRect(xR - 30, seaY, W, H - seaY);
+  ctx.fillStyle = "rgba(0,0,0,0)";
+  if (opts.label){
+    txt("인도네시아·호주", W*0.045, seaY - 52, "#d8f0c8", 12, "center", true);
+    txt("남아메리카(페루)", W - W*0.05, seaY - 102, "#f3e0bf", 12, "center", true);
+    txt("서태평양", xL + 45, H - 14, "rgba(255,255,255,.6)", 12, "center");
+    txt("동태평양", xR - 45, H - 14, "rgba(255,255,255,.6)", 12, "center");
+  }
+}
+function drawCloud(x, y, k){
+  ctx.fillStyle = "rgba(235,240,248,.92)";
+  [[0,0,34],[-30,10,24],[30,10,26],[-14,-18,22],[16,-16,24],[0,14,28]].forEach(c => {
+    ctx.beginPath(); ctx.arc(x + c[0]*k, y + c[1]*k, c[2]*k, 0, 7); ctx.fill();
+  });
+  ctx.fillStyle = "rgba(120,135,160,.55)";
+  ctx.fillRect(x - 46*k, y + 20*k, 92*k, 10*k);
+}
+function drawFish(x, y){
+  ctx.fillStyle = "#ffd36b";
+  ctx.beginPath(); ctx.ellipse(x, y, 7, 3.5, 0, 0, 7); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(x + 6, y); ctx.lineTo(x + 11, y - 4); ctx.lineTo(x + 11, y + 4); ctx.closePath(); ctx.fill();
+}
+function txt(t, x, y, c, size, align, bold){
+  ctx.font = `${bold ? "bold " : ""}${size}px "Noto Sans KR","Malgun Gothic",sans-serif`;
+  ctx.textAlign = align || "left";
+  ctx.lineWidth = 3; ctx.strokeStyle = "rgba(0,0,0,.55)"; ctx.strokeText(t, x, y);
+  ctx.fillStyle = c; ctx.fillText(t, x, y);
+}
+function roundRect(x, y, w, h, r){
+  ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+}
+
+cv.addEventListener("click", e => {
+  const r = cv.getBoundingClientRect();
+  const x = e.clientX - r.left, y = e.clientY - r.top;
+  if (y < seaY + 3 || x < xL || x > xR) return;
+  sim.probe = { f: frac(x), d: clamp(yDepth(y), 1, 245) };
+});
+
+// ---------- 그래프 ----------
+const gc = $("graph"), g = gc.getContext("2d");
+let GW = 400, GH = 220;
+const hist = [];
+function gResize(){
+  const d = window.devicePixelRatio || 1;
+  GW = gc.clientWidth || 400; GH = 220;
+  gc.width = GW*d; gc.height = GH*d; g.setTransform(d,0,0,d,0,0);
+}
+function drawGraph(){
+  g.clearRect(0,0,GW,GH);
+  const L = 36, R = GW - 8, T = 10, B = GH - 24;
+  const yv = v => lerp(B, T, (v + 3) / 6);
+  g.fillStyle = "rgba(255,107,74,.12)"; g.fillRect(L, T, R-L, yv(0.5) - T);
+  g.fillStyle = "rgba(74,168,255,.12)"; g.fillRect(L, yv(-0.5), R-L, B - yv(-0.5));
+  g.strokeStyle = "#E6E8EC"; g.lineWidth = 1; g.fillStyle = "#6B7280"; g.font = "11px sans-serif"; g.textAlign = "right";
+  for (let v = -3; v <= 3; v++){ const y = yv(v); g.beginPath(); g.moveTo(L,y); g.lineTo(R,y); g.stroke(); g.fillText((v>0?"+":"")+v, L-4, y+4); }
+  g.setLineDash([4,4]); g.strokeStyle = "#ff8a6a"; g.beginPath(); g.moveTo(L,yv(0.5)); g.lineTo(R,yv(0.5)); g.stroke();
+  g.strokeStyle = "#7cc0ff"; g.beginPath(); g.moveTo(L,yv(-0.5)); g.lineTo(R,yv(-0.5)); g.stroke(); g.setLineDash([]);
+  g.textAlign = "center"; g.fillText("경과 시간(개월) →", (L+R)/2, GH - 6);
+  if (hist.length < 2) return;
+  const N = 60, dx = (R - L) / (N - 1), off = N - hist.length;
+  g.lineWidth = 2.5; g.strokeStyle = "#C98A00"; g.beginPath();
+  hist.forEach((v,i) => { const x = L + (i+off)*dx, y = yv(clamp(v,-3,3)); i ? g.lineTo(x,y) : g.moveTo(x,y); });
+  g.stroke();
+}
+
+// ---------- UI ----------
+const windEl = $("wind");
+function setWind(v){
+  sim.wind = v/100; windEl.value = v; $("windVal").textContent = v;
+  document.querySelectorAll("#presets button").forEach(b => b.classList.toggle("active", +b.dataset.w === +v));
+}
+windEl.addEventListener("input", e => setWind(+e.target.value));
+document.querySelectorAll("#presets button").forEach(b => b.addEventListener("click", () => setWind(+b.dataset.w)));
+$("chkWalker").onchange = e => opts.walker = e.target.checked;
+$("chkCurrent").onchange = e => opts.current = e.target.checked;
+$("chkLabel").onchange = e => opts.label = e.target.checked;
+$("pauseBtn").onclick = () => { sim.paused = !sim.paused; $("pauseBtn").textContent = sim.paused ? "▶ 계속" : "⏸ 일시정지"; };
+
+const impacts = {
+  normal: ["서태평양(인도네시아·호주): 비가 많은 평년 기후", "페루 연안: 용승이 활발해 수온이 낮고 좋은 어장", "워커 순환이 평년 세기로 유지"],
+  elnino: ["인도네시아·호주: 강수 감소 → 가뭄, 산불 위험", "페루·에콰도르: 폭우·홍수, 용승 약화로 어획량 감소", "상승 기류 지역이 중앙~동태평양으로 이동"],
+  lanina: ["인도네시아·호주: 강수 증가 → 홍수 위험", "페루 연안: 용승 강화, 수온이 평년보다 낮고 건조", "무역풍과 워커 순환이 평년보다 강함"]
+};
+let lastLabel = "";
+function updateUI(s){
+  const a = sim.anomaly, [name, cls] = label(a);
+  $("tw").textContent = s.tw.toFixed(1) + " °C";
+  $("te").textContent = s.te.toFixed(1) + " °C";
+  $("anom").textContent = (a >= 0 ? "+" : "") + a.toFixed(2) + " °C";
+  $("anom").style.color = a >= 0.5 ? "#B42318" : a <= -0.5 ? "#1E5EB8" : "";
+  $("thd").textContent = Math.round(s.thW - s.thE) + " m";
+  $("rainW").style.width = (s.rainW*100) + "%";
+  $("rainE").style.width = (s.rainE*100) + "%";
+  $("months").textContent = Math.floor(sim.months);
+  const diff = Math.abs(targetAnomaly(sim.wind) - a);
+  $("adjust").textContent = diff > 0.15 ? "· 바다가 변화에 반응하는 중…" : "· 안정 상태";
+  if (name !== lastLabel){
+    lastLabel = name;
+    const st = $("status"); st.textContent = name; st.className = "status " + cls;
+    $("impact").innerHTML = "<b>예상되는 영향</b><ul>" + impacts[cls].map(t => `<li>${t}</li>`).join("") + "</ul>";
+  }
+}
+
+// 기록
+const rows = [];
+$("recordBtn").onclick = () => {
+  const s = state(sim.anomaly);
+  const pr = sim.probe ? `${tempAt(s, sim.probe.f, sim.probe.d).toFixed(1)}°C (${Math.round(sim.probe.d)}m)` : "-";
+  rows.push([rows.length + 1, Math.round(sim.wind*100) + "%", s.tw.toFixed(1), s.te.toFixed(1), (sim.anomaly>=0?"+":"") + sim.anomaly.toFixed(2), pr, label(sim.anomaly)[0]]);
+  renderLog();
+};
+$("clearBtn").onclick = () => { rows.length = 0; renderLog(); };
+$("csvBtn").onclick = () => {
+  if (!rows.length) return;
+  const head = "번호,무역풍,서태평양수온(°C),동태평양수온(°C),수온편차(°C),측정기,상태\n";
+  const blob = new Blob(["\ufeff" + head + rows.map(r => r.join(",")).join("\n")], {type:"text/csv"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "엘니뇨_실험기록.csv"; a.click();
+};
+function renderLog(){
+  $("log").innerHTML = rows.length ? rows.map(r => "<tr>" + r.map(c => `<td>${c}</td>`).join("") + "</tr>").join("")
+    : '<tr><td colspan="7" style="color:var(--muted)">‘데이터 기록’ 버튼을 눌러 값을 저장하세요.</td></tr>';
+}
+
+// 퀴즈
+const quiz = [
+  {q:"엘니뇨가 발생할 때 적도 태평양의 무역풍은 평상시와 비교해 어떻게 되나요?", o:["더 강해진다","약해진다","방향이 남북으로 바뀐다","변화가 없다"], a:1, e:"무역풍이 약해지면서 서쪽에 쌓여 있던 따뜻한 해수가 동쪽으로 퍼집니다."},
+  {q:"엘니뇨 시기 페루 연안에서 어획량이 줄어드는 주된 까닭은?", o:["수온이 낮아져서","용승이 약해져 영양염 공급이 줄어서","바다가 얼어서","무역풍이 강해져서"], a:1, e:"차가운 심층수의 용승이 약해지면 영양염이 줄어 플랑크톤과 물고기가 감소합니다."},
+  {q:"엘니뇨 시기 동태평양의 수온약층 깊이는 평상시보다?", o:["깊어진다","얕아진다","사라진다","변화 없다"], a:0, e:"따뜻한 해수가 동쪽으로 이동해 쌓이면서 동쪽 수온약층이 깊어지고, 동서 기울기가 완만해집니다."},
+  {q:"라니냐 시기 인도네시아·호주 지역의 날씨로 알맞은 것은?", o:["가뭄이 심해진다","강수량이 많아진다","기온이 크게 떨어져 눈이 온다","변화가 없다"], a:1, e:"라니냐 때는 따뜻한 해수가 서쪽에 더 많이 쌓여 상승 기류가 강해지고 비가 많이 옵니다."},
+  {q:"엘니뇨를 판단할 때 주로 사용하는 기준은?", o:["북극 해빙 면적","Niño 3.4 해역의 해수면 온도 편차","대서양의 염분","한반도의 기온"], a:1, e:"Niño 3.4 해역 해수면 온도가 평년보다 0.5 °C 이상 높은 상태가 일정 기간 지속되면 엘니뇨로 봅니다."}
+];
+let score = 0, answered = 0;
+$("quiz").innerHTML = quiz.map((q,i) => `<div class="q"><b>${i+1}. ${q.q}</b><div class="opts">${q.o.map((o,j)=>`<button data-q="${i}" data-o="${j}">${"①②③④"[j]} ${o}</button>`).join("")}</div><div class="fb" id="fb${i}"></div></div>`).join("");
+$("quiz").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const i = +b.dataset.q, j = +b.dataset.o, q = quiz[i];
+  const btns = b.parentElement.querySelectorAll("button");
+  if (b.parentElement.dataset.done) return;
+  b.parentElement.dataset.done = 1; answered++;
+  btns[q.a].classList.add("right");
+  if (j === q.a){ score++; $("fb"+i).innerHTML = "⭕ 정답! " + q.e; }
+  else { b.classList.add("wrong"); $("fb"+i).innerHTML = "❌ 아쉬워요. " + q.e; }
+  if (answered === quiz.length) $("score").textContent = `점수: ${score} / ${quiz.length}`;
+});
+
+// ---------- 루프 ----------
+let last = performance.now(), acc = 0;
+function loop(now){
+  const dt = Math.min(0.05, (now - last)/1000); last = now;
+  if (!sim.paused){
+    sim.t += dt;
+    sim.anomaly += (targetAnomaly(sim.wind) - sim.anomaly) * (1 - Math.exp(-dt*0.55));
+    sim.months += dt;
+    acc += dt;
+    if (acc >= 1){ acc -= 1; hist.push(sim.anomaly); if (hist.length > 60) hist.shift(); }
+  }
+  const s = state(sim.anomaly);
+  draw(s, sim.paused ? 0 : dt);
+  drawGraph();
+  updateUI(s);
+  requestAnimationFrame(loop);
+}
+window.addEventListener("resize", resize);
+resize();
+hist.push(0);
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

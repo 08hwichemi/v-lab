@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>별의 진화 가상 실험실 · V-Lab</title>
+<style>
+/* V-Lab 공용 글꼴·색 토큰만 가져옴 (공용 클래스는 이 파일의 클래스 이름과 겹치므로 lab-theme.css 전체는 쓰지 않음) */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+:root{--font: 'IBM Plex Sans KR', 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; --bg: #ffffff; --panel: #ffffff; --panel-2: #F7F8FA; --line: #E6E8EC; --line-2: #F0F1F3; --text: #111111; --text-2: #3F4652; --muted: #6B7280; --accent: #3182F6; --accent-soft: #EAF2FF; --ok: #12A66B; --warn: #F5A623; --err: #E5484D; --radius: 12px; --radius-sm: 8px;}
+</style>
+<style>
+:root{
+  --bg:#070b1a; --panel:#0f1630; --panel2:#141d3d; --line:#26325e;
+  --text:#e8ecff; --muted:#9aa5d1; --accent:#ffc857; --accent2:#5ad1ff; --good:#5be3a1; --bad:#ff6b81;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at top,#131c44 0%,var(--bg) 60%);color:var(--text);
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;line-height:1.6;min-height:100vh}
+header{padding:28px 20px 8px;text-align:center}
+header h1{margin:0;font-size:clamp(24px,4vw,36px);letter-spacing:-.5px}
+header h1 span{color:var(--accent)}
+header p{margin:6px 0 0;color:var(--muted)}
+main{max-width:1240px;margin:0 auto;padding:16px}
+.card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
+.card h2{margin:0 0 12px;font-size:18px;display:flex;align-items:center;gap:8px}
+.card h2 .num{background:var(--accent);color:#1a1300;border-radius:8px;padding:0 9px;font-size:14px}
+.goals{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:0;padding:0;list-style:none}
+.goals li{background:#0b1129;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px}
+.lab{display:grid;grid-template-columns:1.25fr 1fr;gap:16px}
+@media (max-width:900px){.lab{grid-template-columns:1fr}}
+.viewwrap{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#000}
+canvas{display:block;width:100%}
+#starCv{height:400px}
+#hrCv{height:400px;border-radius:12px;border:1px solid var(--line);background:#060914}
+.timeline{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chip{border:1px solid var(--line);background:#0b1129;color:var(--muted);border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer;transition:.2s}
+.chip:hover{border-color:var(--accent2);color:var(--text)}
+.chip.done{color:var(--text);border-color:#3a4a85}
+.chip.active{background:var(--accent);color:#1a1300;border-color:var(--accent);font-weight:700}
+.controls{display:grid;grid-template-columns:1.3fr 1fr;gap:18px}
+@media (max-width:760px){.controls{grid-template-columns:1fr}}
+label.lbl{font-size:14px;color:var(--muted);display:block;margin-bottom:6px}
+.massval{font-size:28px;font-weight:800;color:var(--accent)}
+.massval small{font-size:15px;color:var(--muted);font-weight:500}
+.cat{display:inline-block;margin-left:8px;padding:2px 10px;border-radius:999px;background:#1d2a5c;color:var(--accent2);font-size:13px;vertical-align:middle}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.btn{border:1px solid var(--line);background:#16214a;color:var(--text);padding:8px 14px;border-radius:10px;cursor:pointer;font-size:14px;font-family:inherit;transition:.15s}
+.btn:hover{border-color:var(--accent2)}
+.btn.primary{background:var(--accent);color:#1a1300;border-color:var(--accent);font-weight:700}
+.btn.small{padding:4px 10px;font-size:13px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.data{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.dbox{background:#0b1129;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.dbox .k{font-size:12px;color:var(--muted)}
+.dbox .v{font-size:18px;font-weight:700;margin-top:2px}
+.swatch{display:inline-block;width:16px;height:16px;border-radius:50%;vertical-align:-3px;margin-right:6px;box-shadow:0 0 10px currentColor}
+.desc{margin-top:12px;background:#0b1129;border-left:4px solid var(--accent2);border-radius:8px;padding:12px 14px;font-size:15px}
+.desc b{color:var(--accent2)}
+.hrnote{font-size:13px;color:var(--muted);margin-top:8px;min-height:20px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:center}
+th{color:var(--muted);font-weight:600}
+.empty{color:var(--muted);text-align:center;padding:16px}
+.q{background:#0b1129;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.q p{margin:0 0 8px}
+textarea{width:100%;min-height:70px;background:#070b1a;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px;font-family:inherit;font-size:14px;resize:vertical}
+details{margin-top:6px;font-size:14px;color:var(--muted)}
+details summary{cursor:pointer;color:var(--accent2)}
+.opts{display:grid;gap:6px}
+.opt{text-align:left;border:1px solid var(--line);background:#111a3a;color:var(--text);padding:8px 12px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:14px}
+.opt:hover{border-color:var(--accent2)}
+.opt.right{background:#123d2c;border-color:var(--good)}
+.opt.wrong{background:#3d1220;border-color:var(--bad)}
+.fb{font-size:14px;margin-top:6px;min-height:20px}
+.score{font-weight:700;color:var(--accent)}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 20px 30px}
+
+/* ===== V-Lab 공용 테마에 맞춘 덮어쓰기 ===== */
+body{font-family:var(--font);letter-spacing:-0.012em;-webkit-font-smoothing:antialiased}
+body.vlab-embed header{display:none}
+
+:root{--bg:#fff;--panel:#fff;--panel2:#fff;--line:#E6E8EC;--text:#111;--muted:#6B7280;--accent:#C98A00;--accent2:#1E5EB8;--good:#0B7A4B;--bad:#B42318}
+body{background:#fff}
+header{text-align:left;padding:16px 16px 4px}header h1{font-size:22px;font-weight:600;letter-spacing:-.02em}header h1 span{color:#111}
+main{max-width:none}
+.card{background:#fff;border-radius:12px}.card h2{font-weight:600}.card h2 .num{background:#111;color:#fff;border-radius:6px;font-weight:600}
+.goals li,.dbox,.desc,.q{background:#F7F8FA}
+.chip{background:#fff;color:#3F4652;border-radius:8px}.chip.done{color:#111;border-color:#C9D2E0}.chip.active{background:#111;color:#fff;border-color:#111}
+.btn{background:#fff;color:#111;border-radius:8px;font-weight:600}.btn.primary{background:#111;color:#fff;border-color:#111}
+.massval{color:#111}.cat{background:#EAF2FF;color:#1E5EB8}
+textarea{background:#fff;color:#111}
+.opt{background:#fff}.opt.right{background:#EDFAF3}.opt.wrong{background:#FDEEEE}
+details summary{color:var(--accent2)}
+.score{color:#111}
+</style>
+</head>
+<body>
+<script>if(/embed/.test(location.hash))document.body.classList.add("vlab-embed");</script>
+<header>
+  <h1>🌟 <span>별의 진화</span> 가상 실험실</h1>
+  <p>지구과학 · 별의 탄생부터 최후까지 — 질량에 따라 별의 일생이 어떻게 달라질까?</p>
+</header>
+
+<main>
+  <section class="card">
+    <h2><span class="num">목표</span> 실험 목표</h2>
+    <ul class="goals">
+      <li>🔭 별이 성운에서 탄생하여 최후를 맞기까지의 <b>진화 단계</b>를 순서대로 설명할 수 있다.</li>
+      <li>⚖️ 별의 <b>질량</b>에 따라 수명과 최종 단계가 달라짐을 실험으로 확인할 수 있다.</li>
+      <li>📈 진화 과정에서 별의 위치가 <b>H-R도</b>에서 어떻게 이동하는지 해석할 수 있다.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">1</span> 실험 조건 설정</h2>
+    <div class="controls">
+      <div>
+        <label class="lbl" for="mass">별의 초기 질량 (태양 질량 = 1 M☉)</label>
+        <div><span class="massval" id="massVal">1.0 <small>M☉</small></span><span class="cat" id="catLbl"></span></div>
+        <input type="range" id="mass" min="0" max="1000" step="1">
+        <div class="presets" id="presets"></div>
+      </div>
+      <div>
+        <label class="lbl" for="speed">재생 속도 <span id="spdVal">1×</span></label>
+        <input type="range" id="speed" min="0.25" max="4" step="0.25" value="1">
+        <div class="btnrow">
+          <button class="btn primary" id="playBtn">▶ 진화 시작</button>
+          <button class="btn" id="nextBtn">⏭ 다음 단계</button>
+          <button class="btn" id="resetBtn">⟲ 처음으로</button>
+        </div>
+        <div class="hrnote">※ 실제 단계별 시간은 수만 년~수천억 년으로 크게 다르지만, 관찰하기 쉽도록 각 단계를 같은 길이로 재생합니다. 실제 경과 시간은 아래 데이터에 표시됩니다.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="lab">
+    <section class="card">
+      <h2><span class="num">2</span> 별 관측 창</h2>
+      <div class="viewwrap"><canvas id="starCv"></canvas></div>
+      <div class="timeline" id="timeline"></div>
+    </section>
+    <section class="card">
+      <h2><span class="num">3</span> H-R도 (헤르츠스프룽-러셀 도표)</h2>
+      <canvas id="hrCv"></canvas>
+      <div class="hrnote" id="hrNote"></div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2><span class="num">4</span> 관측 데이터</h2>
+    <div class="data">
+      <div class="dbox"><div class="k">현재 단계</div><div class="v" id="dStage">-</div></div>
+      <div class="dbox"><div class="k">탄생 후 경과 시간</div><div class="v" id="dAge">-</div></div>
+      <div class="dbox"><div class="k">표면 온도</div><div class="v" id="dT">-</div></div>
+      <div class="dbox"><div class="k">광도 (태양 = 1)</div><div class="v" id="dL">-</div></div>
+      <div class="dbox"><div class="k">반지름 (태양 = 1)</div><div class="v" id="dR">-</div></div>
+      <div class="dbox"><div class="k">색</div><div class="v" id="dColor">-</div></div>
+    </div>
+    <div class="dbox" style="margin-top:10px"><div class="k">에너지원 · 핵융합 반응</div><div class="v" id="dFusion" style="font-size:16px">-</div></div>
+    <div class="desc" id="dDesc"></div>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">5</span> 실험 결과 기록표</h2>
+    <p style="margin:0 0 10px;color:var(--muted);font-size:14px">질량을 바꿔 가며 실험한 뒤 <b>[결과 기록]</b>을 눌러 표를 완성하세요. (추천: 0.3, 1, 5, 15, 40 M☉)</p>
+    <div class="btnrow" style="margin:0 0 10px">
+      <button class="btn primary small" id="recBtn">＋ 현재 별 결과 기록</button>
+      <button class="btn small" id="clrBtn">표 지우기</button>
+    </div>
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>초기 질량</th><th>분류</th><th>주계열 단계 표면 온도</th><th>주계열 수명</th><th>최대 반지름</th><th>최종 단계</th></tr></thead>
+      <tbody id="recBody"><tr><td colspan="6" class="empty">아직 기록이 없습니다.</td></tr></tbody>
+    </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">6</span> 탐구 질문</h2>
+    <div class="q"><p><b>Q1.</b> 결과 기록표를 보고, 별의 질량과 주계열 수명 사이에는 어떤 관계가 있는지 쓰고 그 까닭을 설명해 보자.</p>
+      <textarea placeholder="나의 생각을 적어 보세요."></textarea>
+      <details><summary>도움말 보기</summary>질량이 큰 별일수록 수명이 짧다. 질량이 크면 중심부의 온도와 압력이 매우 높아 수소를 훨씬 빠르게 소모하기 때문이다. (광도는 질량의 약 3~4제곱에 비례하지만 연료는 질량에 비례하므로, 수명은 대략 질량의 2.5제곱에 반비례한다.)</details></div>
+    <div class="q"><p><b>Q2.</b> 태양 질량(1 M☉)의 별이 주계열성에서 적색 거성이 될 때 H-R도에서 어느 방향으로 이동하는가? 표면 온도·광도·반지름은 각각 어떻게 변하는가?</p>
+      <textarea placeholder="나의 생각을 적어 보세요."></textarea>
+      <details><summary>도움말 보기</summary>오른쪽 위로 이동한다. 표면 온도는 낮아지지만(오른쪽), 반지름이 수십~수백 배로 커져 광도는 증가한다(위쪽). 광도 ∝ 반지름² × 온도⁴ 관계를 떠올려 보자.</details></div>
+    <div class="q"><p><b>Q3.</b> 1 M☉, 15 M☉, 40 M☉ 별의 최종 단계를 비교하고, 질량에 따라 최후가 달라지는 이유를 설명해 보자.</p>
+      <textarea placeholder="나의 생각을 적어 보세요."></textarea>
+      <details><summary>도움말 보기</summary>남은 중심핵의 질량이 클수록 중력이 강해, 그 중력을 버틸 수 있는 압력의 종류가 달라진다. 비교적 가벼운 핵은 전자의 압력으로 버텨 백색 왜성이, 더 무거운 핵은 중성자의 압력으로 버텨 중성자별이, 그보다 무거우면 어떤 압력으로도 버티지 못해 블랙홀이 된다.</details></div>
+    <div class="q"><p><b>Q4.</b> "우리는 별의 먼지로 이루어져 있다"는 말의 의미를 별의 진화와 관련지어 설명해 보자.</p>
+      <textarea placeholder="나의 생각을 적어 보세요."></textarea>
+      <details><summary>도움말 보기</summary>우리 몸을 이루는 탄소, 산소, 철 등은 별 내부의 핵융합으로 만들어졌고, 철보다 무거운 원소는 초신성 폭발 등에서 만들어졌다. 이 원소들이 우주로 흩어져 새로운 성운이 되고, 태양계와 지구, 생명체의 재료가 되었다.</details></div>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">7</span> 확인 퀴즈 <span class="score" id="score" style="margin-left:auto;font-size:15px"></span></h2>
+    <div id="quiz"></div>
+    <div class="btnrow"><button class="btn small" id="quizReset">퀴즈 다시 풀기</button></div>
+  </section>
+</main>
+<footer>본 실험실의 수치는 질량-광도 관계 등을 이용한 교육용 근사 모형으로, 실제 별의 관측값과 차이가 있을 수 있습니다.</footer>
+
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const LOGMIN = -1, LOGMAX = Math.log10(50);
+const sliderToMass = v => Math.pow(10, LOGMIN + v/1000*(LOGMAX-LOGMIN));
+const massToSlider = m => (Math.log10(m)-LOGMIN)/(LOGMAX-LOGMIN)*1000;
+const UNIVERSE = 1.38e10;
+
+/* ---------- 물리 근사 모형 ---------- */
+function msProps(M){
+  const L = M<0.43 ? 0.23*Math.pow(M,2.3) : M<2 ? Math.pow(M,4) : 1.4*Math.pow(M,3.5);
+  const R = M<1 ? Math.pow(M,0.8) : Math.pow(M,0.57);
+  const T = 5778*Math.pow(L/(R*R),0.25);
+  const t = 1e10*Math.pow(M,-2.5);
+  return {L,R,T,t};
+}
+const RfromLT = (L,T) => Math.sqrt(L)*Math.pow(5778/T,2);
+const LfromRT = (R,T) => R*R*Math.pow(T/5778,4);
+function category(M){ return M<0.5?'low':M<8?'mid':M<25?'high':'vhigh'; }
+const CAT = {
+  low:{name:'저질량 별 (적색 왜성)', fate:'백색 왜성(헬륨, 예측)'},
+  mid:{name:'중간 질량 별 (태양형)', fate:'백색 왜성'},
+  high:{name:'대질량 별', fate:'중성자별'},
+  vhigh:{name:'초대질량 별', fate:'블랙홀'}
+};
+
+function buildStages(M){
+  const ms = msProps(M), c = category(M), S = [];
+  S.push({key:'nebula', name:'성운', T:20, L:0, R:0, dur:1e6, hr:false,
+    fusion:'없음 — 차가운 분자 구름 (약 10~100 K)',
+    desc:'성간 공간의 가스(주로 수소)와 먼지가 모인 <b>차갑고 밀도 높은 분자 구름</b>입니다. 주변 초신성 폭발의 충격파 등으로 밀도가 높아진 부분이 <b>중력에 의해 수축</b>하기 시작합니다.'});
+  const pT = Math.max(3000, ms.T*0.6), pL = M<2 ? ms.L*3 : ms.L*0.6;
+  S.push({key:'proto', name:'원시별', T:pT, L:pL, R:RfromLT(pL,pT), dur:Math.max(1e4, 5e7*Math.pow(M,-2.5)), hr:true,
+    fusion:'핵융합 전 — 중력 수축 에너지로 빛남',
+    desc:'수축하는 가스 덩어리의 중심부 온도와 밀도가 높아져 빛을 내기 시작한 단계입니다. 아직 핵융합은 일어나지 않고 <b>중력 수축 에너지</b>로 빛나며, 주변에 회전하는 원반과 제트가 나타납니다.'});
+  S.push({key:'ms', name: c==='low' ? '주계열성 (적색 왜성)' : '주계열성', T:ms.T, L:ms.L, R:ms.R, dur:ms.t, hr:true,
+    fusion: M<1.3 ? '중심핵 수소 핵융합 (양성자-양성자 연쇄 반응)' : '중심핵 수소 핵융합 (CNO 순환 반응)',
+    desc:'중심핵 온도가 약 1000만 K에 이르면 <b>수소 핵융합</b>이 시작됩니다. 바깥으로 미는 <b>기체 압력</b>과 안으로 당기는 <b>중력</b>이 평형(정역학 평형)을 이루어 크기가 안정적으로 유지됩니다. 별은 일생의 약 90%를 이 단계에서 보냅니다.' +
+      (c==='low' ? '<br>이 별은 질량이 작아 핵융합이 매우 느리므로, 수명이 <b>우주의 나이(약 138억 년)보다 훨씬 깁니다.</b>' : '')});
+  if(c==='low'){
+    S.push({key:'wd', name:'백색 왜성 (예측)', T:12000, Tend:5000, R:0.02, L:LfromRT(0.02,12000), dur:1e10, hr:true,
+      fusion:'핵융합 없음 — 남은 열로 빛남',
+      desc:'적색 왜성은 수소를 모두 소모한 뒤 <b>헬륨으로 이루어진 백색 왜성</b>이 될 것으로 예측됩니다. 하지만 수명이 우주의 나이보다 길어 <b>아직 이 단계에 이른 적색 왜성은 없습니다.</b>'});
+  } else if(c==='mid'){
+    const gL = 1500*Math.pow(M,0.9), gT = 4200;
+    S.push({key:'giant', name:'적색 거성', T:gT, L:gL, R:RfromLT(gL,gT), dur:ms.t*0.1, hr:true,
+      fusion:'헬륨 핵 수축 + 껍질 수소 핵융합 → 이후 헬륨 핵융합(탄소·산소 생성)',
+      desc:'중심핵의 수소가 바닥나면 헬륨 핵이 수축하며 온도가 올라가고, 핵 바깥 껍질에서 수소 핵융합이 일어나 <b>바깥층이 크게 팽창</b>합니다. 표면 온도는 낮아져 붉게 보이지만 크기가 매우 커서 <b>광도는 증가</b>합니다. 이후 중심핵에서 헬륨 핵융합으로 탄소와 산소가 만들어집니다.'});
+    S.push({key:'pn', name:'행성상 성운', T:100000, L:3000, R:RfromLT(3000,100000), dur:3e4, hr:true,
+      fusion:'핵융합 멈춤 — 바깥층 방출',
+      desc:'별의 바깥층이 우주 공간으로 서서히 방출되어 뜨거운 중심핵의 자외선을 받아 빛나는 <b>가스 껍질</b>이 됩니다. 이름과 달리 <b>행성과는 관계가 없습니다.</b> (옛날 망원경으로 보았을 때 행성처럼 둥글게 보여 붙은 이름)'});
+    S.push({key:'wd', name:'백색 왜성', T:30000, Tend:6000, R:0.012, L:LfromRT(0.012,30000), dur:1e10, hr:true,
+      fusion:'핵융합 없음 — 남은 열로 빛남 (점점 식어 감)',
+      desc:'남은 중심핵(주로 탄소·산소)이 <b>지구 정도 크기</b>로 압축된 천체입니다. 핵융합 없이 남은 열로 빛나며 점점 식어 어두워집니다. 각설탕 크기 물질의 질량이 약 1톤에 이를 만큼 <b>밀도가 매우 큽니다.</b>'});
+  } else {
+    const sL = Math.max(3e4, ms.L*2.5), sT = 3600;
+    S.push({key:'sg', name:'적색 초거성', T:sT, L:sL, R:RfromLT(sL,sT), dur:ms.t*0.1, hr:true,
+      fusion:'헬륨 → 탄소 → 네온 → 산소 → 규소 → 철 순서의 연쇄 핵융합',
+      desc:'질량이 큰 별은 중심핵에서 점점 더 무거운 원소의 핵융합이 일어나 <b>양파 껍질 같은 층 구조</b>를 이룹니다. 최종적으로 중심에 <b>철 핵</b>이 만들어지면 더 이상 에너지를 내는 핵융합이 불가능해집니다.'});
+    S.push({key:'sn', name:'초신성 폭발', T:20000, L:1e9, R:1e4, dur:1, hr:false,
+      fusion:'철 핵 붕괴 → 대폭발 (철보다 무거운 원소 생성)',
+      desc:'철 핵이 자체 중력을 이기지 못하고 순식간에 붕괴하면서 바깥층이 튕겨 나가는 거대한 폭발이 일어납니다. 짧은 시간 동안 <b>은하 전체만큼 밝게</b> 빛나며, 금·우라늄처럼 <b>철보다 무거운 원소</b>가 만들어져 우주로 퍼집니다.'});
+    if(c==='high'){
+      S.push({key:'ns', name:'중성자별', T:1e6, L:LfromRT(1.4e-5,1e6), R:1.4e-5, dur:1e10, hr:false,
+        fusion:'핵융합 없음 — 중성자의 압력으로 중력을 버팀',
+        desc:'폭발 후 남은 중심핵이 <b>중성자로 이루어진 지름 약 20 km</b>의 초고밀도 천체가 됩니다. 빠르게 자전하며 전파를 주기적으로 방출하는 중성자별을 <b>펄서</b>라고 합니다.'});
+    } else {
+      S.push({key:'bh', name:'블랙홀', T:0, L:0, R:0, dur:1e10, hr:false,
+        fusion:'— 빛조차 탈출할 수 없음',
+        desc:'남은 중심핵의 질량이 매우 크면 중성자의 압력으로도 붕괴를 막을 수 없어 <b>블랙홀</b>이 됩니다. 빛조차 탈출할 수 없지만, 주변에서 빨려 드는 물질이 뜨겁게 가열되며 내는 <b>X선</b>으로 존재를 확인할 수 있습니다.'});
+    }
+  }
+  return S;
+}
+
+/* ---------- 유틸 ---------- */
+const lerp = (a,b,t) => a+(b-a)*t;
+const lerpLog = (a,b,t) => Math.pow(10, lerp(Math.log10(a), Math.log10(b), t));
+const smooth = t => t*t*(3-2*t);
+const SUP = {'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+function fmt(x, d=2){
+  if(x===0) return '0';
+  if(x>=1e4 || x<0.01){
+    const e = Math.floor(Math.log10(x)), m = x/Math.pow(10,e);
+    return m.toFixed(1)+'×10'+String(e).split('').map(c=>SUP[c]).join('');
+  }
+  return x>=100 ? Math.round(x).toLocaleString() : x.toFixed(x>=10?1:d);
+}
+function fmtYear(y){
+  if(y>=1e8) return (y/1e8).toLocaleString(undefined,{maximumFractionDigits:y>=1e10?0:1})+'억 년';
+  if(y>=1e4) return (y/1e4).toLocaleString(undefined,{maximumFractionDigits:1})+'만 년';
+  return Math.round(y).toLocaleString()+'년';
+}
+function kRGB(K){
+  const t = Math.min(Math.max(K,1000),40000)/100; let r,g,b;
+  if(t<=66){ r=255; g=99.47*Math.log(t)-161.12; b = t<=19?0:138.52*Math.log(t-10)-305.04; }
+  else { r=329.7*Math.pow(t-60,-0.1332); g=288.12*Math.pow(t-60,-0.0755); b=255; }
+  const c=v=>Math.max(0,Math.min(255,Math.round(v)));
+  return [c(r),c(g),c(b)];
+}
+const rgbStr = (c,a=1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+function colorName(T){
+  return T>30000?'청색':T>10000?'청백색':T>7500?'백색':T>6000?'황백색':T>5000?'황색':T>3700?'주황색':'적색';
+}
+
+/* ---------- 상태 ---------- */
+let M = 1, stages = buildStages(M), p = 0, playing = false, speed = 1, trail = [], lastStage = -1;
+const STAGE_SEC = 5;
+
+function stateAt(pp){
+  const i = Math.min(Math.floor(pp), stages.length-1);
+  const f = Math.min(1, pp - i);
+  const s = stages[i];
+  let T=s.T, L=s.L, R=s.R;
+  if(s.Tend){ T = lerpLog(s.T, s.Tend, f); L = LfromRT(R,T); }
+  const n = stages[i+1];
+  if(n && s.hr && n.hr && f>0.75){
+    const g = smooth((f-0.75)/0.25);
+    T = lerpLog(T,n.T,g); L = lerpLog(L,n.L,g); R = lerpLog(R,n.R,g);
+  }
+  let age = 0; for(let k=0;k<i;k++) age += stages[k].dur; age += f*s.dur;
+  return {i,f,s,T,L,R,age};
+}
+
+/* ---------- UI: 질량 ---------- */
+const massSl = $('mass');
+function setMass(m){
+  M = Math.round(m*100)/100;
+  massSl.value = massToSlider(M);
+  $('massVal').innerHTML = (M<1?M.toFixed(2):M.toFixed(1))+' <small>M☉</small>';
+  $('catLbl').textContent = CAT[category(M)].name;
+  stages = buildStages(M); reset();
+}
+massSl.addEventListener('input', () => setMass(sliderToMass(+massSl.value)));
+[0.3,1,5,15,40].forEach(m=>{
+  const b=document.createElement('button'); b.className='btn small'; b.textContent=m+' M☉';
+  b.onclick=()=>setMass(m); $('presets').appendChild(b);
+});
+$('speed').addEventListener('input', e=>{ speed=+e.target.value; $('spdVal').textContent=speed+'×'; });
+
+function reset(){ p=0; playing=false; trail=[]; lastStage=-1; $('playBtn').textContent='▶ 진화 시작'; buildTimeline(); updateData(true); }
+$('resetBtn').onclick = reset;
+$('playBtn').onclick = () => {
+  if(p >= stages.length-0.001){ p=0; trail=[]; }
+  playing = !playing;
+  $('playBtn').textContent = playing ? '⏸ 일시 정지' : '▶ 계속 진행';
+};
+$('nextBtn').onclick = () => { p = Math.min(stages.length-0.001, Math.floor(p)+1); updateData(true); };
+
+function buildTimeline(){
+  const tl=$('timeline'); tl.innerHTML='';
+  stages.forEach((s,i)=>{
+    const c=document.createElement('button'); c.className='chip'; c.textContent=(i+1)+'. '+s.name;
+    c.onclick=()=>{ p=i; updateData(true); }; tl.appendChild(c);
+  });
+}
+
+/* ---------- 데이터 패널 ---------- */
+function updateData(force){
+  const st = stateAt(p), s = st.s;
+  if(!force && st.i===lastStage && !playing) return;
+  [...$('timeline').children].forEach((c,i)=>{
+    c.classList.toggle('active', i===st.i); c.classList.toggle('done', i<st.i);
+  });
+  $('dStage').textContent = s.name;
+  $('dAge').textContent = s.key==='nebula' ? '탄생 전' : fmtYear(st.age);
+  let tTxt, lTxt, rTxt, cHtml;
+  if(s.key==='nebula'){ tTxt='약 10~100 K'; lTxt='— (별 아님)'; rTxt='수 광년 규모'; cHtml='어두운 성운'; }
+  else if(s.key==='bh'){ tTxt='—'; lTxt='0 (빛을 내지 않음)'; rTxt='사건의 지평선 수십 km'; cHtml='⚫ 보이지 않음'; }
+  else if(s.key==='sn'){ tTxt='수만 K 이상'; lTxt='약 10⁹ (10억 배)'; rTxt='급격히 팽창'; cHtml='<span class="swatch" style="background:#fff;color:#fff"></span>매우 밝은 백색'; }
+  else if(s.key==='ns'){ tTxt='약 100만 K'; lTxt=fmt(st.L); rTxt='약 10 km (1.4×10⁻⁵)'; cHtml='<span class="swatch" style="background:#a9c8ff;color:#a9c8ff"></span>청백색 (X선 방출)'; }
+  else {
+    const c = kRGB(st.T);
+    tTxt = Math.round(st.T).toLocaleString()+' K'; lTxt = fmt(st.L); rTxt = fmt(st.R);
+    cHtml = `<span class="swatch" style="background:${rgbStr(c)};color:${rgbStr(c)}"></span>${colorName(st.T)}`;
+  }
+  $('dT').textContent=tTxt; $('dL').textContent=lTxt; $('dR').textContent=rTxt; $('dColor').innerHTML=cHtml;
+  if(st.i!==lastStage || force){
+    $('dFusion').textContent = s.fusion;
+    let extra = '';
+    if(s.key==='ms'){
+      extra = `<br><span style="color:var(--muted);font-size:14px">⏱ 이 별의 주계열 수명: 약 <b style="color:var(--accent)">${fmtYear(s.dur)}</b>${s.dur>UNIVERSE?' (우주 나이보다 김!)':''} · 태양은 약 100억 년</span>`;
+    }
+    $('dDesc').innerHTML = `<b>[${s.name}]</b> ${s.desc}${extra}`;
+    const notes = {
+      nebula:'☁️ 분자 구름은 아직 별이 아니므로 H-R도에 표시되지 않습니다.',
+      sn:'💥 초신성의 광도(약 10억 L☉)는 H-R도의 위쪽 범위를 벗어납니다.',
+      ns:'⚡ 중성자별의 표면 온도(약 100만 K)는 H-R도의 왼쪽 범위를 벗어납니다.',
+      bh:'⚫ 블랙홀은 빛을 내지 않아 H-R도에 나타낼 수 없습니다.'
+    };
+    $('hrNote').textContent = notes[s.key] || '● 현재 별의 위치  ─ 지나온 진화 경로  ☉ 현재의 태양';
+  }
+  lastStage = st.i;
+}
+
+/* ---------- 캔버스 공통 ---------- */
+const starCv=$('starCv'), sctx=starCv.getContext('2d');
+const hrCv=$('hrCv'), hctx=hrCv.getContext('2d');
+let SW=0,SH=0,HW=0,HH=0, hrBg=null;
+function fit(cv,ctx){
+  const dpr=window.devicePixelRatio||1, r=cv.getBoundingClientRect();
+  cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0); return [r.width,r.height];
+}
+const bgStars = Array.from({length:180},()=>({x:Math.random(),y:Math.random(),r:Math.random()*1.3+0.2,tw:Math.random()*6}));
+const parts = Array.from({length:380},()=>({a:Math.random()*Math.PI*2, d:Math.pow(Math.random(),0.55), s:Math.random()*2.2+0.6, h:Math.random(), sp:(Math.random()-.5)*0.4, v:Math.random()*0.6+0.4}));
+function resize(){ [SW,SH]=fit(starCv,sctx); [HW,HH]=fit(hrCv,hctx); buildHRbg(); }
+window.addEventListener('resize', resize);
+
+/* ---------- 별 관측 창 그리기 ---------- */
+function pxRadius(R){
+  if(R<=0) return 0;
+  const lg=Math.log10(R);
+  const base = lg<-2 ? 4+ (lg+5)/3*4 : 8+(lg+2)/5.5*170;
+  return Math.max(3, base*Math.min(1, SH/400));
+}
+function drawStar(cx,cy,pr,T,time,pulse=0){
+  const c=kRGB(T), r=pr*(1+pulse*Math.sin(time*2)*0.03);
+  const g=sctx.createRadialGradient(cx,cy,r*0.6,cx,cy,r*2.6);
+  g.addColorStop(0,rgbStr(c,0.55)); g.addColorStop(1,rgbStr(c,0));
+  sctx.fillStyle=g; sctx.beginPath(); sctx.arc(cx,cy,r*2.6,0,7); sctx.fill();
+  const g2=sctx.createRadialGradient(cx-r*0.25,cy-r*0.25,r*0.05,cx,cy,r);
+  const light=c.map(v=>Math.min(255,v+90));
+  g2.addColorStop(0,rgbStr(light)); g2.addColorStop(0.7,rgbStr(c)); g2.addColorStop(1,rgbStr(c.map(v=>v*0.75)));
+  sctx.fillStyle=g2; sctx.beginPath(); sctx.arc(cx,cy,r,0,7); sctx.fill();
+  if(r>40){ // 표면 대류 무늬
+    sctx.save(); sctx.beginPath(); sctx.arc(cx,cy,r,0,7); sctx.clip(); sctx.globalAlpha=0.12;
+    for(let k=0;k<14;k++){
+      const a=k*2.4+time*0.05, d=r*(0.2+0.7*((k*37)%10)/10);
+      sctx.fillStyle=k%2?'#000':'#fff'; sctx.beginPath();
+      sctx.arc(cx+Math.cos(a)*d, cy+Math.sin(a)*d, r*0.18,0,7); sctx.fill();
+    }
+    sctx.restore();
+  }
+}
+function drawCloud(cx,cy,scale,alpha,time,palette){
+  sctx.save(); sctx.globalCompositeOperation='lighter';
+  const RM=Math.min(SW,SH)*0.48;
+  for(const q of parts){
+    const a=q.a+time*q.sp*(1+(1-scale)*2), d=q.d*RM*scale;
+    const x=cx+Math.cos(a)*d, y=cy+Math.sin(a)*d*0.75;
+    const col = palette(q.h), sz=q.s*(4+8*scale);
+    const g=sctx.createRadialGradient(x,y,0,x,y,sz);
+    g.addColorStop(0,rgbStr(col,0.18*alpha*q.v)); g.addColorStop(1,rgbStr(col,0));
+    sctx.fillStyle=g; sctx.fillRect(x-sz,y-sz,sz*2,sz*2);
+  }
+  sctx.restore();
+}
+const nebPal = h => h<0.4?[200,80,140]:h<0.75?[110,90,220]:[80,150,230];
+const pnPal = h => h<0.5?[60,220,200]:h<0.8?[230,90,150]:[120,160,255];
+const snPal = h => h<0.4?[255,140,60]:h<0.7?[255,220,140]:[120,170,255];
+
+function drawShell(cx,cy,rad,alpha,time,pal,thick){
+  sctx.save(); sctx.globalCompositeOperation='lighter';
+  for(const q of parts){
+    const a=q.a+time*q.sp*0.1, d=rad*(1+ (q.d-0.5)*thick);
+    const x=cx+Math.cos(a)*d, y=cy+Math.sin(a)*d*0.92, col=pal(q.h), sz=q.s*5;
+    const g=sctx.createRadialGradient(x,y,0,x,y,sz);
+    g.addColorStop(0,rgbStr(col,0.35*alpha*q.v)); g.addColorStop(1,rgbStr(col,0));
+    sctx.fillStyle=g; sctx.fillRect(x-sz,y-sz,sz*2,sz*2);
+  }
+  sctx.restore();
+}
+
+function renderStar(time){
+  const W=SW,H=SH,cx=W/2,cy=H/2+10;
+  sctx.fillStyle='#02030a'; sctx.fillRect(0,0,W,H);
+  for(const b of bgStars){
+    sctx.fillStyle=`rgba(255,255,255,${0.35+0.35*Math.sin(time*1.5+b.tw)})`;
+    sctx.fillRect(b.x*W,b.y*H,b.r,b.r);
+  }
+  const st=stateAt(p), s=st.s, f=st.f, pr=pxRadius(st.R);
+  switch(s.key){
+    case 'nebula': {
+      const sc=1-0.8*smooth(f);
+      drawCloud(cx,cy,sc,1,time,nebPal);
+      if(f>0.55){ const a=(f-0.55)/0.45; sctx.globalAlpha=a; drawStar(cx,cy,6+a*6,2500,time); sctx.globalAlpha=1; }
+      break; }
+    case 'proto': {
+      drawCloud(cx,cy,0.2,1-f*0.8,time,nebPal);
+      const dg=sctx.createRadialGradient(cx,cy,pr,cx,cy,pr*5);
+      dg.addColorStop(0,'rgba(255,170,100,0.55)'); dg.addColorStop(1,'rgba(120,60,40,0)');
+      sctx.save(); sctx.translate(cx,cy); sctx.scale(1,0.22); sctx.fillStyle=dg;
+      sctx.beginPath(); sctx.arc(0,0,pr*5,0,7); sctx.fill(); sctx.restore();
+      for(const sgn of [-1,1]){ // 제트
+        const jg=sctx.createLinearGradient(cx,cy,cx,cy+sgn*H*0.45);
+        jg.addColorStop(0,'rgba(160,200,255,0.5)'); jg.addColorStop(1,'rgba(160,200,255,0)');
+        sctx.fillStyle=jg; sctx.beginPath(); sctx.moveTo(cx-3,cy); sctx.lineTo(cx+3,cy);
+        sctx.lineTo(cx+10,cy+sgn*H*0.45); sctx.lineTo(cx-10,cy+sgn*H*0.45); sctx.fill();
+      }
+      drawStar(cx,cy,pr,st.T,time); break; }
+    case 'ms': drawStar(cx,cy,pr,st.T,time); break;
+    case 'giant': case 'sg': drawStar(cx,cy,pr,st.T,time,1); break;
+    case 'pn': {
+      const rad=Math.min(W,H)*(0.12+0.28*f);
+      drawShell(cx,cy,rad,1,time,pnPal,0.5);
+      drawStar(cx,cy,Math.max(5,pr*0.4),st.T,time); break; }
+    case 'wd': {
+      if(stages[st.i-1] && stages[st.i-1].key==='pn' && f<0.4){
+        drawShell(cx,cy,Math.min(W,H)*(0.4+0.1*f),1-f/0.4,time,pnPal,0.5);
+      }
+      drawStar(cx,cy,pr,st.T,time); break; }
+    case 'sn': {
+      const prev=stages[st.i-1];
+      if(f<0.1){ drawStar(cx,cy,pxRadius(prev.R)*(1-f*8),3600,time); }
+      const e=1-Math.pow(1-f,3), rad=10+e*Math.max(W,H)*0.6;
+      drawShell(cx,cy,rad*0.7,1-f*0.6,time,snPal,0.8);
+      const fl=sctx.createRadialGradient(cx,cy,0,cx,cy,rad*0.6);
+      const fa=Math.max(0,1-f*1.4);
+      fl.addColorStop(0,`rgba(255,255,255,${fa})`); fl.addColorStop(0.3,`rgba(255,230,180,${fa*0.7})`); fl.addColorStop(1,'rgba(255,150,80,0)');
+      sctx.fillStyle=fl; sctx.beginPath(); sctx.arc(cx,cy,rad*0.6,0,7); sctx.fill();
+      if(f<0.15){ sctx.fillStyle=`rgba(255,255,255,${(0.15-f)/0.15*0.8})`; sctx.fillRect(0,0,W,H); }
+      break; }
+    case 'ns': {
+      drawShell(cx,cy,Math.max(W,H)*(0.45+0.05*f),0.4*(1-f*0.6),time,snPal,0.8);
+      const ang=time*3;
+      for(const sgn of [0,Math.PI]){
+        const a=ang+sgn, len=Math.max(W,H)*0.6;
+        const bg=sctx.createLinearGradient(cx,cy,cx+Math.cos(a)*len,cy+Math.sin(a)*len);
+        bg.addColorStop(0,'rgba(170,210,255,0.55)'); bg.addColorStop(1,'rgba(170,210,255,0)');
+        sctx.fillStyle=bg; sctx.beginPath(); sctx.moveTo(cx,cy);
+        sctx.lineTo(cx+Math.cos(a-0.07)*len,cy+Math.sin(a-0.07)*len);
+        sctx.lineTo(cx+Math.cos(a+0.07)*len,cy+Math.sin(a+0.07)*len); sctx.fill();
+      }
+      drawStar(cx,cy,6,40000,time); break; }
+    case 'bh': {
+      drawShell(cx,cy,Math.max(W,H)*(0.45+0.05*f),0.35*(1-f*0.6),time,snPal,0.8);
+      const R0=30*Math.min(1,SH/400);
+      sctx.save(); sctx.translate(cx,cy);
+      for(let k=0;k<3;k++){ // 강착 원반
+        sctx.save(); sctx.scale(1,0.28);
+        const ag=sctx.createRadialGradient(0,0,R0*1.2,0,0,R0*(4-k*0.6));
+        ag.addColorStop(0,'rgba(255,220,150,0.9)'); ag.addColorStop(0.4,'rgba(255,120,40,0.6)'); ag.addColorStop(1,'rgba(120,30,10,0)');
+        sctx.fillStyle=ag; sctx.beginPath(); sctx.arc(0,0,R0*(4-k*0.6),0,7); sctx.fill(); sctx.restore();
+      }
+      const ring=sctx.createRadialGradient(0,0,R0*0.9,0,0,R0*1.5);
+      ring.addColorStop(0,'rgba(255,200,120,0.9)'); ring.addColorStop(1,'rgba(255,140,60,0)');
+      sctx.fillStyle=ring; sctx.beginPath(); sctx.arc(0,0,R0*1.5,0,7); sctx.fill();
+      sctx.fillStyle='#000'; sctx.beginPath(); sctx.arc(0,0,R0,0,7); sctx.fill();
+      sctx.restore(); break; }
+  }
+  // 라벨
+  sctx.fillStyle='rgba(5,8,20,0.65)'; sctx.fillRect(10,10,Math.min(W-20,260),48);
+  sctx.fillStyle='#ffc857'; sctx.font='bold 16px sans-serif'; sctx.fillText(s.name,20,30);
+  sctx.fillStyle='#9aa5d1'; sctx.font='13px sans-serif';
+  sctx.fillText(`${M} M☉ · ${s.key==='nebula'?'탄생 전':fmtYear(st.age)}`,20,49);
+  // 크기 비교 막대
+  if(['proto','ms','giant','sg','wd','pn'].includes(s.key)){
+    const sunPx=pxRadius(1);
+    sctx.fillStyle='#9aa5d1'; sctx.font='12px sans-serif';
+    sctx.fillText(`크기: 태양의 ${fmt(st.R)}배 (로그 축척)`, 14, H-14);
+    sctx.strokeStyle='rgba(255,220,120,0.6)'; sctx.setLineDash([4,4]);
+    sctx.beginPath(); sctx.arc(W-30-sunPx*0.5,H-30-sunPx*0.5,sunPx*0.5,0,7); sctx.stroke(); sctx.setLineDash([]);
+    sctx.fillText('☉ 태양(1/2 축척)', W-120-sunPx*0.5, H-34-sunPx);
+  }
+}
+
+/* ---------- H-R도 ---------- */
+const PAD={l:58,r:16,t:30,b:44};
+const XL=5.2, XR=Math.log10(2500), YT=7, YB=-5;
+const hx = T => PAD.l + (XL-Math.log10(T))/(XL-XR)*(HW-PAD.l-PAD.r);
+const hy = L => PAD.t + (YT-Math.log10(L))/(YT-YB)*(HH-PAD.t-PAD.b);
+function buildHRbg(){
+  hrBg=document.createElement('canvas'); const dpr=window.devicePixelRatio||1;
+  hrBg.width=HW*dpr; hrBg.height=HH*dpr; const c=hrBg.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0);
+  c.fillStyle='#060914'; c.fillRect(0,0,HW,HH);
+  // 온도 색띠
+  for(let x=PAD.l;x<HW-PAD.r;x+=2){
+    const lt=XL-(x-PAD.l)/(HW-PAD.l-PAD.r)*(XL-XR);
+    c.fillStyle=rgbStr(kRGB(Math.pow(10,lt)),0.85); c.fillRect(x,PAD.t-10,2,6);
+  }
+  c.strokeStyle='rgba(120,140,200,0.15)'; c.fillStyle='#9aa5d1'; c.font='11px sans-serif'; c.lineWidth=1;
+  for(let e=-4;e<=6;e+=2){
+    const y=hy(Math.pow(10,e)); c.beginPath(); c.moveTo(PAD.l,y); c.lineTo(HW-PAD.r,y); c.stroke();
+    c.textAlign='right'; c.fillText('10'+String(e).split('').map(ch=>SUP[ch]).join(''),PAD.l-6,y+4);
+  }
+  [100000,40000,20000,10000,6000,4000,3000].forEach(T=>{
+    const x=hx(T); c.beginPath(); c.moveTo(x,PAD.t); c.lineTo(x,HH-PAD.b); c.stroke();
+    c.textAlign='center'; c.fillText(T>=10000?(T/1000)+'천':T.toLocaleString(),x,HH-PAD.b+15);
+  });
+  c.fillStyle='#c7cff5'; c.font='12px sans-serif'; c.textAlign='center';
+  c.fillText('표면 온도 (K) ← 높음   낮음 →',(PAD.l+HW-PAD.r)/2,HH-8);
+  c.save(); c.translate(14,(PAD.t+HH-PAD.b)/2); c.rotate(-Math.PI/2); c.fillText('광도 (태양 = 1)',0,0); c.restore();
+  // 주계열 띠
+  c.beginPath();
+  for(let lm=-1;lm<=Math.log10(50);lm+=0.02){ const q=msProps(Math.pow(10,lm)); const x=hx(q.T),y=hy(q.L); lm===-1?c.moveTo(x,y):c.lineTo(x,y); }
+  c.strokeStyle='rgba(255,200,87,0.22)'; c.lineWidth=16; c.lineCap='round'; c.stroke(); c.lineWidth=1;
+  // 영역 라벨
+  c.font='bold 12px sans-serif'; c.fillStyle='rgba(255,200,87,0.85)';
+  const msLbl=msProps(3); c.save(); c.translate(hx(msLbl.T)-6,hy(msLbl.L)+22); c.rotate(0.62); c.fillText('주계열성',0,0); c.restore();
+  c.fillStyle='rgba(255,140,100,0.85)'; c.fillText('적색 거성',hx(4300),hy(3e2)+30);
+  c.fillStyle='rgba(255,110,110,0.85)'; c.fillText('초거성',hx(5000),hy(3e5)-6);
+  c.fillStyle='rgba(180,200,255,0.85)'; c.fillText('백색 왜성',hx(15000),hy(3e-4)+18);
+  // 태양
+  const sx=hx(5778), sy=hy(1);
+  c.strokeStyle='#ffd34d'; c.lineWidth=1.5; c.beginPath(); c.arc(sx,sy,5,0,7); c.stroke();
+  c.fillStyle='#ffd34d'; c.beginPath(); c.arc(sx,sy,1.5,0,7); c.fill();
+  c.font='11px sans-serif'; c.textAlign='left'; c.fillText('태양',sx+7,sy-5);
+  c.strokeStyle='rgba(120,140,200,0.5)'; c.strokeRect(PAD.l,PAD.t,HW-PAD.l-PAD.r,HH-PAD.t-PAD.b);
+}
+function renderHR(time){
+  if(!hrBg) return;
+  hctx.clearRect(0,0,HW,HH); hctx.drawImage(hrBg,0,0,HW,HH);
+  const st=stateAt(p);
+  if(st.s.hr){
+    const x=hx(st.T), y=hy(st.L), last=trail[trail.length-1];
+    if(!last || Math.hypot(last.x-x,last.y-y)>1.5) trail.push({x,y,T:st.T});
+  }
+  if(trail.length>1){
+    hctx.lineWidth=2.2;
+    for(let k=1;k<trail.length;k++){
+      hctx.strokeStyle=rgbStr(kRGB(trail[k].T),0.8);
+      hctx.beginPath(); hctx.moveTo(trail[k-1].x,trail[k-1].y); hctx.lineTo(trail[k].x,trail[k].y); hctx.stroke();
+    }
+  }
+  if(st.s.hr){
+    const x=hx(st.T), y=hy(st.L), c=kRGB(st.T), r=7+Math.sin(time*4)*1.5;
+    const g=hctx.createRadialGradient(x,y,0,x,y,r*2.4);
+    g.addColorStop(0,rgbStr(c,0.9)); g.addColorStop(1,rgbStr(c,0));
+    hctx.fillStyle=g; hctx.beginPath(); hctx.arc(x,y,r*2.4,0,7); hctx.fill();
+    hctx.fillStyle='#fff'; hctx.beginPath(); hctx.arc(x,y,3.5,0,7); hctx.fill();
+    hctx.fillStyle='#fff'; hctx.font='bold 12px sans-serif'; hctx.textAlign= x>HW*0.6?'right':'left';
+    hctx.fillText(st.s.name, x+(x>HW*0.6?-12:12), y-10);
+  }
+}
+
+/* ---------- 메인 루프 ---------- */
+let prevT=performance.now();
+function loop(now){
+  const dt=Math.min(0.1,(now-prevT)/1000); prevT=now; const time=now/1000;
+  if(playing){
+    p += dt*speed/STAGE_SEC;
+    if(p >= stages.length-0.001){ p=stages.length-0.001; playing=false; $('playBtn').textContent='↻ 다시 보기'; }
+    updateData(false);
+  }
+  renderStar(time); renderHR(time);
+  requestAnimationFrame(loop);
+}
+
+/* ---------- 결과 기록 ---------- */
+const records=[];
+$('recBtn').onclick=()=>{
+  const ms=stages.find(s=>s.key==='ms'), maxR=Math.max(...stages.filter(s=>s.hr).map(s=>s.R));
+  records.push({M, cat:CAT[category(M)].name, T:ms.T, life:ms.dur, maxR, fate:CAT[category(M)].fate});
+  records.sort((a,b)=>a.M-b.M); drawRecords();
+};
+$('clrBtn').onclick=()=>{ records.length=0; drawRecords(); };
+function drawRecords(){
+  const tb=$('recBody');
+  if(!records.length){ tb.innerHTML='<tr><td colspan="6" class="empty">아직 기록이 없습니다.</td></tr>'; return; }
+  tb.innerHTML=records.map(r=>`<tr><td><b>${r.M} M☉</b></td><td>${r.cat}</td>
+    <td><span class="swatch" style="background:${rgbStr(kRGB(r.T))};color:${rgbStr(kRGB(r.T))}"></span>${Math.round(r.T).toLocaleString()} K</td>
+    <td>${fmtYear(r.life)}</td><td>태양의 ${fmt(r.maxR)}배</td><td>${r.fate}</td></tr>`).join('');
+}
+
+/* ---------- 퀴즈 ---------- */
+const QUIZ=[
+  {q:'별이 일생 중 가장 오랜 시간을 보내는 단계는?', o:['원시별','주계열성','적색 거성','행성상 성운'], a:1, e:'주계열성 단계에서 중심핵의 수소 핵융합이 안정적으로 일어나며, 일생의 약 90%를 보냅니다.'},
+  {q:'질량이 큰 별일수록 주계열 단계의 수명은 어떻게 되는가?', o:['길어진다','짧아진다','질량과 관계없다','처음엔 길다가 짧아진다'], a:1, e:'질량이 큰 별은 중심부 온도가 높아 연료를 매우 빠르게 소모하므로 수명이 짧습니다.'},
+  {q:'주계열성이 빛을 내는 주된 에너지원은?', o:['중력 수축','중심핵의 수소 핵융합','헬륨 껍질의 핵분열','표면의 화학 반응'], a:1, e:'주계열성은 중심핵에서 수소 원자핵 4개가 헬륨 원자핵 1개로 융합하며 에너지를 냅니다.'},
+  {q:'H-R도에서 적색 거성이 위치하는 곳은?', o:['왼쪽 위','왼쪽 아래','오른쪽 위','오른쪽 아래'], a:2, e:'적색 거성은 표면 온도가 낮고(오른쪽) 크기가 커서 광도가 큽니다(위쪽).'},
+  {q:'태양 정도 질량의 별이 마지막에 남기는 천체는?', o:['백색 왜성','중성자별','블랙홀','갈색 왜성'], a:0, e:'태양형 별은 적색 거성 → 행성상 성운을 거쳐 백색 왜성으로 일생을 마칩니다.'},
+  {q:'철보다 무거운 원소(금, 우라늄 등)가 주로 만들어지는 과정은?', o:['주계열성의 수소 핵융합','적색 거성의 헬륨 핵융합','초신성 폭발','백색 왜성의 냉각'], a:2, e:'철 이후의 원소는 핵융합으로 에너지를 얻을 수 없어, 초신성 폭발과 같은 극한 환경에서 만들어집니다.'}
+];
+let answered=0, correct=0;
+function buildQuiz(){
+  answered=0; correct=0; $('score').textContent=`0 / ${QUIZ.length}`;
+  $('quiz').innerHTML='';
+  QUIZ.forEach((item,qi)=>{
+    const d=document.createElement('div'); d.className='q';
+    d.innerHTML=`<p><b>${qi+1}.</b> ${item.q}</p><div class="opts"></div><div class="fb"></div>`;
+    const opts=d.querySelector('.opts'), fb=d.querySelector('.fb'); let done=false;
+    item.o.forEach((t,oi)=>{
+      const b=document.createElement('button'); b.className='opt'; b.textContent=['①','②','③','④'][oi]+' '+t;
+      b.onclick=()=>{
+        if(done) return; done=true; answered++;
+        const ok=oi===item.a; if(ok) correct++;
+        b.classList.add(ok?'right':'wrong'); opts.children[item.a].classList.add('right');
+        fb.innerHTML=(ok?'<span style="color:var(--good)">⭕ 정답!</span> ':'<span style="color:var(--bad)">❌ 아쉬워요.</span> ')+item.e;
+        $('score').textContent=`${correct} / ${QUIZ.length}`+(answered===QUIZ.length?(correct===QUIZ.length?' 🎉 만점!':' 완료'):'');
+      };
+      opts.appendChild(b);
+    });
+    $('quiz').appendChild(d);
+  });
+}
+$('quizReset').onclick=buildQuiz;
+
+/* ---------- 시작 ---------- */
+resize(); buildQuiz(); setMass(1);
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

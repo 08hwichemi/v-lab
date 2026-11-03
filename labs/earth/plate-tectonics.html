@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>판구조론 가상 실험실 · V-Lab</title>
+<style>
+/* V-Lab 공용 글꼴·색 토큰만 가져옴 (공용 클래스는 이 파일의 클래스 이름과 겹치므로 lab-theme.css 전체는 쓰지 않음) */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+:root{--font: 'IBM Plex Sans KR', 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; --bg: #ffffff; --panel: #ffffff; --panel-2: #F7F8FA; --line: #E6E8EC; --line-2: #F0F1F3; --text: #111111; --text-2: #3F4652; --muted: #6B7280; --accent: #3182F6; --accent-soft: #EAF2FF; --ok: #12A66B; --warn: #F5A623; --err: #E5484D; --radius: 12px; --radius-sm: 8px;}
+</style>
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#ffffff; --ink:#1d2433; --muted:#5d6678; --line:#dde2ec;
+    --accent:#d9622b; --accent2:#2f5fb3; --good:#1f8a4c; --bad:#c0392b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  header{background:linear-gradient(120deg,#2b1a10,#7a2f12 55%,#d9622b);color:#fff;padding:28px 16px 22px}
+  header .wrap{max-width:1000px;margin:0 auto}
+  header h1{margin:0 0 4px;font-size:1.7rem;letter-spacing:-0.5px}
+  header p{margin:0;opacity:.9}
+  nav{max-width:1000px;margin:-18px auto 0;padding:0 16px;display:flex;gap:8px;flex-wrap:wrap}
+  nav button{border:0;background:#fff;color:var(--ink);padding:10px 16px;border-radius:10px 10px 0 0;font-weight:700;cursor:pointer;font-size:.95rem;box-shadow:0 -2px 6px rgba(0,0,0,.05);font-family:inherit}
+  nav button.on{background:var(--card);color:var(--accent);box-shadow:inset 0 3px 0 var(--accent)}
+  main{max-width:1000px;margin:0 auto;padding:0 16px 40px}
+  section.tab{display:none;background:var(--card);border-radius:0 12px 12px 12px;padding:20px;box-shadow:0 4px 16px rgba(20,30,60,.06)}
+  section.tab.on{display:block}
+  h2{margin:0 0 6px;font-size:1.3rem}
+  h3{margin:18px 0 8px;font-size:1.05rem}
+  .lead{color:var(--muted);margin:0 0 14px}
+  .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+  .seg{display:flex;flex-wrap:wrap;gap:6px}
+  .seg button,.btn{border:1px solid var(--line);background:#fff;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:.9rem;color:var(--ink)}
+  .seg button.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+  .btn.primary{background:var(--accent2);border-color:var(--accent2);color:#fff;font-weight:700}
+  .btn:hover,.seg button:hover{filter:brightness(.97)}
+  label.chk{font-size:.88rem;color:var(--muted);display:flex;align-items:center;gap:4px}
+  .canvas-box{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#000}
+  canvas{display:block;width:100%;height:auto}
+  .grid{display:grid;grid-template-columns:1.2fr 1fr;gap:14px;margin-top:14px}
+  @media (max-width:760px){.grid{grid-template-columns:1fr}}
+  .panel{border:1px solid var(--line);border-radius:10px;padding:14px;background:#fbfcfe}
+  .panel h3{margin-top:0}
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th,td{border-bottom:1px solid var(--line);padding:6px 6px;text-align:left;vertical-align:top}
+  th{color:var(--muted);font-weight:600;white-space:nowrap;width:30%}
+  .meter{display:flex;gap:8px;flex-wrap:wrap}
+  .meter div{flex:1;min-width:80px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px;text-align:center}
+  .meter b{display:block;font-size:1.3rem}
+  .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.82rem;color:var(--muted);margin-top:8px}
+  .legend span{display:inline-flex;align-items:center;gap:5px}
+  .dot{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .sw{width:18px;height:11px;display:inline-block;border:1px solid #999}
+  .think{background:#fff7ef;border-left:4px solid var(--accent);padding:10px 14px;border-radius:6px;margin-top:12px;font-size:.93rem}
+  .think ol{margin:6px 0 0;padding-left:20px}
+  input[type=range]{accent-color:var(--accent);vertical-align:middle}
+  .status{font-size:.9rem;color:var(--muted)}
+  .q{border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+  .q p{margin:0 0 6px;font-weight:600}
+  .q label{display:block;padding:3px 0;cursor:pointer;font-size:.93rem}
+  .fb{margin-top:6px;font-size:.88rem;display:none}
+  .fb.ok{color:var(--good);display:block}
+  .fb.no{color:var(--bad);display:block}
+  .score{font-size:1.1rem;font-weight:700;margin-top:8px}
+  textarea{width:100%;min-height:70px;border:1px solid var(--line);border-radius:8px;padding:8px;font-family:inherit;font-size:.9rem}
+  footer{text-align:center;color:var(--muted);font-size:.8rem;padding:10px}
+
+/* ===== V-Lab 공용 테마에 맞춘 덮어쓰기 ===== */
+body{font-family:var(--font);letter-spacing:-0.012em;-webkit-font-smoothing:antialiased}
+body.vlab-embed header{display:none}
+
+:root{--bg:#fff;--card:#fff;--ink:#111;--muted:#6B7280;--line:#E6E8EC;--accent:#3182F6;--accent2:#111;--good:#0B7A4B;--bad:#B42318}
+header{background:#fff;color:#111;padding:16px 16px 8px;border-bottom:1px solid var(--line)}
+header h1{font-size:20px;font-weight:600;letter-spacing:-.02em}header p{opacity:1;color:var(--muted)}
+header .wrap,nav,main{max-width:1100px}
+nav{margin:0 auto;padding:14px 16px 0;gap:6px}
+nav button{background:#F0F1F3;border-radius:8px 8px 0 0;box-shadow:none;font-weight:600;color:#3F4652}
+nav button.on{background:#fff;color:#111;box-shadow:inset 0 2px 0 var(--accent);border:1px solid var(--line);border-bottom:0}
+section.tab{box-shadow:none;border:1px solid var(--line);border-radius:0 12px 12px 12px}
+h2,h3{font-weight:600}
+.seg button,.btn{border-radius:8px}.seg button.on{background:#111;border-color:#111}
+.btn.primary{background:#111;border-color:#111}
+.panel{background:#F7F8FA;border-radius:12px}
+.think{background:#FFF8E6;border-left-color:#F5A623}
+.meter div{background:#fff}
+.fb.ok{color:var(--good)}.fb.no{color:var(--bad)}
+</style>
+</head>
+<body>
+<script>if(/embed/.test(location.hash))document.body.classList.add("vlab-embed");</script>
+<header><div class="wrap">
+  <h1>🌋 판구조론 가상 실험실</h1>
+  <p>판의 경계에서 일어나는 지각 변동을 관찰하고, 해양저 확장의 증거를 직접 측정해 봅시다.</p>
+</div></header>
+
+<nav>
+  <button class="on" data-tab="t1">실험 1 · 판의 경계</button>
+  <button data-tab="t2">실험 2 · 해양저 확장과 고지자기</button>
+  <button data-tab="t3">확인 문제</button>
+</nav>
+
+<main>
+<!-- ================= 실험 1 ================= -->
+<section class="tab on" id="t1">
+  <h2>실험 1. 판의 경계 시뮬레이터</h2>
+  <p class="lead">경계의 종류를 고르고 단면도에서 판의 움직임, 지진, 마그마 활동을 관찰하세요. 지진이 일어나는 깊이에 주목하세요.</p>
+
+  <div class="controls">
+    <div class="seg" id="scenBtns">
+      <button data-s="ridge" class="on">발산형 (해양판↔해양판, 해령)</button>
+      <button data-s="rift">발산형 (대륙판↔대륙판, 열곡대)</button>
+      <button data-s="oc">수렴형 (해양판↔대륙판)</button>
+      <button data-s="oo">수렴형 (해양판↔해양판)</button>
+      <button data-s="cc">수렴형 (대륙판↔대륙판)</button>
+      <button data-s="tr">보존형 (변환 단층)</button>
+    </div>
+  </div>
+  <div class="controls">
+    <button class="btn primary" id="playBtn">⏸ 일시정지</button>
+    <button class="btn" id="resetBtn">↺ 처음부터</button>
+    <span class="status">속도 <input type="range" id="spd" min="0.25" max="3" step="0.25" value="1"> <span id="spdV">1×</span></span>
+    <label class="chk"><input type="checkbox" id="cQuake" checked>지진</label>
+    <label class="chk"><input type="checkbox" id="cMagma" checked>마그마</label>
+    <label class="chk"><input type="checkbox" id="cLabel" checked>이름표</label>
+  </div>
+
+  <div class="canvas-box"><canvas id="bcv" width="800" height="420"></canvas></div>
+  <div class="legend" id="legend1">
+    <span><i class="sw" style="background:#5b6770"></i>해양 지각(현무암질)</span>
+    <span><i class="sw" style="background:#b89b72"></i>대륙 지각(화강암질)</span>
+    <span><i class="sw" style="background:#e8873f"></i>연약권</span>
+    <span><i class="dot" style="background:#ffd23f"></i>천발 지진(0~70 km)</span>
+    <span><i class="dot" style="background:#ff8c1a"></i>중발 지진(70~300 km)</span>
+    <span><i class="dot" style="background:#e0218a"></i>심발 지진(300 km 이상)</span>
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <h3 id="infoTitle">발산형 경계 — 해령</h3>
+      <table id="infoTable"></table>
+    </div>
+    <div class="panel">
+      <h3>지진 관측 기록</h3>
+      <div class="meter">
+        <div>천발<b id="qS">0</b></div>
+        <div>중발<b id="qM">0</b></div>
+        <div>심발<b id="qD">0</b></div>
+      </div>
+      <p class="status" style="margin:8px 0 0">경계를 바꾸거나 '처음부터'를 누르면 기록이 초기화됩니다. 진원 깊이는 단면도 위치로 추정한 값입니다.</p>
+      <div class="think" id="thinkBox"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 실험 2 ================= -->
+<section class="tab" id="t2">
+  <h2>실험 2. 해양저 확장과 고지자기 줄무늬</h2>
+  <p class="lead">해령에서 새로 만들어진 암석은 굳을 때의 지구 자기장 방향을 기록합니다. 지구 자기장은 주기적으로 역전되므로 해저에는 줄무늬가 생깁니다. 아래는 해저를 위에서 내려다본 모습입니다.</p>
+
+  <div class="controls">
+    <button class="btn primary" id="mPlay">▶ 해양저 확장 시작</button>
+    <button class="btn" id="mReset">↺ 초기화</button>
+    <span class="status">확장 속도(한쪽) <input type="range" id="mRate" min="1" max="10" step="1" value="5"> <b id="mRateV">5</b> cm/년</span>
+    <label class="chk"><input type="checkbox" id="mHide">속도 숨기기(측정으로 알아내기)</label>
+  </div>
+  <div class="controls status">
+    경과 시간 <b id="mTime">0.00</b> 백만 년 &nbsp;|&nbsp; 현재 지구 자기장: <b id="mPol">정자극기</b>
+  </div>
+
+  <div class="canvas-box"><canvas id="mcv" width="800" height="330"></canvas></div>
+  <div class="legend">
+    <span><i class="sw" style="background:#1f3b6e"></i>정자극기 암석(현재와 같은 방향)</span>
+    <span><i class="sw" style="background:#e8eef7"></i>역자극기 암석(현재와 반대 방향)</span>
+    <span><i class="sw" style="background:#8a8f99"></i>실험 시작 전부터 있던 해양 지각</span>
+    <span><i class="sw" style="background:#d9302b"></i>해령 축</span>
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <h3>측정 기록표</h3>
+      <p class="status" style="margin-top:0">해저(줄무늬 영역)를 클릭하면 시추하여 그 지점의 해령으로부터 거리와 암석의 나이를 측정합니다.</p>
+      <table>
+        <thead><tr><th style="width:auto">#</th><th style="width:auto">위치</th><th style="width:auto">거리 (km)</th><th style="width:auto">나이 (백만 년)</th><th style="width:auto">속도 (cm/년)</th></tr></thead>
+        <tbody id="mTable"><tr><td colspan="5" class="status">아직 측정한 지점이 없습니다.</td></tr></tbody>
+      </table>
+      <div class="controls" style="margin-top:8px"><button class="btn" id="mClear">기록 지우기</button></div>
+      <p class="status" style="margin:0">속도 = 거리 ÷ 나이 &nbsp;(1 km/백만 년 = 0.1 cm/년)</p>
+    </div>
+    <div class="panel">
+      <div class="think" style="margin-top:0">
+        <b>🔍 생각해 보기</b>
+        <ol>
+          <li>줄무늬는 해령을 중심으로 어떤 모양으로 분포하나요? 그 이유는 무엇일까요?</li>
+          <li>해령에서 멀어질수록 암석의 나이는 어떻게 변하나요?</li>
+          <li>확장 속도를 빠르게 하면 줄무늬의 폭은 어떻게 달라지나요?</li>
+          <li>'속도 숨기기'를 켠 뒤 여러 지점을 측정하여 확장 속도를 구해 보세요.</li>
+          <li>아래 자기 이상 그래프가 해령을 기준으로 대칭인 것은 무엇을 뜻할까요?</li>
+        </ol>
+      </div>
+      <h3>나의 결론</h3>
+      <textarea placeholder="관찰한 내용과 결론을 적어 보세요."></textarea>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 확인 문제 ================= -->
+<section class="tab" id="t3">
+  <h2>확인 문제</h2>
+  <p class="lead">실험에서 관찰한 내용을 바탕으로 문제를 풀어 보세요.</p>
+  <div id="quiz"></div>
+  <div class="controls"><button class="btn primary" id="grade">채점하기</button><button class="btn" id="retry">다시 풀기</button></div>
+  <div class="score" id="score"></div>
+</section>
+</main>
+<footer>판구조론 가상 실험실 · 단면도와 수치는 이해를 돕기 위해 단순화한 모형입니다.</footer>
+
+<script>
+/* ---------------- 탭 ---------------- */
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('section.tab').forEach(s=>s.classList.toggle('on',s.id===b.dataset.tab));
+});
+
+/* =========================================================
+   실험 1 : 판의 경계 시뮬레이터
+   ========================================================= */
+const cv=document.getElementById('bcv'), cx=cv.getContext('2d');
+const W=800,H=420,SEA=150;
+let scen='ridge', playing=true, speed=1, t=0, quakes=[], magma=[], puffs=[];
+let qCount={S:0,M:0,D:0};
+const OCEAN='#5b6770', OCEAN2='#78858f', CONT='#b89b72', CONT2='#cdb48d';
+
+const INFO={
+  ridge:{title:'발산형 경계 — 해양판과 해양판 (해령)',rows:[
+    ['판의 이동','두 해양판이 서로 멀어짐'],
+    ['맨틀 대류','상승부 — 뜨거운 맨틀 물질이 올라옴'],
+    ['지형','해령, 해령 중심의 열곡'],
+    ['지각 변화','새로운 해양 지각이 생성됨'],
+    ['지진','천발 지진'],
+    ['화산 활동','활발 (현무암질 마그마)'],
+    ['예','대서양 중앙 해령, 동태평양 해령']],
+    think:['마그마는 어디에서 올라오나요?','해령에서 멀어질수록 해양 지각은 어떻게 이동하나요?','지진은 주로 얕은 곳과 깊은 곳 중 어디에서 일어나나요?']},
+  rift:{title:'발산형 경계 — 대륙판과 대륙판 (열곡대)',rows:[
+    ['판의 이동','하나의 대륙판이 갈라지며 양쪽으로 멀어짐'],
+    ['맨틀 대류','상승부 — 뜨거운 맨틀 물질이 대륙 아래로 올라옴'],
+    ['지형','열곡대(정단층으로 생긴 길고 깊은 골짜기), 호수, 화산'],
+    ['지각 변화','대륙 지각이 늘어나며 얇아지고 갈라짐 → 계속되면 바다가 생기고 해령으로 발전'],
+    ['지진','천발 지진'],
+    ['화산 활동','활발'],
+    ['예','동아프리카 열곡대, 홍해(열곡대가 바다로 발전한 곳)']],
+    think:['열곡대 아래 대륙 지각의 두께는 주변과 비교해 어떤가요?','골짜기 양쪽의 지각 덩어리는 어떤 단층을 따라 내려앉았나요?','열곡대가 계속 벌어지면 앞으로 어떤 지형이 될까요? (해령과 비교)']},
+  oc:{title:'수렴형 경계 — 해양판과 대륙판 (섭입형)',rows:[
+    ['판의 이동','밀도가 큰 해양판이 대륙판 아래로 섭입함'],
+    ['맨틀 대류','하강부'],
+    ['지형','해구, 습곡 산맥, 화산'],
+    ['지각 변화','해양 지각이 소멸됨'],
+    ['지진','천발~심발 지진 (해구에서 대륙 쪽으로 갈수록 깊어짐)'],
+    ['화산 활동','활발 (안산암질 마그마)'],
+    ['예','안데스 산맥과 페루-칠레 해구']],
+    think:['왜 해양판이 대륙판 아래로 들어갈까요? (밀도 비교)','진원의 깊이는 해구에서 대륙 쪽으로 가면서 어떻게 변하나요?','화산은 해구로부터 어느 쪽에 생기나요?']},
+  oo:{title:'수렴형 경계 — 해양판과 해양판 (섭입형)',rows:[
+    ['판의 이동','더 오래되고 밀도가 큰 해양판이 다른 해양판 아래로 섭입함'],
+    ['맨틀 대류','하강부'],
+    ['지형','해구, 호상 열도(활 모양의 화산섬)'],
+    ['지각 변화','해양 지각이 소멸됨'],
+    ['지진','천발~심발 지진'],
+    ['화산 활동','활발'],
+    ['예','일본 열도, 마리아나 해구, 알류샨 열도']],
+    think:['해양판↔대륙판 경계와 비교했을 때 생기는 지형은 어떻게 다른가요?','화산섬들은 해구와 나란히 늘어설까요? 그 이유는?']},
+  cc:{title:'수렴형 경계 — 대륙판과 대륙판 (충돌형)',rows:[
+    ['판의 이동','두 대륙판이 정면으로 충돌함'],
+    ['맨틀 대류','하강부'],
+    ['지형','거대한 습곡 산맥, 지각이 두꺼워짐'],
+    ['지각 변화','밀도가 작아 섭입이 거의 일어나지 않음'],
+    ['지진','천발~중발 지진'],
+    ['화산 활동','거의 없음'],
+    ['예','히말라야 산맥, 알프스 산맥']],
+    think:['대륙판끼리는 왜 섭입이 잘 일어나지 않을까요?','산맥 아래 지각의 두께는 어떻게 변하나요?','화산 활동이 거의 없는 이유는 무엇일까요?']},
+  tr:{title:'보존형 경계 — 변환 단층 (위에서 본 모습)',rows:[
+    ['판의 이동','두 판이 서로 반대 방향으로 어긋나며 미끄러짐'],
+    ['지형','변환 단층, 단열대'],
+    ['지각 변화','판의 생성도 소멸도 없음'],
+    ['지진','변환 단층에서 천발 지진이 자주 발생 (양 끝의 해령에서도 천발 지진 발생)'],
+    ['화산 활동','변환 단층에서는 없음 (해령에서는 있음)'],
+    ['예','산안드레아스 단층 (미국 캘리포니아)']],
+    think:['해령과 변환 단층 중 지진이 더 자주 일어나는 곳은 어디인가요?','해령 사이의 변환 단층에서 양쪽 판은 어느 방향으로 움직이나요?','단열대(점선)에서는 왜 지진이 거의 없을까요? (양쪽 판의 이동 방향 비교)']}
+};
+
+function setScen(s){
+  scen=s; t=0; quakes=[]; magma=[]; puffs=[]; qCount={S:0,M:0,D:0}; updCount();
+  document.querySelectorAll('#scenBtns button').forEach(b=>b.classList.toggle('on',b.dataset.s===s));
+  const I=INFO[s];
+  document.getElementById('infoTitle').textContent=I.title;
+  document.getElementById('infoTable').innerHTML=I.rows.map(r=>`<tr><th>${r[0]}</th><td>${r[1]}</td></tr>`).join('');
+  document.getElementById('thinkBox').innerHTML='<b>🔍 생각해 보기</b><ol>'+I.think.map(x=>`<li>${x}</li>`).join('')+'</ol>';
+}
+document.querySelectorAll('#scenBtns button').forEach(b=>b.onclick=()=>setScen(b.dataset.s));
+document.getElementById('playBtn').onclick=e=>{playing=!playing;e.target.textContent=playing?'⏸ 일시정지':'▶ 재생';};
+document.getElementById('resetBtn').onclick=()=>setScen(scen);
+const spd=document.getElementById('spd');
+spd.oninput=()=>{speed=+spd.value;document.getElementById('spdV').textContent=speed+'×';};
+const opt=id=>document.getElementById(id).checked;
+
+/* ---- 도구 함수 ---- */
+const mod=(a,b)=>((a%b)+b)%b;
+function arrow(x1,y1,x2,y2,c,w=3){
+  cx.strokeStyle=c;cx.fillStyle=c;cx.lineWidth=w;cx.beginPath();cx.moveTo(x1,y1);cx.lineTo(x2,y2);cx.stroke();
+  const a=Math.atan2(y2-y1,x2-x1),h=10+w;
+  cx.beginPath();cx.moveTo(x2+Math.cos(a)*2,y2+Math.sin(a)*2);
+  cx.lineTo(x2-h*Math.cos(a-0.45),y2-h*Math.sin(a-0.45));cx.lineTo(x2-h*Math.cos(a+0.45),y2-h*Math.sin(a+0.45));cx.closePath();cx.fill();
+}
+function label(txt,x,y,color='#1d2433'){
+  if(!opt('cLabel'))return;
+  cx.font='bold 13px "Malgun Gothic","Apple SD Gothic Neo",sans-serif';
+  const w=cx.measureText(txt).width+10;
+  cx.fillStyle='rgba(255,255,255,.85)';cx.fillRect(x-w/2,y-11,w,20);
+  cx.fillStyle=color;cx.textAlign='center';cx.textBaseline='middle';cx.fillText(txt,x,y);
+}
+function poly(pts,fill){cx.beginPath();cx.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)cx.lineTo(pts[i][0],pts[i][1]);cx.closePath();cx.fillStyle=fill;cx.fill();}
+function pathLen(p){let L=0;for(let i=1;i<p.length;i++)L+=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]);return L;}
+function pointAt(p,s){
+  for(let i=1;i<p.length;i++){const dx=p[i][0]-p[i-1][0],dy=p[i][1]-p[i-1][1],l=Math.hypot(dx,dy);
+    if(s<=l)return[p[i-1][0]+dx*s/l,p[i-1][1]+dy*s/l,dx/l,dy/l];s-=l;}
+  const n=p.length;return[p[n-1][0],p[n-1][1],1,0];
+}
+function depthKm(y){return Math.max(0,(y-SEA)*1.9);} // 단면도 위치 → 추정 깊이
+function addQuake(x,y,force){
+  const d=depthKm(y); const cat=force||(d<70?'S':d<300?'M':'D');
+  quakes.push({x,y,life:1,cat}); qCount[cat]++; updCount();
+}
+function updCount(){['S','M','D'].forEach(k=>document.getElementById('q'+k).textContent=qCount[k]);}
+const QC={S:'#ffd23f',M:'#ff8c1a',D:'#e0218a'};
+
+/* ---- 공통 배경 ---- */
+function background(sea=SEA){
+  let g=cx.createLinearGradient(0,0,0,sea);g.addColorStop(0,'#bfe0ff');g.addColorStop(1,'#e9f5ff');
+  cx.fillStyle=g;cx.fillRect(0,0,W,sea);
+  g=cx.createLinearGradient(0,SEA,0,280);g.addColorStop(0,'#4f8fe0');g.addColorStop(1,'#1d4f99');
+  cx.fillStyle=g;cx.fillRect(0,sea,W,H-sea);
+  g=cx.createLinearGradient(0,260,0,H);g.addColorStop(0,'#f0a55c');g.addColorStop(1,'#cc5322');
+  cx.fillStyle=g;cx.fillRect(0,262,W,H-262);
+}
+function mantleFlow(converge,cxPos=400){
+  // 연약권 속 물질의 흐름(점)
+  const off=t*14;
+  cx.fillStyle='rgba(255,240,210,.55)';
+  [300,335,370,400].forEach((y,row)=>{
+    for(let i=0;i<16;i++){
+      const d=mod(i*26+off+row*13,cxPos);
+      const xl=converge? d : cxPos-d;
+      const xr=converge? W-mod(i*26+off+row*13,W-cxPos) : cxPos+mod(i*26+off+row*13,W-cxPos);
+      cx.beginPath();cx.arc(xl,y,2.2,0,7);cx.fill();
+      cx.beginPath();cx.arc(xr,y,2.2,0,7);cx.fill();
+    }
+  });
+  const c='rgba(120,30,0,.55)';
+  if(converge){arrow(cxPos-170,385,cxPos-60,385,c,4);arrow(cxPos+170,385,cxPos+60,385,c,4);}
+  else{arrow(cxPos,410,cxPos,345,c,5);arrow(cxPos-60,385,cxPos-180,385,c,4);arrow(cxPos+60,385,cxPos+180,385,c,4);}
+}
+function drawQuakes(dt){
+  if(!opt('cQuake')){quakes=[];return;}
+  quakes.forEach(q=>{
+    const r=4+(1-q.life)*16;
+    cx.globalAlpha=Math.max(0,q.life);
+    cx.strokeStyle=QC[q.cat];cx.lineWidth=2;cx.beginPath();cx.arc(q.x,q.y,r,0,7);cx.stroke();
+    cx.fillStyle=QC[q.cat];cx.beginPath();cx.arc(q.x,q.y,4,0,7);cx.fill();
+    cx.globalAlpha=1;q.life-=dt*0.6;
+  });
+  quakes=quakes.filter(q=>q.life>0);
+}
+function drawMagma(dt){
+  if(!opt('cMagma')){magma=[];puffs=[];return;}
+  magma.forEach(m=>{
+    m.p+=dt*m.v;
+    const x=m.x0+(m.x1-m.x0)*m.p+Math.sin(m.p*12+m.ph)*3,y=m.y0+(m.y1-m.y0)*m.p;
+    const g=cx.createRadialGradient(x,y,0,x,y,m.r);g.addColorStop(0,'#fff3a0');g.addColorStop(.5,'#ff7a1a');g.addColorStop(1,'rgba(200,30,0,0)');
+    cx.fillStyle=g;cx.beginPath();cx.arc(x,y,m.r,0,7);cx.fill();
+    if(m.p>=1&&m.erupt)puffs.push({x,y,life:1});
+  });
+  magma=magma.filter(m=>m.p<1);
+  puffs.forEach(p=>{p.life-=dt*0.5;p.y-=dt*25;
+    cx.globalAlpha=Math.max(0,p.life)*.7;cx.fillStyle='#777';cx.beginPath();cx.arc(p.x,p.y,6+(1-p.life)*14,0,7);cx.fill();cx.globalAlpha=1;});
+  puffs=puffs.filter(p=>p.life>0);
+}
+function spawnMagma(x0,y0,x1,y1,erupt){magma.push({x0,y0,x1,y1,p:0,v:0.25+Math.random()*0.15,r:6+Math.random()*4,ph:Math.random()*6,erupt});}
+
+/* ---- 발산형: 해령 ---- */
+function drawRidge(dt){
+  background(); mantleFlow(false);
+  const top=x=>228-38*Math.exp(-(((x-400)/85)**2));
+  const bot=x=>272-26*Math.exp(-(((x-400)/70)**2));
+  const plate=(a,b)=>{const pts=[];for(let x=a;x<=b;x+=4)pts.push([x,top(x)]);for(let x=b;x>=a;x-=4)pts.push([x,bot(x)]);return pts;};
+  // 중앙 마그마
+  poly([[384,top(384)],[416,top(416)],[430,330],[370,330]],'#e8501a');
+  poly(plate(0,396),OCEAN); poly(plate(404,800),OCEAN);
+  // 열곡
+  poly([[388,top(388)-1],[400,top(400)+10],[412,top(412)-1]],'#2a62b8');
+  // 이동 표시선
+  const off=t*18;cx.strokeStyle=OCEAN2;cx.lineWidth=2;
+  for(let k=0;k<10;k++){const d=mod(off+k*40,400);
+    [400-d,400+d].forEach(x=>{if(Math.abs(x-400)>8){cx.beginPath();cx.moveTo(x,top(x)+3);cx.lineTo(x,bot(x)-3);cx.stroke();}});}
+  arrow(300,250,220,250,'#fff');arrow(500,250,580,250,'#fff');
+  if(Math.random()<dt*1.2) spawnMagma(400+(Math.random()-.5)*30,400,400+(Math.random()-.5)*10,205,false);
+  if(Math.random()<dt*1.4) addQuake(400+(Math.random()-.5)*110,200+Math.random()*45);
+  drawMagma(dt);drawQuakes(dt);
+  label('해령',400,165);label('열곡',455,200,'#2a62b8');label('해양판',120,250);label('해양판',680,250);
+  label('연약권',110,320);label('맨틀 상승',400,400,'#7a1d00');label('바다',700,175,'#1d4f99');
+}
+
+/* ---- 발산형: 대륙 열곡대 ---- */
+function drawRift(dt){
+  background(262); mantleFlow(false);
+  const bot=x=>292-62*Math.exp(-(((x-400)/110)**2));
+  // 지각 윗면: 어깨(살짝 솟음) → 정단층 계단 → 열곡 바닥
+  const TL=[[0,142],[250,138],[318,128],[330,128],[338,160],[356,160],[364,186],[400,190]];
+  const TR=TL.map(([x,y])=>[800-x,y]).reverse();
+  const topAt=x=>{const P=x<=400?TL:TR;for(let i=1;i<P.length;i++)if(x<=P[i][0]){const[a,b]=[P[i-1],P[i]];return a[1]+(b[1]-a[1])*(x-a[0])/((b[0]-a[0])||1);}return P[P.length-1][1];};
+  // 중앙 마그마
+  poly([[392,200],[408,200],[440,320],[360,320]],'#e8501a');
+  const left=[...TL];for(let x=400;x>=0;x-=4)left.push([x,bot(x)]);
+  const right=[...TR];for(let x=800;x>=400;x-=4)right.push([x,bot(x)]);
+  poly(left,CONT);poly(right,'#a88b62');
+  // 화산
+  poly([[498,146],[528,92],[558,146]],'#6b5a4a');
+  cx.strokeStyle='#d9481a';cx.lineWidth=3;cx.beginPath();cx.moveTo(400,232);cx.lineTo(400,192);cx.stroke();
+  // 열곡 호수
+  poly([[364,180],[436,180],[436,190],[364,190]],'#3a7bd5');
+  // 정단층
+  cx.strokeStyle='#4a3418';cx.lineWidth=2;cx.setLineDash([5,4]);
+  [[330,128,352,250],[356,160,372,240],[470,128,448,250],[444,160,428,240]].forEach(([a,b,c,d])=>{cx.beginPath();cx.moveTo(a,b);cx.lineTo(c,d);cx.stroke();});
+  cx.setLineDash([]);
+  // 이동 표시선
+  const off=t*14;cx.strokeStyle=CONT2;cx.lineWidth=2;
+  for(let k=0;k<9;k++){const d=mod(off+k*44,400);
+    [400-d,400+d].forEach(x=>{if(Math.abs(x-400)>90){cx.beginPath();cx.moveTo(x,topAt(x)+4);cx.lineTo(x,bot(x)-4);cx.stroke();}});}
+  arrow(230,215,150,215,'#5a4527');arrow(570,215,650,215,'#3d2d18');
+  if(Math.random()<dt*1.2) spawnMagma(400+(Math.random()-.5)*30,400,400+(Math.random()-.5)*14,195,false);
+  if(Math.random()<dt*0.5) spawnMagma(410,330,528,94,true);
+  if(Math.random()<dt*1.6) addQuake(400+(Math.random()-.5)*160,170+Math.random()*80);
+  drawMagma(dt);drawQuakes(dt);
+  label('열곡대',400,108);label('호수',400,168,'#2a62b8');label('화산',528,74);
+  label('대륙판',110,175);label('대륙판',690,175);label('정단층',300,232,'#4a3418');
+  label('얇아진 지각',400,262,'#7a1d00');label('연약권',110,330);label('맨틀 상승',400,400,'#7a1d00');
+}
+
+/* ---- 수렴형 (섭입) ---- */
+const SLAB=[[0,242],[380,248],[440,262],[520,300],[620,355],[720,412],[800,460]];
+const SLEN=pathLen(SLAB);
+function drawSlab(){
+  cx.lineJoin='round';cx.lineCap='butt';
+  cx.strokeStyle=OCEAN;cx.lineWidth=34;cx.beginPath();cx.moveTo(SLAB[0][0],SLAB[0][1]);
+  SLAB.forEach(p=>cx.lineTo(p[0],p[1]));cx.stroke();
+  const off=t*18;cx.strokeStyle=OCEAN2;cx.lineWidth=2;
+  for(let k=0;k<Math.ceil(SLEN/36);k++){
+    const s=mod(off+k*36,SLEN);const[x,y,tx,ty]=pointAt(SLAB,s);
+    cx.beginPath();cx.moveTo(x+ty*13,y-tx*13);cx.lineTo(x-ty*13,y+tx*13);cx.stroke();
+  }
+}
+function drawSubduction(dt,type){
+  background(); mantleFlow(true,560);
+  drawSlab();
+  let volX,volY;
+  if(type==='oc'){
+    poly([[440,246],[470,195],[520,152],[565,136],[595,98],[612,74],[628,98],[660,128],[720,120],[800,126],[800,300],[565,300],[500,282]],CONT);
+    cx.strokeStyle=CONT2;cx.lineWidth=2;
+    for(let x=560;x<800;x+=40){cx.beginPath();cx.moveTo(x,140);cx.lineTo(x,290);cx.stroke();}
+    poly([[440,246],[470,195],[520,152],[565,136],[595,98],[612,74],[628,98],[660,128],[720,120],[800,126],[800,134],[720,128],[660,136],[628,106],[612,84],[595,106],[565,144],[520,160],[470,203]],'#8f7a55');
+    volX=612;volY=76;
+  }else{
+    poly([[440,250],[480,229],[565,227],[588,165],[606,112],[624,165],[648,227],[800,227],[800,268],[600,272],[520,270]],OCEAN);
+    cx.strokeStyle=OCEAN2;cx.lineWidth=2;
+    for(let x=660;x<800;x+=40){cx.beginPath();cx.moveTo(x,231);cx.lineTo(x,264);cx.stroke();}
+    poly([[588,165],[606,112],[624,165],[630,190],[582,190]],'#6b5a4a');
+    volX=606;volY=114;
+  }
+  // 마그마 생성대
+  if(opt('cMagma')){const g=cx.createRadialGradient(600,322,0,600,322,28);g.addColorStop(0,'rgba(255,120,30,.9)');g.addColorStop(1,'rgba(255,60,0,0)');cx.fillStyle=g;cx.beginPath();cx.arc(600,322,28,0,7);cx.fill();}
+  if(Math.random()<dt*0.9) spawnMagma(598+(Math.random()-.5)*16,322,volX,volY,true);
+  if(Math.random()<dt*2.2){
+    const s=SLEN*0.38+Math.random()*SLEN*0.6; const[x,y]=pointAt(SLAB,s);
+    addQuake(x+(Math.random()-.5)*14,y-6+(Math.random()-.5)*14);
+  }
+  arrow(200,244,300,244,'#fff');
+  arrow(780,type==='oc'?250:248,720,type==='oc'?250:248,type==='oc'?'#5a4527':'#fff');
+  drawMagma(dt);drawQuakes(dt);
+  label('해구',440,285,'#123a7a');label('해양판',150,280);
+  label(type==='oc'?'대륙판':'해양판',735,type==='oc'?200:250);
+  label(type==='oc'?'화산·습곡 산맥':'호상 열도(화산섬)',volX,volY-25);
+  label('섭입대',690,440,'#7a1d00');label('연약권',110,340);
+  label('마그마 생성',600,290,'#9a2a00');label('바다',230,180,'#1d4f99');
+}
+
+/* ---- 수렴형 (충돌) ---- */
+function drawCollision(dt){
+  background(); mantleFlow(true);
+  const h=Math.min(1,t/25);
+  const top=x=>138-h*105*Math.exp(-(((x-400)/105)**2));
+  const bot=x=>288+h*70*Math.exp(-(((x-400)/90)**2));
+  const plate=(a,b)=>{const pts=[];for(let x=a;x<=b;x+=4)pts.push([x,top(x)]);for(let x=b;x>=a;x-=4)pts.push([x,bot(x)]);return pts;};
+  poly(plate(0,400),CONT);poly(plate(400,800),'#a88b62');
+  // 습곡 무늬
+  cx.strokeStyle='rgba(90,65,35,.45)';cx.lineWidth=1.5;
+  for(let k=1;k<6;k++){cx.beginPath();for(let x=0;x<=800;x+=4){const yy=top(x)+(bot(x)-top(x))*k/6+Math.sin(x/14)*h*6*Math.exp(-(((x-400)/120)**2));x?cx.lineTo(x,yy):cx.moveTo(x,yy);}cx.stroke();}
+  cx.setLineDash([6,5]);cx.strokeStyle='#5a3a1a';cx.lineWidth=2;cx.beginPath();cx.moveTo(400,top(400));cx.lineTo(400,bot(400));cx.stroke();cx.setLineDash([]);
+  // 떨어져 나간 해양판 조각
+  cx.save();cx.translate(400,330+h*40);cx.rotate(1.35);cx.fillStyle=OCEAN;cx.fillRect(-40,-12,80,24);cx.restore();
+  // 쌓인 눈
+  if(h>.6){poly([[370,top(370)],[400,top(400)],[430,top(430)],[415,top(415)+8],[385,top(385)+8]],'#ffffff');}
+  arrow(110,210,200,210,'#5a4527');arrow(690,210,600,210,'#3d2d18');
+  if(Math.random()<dt*1.8) addQuake(400+(Math.random()-.5)*240,top(400)+40+Math.random()*(bot(400)-top(400)));
+  drawQuakes(dt);
+  label('대륙판',90,175);label('대륙판',710,175);
+  label(h<1?'습곡 산맥 형성 중…':'습곡 산맥',400,Math.max(20,top(400)-18));
+  label('두꺼워진 지각(산맥 뿌리)',400,bot(400)+16,'#7a1d00');label('연약권',110,340);
+}
+
+/* ---- 보존형 (위에서 본 모습) ---- */
+function drawTransform(dt){
+  const g=cx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#3b5a7a');g.addColorStop(1,'#2d4864');
+  cx.fillStyle=g;cx.fillRect(0,0,W,H);
+  const FY=210,RA=250,RB=550,off=t*16;
+  cx.strokeStyle='rgba(255,255,255,.22)';cx.lineWidth=2;
+  const tick=(x,y1,y2)=>{cx.beginPath();cx.moveTo(x,y1);cx.lineTo(x,y2);cx.stroke();};
+  for(let k=0;k<20;k++){const d=mod(off+k*36,720);
+    // 위쪽 블록(해령 A 기준)
+    if(RA-d>0)tick(RA-d,6,FY-4); if(RA+d<W)tick(RA+d,6,FY-4);
+    // 아래쪽 블록(해령 B 기준)
+    if(RB-d>0)tick(RB-d,FY+4,H-6); if(RB+d<W)tick(RB+d,FY+4,H-6);
+  }
+  // 해령
+  cx.strokeStyle='#e8501a';cx.lineWidth=8;tick(RA,0,FY);tick(RB,FY,H);
+  // 단열대
+  cx.setLineDash([8,7]);cx.strokeStyle='rgba(255,255,255,.6)';cx.lineWidth=2;
+  cx.beginPath();cx.moveTo(0,FY);cx.lineTo(RA,FY);cx.moveTo(RB,FY);cx.lineTo(W,FY);cx.stroke();cx.setLineDash([]);
+  // 변환 단층
+  cx.strokeStyle='#ffd23f';cx.lineWidth=4;cx.beginPath();cx.moveTo(RA,FY);cx.lineTo(RB,FY);cx.stroke();
+  // 이동 화살표
+  arrow(330,160,450,160,'#fff',4);arrow(470,262,350,262,'#fff',4);
+  arrow(140,90,70,90,'rgba(255,255,255,.75)');arrow(660,330,730,330,'rgba(255,255,255,.75)');
+  arrow(140,330,70,330,'rgba(255,255,255,.75)');arrow(660,90,730,90,'rgba(255,255,255,.75)');
+  if(Math.random()<dt*2.5) addQuake(RA+10+Math.random()*(RB-RA-20),FY+(Math.random()-.5)*10,'S');
+  // 해령에서의 천발 지진
+  if(Math.random()<dt*1.0){const up=Math.random()<.5;addQuake((up?RA:RB)+(Math.random()-.5)*10,up?10+Math.random()*(FY-20):FY+10+Math.random()*(H-FY-20),'S');}
+  drawQuakes(dt);
+  label('해령 (천발 지진)',RA,24,'#b8380d');label('해령 (천발 지진)',RB,H-22,'#b8380d');
+  label('변환 단층 (지진 활발)',400,FY-26,'#8a6200');
+  label('단열대',120,FY+22);label('단열대',690,FY-22);
+  label('위에서 내려다본 해저',680,24);
+  if(opt('cLabel')){cx.font='12px sans-serif';cx.fillStyle='rgba(255,255,255,.85)';cx.textAlign='left';cx.fillText('※ 위에서 본 그림이라 지진은 위치만 표시합니다. 모두 천발 지진으로 기록됩니다.',10,H-8);}
+}
+
+/* ---- 루프 ---- */
+let last=performance.now();
+function loop(now){
+  let dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(!playing)dt=0; dt*=speed; t+=dt;
+  cx.clearRect(0,0,W,H);
+  if(scen==='ridge')drawRidge(dt);
+  else if(scen==='rift')drawRift(dt);
+  else if(scen==='oc'||scen==='oo')drawSubduction(dt,scen);
+  else if(scen==='cc')drawCollision(dt);
+  else drawTransform(dt);
+  drawMag(); // 실험 2
+  requestAnimationFrame(loop);
+}
+
+/* =========================================================
+   실험 2 : 해양저 확장과 고지자기 줄무늬
+   ========================================================= */
+const mc=document.getElementById('mcv'), mx=mc.getContext('2d');
+const MW=800,MH=330,MY0=20,MY1=210,GY=275;
+let mT=0,mRate=5,mRun=false,mLast=performance.now(),samples=[];
+function rng(seed){return()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};}
+const hist=[];{const r=rng(20261028);let T=0,p=1;while(T<60){hist.push({s:T,p});T+=0.12+r()*0.75;p=-p;}}
+function polAt(T){let p=1;for(const h of hist){if(h.s<=T)p=h.p;else break;}return p;}
+const kmPerMyr=()=>mRate*10;
+const fillTime=()=>400/kmPerMyr();
+
+function drawMag(){
+  const now=performance.now(),dt=Math.min(0.05,(now-mLast)/1000);mLast=now;
+  if(mRun){mT+=dt*fillTime()/14;if(mT>=fillTime()){mT=fillTime();mRun=false;mBtn();}}
+  mx.fillStyle='#f7f9fc';mx.fillRect(0,0,MW,MH);
+  const nowPol=polAt(mT);
+  const prof=[];
+  for(let x=0;x<MW;x++){
+    const d=Math.abs(x+0.5-400),age=d/kmPerMyr();
+    let c,v=0;
+    if(age>mT){c='#8a8f99';}
+    else{const p=polAt(mT-age)*nowPol;c=p>0?'#1f3b6e':'#e8eef7';v=p;}
+    mx.fillStyle=c;mx.fillRect(x,MY0,1,MY1-MY0);prof.push(v);
+  }
+  mx.fillStyle='#d9302b';mx.fillRect(397,MY0,6,MY1-MY0);
+  // 측정 지점
+  samples.forEach((s,i)=>{mx.fillStyle='#ffcf33';mx.strokeStyle='#000';mx.lineWidth=1.5;
+    mx.beginPath();mx.arc(s.x,s.y,7,0,7);mx.fill();mx.stroke();
+    mx.fillStyle='#000';mx.font='bold 10px sans-serif';mx.textAlign='center';mx.textBaseline='middle';mx.fillText(i+1,s.x,s.y);});
+  // 거리 눈금
+  mx.fillStyle='#5d6678';mx.font='11px sans-serif';mx.textAlign='center';mx.textBaseline='top';
+  for(let k=-400;k<=400;k+=100){const x=400+k;mx.fillRect(Math.min(799,x),MY1,1,5);mx.fillText(Math.abs(k)+' km',Math.min(780,Math.max(20,x)),MY1+6);}
+  // 자기 이상 그래프
+  mx.strokeStyle='#ccd3df';mx.lineWidth=1;mx.beginPath();mx.moveTo(0,GY);mx.lineTo(MW,GY);mx.stroke();
+  mx.strokeStyle='#d9622b';mx.lineWidth=2;mx.beginPath();
+  for(let x=0;x<MW;x++){const y=GY-prof[x]*22;x?mx.lineTo(x,y):mx.moveTo(x,y);}mx.stroke();
+  mx.fillStyle='#5d6678';mx.font='11px sans-serif';mx.textAlign='left';mx.textBaseline='top';
+  mx.fillText('자기 이상 (+ 정자극 / − 역자극)',6,GY+28);
+  mx.textAlign='center';mx.fillStyle='#b8241f';mx.font='bold 12px sans-serif';mx.fillText('해령',400,4);
+  document.getElementById('mTime').textContent=mT.toFixed(2);
+  document.getElementById('mPol').textContent=nowPol>0?'정자극기':'역자극기 (실험 시작 때와 반대)';
+}
+function mBtn(){document.getElementById('mPlay').textContent=mRun?'⏸ 일시정지':(mT>=fillTime()?'✔ 완료':'▶ 해양저 확장 시작');}
+document.getElementById('mPlay').onclick=()=>{if(mT>=fillTime())return;mRun=!mRun;mBtn();};
+function mResetAll(){mT=0;mRun=false;samples=[];renderTable();mBtn();}
+document.getElementById('mReset').onclick=mResetAll;
+const mRateEl=document.getElementById('mRate');
+mRateEl.oninput=()=>{mRate=+mRateEl.value;document.getElementById('mRateV').textContent=mRate;mResetAll();};
+document.getElementById('mHide').onchange=e=>{document.getElementById('mRateV').textContent=e.target.checked?'?':mRate;renderTable();};
+document.getElementById('mClear').onclick=()=>{samples=[];renderTable();};
+mc.addEventListener('click',e=>{
+  const r=mc.getBoundingClientRect(),x=(e.clientX-r.left)*MW/r.width,y=(e.clientY-r.top)*MH/r.height;
+  if(y<MY0||y>MY1)return;
+  const d=Math.abs(x-400),age=d/kmPerMyr();
+  if(d<6){alert('해령 축 위입니다. 해령에서 조금 떨어진 곳을 클릭하세요.');return;}
+  if(age>mT){alert('회색 영역은 실험 시작 전부터 있던 지각이라 이번 측정에서 제외합니다. 줄무늬 영역을 클릭하세요.');return;}
+  if(samples.length>=10)samples.shift();
+  samples.push({x,y,d,age});renderTable();
+});
+function renderTable(){
+  const tb=document.getElementById('mTable');
+  if(!samples.length){tb.innerHTML='<tr><td colspan="5" class="status">아직 측정한 지점이 없습니다.</td></tr>';return;}
+  const hide=document.getElementById('mHide').checked;
+  tb.innerHTML=samples.map((s,i)=>`<tr><td>${i+1}</td><td>해령 ${s.x<400?'서쪽':'동쪽'}</td><td>${s.d.toFixed(0)}</td><td>${s.age.toFixed(2)}</td><td>${hide?'<i>직접 계산</i>':(s.d/s.age/10).toFixed(1)}</td></tr>`).join('');
+}
+
+/* =========================================================
+   확인 문제
+   ========================================================= */
+const QUIZ=[
+  {q:'해령에서 멀어질수록 해양 지각의 나이는 어떻게 변하나요?',o:['점점 젊어진다','점점 많아진다','변하지 않는다','불규칙하게 변한다'],a:1,e:'해령에서 새 지각이 만들어져 양쪽으로 밀려나므로, 해령에서 멀수록 오래된 지각입니다.'},
+  {q:'해양판이 대륙판 아래로 섭입하는 경계에서 진원의 깊이 분포로 옳은 것은?',o:['해구에서 대륙 쪽으로 갈수록 깊어진다','해구에서 대륙 쪽으로 갈수록 얕아진다','모두 천발 지진이다','지진이 일어나지 않는다'],a:0,e:'섭입하는 해양판을 따라 지진이 발생하므로 대륙 쪽으로 갈수록 진원이 깊어집니다.'},
+  {q:'히말라야 산맥이 만들어진 판의 경계는?',o:['발산형 경계','해양판-해양판 수렴형 경계','대륙판-대륙판 수렴형(충돌형) 경계','보존형 경계'],a:2,e:'인도판과 유라시아판, 두 대륙판이 충돌하여 거대한 습곡 산맥이 만들어졌습니다.'},
+  {q:'판의 생성도 소멸도 일어나지 않는 경계는?',o:['해령','해구','변환 단층','호상 열도'],a:2,e:'보존형 경계(변환 단층)에서는 두 판이 서로 어긋나기만 하므로 판이 생성되거나 소멸되지 않습니다.'},
+  {q:'해저의 고지자기 줄무늬가 해령을 중심으로 대칭인 까닭은?',o:['해령에서 생성된 지각이 양쪽으로 똑같이 이동하며 당시 자기장 방향을 기록했기 때문','해구에서 지각이 소멸했기 때문','바닷물의 온도가 해령에서 가장 높기 때문','대륙 지각이 해양 지각을 덮었기 때문'],a:0,e:'해령에서 굳은 암석은 그때의 자기장 방향을 기록한 채 양쪽으로 이동하므로 대칭 줄무늬가 생깁니다.'},
+  {q:'해령에서 200 km 떨어진 해양 지각의 나이가 400만 년이라면, 이 해령의 한쪽 확장 속도는?',o:['0.5 cm/년','2 cm/년','5 cm/년','50 cm/년'],a:2,e:'200 km ÷ 4백만 년 = 50 km/백만 년 = 5 cm/년 입니다.'},
+  {q:'동아프리카 열곡대처럼 대륙판이 갈라지는 발산형 경계에서 나타나는 특징으로 옳은 것은?',o:['해구와 호상 열도가 생긴다','심발 지진이 자주 일어난다','정단층으로 골짜기가 생기고 천발 지진과 화산 활동이 일어난다','판의 생성과 소멸이 모두 없다'],a:2,e:'대륙이 양쪽으로 늘어나며 정단층을 따라 땅이 내려앉아 열곡이 생기고, 마그마가 올라와 천발 지진과 화산 활동이 일어납니다.'},
+  {q:'해양판과 해양판이 수렴하는 경계에서 만들어지는 대표적인 지형은?',o:['열곡대','호상 열도와 해구','습곡 산맥만 있음','단열대'],a:1,e:'섭입하는 판 위쪽에서 마그마가 올라와 해구와 나란한 화산섬의 줄(호상 열도)이 생깁니다.'}
+];
+function buildQuiz(){
+  document.getElementById('quiz').innerHTML=QUIZ.map((q,i)=>`<div class="q"><p>${i+1}. ${q.q}</p>${q.o.map((o,j)=>`<label><input type="radio" name="q${i}" value="${j}"> ${o}</label>`).join('')}<div class="fb" id="fb${i}"></div></div>`).join('');
+  document.getElementById('score').textContent='';
+}
+document.getElementById('grade').onclick=()=>{
+  let sc=0;
+  QUIZ.forEach((q,i)=>{const s=document.querySelector(`input[name=q${i}]:checked`),fb=document.getElementById('fb'+i);
+    if(s&&+s.value===q.a){sc++;fb.className='fb ok';fb.textContent='⭕ 정답! '+q.e;}
+    else{fb.className='fb no';fb.textContent=(s?'❌ 오답. ':'⚠ 답을 고르지 않았어요. ')+'정답: '+q.o[q.a]+' — '+q.e;}});
+  document.getElementById('score').textContent=`점수: ${sc} / ${QUIZ.length}`+(sc===QUIZ.length?' 🎉 완벽해요!':'');
+};
+document.getElementById('retry').onclick=buildQuiz;
+
+setScen('ridge');buildQuiz();requestAnimationFrame(loop);
+</script>
+</body>
+</html>

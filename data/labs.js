@@ -163,6 +163,71 @@ window.VLAB = {
       tags: ["별자리", "계절별 별자리", "황도 12궁", "천구", "밤하늘 관측"],
       thumbnail: "assets/img/thumbs/constellation/0.png",
       added: "2026-11-02"
+    },
+    {
+      id: "plate-tectonics",
+      subject: "earth",
+      title: "판구조론 가상 실험실",
+      summary: "발산형·수렴형·보존형 경계 6가지의 단면도에서 판의 이동, 지진(천발·중발·심발), 마그마 활동을 관찰합니다. 해양저 확장 실험에서는 고지자기 줄무늬가 만들어지는 과정을 보고, 해저를 시추해 거리와 나이로 확장 속도를 직접 구합니다. 확인 문제 8문항.",
+      file: "labs/earth/plate-tectonics.html",
+      author: "장미나",
+      grade: ["고2", "고3"],
+      unit: "지구과학Ⅰ · 판 구조론과 대륙 분포의 변화",
+      tags: ["판 구조론", "판의 경계", "해양저 확장", "고지자기", "변환 단층"],
+      thumbnail: "assets/img/thumbs/plate-tectonics/0.png",
+      added: "2026-11-03"
+    },
+    {
+      id: "elnino",
+      subject: "earth",
+      title: "엘니뇨 · 라니냐 가상 실험실",
+      summary: "적도 태평양의 무역풍 세기를 조절하며 서·동태평양 수온, 수온약층 기울기, 용승, 워커 순환, 강수 지역이 어떻게 바뀌는지 봅니다. 바다를 클릭해 수온 측정기를 놓고, Niño 3.4 수온 편차 그래프와 데이터 기록표로 엘니뇨·라니냐를 판정합니다.",
+      file: "labs/earth/elnino.html",
+      author: "장미나",
+      grade: ["고2", "고3"],
+      unit: "지구과학Ⅰ · 대기와 해양의 상호 작용",
+      tags: ["엘니뇨", "라니냐", "무역풍", "용승", "워커 순환", "수온약층"],
+      thumbnail: "assets/img/thumbs/elnino/0.png",
+      added: "2026-11-03"
+    },
+    {
+      id: "foehn",
+      subject: "earth",
+      title: "푄 현상 가상 실험실",
+      summary: "출발 기온·이슬점·산의 높이를 정하고 공기 덩어리가 산을 넘는 과정을 따라갑니다. 건조 단열 감률과 습윤 단열 감률, 상승 응결 고도에 따라 기온·이슬점·상대 습도가 어떻게 변하는지 고도–기온 그래프와 결과표로 확인하고, 높새바람을 설명합니다.",
+      file: "labs/earth/foehn.html",
+      author: "장미나",
+      grade: ["고1", "고2"],
+      unit: "지구과학 · 대기의 변화 (단열 변화)",
+      tags: ["푄 현상", "높새바람", "단열 변화", "건조 단열 감률", "습윤 단열 감률", "응결 고도"],
+      thumbnail: "assets/img/thumbs/foehn/0.png",
+      added: "2026-11-03"
+    },
+    {
+      id: "planet-motion",
+      subject: "earth",
+      title: "행성의 겉보기 운동 가상 실험실",
+      summary: "수성·금성·화성·목성·토성을 골라 태양계를 위에서 본 모습과 지구에서 본 하늘을 나란히 보며 순행·역행·유, 이각, 합·충·구·최대 이각을 관찰합니다. 주요 현상이 자동으로 기록되어 역행 기간과 회합 주기를 재고, 최대 이각으로 궤도 반지름을 구하는 탐구 활동이 들어 있습니다.",
+      file: "labs/earth/planet-motion.html",
+      author: "장미나",
+      grade: ["고2", "고3"],
+      unit: "지구과학 · 행성의 운동",
+      tags: ["겉보기 운동", "순행", "역행", "이각", "회합 주기", "내행성", "외행성"],
+      thumbnail: "assets/img/thumbs/planet-motion/0.png",
+      added: "2026-11-03"
+    },
+    {
+      id: "star-evolution",
+      subject: "earth",
+      title: "별의 진화 가상 실험실",
+      summary: "별의 초기 질량(0.1~50 M☉)을 정하고 성운에서 원시별, 주계열성, 거성, 최후(백색 왜성·중성자별·블랙홀)까지의 진화를 재생합니다. 별 관측 창과 H-R도 위의 이동 경로, 단계별 온도·광도·반지름·핵융합 반응을 보며 질량에 따른 수명과 최종 단계를 표로 비교합니다.",
+      file: "labs/earth/star-evolution.html",
+      author: "장미나",
+      grade: ["고2", "고3"],
+      unit: "지구과학Ⅰ · 별의 진화와 H-R도",
+      tags: ["별의 진화", "H-R도", "주계열성", "적색 거성", "백색 왜성", "초신성", "중성자별", "블랙홀"],
+      thumbnail: "assets/img/thumbs/star-evolution/0.png",
+      added: "2026-11-03"
     }
   ]
 };

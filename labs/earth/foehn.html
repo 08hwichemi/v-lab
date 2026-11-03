@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>푄 현상 가상 실험실 · V-Lab</title>
+<style>
+/* V-Lab 공용 글꼴·색 토큰만 가져옴 (공용 클래스는 이 파일의 클래스 이름과 겹치므로 lab-theme.css 전체는 쓰지 않음) */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+:root{--font: 'IBM Plex Sans KR', 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; --bg: #ffffff; --panel: #ffffff; --panel-2: #F7F8FA; --line: #E6E8EC; --line-2: #F0F1F3; --text: #111111; --text-2: #3F4652; --muted: #6B7280; --accent: #3182F6; --accent-soft: #EAF2FF; --ok: #12A66B; --warn: #F5A623; --err: #E5484D; --radius: 12px; --radius-sm: 8px;}
+</style>
+<style>
+  :root{
+    --bg:#f3f6fa; --card:#ffffff; --ink:#1d2733; --muted:#5f6b7a; --line:#dde3ea;
+    --accent:#2f6fde; --warm:#e0553a; --cool:#2f86c9; --ok:#2b9a66;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+  header{background:linear-gradient(120deg,#1f4f9c,#2f86c9);color:#fff;padding:22px 20px}
+  header h1{margin:0;font-size:1.6rem}
+  header p{margin:6px 0 0;opacity:.9;font-size:.95rem}
+  main{max-width:1200px;margin:0 auto;padding:18px 16px 40px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  h2{font-size:1.15rem;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+  h2 .num{background:var(--accent);color:#fff;border-radius:50%;width:24px;height:24px;font-size:.8rem;display:inline-flex;align-items:center;justify-content:center}
+  .lab{display:grid;grid-template-columns:300px 1fr;gap:16px}
+  @media (max-width:860px){.lab{grid-template-columns:1fr}}
+  .ctrl label{display:block;font-weight:600;font-size:.92rem;margin-top:12px}
+  .ctrl .row{display:flex;align-items:center;gap:10px}
+  .ctrl input[type=range]{flex:1;accent-color:var(--accent)}
+  .ctrl output{min-width:64px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent)}
+  .hint{font-size:.8rem;color:var(--muted);margin:2px 0 0}
+  .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  button{font:inherit;border:0;border-radius:9px;padding:9px 14px;cursor:pointer;font-weight:600}
+  .primary{background:var(--accent);color:#fff}
+  .ghost{background:#eaf0f8;color:var(--ink)}
+  .rec{background:var(--ok);color:#fff}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .presets{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .presets button{font-size:.8rem;padding:6px 10px;background:#f1f4f8;border:1px solid var(--line)}
+  canvas{width:100%;display:block;border-radius:10px}
+  #world{height:360px;background:#cfe6fb}
+  #graph{height:300px;background:#fbfcfe;border:1px solid var(--line)}
+  .readout{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px}
+  @media (max-width:600px){.readout{grid-template-columns:repeat(2,1fr)}}
+  .ro{background:#f6f8fb;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+  .ro small{display:block;color:var(--muted);font-size:.75rem}
+  .ro b{font-size:1.15rem;font-variant-numeric:tabular-nums}
+  .stage{margin-top:8px;padding:8px 12px;border-radius:9px;background:#eef4ff;font-weight:600;font-size:.92rem}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:860px){.two{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;font-size:.88rem}
+  th,td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:center;font-variant-numeric:tabular-nums}
+  th{background:#f3f6fa;font-weight:600}
+  .tablewrap{overflow-x:auto}
+  .up{color:var(--warm);font-weight:700}
+  .concept p,.concept li{font-size:.93rem}
+  .formula{background:#f6f8fb;border-left:4px solid var(--accent);padding:8px 12px;border-radius:6px;margin:8px 0;font-size:.9rem}
+  details{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0;background:#fcfdff}
+  summary{cursor:pointer;font-weight:600}
+  details textarea{width:100%;min-height:60px;margin-top:8px;border:1px solid var(--line);border-radius:8px;padding:8px;font:inherit}
+  .answer{margin-top:8px;padding:8px 10px;background:#eefaf3;border-radius:8px;font-size:.9rem;display:none}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--muted);margin-top:6px}
+  .legend span::before{content:"";display:inline-block;width:18px;height:3px;margin-right:5px;vertical-align:middle;background:var(--c)}
+  .legend span.dash::before{background:repeating-linear-gradient(90deg,var(--c) 0 4px,transparent 4px 7px)}
+
+/* ===== V-Lab 공용 테마에 맞춘 덮어쓰기 ===== */
+body{font-family:var(--font);letter-spacing:-0.012em;-webkit-font-smoothing:antialiased}
+body.vlab-embed header{display:none}
+
+:root{--bg:#fff;--card:#fff;--ink:#111;--muted:#6B7280;--line:#E6E8EC;--accent:#3182F6;--warm:#E5484D;--cool:#1E5EB8;--ok:#12A66B}
+header{background:#fff;color:#111;border-bottom:1px solid var(--line);padding:16px 20px}
+header h1{font-size:20px;font-weight:600;letter-spacing:-.02em}header p{opacity:1;color:var(--muted)}
+main{max-width:none}
+.card{border-radius:12px;box-shadow:none}
+h2{font-weight:600}h2 .num{background:#111}
+button{border-radius:8px}.ghost{background:#F0F1F3}.presets button{background:#fff}
+.ro{background:#F7F8FA}.stage{background:#EAF2FF;color:#1E5EB8}
+.formula{background:#F7F8FA}.answer{background:#EDFAF3}
+details{border-radius:10px;background:#fff}
+</style>
+</head>
+<body>
+<script>if(/embed/.test(location.hash))document.body.classList.add("vlab-embed");</script>
+<header>
+  <h1>🌄 푄 현상 가상 실험실</h1>
+  <p>공기 덩어리가 산을 넘을 때 기온과 습도는 어떻게 변할까? 조건을 바꿔 가며 직접 실험해 보세요.</p>
+</header>
+
+<main>
+  <section class="card">
+    <h2><span class="num">1</span>실험 목표</h2>
+    <p style="margin:0">습윤한 공기가 산을 넘어 반대편으로 내려올 때 <b>고온 건조한 바람</b>으로 바뀌는 푄 현상의 원리를 단열 변화(건조 단열 감률, 습윤 단열 감률)로 설명할 수 있다.</p>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">2</span>실험하기</h2>
+    <div class="lab">
+      <div class="ctrl">
+        <label for="t0">출발 지점 기온</label>
+        <div class="row"><input id="t0" type="range" min="10" max="35" step="1" value="20"><output id="t0v">20 °C</output></div>
+
+        <label for="td0">출발 지점 이슬점</label>
+        <div class="row"><input id="td0" type="range" min="0" max="35" step="1" value="16"><output id="td0v">16 °C</output></div>
+        <p class="hint">이슬점이 기온에 가까울수록 습한 공기입니다.</p>
+
+        <label for="hm">산의 높이</label>
+        <div class="row"><input id="hm" type="range" min="500" max="3000" step="100" value="2000"><output id="hmv">2000 m</output></div>
+
+        <label for="spd">바람 세기 (애니메이션 속도)</label>
+        <div class="row"><input id="spd" type="range" min="1" max="5" step="1" value="3"><output id="spdv">보통</output></div>
+
+        <label>예시 조건</label>
+        <div class="presets">
+          <button data-p="18,14,1500">높새바람(태백산맥)</button>
+          <button data-p="15,10,3000">알프스 푄</button>
+          <button data-p="25,8,1000">건조한 공기</button>
+        </div>
+
+        <div class="btns">
+          <button class="primary" id="start">▶ 실험 시작</button>
+          <button class="ghost" id="reset">↺ 초기화</button>
+          <button class="rec" id="record" disabled>＋ 결과 기록</button>
+        </div>
+      </div>
+
+      <div>
+        <canvas id="world"></canvas>
+        <div class="readout">
+          <div class="ro"><small>고도</small><b id="rH">0 m</b></div>
+          <div class="ro"><small>기온</small><b id="rT">–</b></div>
+          <div class="ro"><small>이슬점</small><b id="rTd">–</b></div>
+          <div class="ro"><small>상대 습도</small><b id="rRH">–</b></div>
+          <div class="ro"><small>기온 감률</small><b id="rL">–</b></div>
+        </div>
+        <div class="stage" id="stage">‘실험 시작’을 눌러 공기 덩어리를 출발시키세요.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="two">
+    <div class="card">
+      <h2><span class="num">3</span>고도–기온 그래프</h2>
+      <canvas id="graph"></canvas>
+      <div class="legend">
+        <span style="--c:#2f86c9">상승 (바람받이)</span>
+        <span style="--c:#e0553a">하강 (비그늘)</span>
+        <span class="dash" style="--c:#8a96a6">이슬점</span>
+        <span class="dash" style="--c:#2b9a66">응결 고도</span>
+      </div>
+    </div>
+    <div class="card">
+      <h2><span class="num">4</span>실험 결과 기록</h2>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>회</th><th>출발<br>기온</th><th>이슬점</th><th>산<br>높이</th><th>응결<br>고도</th><th>정상<br>기온</th><th>도착<br>기온</th><th>기온<br>변화</th><th>습도<br>(출발→도착)</th></tr></thead>
+        <tbody id="tbody"><tr id="empty"><td colspan="9" style="color:var(--muted)">실험을 마친 뒤 ‘결과 기록’을 눌러 보세요.</td></tr></tbody>
+      </table>
+      </div>
+      <div class="btns"><button class="ghost" id="clearTable">기록 지우기</button></div>
+    </div>
+  </section>
+
+  <section class="card concept">
+    <h2><span class="num">5</span>개념 정리</h2>
+    <ul>
+      <li><b>단열 변화</b>: 공기 덩어리가 주변과 열을 주고받지 않고 상승하면 팽창하여 기온이 내려가고, 하강하면 압축되어 기온이 올라갑니다.</li>
+      <li><b>건조 단열 감률</b>(불포화 공기): 약 <b>1 °C / 100 m</b></li>
+      <li><b>습윤 단열 감률</b>(포화 공기, 구름 속): 약 <b>0.5 °C / 100 m</b> — 수증기가 응결하며 내놓는 <b>숨은열(잠열)</b> 때문에 덜 냉각됩니다.</li>
+      <li><b>이슬점 감률</b>: 약 0.2 °C / 100 m</li>
+    </ul>
+    <div class="formula">상승 응결 고도(m) ≈ 125 × (기온 − 이슬점)</div>
+    <p>바람받이 쪽에서 구름이 생기고 비가 내리면 수증기를 잃은 공기가 산을 넘습니다. 비그늘 쪽으로 내려올 때는 건조 단열 감률(1 °C/100 m)로 데워지므로, 출발할 때보다 <b>기온은 높고 습도는 낮은</b> 바람이 됩니다. 우리나라에서는 늦봄~초여름 오호츠크해 기단의 바람이 태백산맥을 넘어 영서 지방에 부는 <b>높새바람</b>이 대표적인 예입니다.</p>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">6</span>탐구 질문</h2>
+    <details><summary>Q1. 출발 지점과 도착 지점의 높이가 같은데, 왜 도착 기온이 더 높을까요?</summary>
+      <textarea placeholder="내 생각을 적어 보세요."></textarea>
+      <button class="ghost showA">예시 답 보기</button>
+      <div class="answer">올라갈 때 응결 고도 위에서는 습윤 단열 감률(0.5 °C/100 m)로 천천히 냉각되지만, 내려올 때는 전 구간을 건조 단열 감률(1 °C/100 m)로 빠르게 데워지기 때문입니다. 구름이 만들어질 때 방출된 숨은열이 공기에 남은 셈입니다.</div>
+    </details>
+    <details><summary>Q2. ‘건조한 공기’ 예시처럼 응결 고도가 산보다 높으면 어떻게 되나요?</summary>
+      <textarea placeholder="실험 결과를 바탕으로 적어 보세요."></textarea>
+      <button class="ghost showA">예시 답 보기</button>
+      <div class="answer">구름이 생기지 않으므로 올라갈 때와 내려올 때 모두 건조 단열 감률을 따릅니다. 따라서 도착 기온이 출발 기온과 같아 푄 현상이 나타나지 않습니다.</div>
+    </details>
+    <details><summary>Q3. 산의 높이를 높이면 도착 기온은 어떻게 변하나요? 그 이유는?</summary>
+      <textarea placeholder="여러 높이로 실험해 표를 비교해 보세요."></textarea>
+      <button class="ghost showA">예시 답 보기</button>
+      <div class="answer">응결 고도 위로 올라가는 구간(구름 속 구간)이 길어질수록 도착 기온이 더 높아집니다. 구름 속 100 m마다 0.5 °C씩 차이가 쌓이기 때문입니다.</div>
+    </details>
+    <details><summary>Q4. 높새바람이 불 때 영서 지방에 어떤 피해가 생길 수 있을까요?</summary>
+      <textarea placeholder="고온 건조한 바람의 영향을 생각해 보세요."></textarea>
+      <button class="ghost showA">예시 답 보기</button>
+      <div class="answer">고온 건조한 바람 때문에 농작물이 말라 피해를 입거나, 산불이 일어나기 쉽고 번지기도 쉬워집니다.</div>
+    </details>
+  </section>
+</main>
+
+<script>
+(function(){
+  const DRY=0.01, MOIST=0.005, DEW=0.002;
+  const $=id=>document.getElementById(id);
+  const t0=$('t0'), td0=$('td0'), hm=$('hm'), spd=$('spd');
+  const world=$('world'), graph=$('graph');
+  const wctx=world.getContext('2d'), gctx=graph.getContext('2d');
+  const spdNames=['','아주 약함','약함','보통','강함','아주 강함'];
+
+  let P={}, s=0, running=false, done=false, lastT=0, runNo=0;
+
+  function eSat(T){return 6.112*Math.exp(17.62*T/(243.12+T));}
+  function RH(T,Td){return Math.min(100,100*eSat(Td)/eSat(T));}
+
+  function setup(){
+    if(+td0.value>+t0.value) td0.value=t0.value;
+    const T0=+t0.value, Td0=+td0.value, H=+hm.value;
+    const lcl=125*(T0-Td0);
+    const cloud=lcl<H;
+    const Tc=T0-DRY*Math.min(lcl,H);
+    const Ttop=cloud? Tc-MOIST*(H-lcl) : T0-DRY*H;
+    const Tdtop=cloud? Ttop : Td0-DEW*H;
+    const Tend=Ttop+DRY*H, Tdend=Tdtop+DEW*H;
+    P={T0,Td0,H,lcl,cloud,Tc,Ttop,Tdtop,Tend,Tdend};
+    $('t0v').textContent=T0+' °C'; $('td0v').textContent=Td0+' °C';
+    $('hmv').textContent=H+' m'; $('spdv').textContent=spdNames[+spd.value];
+  }
+
+  // 지형: x(0~1) → 고도
+  function terrain(x){
+    const u=(x-0.22)/0.56;
+    if(u<=0||u>=1) return 0;
+    return P.H*(1-Math.cos(2*Math.PI*u))/2;
+  }
+  const X0=0.04, X1=0.96;
+  function stateAt(x){
+    const h=terrain(x);
+    let T,Td,stage,lapse;
+    if(x<=0.5){
+      if(!P.cloud||h<P.lcl){T=P.T0-DRY*h;Td=P.Td0-DEW*h;
+        stage=h<1?'평지에서 산 쪽으로 이동 중':'건조 단열 상승 — 팽창하며 1 °C/100 m씩 냉각';lapse='1.0 °C/100m';}
+      else{T=P.Tc-MOIST*(h-P.lcl);Td=T;stage='습윤 단열 상승 — 구름이 생기고 비가 내림 (숨은열 방출)';lapse='0.5 °C/100m';}
+    }else{
+      T=P.Ttop+DRY*(P.H-h);Td=P.Tdtop+DEW*(P.H-h);
+      stage=h<1?'비그늘 쪽 평지 도착 — 고온 건조한 바람':'건조 단열 하강 — 압축되며 1 °C/100 m씩 승온';lapse='1.0 °C/100m';
+    }
+    if(h<1&&x>0.5&&done) stage='도착! 출발 때보다 '+(P.Tend-P.T0).toFixed(1)+' °C 높고 건조한 바람이 되었습니다.';
+    return {h,T,Td,rh:RH(T,Td),stage,lapse};
+  }
+
+  function fit(c){
+    const r=c.getBoundingClientRect(), d=window.devicePixelRatio||1;
+    c.width=r.width*d; c.height=r.height*d;
+    c.getContext('2d').setTransform(d,0,0,d,0,0);
+    return {w:r.width,h:r.height};
+  }
+
+  function tColor(T){
+    const k=Math.max(0,Math.min(1,(T+15)/55));
+    return `hsl(${220-220*k},75%,50%)`;
+  }
+
+  function cloudPuff(ctx,x,y,r,a){
+    ctx.fillStyle=`rgba(255,255,255,${a})`;
+    ctx.beginPath();
+    ctx.arc(x,y,r,0,7);ctx.arc(x-r*0.9,y+r*0.25,r*0.7,0,7);ctx.arc(x+r*0.9,y+r*0.25,r*0.75,0,7);ctx.arc(x+r*0.2,y-r*0.45,r*0.7,0,7);
+    ctx.fill();
+  }
+
+  function drawWorld(now){
+    const {w,h}=fit(world), ctx=wctx;
+    const ground=h-34, maxAlt=3400, sc=(ground-30)/maxAlt;
+    const Y=a=>ground-a*sc, Xp=x=>x*w;
+    // 하늘
+    const g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,'#8ec5f2');g.addColorStop(1,'#e3f1fc');
+    ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+    // 비그늘 쪽 따뜻한 기운
+    if(done&&P.cloud){const wg=ctx.createLinearGradient(w*0.5,0,w,0);wg.addColorStop(0,'rgba(255,170,90,0)');wg.addColorStop(1,'rgba(255,150,80,0.28)');ctx.fillStyle=wg;ctx.fillRect(w*0.5,0,w*0.5,ground);}
+    // 고도 눈금
+    ctx.fillStyle='rgba(30,50,80,.55)';ctx.font='11px sans-serif';ctx.textAlign='left';
+    for(let a=0;a<=3000;a+=1000){ctx.fillText(a+' m',6,Y(a)-3);ctx.strokeStyle='rgba(30,50,80,.12)';ctx.beginPath();ctx.moveTo(0,Y(a));ctx.lineTo(w,Y(a));ctx.stroke();}
+    // 응결 고도선
+    if(P.cloud){ctx.setLineDash([6,5]);ctx.strokeStyle='#2b9a66';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(0,Y(P.lcl));ctx.lineTo(w*0.5,Y(P.lcl));ctx.stroke();ctx.setLineDash([]);
+      ctx.fillStyle='#1f7a50';ctx.font='bold 12px sans-serif';ctx.fillText('응결 고도 '+Math.round(P.lcl)+' m',8,Y(P.lcl)-5);}
+    // 산
+    ctx.beginPath();ctx.moveTo(0,h);
+    for(let i=0;i<=200;i++){const x=i/200;ctx.lineTo(Xp(x),Y(terrain(x)));}
+    ctx.lineTo(w,h);ctx.closePath();
+    const mg=ctx.createLinearGradient(0,Y(P.H),0,ground);mg.addColorStop(0,'#7c8a6a');mg.addColorStop(1,'#4f7a45');
+    ctx.fillStyle=mg;ctx.fill();
+    // 바람받이 쪽 초록 / 비그늘 쪽 갈색 느낌
+    ctx.fillStyle='#5b8f4a';ctx.fillRect(0,ground,w*0.5,h-ground);
+    ctx.fillStyle='#b99a5e';ctx.fillRect(w*0.5,ground,w*0.5,h-ground);
+    ctx.fillStyle='#fff';ctx.font='bold 12px sans-serif';
+    ctx.textAlign='left';ctx.fillText('바람받이 쪽',10,h-12);
+    ctx.textAlign='right';ctx.fillText('비그늘 쪽',w-10,h-12);
+
+    // 구름 & 비 (공기가 응결 고도를 지난 뒤)
+    const curX=X0+(X1-X0)*s;
+    if(P.cloud){
+      let alpha=0;
+      for(let x=0.22;x<=0.5;x+=0.004){if(terrain(x)>=P.lcl&&curX>=x){alpha=1;break;}}
+      if(alpha){
+        for(let x=0.22;x<=0.52;x+=0.025){
+          const th=terrain(x);
+          if(th<P.lcl-10||x>curX+0.02) continue;
+          const top=Math.max(th,P.lcl);
+          cloudPuff(ctx,Xp(x),Y(top)-14,14,0.9);
+          // 비
+          if(x<0.47){ctx.strokeStyle='rgba(40,90,170,.55)';ctx.lineWidth=1.2;
+            for(let k=0;k<3;k++){const ph=((now/600)+k/3+x*7)%1;const ry=Y(top)-4+ph*Math.max(10,(Y(th*0.4)-Y(top)));
+              const rx=Xp(x)-10+k*10;if(ry<Y(terrain(rx/w))-2){ctx.beginPath();ctx.moveTo(rx,ry);ctx.lineTo(rx-2,ry+7);ctx.stroke();}}}
+        }
+      }
+    }
+    // 바람 화살표
+    ctx.strokeStyle='rgba(255,255,255,.85)';ctx.fillStyle='rgba(255,255,255,.85)';ctx.lineWidth=2;
+    [[0.06,0.25],[0.06,0.45]].forEach(([x,yf])=>{const y=h*yf,xs=Xp(x);ctx.beginPath();ctx.moveTo(xs,y);ctx.lineTo(xs+40,y);ctx.stroke();ctx.beginPath();ctx.moveTo(xs+46,y);ctx.lineTo(xs+38,y-5);ctx.lineTo(xs+38,y+5);ctx.fill();});
+
+    // 기준점 라벨
+    const marks=[];
+    marks.push({x:X0,label:'A 출발',T:P.T0});
+    if(P.cloud){let xl=0.22;while(terrain(xl)<P.lcl&&xl<0.5)xl+=0.001;marks.push({x:xl,label:'B 응결',T:P.Tc});}
+    marks.push({x:0.5,label:'C 정상',T:P.Ttop});
+    marks.push({x:X1,label:'D 도착',T:P.Tend});
+    marks.forEach(m=>{
+      if(curX+0.001<m.x&&!done) return;
+      const px=Xp(m.x), py=Y(terrain(m.x));
+      ctx.fillStyle='#1d2733';ctx.beginPath();ctx.arc(px,py,3.5,0,7);ctx.fill();
+      const txt=m.label+' '+m.T.toFixed(1)+'°C';ctx.font='bold 11px sans-serif';
+      const tw=ctx.measureText(txt).width+10;let bx=Math.min(Math.max(px-tw/2,2),w-tw-2);
+      const by=m.label[0]==='C'?py-62:py-44;
+      ctx.fillStyle='rgba(255,255,255,.92)';ctx.fillRect(bx,by,tw,18);
+      ctx.fillStyle='#1d2733';ctx.textAlign='left';ctx.fillText(txt,bx+5,by+13);
+    });
+
+    // 공기 덩어리
+    if(running||done||s>0){
+      const st=stateAt(curX), px=Xp(curX), py=Y(st.h)-16;
+      ctx.fillStyle=tColor(st.T);ctx.strokeStyle='#fff';ctx.lineWidth=2;
+      ctx.beginPath();ctx.arc(px,py,12,0,7);ctx.fill();ctx.stroke();
+      ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText(Math.round(st.T)+'°',px,py+4);
+    }else{
+      const px=Xp(X0),py=Y(0)-16;ctx.fillStyle=tColor(P.T0);ctx.strokeStyle='#fff';ctx.lineWidth=2;
+      ctx.beginPath();ctx.arc(px,py,12,0,7);ctx.fill();ctx.stroke();
+      ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText(Math.round(P.T0)+'°',px,py+4);
+    }
+  }
+
+  function drawGraph(){
+    const {w,h}=fit(graph), ctx=gctx;
+    const L=46,R=12,T=14,B=36;
+    const tMin=-20,tMax=50,aMax=3200;
+    const X=t=>L+(t-tMin)/(tMax-tMin)*(w-L-R), Y=a=>h-B-a/aMax*(h-T-B);
+    ctx.clearRect(0,0,w,h);
+    ctx.strokeStyle='#e6ebf1';ctx.lineWidth=1;ctx.fillStyle='#5f6b7a';ctx.font='11px sans-serif';
+    for(let t=tMin;t<=tMax;t+=10){ctx.beginPath();ctx.moveTo(X(t),T);ctx.lineTo(X(t),h-B);ctx.stroke();ctx.textAlign='center';ctx.fillText(t,X(t),h-B+14);}
+    for(let a=0;a<=3000;a+=500){ctx.beginPath();ctx.moveTo(L,Y(a));ctx.lineTo(w-R,Y(a));ctx.stroke();ctx.textAlign='right';ctx.fillText(a,L-5,Y(a)+4);}
+    ctx.textAlign='center';ctx.fillText('기온 (°C)',(L+w-R)/2,h-6);
+    ctx.save();ctx.translate(12,(T+h-B)/2);ctx.rotate(-Math.PI/2);ctx.fillText('고도 (m)',0,0);ctx.restore();
+    if(P.cloud){ctx.setLineDash([5,4]);ctx.strokeStyle='#2b9a66';ctx.beginPath();ctx.moveTo(L,Y(P.lcl));ctx.lineTo(w-R,Y(P.lcl));ctx.stroke();ctx.setLineDash([]);}
+    if(s<=0&&!done) return;
+    const curX=X0+(X1-X0)*s, N=300;
+    // 이슬점
+    ctx.setLineDash([4,4]);ctx.strokeStyle='#8a96a6';ctx.lineWidth=1.5;ctx.beginPath();
+    for(let i=0;i<=N;i++){const x=X0+(curX-X0)*i/N,st=stateAt(x);i?ctx.lineTo(X(st.Td),Y(st.h)):ctx.moveTo(X(st.Td),Y(st.h));}
+    ctx.stroke();ctx.setLineDash([]);
+    // 기온 (상승/하강 색 구분)
+    ctx.lineWidth=3;
+    [['#2f86c9',X0,Math.min(curX,0.5)],['#e0553a',0.5,curX]].forEach(([c,a,b])=>{
+      if(b<=a) return;ctx.strokeStyle=c;ctx.beginPath();
+      for(let i=0;i<=N;i++){const x=a+(b-a)*i/N,st=stateAt(x);i?ctx.lineTo(X(st.T),Y(st.h)):ctx.moveTo(X(st.T),Y(st.h));}
+      ctx.stroke();
+    });
+    const st=stateAt(curX);ctx.fillStyle=tColor(st.T);ctx.beginPath();ctx.arc(X(st.T),Y(st.h),5,0,7);ctx.fill();
+    if(done){ctx.fillStyle='#e0553a';ctx.font='bold 12px sans-serif';ctx.textAlign='left';
+      ctx.fillText('도착 '+P.Tend.toFixed(1)+'°C',X(P.Tend)+6,Y(0)-8);
+      ctx.fillStyle='#2f86c9';ctx.textAlign='right';ctx.fillText('출발 '+P.T0.toFixed(1)+'°C',X(P.T0)-6,Y(0)-8);}
+  }
+
+  function updateReadout(){
+    const curX=X0+(X1-X0)*s, st=stateAt(curX);
+    $('rH').textContent=Math.round(st.h)+' m';
+    $('rT').textContent=st.T.toFixed(1)+' °C';
+    $('rTd').textContent=st.Td.toFixed(1)+' °C';
+    $('rRH').textContent=Math.round(st.rh)+' %';
+    $('rL').textContent=(s>0||running)?st.lapse:'–';
+    if(s>0||running) $('stage').textContent=st.stage;
+  }
+
+  function render(now){drawWorld(now||performance.now());drawGraph();updateReadout();}
+
+  function loop(now){
+    if(!running) return;
+    const dt=Math.min(0.05,(now-lastT)/1000);lastT=now;
+    s+=dt*(+spd.value)*0.035;
+    if(s>=1){s=1;running=false;done=true;$('start').textContent='▶ 다시 실험';$('record').disabled=false;}
+    render(now);
+    if(running) requestAnimationFrame(loop); else idle();
+  }
+  function idle(){ if(!running&&done&&P.cloud){ /* 비 애니메이션 유지 */ render(); setTimeout(()=>{if(!running&&done)requestAnimationFrame(idle);},60);} }
+
+  function reset(){
+    running=false;done=false;s=0;setup();
+    $('start').textContent='▶ 실험 시작';$('record').disabled=true;
+    $('stage').textContent='‘실험 시작’을 눌러 공기 덩어리를 출발시키세요.';
+    const st=stateAt(X0);
+    $('rH').textContent='0 m';$('rT').textContent=st.T.toFixed(1)+' °C';$('rTd').textContent=st.Td.toFixed(1)+' °C';$('rRH').textContent=Math.round(st.rh)+' %';$('rL').textContent='–';
+    drawWorld(performance.now());drawGraph();
+  }
+
+  $('start').onclick=()=>{
+    if(running) return;
+    if(done) {done=false;s=0;}
+    setup();running=true;lastT=performance.now();$('record').disabled=true;$('start').textContent='진행 중…';
+    requestAnimationFrame(loop);
+  };
+  $('reset').onclick=reset;
+  [t0,td0,hm].forEach(el=>el.addEventListener('input',reset));
+  spd.addEventListener('input',()=>{$('spdv').textContent=spdNames[+spd.value];});
+  document.querySelectorAll('.presets button').forEach(b=>b.onclick=()=>{
+    const [a,c,d]=b.dataset.p.split(',');t0.value=a;td0.value=c;hm.value=d;reset();
+  });
+
+  $('record').onclick=()=>{
+    const e=$('empty');if(e)e.remove();
+    runNo++;
+    const rh0=RH(P.T0,P.Td0), rh1=RH(P.Tend,P.Tdend), d=P.Tend-P.T0;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${runNo}</td><td>${P.T0}°C</td><td>${P.Td0}°C</td><td>${P.H}m</td>
+      <td>${P.cloud?Math.round(P.lcl)+'m':'구름 없음'}</td><td>${P.Ttop.toFixed(1)}°C</td><td>${P.Tend.toFixed(1)}°C</td>
+      <td class="${d>0.05?'up':''}">${d>0.05?'+':''}${d.toFixed(1)}°C</td><td>${Math.round(rh0)}% → ${Math.round(rh1)}%</td>`;
+    $('tbody').appendChild(tr);
+    $('record').disabled=true;
+  };
+  $('clearTable').onclick=()=>{runNo=0;$('tbody').innerHTML='<tr id="empty"><td colspan="9" style="color:var(--muted)">실험을 마친 뒤 ‘결과 기록’을 눌러 보세요.</td></tr>';};
+
+  document.querySelectorAll('.showA').forEach(b=>b.onclick=()=>{const a=b.nextElementSibling;const v=a.style.display==='block';a.style.display=v?'none':'block';b.textContent=v?'예시 답 보기':'예시 답 숨기기';});
+
+  window.addEventListener('resize',()=>render());
+  reset();
+})();
+</script>
+</body>
+</html>

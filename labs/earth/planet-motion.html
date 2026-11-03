@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>행성의 겉보기 운동 가상 실험실 · V-Lab</title>
+<style>
+/* V-Lab 공용 글꼴·색 토큰만 가져옴 (공용 클래스는 이 파일의 클래스 이름과 겹치므로 lab-theme.css 전체는 쓰지 않음) */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+:root{--font: 'IBM Plex Sans KR', 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; --bg: #ffffff; --panel: #ffffff; --panel-2: #F7F8FA; --line: #E6E8EC; --line-2: #F0F1F3; --text: #111111; --text-2: #3F4652; --muted: #6B7280; --accent: #3182F6; --accent-soft: #EAF2FF; --ok: #12A66B; --warn: #F5A623; --err: #E5484D; --radius: 12px; --radius-sm: 8px;}
+</style>
+<style>
+  :root{
+    --bg:#0b1020; --panel:#141b31; --panel2:#1b2442; --line:#2a3560;
+    --text:#e6eaf5; --muted:#9aa5c7; --accent:#ffcc4d; --blue:#4aa3ff;
+    --pro:#5ad1ff; --retro:#ff5f7a; --ok:#6be3a4;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;line-height:1.55}
+  header{padding:22px 20px 14px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#121a35,#0b1020)}
+  header h1{margin:0;font-size:1.45rem}
+  header p{margin:6px 0 0;color:var(--muted);font-size:.93rem}
+  .wrap{max-width:1280px;margin:0 auto;padding:16px}
+  .controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;background:var(--panel);
+    border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+  .controls label{font-size:.85rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+  select,input[type=date],input[type=number]{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+    border-radius:8px;padding:6px 8px;font:inherit;font-size:.9rem}
+  input[type=number]{width:64px}
+  button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;
+    padding:7px 12px;font:inherit;font-size:.88rem;cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  button.primary{background:var(--accent);color:#1a1400;border-color:var(--accent);font-weight:700}
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:14px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
+  .card h2{font-size:1rem;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+  .card h2 small{font-weight:400;color:var(--muted);font-size:.78rem}
+  canvas{display:block;width:100%;border-radius:8px;background:#05081a}
+  #orbitCv{aspect-ratio:1/1}
+  #skyCv{height:300px}
+  .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+  .row > .card{flex:1 1 240px}
+  #lookCv{width:150px;height:150px;margin:0 auto}
+  .info{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:.9rem}
+  .info dt{color:var(--muted)}
+  .info dd{margin:0;font-weight:600}
+  .badge{display:inline-block;padding:1px 9px;border-radius:999px;font-size:.82rem;font-weight:700}
+  .b-pro{background:rgba(90,209,255,.15);color:var(--pro)}
+  .b-retro{background:rgba(255,95,122,.18);color:var(--retro)}
+  .b-stat{background:rgba(255,204,77,.18);color:var(--accent)}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--muted);margin-top:6px}
+  .legend i{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:4px;border-radius:2px}
+  table{width:100%;border-collapse:collapse;font-size:.84rem}
+  th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:center}
+  th{color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--panel)}
+  .tbox{max-height:240px;overflow:auto}
+  .empty{color:var(--muted);font-size:.85rem;padding:10px;text-align:center}
+  .activity{margin-top:14px}
+  .activity h3{font-size:.98rem;margin:14px 0 6px;color:var(--accent)}
+  .activity ol,.activity ul{margin:4px 0 4px 18px;padding:0}
+  .activity li{margin:3px 0}
+  details{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:6px}
+  summary{cursor:pointer;color:var(--ok);font-weight:600}
+  .concept{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+  .concept div{background:var(--panel2);border-radius:8px;padding:10px;font-size:.88rem}
+  .concept b{color:var(--accent)}
+  .note{font-size:.78rem;color:var(--muted);margin-top:6px}
+  .formula{font-family:"Cambria Math","Times New Roman",serif;font-size:1.02rem;background:#0d1430;padding:2px 8px;border-radius:6px}
+
+/* ===== V-Lab 공용 테마에 맞춘 덮어쓰기 ===== */
+body{font-family:var(--font);letter-spacing:-0.012em;-webkit-font-smoothing:antialiased}
+body.vlab-embed header{display:none}
+
+:root{--bg:#fff;--panel:#fff;--panel2:#F7F8FA;--line:#E6E8EC;--text:#111;--muted:#6B7280;--accent:#C98A00;--blue:#3182F6;--ok:#0B7A4B}
+header{background:#fff;border-bottom:1px solid var(--line);padding:16px 16px 12px}
+header h1{font-size:20px;font-weight:600;letter-spacing:-.02em}
+.wrap{max-width:none}
+.controls,.card,details{border-radius:12px}
+.card h2{font-weight:600}
+button{border-radius:8px;font-weight:600;background:#fff}button:hover{background:#F7F8FA;border-color:var(--line)}
+button.primary{background:#111;color:#fff;border-color:#111}
+select,input[type=date],input[type=number]{background:#fff;border-radius:8px}
+.b-pro{color:#1E5EB8;background:#EAF2FF}.b-retro{color:#B42318;background:#FDEEEE}.b-stat{color:#9A6200;background:#FFF8E6}
+.formula{background:#F7F8FA}
+.activity h3{color:#111}.concept b{color:#1E5EB8}
+</style>
+</head>
+<body>
+<script>if(/embed/.test(location.hash))document.body.classList.add("vlab-embed");</script>
+<header>
+  <h1>🔭 태양계 행성의 겉보기 운동 가상 실험실</h1>
+  <p>지구에서 본 행성의 위치 변화(순행·역행·유), 이각, 합·충·최대 이각을 시뮬레이션으로 관찰하고 기록해 봅시다.</p>
+</header>
+
+<div class="wrap">
+  <div class="controls">
+    <label>행성
+      <select id="planetSel">
+        <option value="mercury">수성 (내행성)</option>
+        <option value="venus">금성 (내행성)</option>
+        <option value="mars" selected>화성 (외행성)</option>
+        <option value="jupiter">목성 (외행성)</option>
+        <option value="saturn">토성 (외행성)</option>
+      </select>
+    </label>
+    <button id="playBtn" class="primary">⏸ 일시정지</button>
+    <label>속도
+      <select id="speedSel">
+        <option value="0.25">느리게 (15일/초)</option>
+        <option value="0.5">조금 느리게 (30일/초)</option>
+        <option value="1" selected>보통 (60일/초)</option>
+        <option value="3">빠르게 (180일/초)</option>
+        <option value="8">매우 빠르게 (480일/초)</option>
+      </select>
+    </label>
+    <button id="step1">+1일</button>
+    <button id="step10">+10일</button>
+    <label>날짜 <input type="date" id="dateIn"></label>
+    <button id="todayBtn">오늘로</button>
+    <button id="clearBtn">기록·궤적 지우기</button>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>① 태양계를 위에서 본 모습 <small>지구 → 행성 시선 방향 표시</small></h2>
+      <canvas id="orbitCv"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--blue)"></i>지구</span>
+        <span><i style="background:#fff;opacity:.7"></i>시선 방향</span>
+        <span><i style="background:var(--accent)"></i>기록한 관측 지점(번호)</span>
+      </div>
+      <label style="font-size:.85rem;color:var(--muted);margin-top:8px;display:flex;gap:6px;align-items:center">
+        <input type="checkbox" id="sightChk" checked> 기록한 시선 방향 표시
+      </label>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>② 지구에서 본 하늘 (황도 부근 별자리 배경) <small>
+          <label style="display:inline-flex;gap:6px;align-items:center">보기 범위
+            <select id="zoomSel">
+              <option value="360">전체 360°</option>
+              <option value="120" selected>120°</option>
+              <option value="60">60° (확대)</option>
+            </select></label></small></h2>
+        <canvas id="skyCv"></canvas>
+        <div class="legend">
+          <span><i style="background:var(--pro)"></i>순행 (서 → 동)</span>
+          <span><i style="background:var(--retro)"></i>역행 (동 → 서)</span>
+          <span><i style="background:var(--accent)"></i>태양 / 관측 기록</span>
+        </div>
+        <div class="note" id="exagNote"></div>
+      </div>
+
+      <div class="row">
+        <div class="card" style="flex:0 0 190px">
+          <h2>③ 망원경으로 본 모습</h2>
+          <canvas id="lookCv"></canvas>
+          <div class="note" style="text-align:center">크기 = 상대적 시직경<br>밝은 부분 = 위상</div>
+        </div>
+        <div class="card">
+          <h2>④ 현재 관측 정보</h2>
+          <dl class="info" id="info"></dl>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <h2>⑤ 관측 기록표
+        <span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+          <button id="recBtn" class="primary">📌 지금 위치 기록</button>
+          <label style="font-size:.8rem;color:var(--muted);display:flex;gap:4px;align-items:center">
+            <input type="checkbox" id="autoChk"> 자동 기록, 간격 <input type="number" id="autoInt" value="30" min="5" max="365">일
+          </label>
+          <button id="csvBtn">CSV 저장</button>
+        </span>
+      </h2>
+      <div class="tbox"><table>
+        <thead><tr><th>번호</th><th>날짜</th><th>황경(°)</th><th>황위(°)</th><th>이각(°)</th><th>거리(AU)</th><th>운동</th><th>위치 관계</th></tr></thead>
+        <tbody id="recBody"></tbody>
+      </table><div class="empty" id="recEmpty">아직 기록이 없습니다. ‘지금 위치 기록’을 눌러 보세요.</div></div>
+    </div>
+    <div class="card" style="flex:0 1 380px">
+      <h2>⑥ 주요 현상 자동 기록 <small>시뮬레이션이 진행되며 자동으로 기록됨</small></h2>
+      <div class="tbox"><table>
+        <thead><tr><th>날짜</th><th>현상</th><th>이전 같은 현상과의 간격</th></tr></thead>
+        <tbody id="evBody"></tbody>
+      </table><div class="empty" id="evEmpty">시뮬레이션을 진행하면 합·충·유·최대 이각 등이 기록됩니다.</div></div>
+    </div>
+  </div>
+
+  <div class="card activity">
+    <h2>📘 핵심 개념</h2>
+    <div class="concept">
+      <div><b>순행과 역행</b><br>행성은 별자리 사이를 대부분 서→동으로 이동(순행)하지만, 일정 기간 동→서로 이동(역행)한다. 방향이 바뀌는 순간 멈춘 듯 보이는 것을 <b>유(留)</b>라고 한다.</div>
+      <div><b>역행의 원인</b><br>공전 속도가 빠른 안쪽 행성이 바깥쪽 행성을 추월할 때, 시선 방향이 거꾸로 돌아가며 나타난다. 외행성은 <b>충</b> 무렵, 내행성은 <b>내합</b> 무렵에 역행한다.</div>
+      <div><b>이각</b><br>지구에서 볼 때 태양과 행성이 이루는 각. 동쪽으로 벌어지면 동방 이각(초저녁 서쪽 하늘), 서쪽으로 벌어지면 서방 이각(새벽 동쪽 하늘)에서 보인다.</div>
+      <div><b>내행성의 위치 관계</b><br>내합(이각 0°, 지구에 가장 가까움) → 서방 최대 이각 → 외합(이각 0°, 가장 멂) → 동방 최대 이각 → 내합. 최대 이각은 90°보다 작다.</div>
+      <div><b>외행성의 위치 관계</b><br>합(이각 0°) → 서구(서쪽 90°) → 충(180°, 밤새 관측, 가장 밝음) → 동구(동쪽 90°) → 합. 이각은 0°~180° 모두 가능하다.</div>
+      <div><b>회합 주기 (S)</b><br>같은 위치 관계(예: 충 → 충)가 반복되는 주기.<br>내행성: <span class="formula">1/S = 1/P − 1/E</span><br>외행성: <span class="formula">1/S = 1/E − 1/P</span><br>(E: 지구 공전 주기 1년, P: 행성 공전 주기)</div>
+    </div>
+
+    <h2 style="margin-top:18px">🧪 탐구 활동</h2>
+
+    <h3>활동 1. 외행성의 역행 관찰 (화성)</h3>
+    <ol>
+      <li>행성을 <b>화성</b>, 보기 범위를 <b>60°</b>로 놓고 시뮬레이션을 진행한다.</li>
+      <li>⑥ 표에서 ‘유(순행→역행)’과 ‘유(역행→순행)’의 날짜를 찾아 <b>역행 기간</b>을 구한다.</li>
+      <li>역행 기간 중 어느 날에 ‘충’이 일어나는지 확인한다.</li>
+      <li>① 그림에서 역행할 때 지구와 화성의 상대적 위치(누가 누구를 추월하는가?)를 설명한다.</li>
+    </ol>
+    <details><summary>예시 답안 보기</summary>
+      역행 기간은 약 70일 내외이며, 충은 역행 기간의 한가운데 무렵에 일어난다. 이때 공전 속도가 빠른 지구가 바깥쪽의 화성을 추월하기 때문에, 지구에서 화성을 보는 시선 방향이 별자리 배경에 대해 동→서로 거꾸로 움직이는 것처럼 보인다. 황위가 조금씩 변하므로 하늘에서는 고리(루프)나 Z자 모양의 경로가 나타난다.
+    </details>
+
+    <h3>활동 2. 내행성의 최대 이각으로 궤도 반지름 구하기 (금성·수성)</h3>
+    <ol>
+      <li>행성을 <b>금성</b>으로 바꾸고 ⑥ 표에서 ‘동방 최대 이각’ 또는 ‘서방 최대 이각’의 각도 θ를 읽는다.</li>
+      <li>최대 이각일 때 태양–금성–지구가 이루는 각은 90°이다. 이를 이용해 금성의 궤도 반지름 r을 구한다. <span class="formula">r = sin θ (AU)</span></li>
+      <li>같은 방법으로 수성의 궤도 반지름도 구하고, 두 결과를 비교한다.</li>
+    </ol>
+    <details><summary>예시 답안 보기</summary>
+      금성의 최대 이각 ≈ 46.3° → r = sin 46.3° ≈ 0.72 AU. 수성의 최대 이각 ≈ 22.8° → r ≈ 0.39 AU. 태양에 가까운 행성일수록 최대 이각이 작아 해 뜨기 직전이나 해 진 직후에만 잠깐 보인다.
+      (실제 수성은 궤도 이심률이 커서 최대 이각이 약 18°~28° 사이로 변하지만, 이 실험실은 원 궤도로 단순화하였다.)
+    </details>
+
+    <h3>활동 3. 회합 주기를 측정하여 공전 주기 구하기</h3>
+    <ol>
+      <li>외행성 하나를 고르고 ‘충’이 두 번 이상 일어날 때까지 진행한다. ⑥ 표의 ‘간격’ 칸에서 회합 주기 S를 읽는다.</li>
+      <li>회합 주기 공식으로 그 행성의 공전 주기 P를 계산한다.</li>
+      <li>내행성은 ‘내합 → 내합’ 간격으로 같은 활동을 해 본다.</li>
+    </ol>
+    <details><summary>예시 답안 보기</summary>
+      화성: S ≈ 780일(2.14년) → 1/P = 1 − 1/2.14 → P ≈ 1.88년<br>
+      목성: S ≈ 399일 → P ≈ 11.9년 / 토성: S ≈ 378일 → P ≈ 29.5년<br>
+      금성: S ≈ 584일(1.60년) → 1/P = 1 + 1/1.60 → P ≈ 0.62년(약 225일)
+    </details>
+
+    <h3>활동 4. 행성별 비교 탐구</h3>
+    <ol>
+      <li>화성·목성·토성의 역행 기간과 역행하는 각도(②에서 측정)를 비교해 표로 정리한다.</li>
+      <li>③ 망원경 모습에서, 금성이 가장 크게 보일 때와 가장 둥글게(보름달 모양) 보일 때의 위치 관계를 각각 찾는다.</li>
+      <li>외행성이 가장 밝게 보이는 때는 언제이며 그 까닭은 무엇인지 설명한다.</li>
+    </ol>
+    <details><summary>예시 답안 보기</summary>
+      ① 멀리 있는 행성일수록 회합 주기가 1년에 가까워지고 역행 기간은 길어지지만(토성 약 140일), 역행하는 각도는 작아진다(화성 약 15° 내외, 토성 약 7°).<br>
+      ② 금성은 내합 부근에서 지구와 가장 가까워 가장 크게 보이지만 가는 초승달 모양이며, 외합 부근에서는 보름달 모양이지만 가장 작게 보인다.<br>
+      ③ 외행성은 충일 때 지구와 가장 가깝고 태양 반대편에 있어 밤새도록 관측할 수 있으며, 가장 밝게 보인다.
+    </details>
+    <p class="note">※ 이 실험실은 모든 행성의 궤도를 원으로 단순화하고(궤도 경사는 반영), 2000년 1월 1일 기준 평균 위치에서 계산하였습니다. 실제 날짜의 현상과는 며칠~수십 일 차이가 날 수 있습니다.</p>
+  </div>
+</div>
+
+<script>
+(() => {
+const RAD = Math.PI/180, DEG = 180/Math.PI;
+const J2000 = Date.UTC(2000,0,1,12);
+const n360 = a => { a %= 360; return a < 0 ? a + 360 : a; };
+const n180 = a => { a = n360(a); return a > 180 ? a - 360 : a; };
+
+// 궤도 요소 (원 궤도 근사): a(AU), T(년), i(궤도경사°), O(승교점 황경°), L0(J2000 평균황경°), D(지름 km)
+const PL = {
+  mercury:{name:'수성',a:0.387,T:0.24085,i:7.00,O:48.3, L0:252.25,col:'#c9bfb0',r:4,D:4879,  inner:true},
+  venus:  {name:'금성',a:0.723,T:0.61520,i:3.39,O:76.7, L0:181.98,col:'#f2dc8f',r:6,D:12104, inner:true},
+  mars:   {name:'화성',a:1.524,T:1.88085,i:1.85,O:49.6, L0:355.45,col:'#ff6a3d',r:5,D:6779,  inner:false},
+  jupiter:{name:'목성',a:5.203,T:11.862, i:1.30,O:100.5,L0:34.40, col:'#e0b98f',r:9,D:139820,inner:false},
+  saturn: {name:'토성',a:9.537,T:29.457, i:2.49,O:113.7,L0:49.94, col:'#ead39a',r:8,D:116460,inner:false},
+};
+const EARTH = {a:1,T:1.0000174,i:0,O:0,L0:100.46};
+
+const ZODIAC = [['물고기자리',5],['양자리',38],['황소자리',68],['쌍둥이자리',100],['게자리',125],['사자자리',150],
+  ['처녀자리',190],['천칭자리',225],['전갈자리',245],['궁수자리',275],['염소자리',308],['물병자리',335]];
+
+function helio(p, d){
+  const L = (p.L0 + 360*d/(p.T*365.25))*RAD, O = p.O*RAD, inc = p.i*RAD, u = L - O, r = p.a;
+  const cu = Math.cos(u), su = Math.sin(u);
+  return { x: r*(Math.cos(O)*cu - Math.sin(O)*su*Math.cos(inc)),
+           y: r*(Math.sin(O)*cu + Math.cos(O)*su*Math.cos(inc)),
+           z: r*su*Math.sin(inc) };
+}
+function observe(p, d){
+  const E = helio(EARTH,d), P = helio(p,d);
+  const gx=P.x-E.x, gy=P.y-E.y, gz=P.z-E.z;
+  const rho = Math.hypot(gx,gy,gz);
+  const lon = n360(Math.atan2(gy,gx)*DEG);
+  const lat = Math.atan2(gz, Math.hypot(gx,gy))*DEG;
+  const sunLon = n360(Math.atan2(-E.y,-E.x)*DEG);
+  const el = n180(lon - sunLon);
+  const r = Math.hypot(P.x,P.y,P.z);
+  const cosA = ((-P.x)*(E.x-P.x)+(-P.y)*(E.y-P.y)+(-P.z)*(E.z-P.z))/(r*rho);
+  return {E,P,lon,lat,sunLon,el,rho,k:(1+cosA)/2};
+}
+const rateOf = (p,d) => n180(observe(p,d+0.5).lon - observe(p,d-0.5).lon); // °/일
+const synodic = p => 1/Math.abs(1/p.T - 1/EARTH.T)*365.25;
+
+const fmtDate = d => { const t = new Date(J2000 + d*864e5 - 12*36e5); return t.toISOString().slice(0,10); };
+const todayDay = () => { const n = new Date(); return (Date.UTC(n.getFullYear(),n.getMonth(),n.getDate(),12) - J2000)/864e5; };
+
+// ---- 상태 ----
+const st = { key:'mars', day:todayDay(), playing:true, speed:1, trail:[], recs:[], evs:[], prev:null,
+             lastTrail:-1e9, lastAuto:-1e9, skyCenter:null, zoom:120, cur:null, rate:0 };
+
+// 정적인 배경별 (시드 고정)
+let seed = 7; const rnd = () => (seed = (seed*16807)%2147483647)/2147483647;
+const STARS = Array.from({length:700}, () => ({lon:rnd()*360, lat:(rnd()-.5)*26, m:rnd()}));
+
+// ---- 캔버스 ----
+const $ = id => document.getElementById(id);
+const orbitCv=$('orbitCv'), skyCv=$('skyCv'), lookCv=$('lookCv');
+function fit(cv){
+  const dpr = window.devicePixelRatio||1, w = cv.clientWidth, h = cv.clientHeight;
+  if (cv.width !== Math.round(w*dpr) || cv.height !== Math.round(h*dpr)){ cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr); }
+  const ctx = cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); return {ctx,w,h};
+}
+
+function relation(o, rate){
+  const p = PL[st.key], ae = Math.abs(o.el);
+  if (p.inner){
+    const maxE = Math.asin(p.a)*DEG;
+    if (ae < 2.5) return o.rho < 1 ? '내합 부근' : '외합 부근';
+    if (ae > maxE - 0.8) return o.el > 0 ? '동방 최대 이각 부근' : '서방 최대 이각 부근';
+    return o.el > 0 ? '동방 이각' : '서방 이각';
+  } else {
+    if (ae < 3) return '합 부근';
+    if (ae > 177) return '충 부근';
+    if (Math.abs(ae-90) < 2) return o.el > 0 ? '동구 부근' : '서구 부근';
+    return o.el > 0 ? (ae>90?'충 ~ 동구 사이':'동구 ~ 합 사이') : (ae>90?'서구 ~ 충 사이':'합 ~ 서구 사이');
+  }
+}
+function visibility(o){
+  const p = PL[st.key], ae = Math.abs(o.el);
+  if (ae < (p.inner ? 10 : 15)) return '태양과 가까워 관측 어려움';
+  if (!p.inner && ae > 150) return '거의 밤새도록 관측 가능';
+  return o.el > 0 ? '초저녁 서쪽 하늘' : '새벽 동쪽 하늘';
+}
+function motion(rate){ return Math.abs(rate) < 0.008 ? '유' : (rate > 0 ? '순행' : '역행'); }
+
+// ---- 시간 진행 및 현상 감지 ----
+function detect(prev, cur){
+  const p = PL[st.key], ev = [];
+  if (prev.rate*cur.rate < 0) ev.push(cur.rate < 0 ? '유 (순행 → 역행)' : '유 (역행 → 순행)');
+  if (prev.el*cur.el < 0){
+    if (Math.abs(cur.el) < 90) ev.push(p.inner ? (cur.rho < 1 ? '내합' : '외합') : '합');
+    else if (!p.inner) ev.push('충');
+  }
+  if (p.inner){
+    cur.dA = Math.abs(cur.el) - Math.abs(prev.el);
+    if (prev.dA > 0 && cur.dA <= 0 && Math.abs(cur.el) > 10)
+      ev.push((cur.el > 0 ? '동방 최대 이각' : '서방 최대 이각') + ` (${Math.abs(cur.el).toFixed(1)}°)`);
+  } else if ((Math.abs(prev.el)-90)*(Math.abs(cur.el)-90) < 0){
+    ev.push(cur.el > 0 ? '동구' : '서구');
+  }
+  return ev;
+}
+function addEvent(name){
+  const base = name.replace(/\s*\(\d.*\)$/,'');
+  const last = [...st.evs].reverse().find(e => e.base === base);
+  st.evs.push({day:st.day, name, base, gap: last ? st.day - last.day : null});
+  renderEvents();
+}
+function advance(days){
+  const p = PL[st.key];
+  let rem = days;
+  while (rem > 1e-9){
+    const s = Math.min(1, rem); rem -= s; st.day += s;
+    const o = observe(p, st.day), rate = rateOf(p, st.day);
+    const cur = {el:o.el, rate, rho:o.rho};
+    if (st.prev){ detect(st.prev, cur).forEach(addEvent); }
+    st.prev = cur;
+    if (st.day - st.lastTrail >= 1){ st.trail.push({lon:o.lon, lat:o.lat, retro:rate<0}); st.lastTrail = st.day;
+      if (st.trail.length > 6000) st.trail.shift(); }
+    if ($('autoChk').checked){
+      const iv = Math.max(5, +$('autoInt').value || 30);
+      if (st.day - st.lastAuto >= iv){ record(); }
+    }
+  }
+}
+function resetRun(){
+  st.trail=[]; st.recs=[]; st.evs=[]; st.prev=null; st.lastTrail=-1e9; st.lastAuto=-1e9; st.skyCenter=null;
+  const p = PL[st.key], o = observe(p, st.day), rate = rateOf(p, st.day);
+  st.prev = {el:o.el, rate, rho:o.rho};
+  renderRecs(); renderEvents();
+}
+
+// ---- 기록 ----
+function record(){
+  const p = PL[st.key], o = observe(p, st.day), rate = rateOf(p, st.day);
+  st.recs.push({n:st.recs.length+1, day:st.day, lon:o.lon, lat:o.lat, el:o.el, rho:o.rho,
+    mot:motion(rate), rel:relation(o,rate), E:o.E, P:o.P});
+  st.lastAuto = st.day; renderRecs();
+}
+function renderRecs(){
+  $('recBody').innerHTML = st.recs.map(r => `<tr><td>${r.n}</td><td>${fmtDate(r.day)}</td><td>${r.lon.toFixed(1)}</td>
+    <td>${r.lat.toFixed(2)}</td><td>${r.el>0?'동 ':'서 '}${Math.abs(r.el).toFixed(1)}</td><td>${r.rho.toFixed(3)}</td>
+    <td>${badge(r.mot)}</td><td>${r.rel}</td></tr>`).join('');
+  $('recEmpty').style.display = st.recs.length ? 'none' : 'block';
+  const tb = $('recBody').closest('.tbox'); tb.scrollTop = tb.scrollHeight;
+}
+function renderEvents(){
+  $('evBody').innerHTML = st.evs.map(e => `<tr><td>${fmtDate(e.day)}</td><td>${e.name}</td>
+    <td>${e.gap ? Math.round(e.gap)+'일' : '-'}</td></tr>`).join('');
+  $('evEmpty').style.display = st.evs.length ? 'none' : 'block';
+  const tb = $('evBody').closest('.tbox'); tb.scrollTop = tb.scrollHeight;
+}
+const badge = m => `<span class="badge ${m==='역행'?'b-retro':m==='유'?'b-stat':'b-pro'}">${m}</span>`;
+
+// ---- 그리기: 궤도 ----
+function drawOrbit(o){
+  const {ctx,w,h} = fit(orbitCv), p = PL[st.key];
+  const cx=w/2, cy=h/2, R=Math.min(w,h)/2-30, sc=(R-22)/Math.max(p.a,1);
+  const S = v => ({x:cx+v.x*sc, y:cy-v.y*sc});
+  ctx.clearRect(0,0,w,h);
+  // 황도 별자리 띠
+  ctx.strokeStyle='#2a3560'; ctx.lineWidth=12; ctx.beginPath(); ctx.arc(cx,cy,R,0,7); ctx.stroke();
+  ctx.font='11px sans-serif'; ctx.fillStyle='#8b96bd'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ZODIAC.forEach(([n,l]) => { const a=l*RAD; ctx.fillText(n, cx+(R+19)*Math.cos(a), cy-(R+19)*Math.sin(a)); });
+  for (let l=0;l<360;l+=30){ const a=l*RAD; ctx.strokeStyle='#3a477a'; ctx.lineWidth=1; ctx.beginPath();
+    ctx.moveTo(cx+(R-6)*Math.cos(a),cy-(R-6)*Math.sin(a)); ctx.lineTo(cx+(R+6)*Math.cos(a),cy-(R+6)*Math.sin(a)); ctx.stroke(); }
+  // 궤도
+  ctx.setLineDash([3,4]); ctx.lineWidth=1;
+  ctx.strokeStyle='rgba(74,163,255,.6)'; ctx.beginPath(); ctx.arc(cx,cy,sc,0,7); ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.beginPath(); ctx.arc(cx,cy,p.a*sc,0,7); ctx.stroke();
+  ctx.setLineDash([]);
+  const ray = (Es, Ps) => { const ux=Ps.x-Es.x, uy=Ps.y-Es.y, L=Math.hypot(ux,uy), dx=ux/L, dy=uy/L;
+    const ex=Es.x-cx, ey=Es.y-cy, b=ex*dx+ey*dy, c=ex*ex+ey*ey-R*R, t=-b+Math.sqrt(b*b-c);
+    return {x:Es.x+dx*t, y:Es.y+dy*t}; };
+  // 기록된 시선
+  if ($('sightChk').checked) st.recs.forEach(r => {
+    const Es=S(r.E), Ps=S(r.P), Q=ray(Es,Ps);
+    ctx.strokeStyle='rgba(255,204,77,.35)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(Es.x,Es.y); ctx.lineTo(Q.x,Q.y); ctx.stroke();
+    [Es,Ps].forEach(pt => { ctx.fillStyle='rgba(255,204,77,.85)'; ctx.beginPath(); ctx.arc(pt.x,pt.y,2.5,0,7); ctx.fill(); });
+    ctx.fillStyle='#ffcc4d'; ctx.font='bold 10px sans-serif';
+    ctx.fillText(r.n, Es.x+(Es.x-cx)*0.12+6, Es.y+(Es.y-cy)*0.12-6);
+    ctx.fillText(r.n, Ps.x+6, Ps.y-7); ctx.fillText(r.n, Q.x, Q.y);
+  });
+  // 태양
+  const g=ctx.createRadialGradient(cx,cy,0,cx,cy,16); g.addColorStop(0,'#fff6c8'); g.addColorStop(.4,'#ffcc4d'); g.addColorStop(1,'rgba(255,204,77,0)');
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,16,0,7); ctx.fill();
+  // 현재 시선
+  const Es=S(o.E), Ps=S(o.P), Q=ray(Es,Ps);
+  ctx.strokeStyle='rgba(255,255,255,.75)'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(Es.x,Es.y); ctx.lineTo(Q.x,Q.y); ctx.stroke();
+  ctx.fillStyle=st.rate<0?'#ff5f7a':'#5ad1ff'; ctx.beginPath(); ctx.arc(Q.x,Q.y,5,0,7); ctx.fill();
+  // 태양 방향 (지구→태양)
+  ctx.setLineDash([2,3]); ctx.strokeStyle='rgba(255,204,77,.5)'; ctx.beginPath(); ctx.moveTo(Es.x,Es.y); ctx.lineTo(cx,cy); ctx.stroke(); ctx.setLineDash([]);
+  // 행성, 지구
+  ctx.fillStyle=p.col; ctx.beginPath(); ctx.arc(Ps.x,Ps.y,p.r,0,7); ctx.fill();
+  ctx.fillStyle='#4aa3ff'; ctx.beginPath(); ctx.arc(Es.x,Es.y,5,0,7); ctx.fill();
+  ctx.font='bold 12px sans-serif'; ctx.fillStyle='#fff'; ctx.textAlign='left';
+  ctx.fillText(p.name, Ps.x+p.r+4, Ps.y+10); ctx.fillStyle='#9fd0ff'; ctx.fillText('지구', Es.x+8, Es.y+10);
+  ctx.fillStyle='#8b96bd'; ctx.font='11px sans-serif'; ctx.fillText('공전 방향: 시계 반대 방향 ↺', 8, h-8);
+  ctx.textAlign='right'; ctx.fillText('→ 춘분점 방향(황경 0°)', w-8, cy-8);
+  ctx.strokeStyle='#3a477a'; ctx.beginPath(); ctx.moveTo(cx+18,cy); ctx.lineTo(cx+R-8,cy); ctx.stroke();
+}
+
+// ---- 그리기: 하늘 ----
+function drawSky(o){
+  const {ctx,w,h} = fit(skyCv), zoom = st.zoom;
+  const ppd = w/zoom, cy = h/2 - 8, latS = (h/2-30)/12;
+  if (zoom === 360) st.skyCenter = 180;
+  else if (st.skyCenter === null || Math.abs(n180(o.lon - st.skyCenter)) > zoom*0.4)
+    st.skyCenter = n360(o.lon + (st.rate >= 0 ? 0.25 : -0.25)*zoom);
+  const X = lon => w/2 - n180(lon - st.skyCenter)*ppd, Y = lat => cy - lat*latS;
+  const bg=ctx.createLinearGradient(0,0,0,h); bg.addColorStop(0,'#03051a'); bg.addColorStop(1,'#0a1030');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,w,h);
+  // 별
+  STARS.forEach(s => { const x=X(s.lon); if (x<0||x>w) return; const a=.25+.75*s.m*s.m;
+    ctx.fillStyle=`rgba(255,255,255,${a})`; ctx.fillRect(x, Y(s.lat), s.m>.92?2:1.2, s.m>.92?2:1.2); });
+  // 격자
+  ctx.strokeStyle='rgba(255,204,77,.35)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(0,cy); ctx.lineTo(w,cy); ctx.stroke();
+  ctx.fillStyle='#6f7aa3'; ctx.font='10px sans-serif'; ctx.textAlign='left';
+  [-10,-5,5,10].forEach(b => { ctx.strokeStyle='rgba(120,140,200,.12)'; ctx.beginPath(); ctx.moveTo(0,Y(b)); ctx.lineTo(w,Y(b)); ctx.stroke();
+    ctx.fillText((b>0?'+':'')+b+'°', 4, Y(b)-2); });
+  ctx.fillText('황도', 4, cy-3);
+  const step = zoom===360?30:zoom===120?10:5; ctx.textAlign='center';
+  for (let l=0;l<360;l+=step){ const x=X(l); if (x<0||x>w) continue;
+    ctx.strokeStyle='rgba(120,140,200,.15)'; ctx.beginPath(); ctx.moveTo(x,14); ctx.lineTo(x,h-24); ctx.stroke();
+    ctx.fillStyle='#6f7aa3'; ctx.fillText(l+'°', x, 10); }
+  ctx.font='12px sans-serif'; ctx.fillStyle='#8b96bd';
+  ZODIAC.forEach(([n,l]) => { const x=X(l); if (x>-30&&x<w+30) ctx.fillText(n, x, h-8); });
+  // 태양
+  const sx = X(o.sunLon);
+  if (sx>-20 && sx<w+20){ const g=ctx.createRadialGradient(sx,cy,0,sx,cy,22); g.addColorStop(0,'#fff6c8'); g.addColorStop(.35,'#ffcc4d'); g.addColorStop(1,'rgba(255,204,77,0)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(sx,cy,22,0,7); ctx.fill(); ctx.fillStyle='#1a1400'; ctx.font='bold 10px sans-serif'; ctx.fillText('태양',sx,cy+3); }
+  // 궤적
+  ctx.lineWidth=2.2; ctx.lineCap='round';
+  for (let i=1;i<st.trail.length;i++){
+    const a=st.trail[i-1], b=st.trail[i], x1=X(a.lon), x2=X(b.lon);
+    if (Math.abs(x1-x2) > w/2 || (x1<0&&x2<0) || (x1>w&&x2>w)) continue;
+    const age = (st.trail.length-i)/st.trail.length;
+    ctx.strokeStyle = b.retro ? `rgba(255,95,122,${1-age*.6})` : `rgba(90,209,255,${1-age*.6})`;
+    ctx.beginPath(); ctx.moveTo(x1,Y(a.lat)); ctx.lineTo(x2,Y(b.lat)); ctx.stroke();
+  }
+  // 기록 지점
+  ctx.font='bold 11px sans-serif';
+  st.recs.forEach(r => { const x=X(r.lon); if (x<0||x>w) return; const y=Y(r.lat);
+    ctx.strokeStyle='#ffcc4d'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(x,y,5,0,7); ctx.stroke();
+    ctx.fillStyle='#ffcc4d'; ctx.fillText(r.n, x, y-9); });
+  // 행성
+  const p = PL[st.key], px = X(o.lon), py = Y(o.lat);
+  ctx.fillStyle=p.col; ctx.shadowColor=p.col; ctx.shadowBlur=10; ctx.beginPath(); ctx.arc(px,py,5,0,7); ctx.fill(); ctx.shadowBlur=0;
+  ctx.fillStyle='#fff'; ctx.font='bold 12px sans-serif'; ctx.fillText(p.name, px, py+20);
+  // 방향
+  ctx.fillStyle='#cfd6ef'; ctx.font='bold 12px sans-serif';
+  ctx.textAlign='left'; ctx.fillText('← 동', 6, 26); ctx.textAlign='right'; ctx.fillText('서 →', w-6, 26);
+  const ex = latS/ppd;
+  $('exagNote').textContent = '※ 남쪽 하늘을 바라본 방향(왼쪽이 동쪽). 행성의 경로가 잘 보이도록 세로(황위)를 가로보다 약 ' +
+     (ex>=1.5 ? ex.toFixed(0)+'배 과장하여' : '같은 비율로') + ' 나타냈습니다. 배경 별은 위치 비교용 가상 별입니다.';
+}
+
+// ---- 그리기: 망원경 모습 ----
+function drawLook(o){
+  const {ctx,w,h} = fit(lookCv), p = PL[st.key];
+  ctx.clearRect(0,0,w,h);
+  const minRho = Math.abs(p.a-1), maxR = w/2-8;
+  const r = Math.max(2, maxR * minRho / o.rho);
+  const cx=w/2, cy=h/2, k=o.k, litRight = o.el > 0; // 태양이 행성의 서쪽(오른쪽)에 있으면 오른쪽이 밝음
+  ctx.fillStyle='#05081a'; ctx.fillRect(0,0,w,h);
+  ctx.fillStyle='#1d2238'; ctx.beginPath(); ctx.arc(cx,cy,r,0,7); ctx.fill();
+  ctx.fillStyle=p.col; ctx.beginPath();
+  if (litRight) ctx.arc(cx,cy,r,-Math.PI/2,Math.PI/2); else ctx.arc(cx,cy,r,Math.PI/2,Math.PI*1.5);
+  ctx.fill();
+  ctx.fillStyle = k >= 0.5 ? p.col : '#1d2238';
+  ctx.beginPath(); ctx.ellipse(cx,cy,Math.max(0.01,r*Math.abs(2*k-1)),r,0,0,7); ctx.fill();
+  ctx.fillStyle='#8b96bd'; ctx.font='10px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('동 ←      → 서', cx, h-4);
+}
+
+// ---- 정보 ----
+function updateInfo(o){
+  const p = PL[st.key], m = motion(st.rate);
+  const diam = 206265*p.D/(o.rho*1.496e8);
+  $('info').innerHTML = `
+    <dt>날짜</dt><dd>${fmtDate(st.day)}</dd>
+    <dt>운동 상태</dt><dd>${badge(m)} <span style="color:var(--muted);font-weight:400">(${st.rate>=0?'+':''}${st.rate.toFixed(3)}°/일)</span></dd>
+    <dt>위치 관계</dt><dd>${relation(o,st.rate)}</dd>
+    <dt>이각</dt><dd>${o.el>0?'동방(태양의 동쪽)':'서방(태양의 서쪽)'} ${Math.abs(o.el).toFixed(1)}°</dd>
+    <dt>관측 시기</dt><dd>${visibility(o)}</dd>
+    <dt>황경 / 황위</dt><dd>${o.lon.toFixed(1)}° / ${o.lat>=0?'+':''}${o.lat.toFixed(2)}°</dd>
+    <dt>지구와의 거리</dt><dd>${o.rho.toFixed(3)} AU</dd>
+    <dt>시직경 / 위상</dt><dd>${diam.toFixed(1)}″ / ${(o.k*100).toFixed(0)}% 밝음</dd>
+    <dt>공전 주기</dt><dd>${p.T.toFixed(2)}년 (${Math.round(p.T*365.25)}일)</dd>
+    <dt>회합 주기(이론)</dt><dd>${Math.round(synodic(p))}일</dd>
+    ${p.inner?`<dt>최대 이각(이론)</dt><dd>${(Math.asin(p.a)*DEG).toFixed(1)}°</dd>`:''}`;
+}
+
+// ---- 루프 ----
+let tick = 0;
+function frame(){
+  if (st.playing) advance(st.speed);
+  render();
+  requestAnimationFrame(frame);
+}
+function render(){
+  const p = PL[st.key], o = observe(p, st.day); st.rate = rateOf(p, st.day);
+  drawOrbit(o); drawSky(o); drawLook(o);
+  if (++tick % 4 === 0 || !st.playing) updateInfo(o);
+  const di = $('dateIn'); if (document.activeElement !== di) di.value = fmtDate(st.day);
+}
+
+// ---- 이벤트 ----
+$('planetSel').onchange = e => { st.key = e.target.value; resetRun(); };
+$('playBtn').onclick = () => { st.playing = !st.playing; $('playBtn').textContent = st.playing ? '⏸ 일시정지' : '▶ 재생'; };
+$('speedSel').onchange = e => st.speed = +e.target.value;
+$('zoomSel').onchange = e => { st.zoom = +e.target.value; st.skyCenter = null; };
+$('step1').onclick = () => advance(1);
+$('step10').onclick = () => advance(10);
+$('dateIn').onchange = e => { const t = Date.parse(e.target.value+'T12:00:00Z'); if (!isNaN(t)){ st.day=(t-J2000)/864e5; resetRun(); } };
+$('todayBtn').onclick = () => { st.day = todayDay(); resetRun(); };
+$('clearBtn').onclick = () => resetRun();
+$('recBtn').onclick = () => record();
+$('csvBtn').onclick = () => {
+  const p = PL[st.key];
+  let csv = '\uFEFF행성,번호,날짜,황경(°),황위(°),이각(°; +동방 -서방),거리(AU),운동,위치 관계\n';
+  st.recs.forEach(r => csv += [p.name,r.n,fmtDate(r.day),r.lon.toFixed(2),r.lat.toFixed(3),r.el.toFixed(2),r.rho.toFixed(4),r.mot,r.rel].join(',')+'\n');
+  csv += '\n날짜,현상,이전 같은 현상과의 간격(일)\n';
+  st.evs.forEach(e => csv += [fmtDate(e.day), e.name.replace(/,/g,' '), e.gap?Math.round(e.gap):''].join(',')+'\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download = `${p.name}_겉보기운동_관측기록.csv`; a.click();
+};
+
+resetRun();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

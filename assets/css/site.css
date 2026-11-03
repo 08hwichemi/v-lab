@@ -263,6 +263,23 @@ table.list th { color: var(--muted); font-weight: 600; font-size: 11.5px; }
 .tl-table th { color: var(--muted); font-weight: 600; font-size: 11.5px; white-space: normal; vertical-align: bottom; }
 .tl-table td:nth-child(n+2) { font-family: var(--mono); font-size: 12.5px; }
 .tl-table td.txt { font-family: var(--font); font-size: 13px; }
+/* 부록 '핵심 공식': 분수·첨자·제곱근을 교과서처럼 (tools.js fmla) */
+.tl-fx td { vertical-align: middle; }
+.tl-fx td:first-child { font-size: 13px; color: var(--text-2); white-space: normal; min-width: 92px; }
+.tl-fx td:nth-child(2) { font-family: var(--font); font-size: 14.5px; white-space: normal; color: var(--text); }
+.tl-fx .fx { line-height: 1.95; }
+.tl-fx .fx sup, .tl-fx .fx sub { font-size: .7em; line-height: 0; }
+.tl-fx .fx sup { vertical-align: .55em; } .tl-fx .fx sub { vertical-align: -.25em; }
+.tl-fx .fr { display: inline-flex; flex-direction: column; align-items: stretch; vertical-align: middle; text-align: center; margin: 0 .2em; line-height: 1.3; font-size: .95em; }
+.tl-fx .fr > span { padding: 0 .25em; white-space: nowrap; }
+.tl-fx .fr > span:first-child { border-bottom: 1px solid currentColor; padding-bottom: .08em; }
+.tl-fx .fr > span:last-child { padding-top: .14em; }
+.tl-fx .fr .sq { margin-top: .2em; }   /* 분모 안 근호의 윗줄이 분수 줄에 붙지 않게 */
+.tl-fx .sq { display: inline-flex; align-items: stretch; vertical-align: middle; white-space: nowrap; margin: 0 .1em; line-height: 1.3; }
+.tl-fx .sq > svg { width: .62em; flex: none; overflow: visible; }   /* 근호: 안쪽 식 높이만큼 늘어남 */
+.tl-fx .sq > svg path { fill: none; stroke: currentColor; stroke-width: 1.1px; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.tl-fx .sq > span { border-top: 1px solid currentColor; padding: .12em .2em 0 .1em; display: inline-block; }
+.tl-fx .fx-note { font-size: 12px; color: var(--muted); line-height: 1.45; padding: 1px 0 4px; }
 .tl-codon td { font-family: var(--mono) !important; font-size: 11.5px !important; padding: 5px 6px; }
 .tl-codon td div { white-space: nowrap; }
 .tl-codon td b { font-weight: 600; font-family: var(--font); }

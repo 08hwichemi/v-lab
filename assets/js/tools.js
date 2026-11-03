@@ -285,9 +285,27 @@
     bindPeriodic(body);
   }
   const SEC_COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#14B8A6", "#F97316", "#6366F1", "#84CC16", "#06B6D4", "#A855F7"];
+  /* 공식 표기 (부록 '핵심 공식' 전용): \frac{a}{b} 분수, \sqrt{x} 제곱근, ^{..}·^x 위첨자, _{..}·_x 아래첨자.
+     중괄호 없이 ^·_ 뒤에 오는 글자는 한 글자만 올리거나 내림. 나머지 글자는 그대로 표시 */
+  function fmla(src) {
+    const s = String(src); let i = 0;
+    const group = () => { if (s[i] !== "{") return esc(s[i++] || ""); i++; const o = parse("}"); i++; return o; };
+    function parse(end) {
+      let o = "";
+      while (i < s.length && s[i] !== end) {
+        if (s.startsWith("\\frac", i)) { i += 5; const a = group(), b = group(); o += `<span class="fr"><span>${a}</span><span>${b}</span></span>`; }
+        else if (s.startsWith("\\sqrt", i)) { i += 5; o += `<span class="sq"><svg viewBox="0 0 10 24" preserveAspectRatio="none" aria-hidden="true"><path d="M0.5 14 L3 12.5 L6 23 L9.6 0.6"/></svg><span>${group()}</span></span>`; }
+        else if (s[i] === "^" || s[i] === "_") { const t = s[i] === "^" ? "sup" : "sub"; i++; o += `<${t}>${group()}</${t}>`; }
+        else o += esc(s[i++]);
+      }
+      return o;
+    }
+    return parse(null);
+  }
   function renderSection(sec, color) {
     let inner = "";
-    if (sec.type === "table") inner = `<table class="tl-table"><thead><tr>${sec.cols.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${sec.rows.map(r => { const rowMulti = r.some((c, i) => i > 0 && String(c).length > 14 && String(c).includes(" / ")); return `<tr data-row>${r.map((c, i) => { c = String(c); const multi = rowMulti && i > 0 && c.includes(" / "); const cls = [c.length > 18 && !multi ? "wrap" : "", i > 0 && /[가-힣]/.test(c) ? "txt" : ""].filter(Boolean).join(" "); return `<td${cls ? ` class="${cls}"` : ""}>${multi ? c.split(" / ").map(esc).join("<br>") : esc(c)}</td>`; }).join("")}</tr>`; }).join("")}</tbody></table>`;
+    if (sec.type === "formula") inner = `<table class="tl-table tl-fx"><thead><tr>${sec.cols.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${sec.rows.map(r => `<tr data-row><td>${esc(r[0])}</td><td>${[].concat(r[1]).map(l => `<div class="fx">${fmla(l)}</div>`).join("")}${r[2] ? `<div class="fx-note">${fmla(r[2])}</div>` : ""}</td></tr>`).join("")}</tbody></table>`;
+    else if (sec.type === "table") inner = `<table class="tl-table"><thead><tr>${sec.cols.map(c => `<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${sec.rows.map(r => { const rowMulti = r.some((c, i) => i > 0 && String(c).length > 14 && String(c).includes(" / ")); return `<tr data-row>${r.map((c, i) => { c = String(c); const multi = rowMulti && i > 0 && c.includes(" / "); const cls = [c.length > 18 && !multi ? "wrap" : "", i > 0 && /[가-힣]/.test(c) ? "txt" : ""].filter(Boolean).join(" "); return `<td${cls ? ` class="${cls}"` : ""}>${multi ? c.split(" / ").map(esc).join("<br>") : esc(c)}</td>`; }).join("")}</tr>`; }).join("")}</tbody></table>`;
     else if (sec.type === "list") inner = `<ul class="tl-list">${sec.rows.map(r => `<li data-row>${esc(r)}</li>`).join("")}</ul>`;
     else if (sec.type === "codon") inner = renderCodon();
     else if (sec.type === "periodic") inner = renderPeriodic();

@@ -9,10 +9,11 @@
 - 운영자 휘쌤(화학 교사). 다른 선생님들이 만든 실험 HTML을 받아서 올리는 일이 주 업무.
 - 모든 사용자 응답과 커밋 메시지는 **한국어**로 쓴다.
 
-## 현재 등록된 실험 (data/labs.js, 13개)
+## 현재 등록된 실험 (data/labs.js, 14개)
 
 | 과목 | id | 제목 | 제작 |
 |---|---|---|---|
+| 물리 | mechanics-energy | 역학과 에너지 가상 실험실 (6가지, `experiments[]` · 포물선·단진자·케플러·인공위성·도플러·일반 상대성) | 하영우 |
 | 화학 | chem-smart-lab | 화학 스마트 실험실 (7가지, `experiments[]`) | 휘쌤 |
 | 화학 | organic-structure | 구조식 그리기 (OpenChemLib 편집기) | 휘쌤 |
 | 화학 | coin-entropy | 동전 던지기로 보는 엔트로피 | 홍채린 |
@@ -23,7 +24,7 @@
 | 지구 | constellation | 별자리 탐험 | 홍채린 |
 | 지구 | plate-tectonics / elnino / foehn / planet-motion / star-evolution | 판구조론 · 엘니뇨 · 푄 · 행성의 겉보기 운동 · 별의 진화 | 장미나 |
 
-물리·생명과학은 아직 비어 있음.
+생명과학은 아직 비어 있음.
 
 ## 외부 선생님 실험을 올리는 절차 (지금까지의 방식)
 
@@ -34,9 +35,11 @@
    - `<body>` 바로 뒤에 `<script>if(/embed/.test(location.hash))document.body.classList.add("vlab-embed");</script>` 를 넣고, CSS에 `body.vlab-embed header{display:none}` (파일 자체 제목 숨김)을 둔다.
    - `<title>` 은 `제목 · V-Lab`.
    - 자체 테마로 만든 실험(coin-entropy, chem-smart-lab, organic-structure)만 `lab-theme.css` 를 그대로 쓴다.
+   - 한 파일에 실험이 여럿이고 자체 해시(`#projectile` 등)로 전환하는 파일은, 뷰어가 보내는 `#exp=N&embed` 를 받도록 해시 해석 함수에 `exp=N` → id 표(`ORDER`)를 넣는다 (`labs/physics/mechanics-energy.html` 의 `idFromHash` 참고). 임베드 때는 파일 자체 실험 목록(`.side`)도 숨긴다.
+   - 파일에 다크 모드 토큰(`prefers-color-scheme: dark`)이 있으면 지운다. 실험 화면은 항상 밝은 바탕.
 3. **검토** — 백그라운드 에이전트에게 파일별로 (A) 코드/런타임 오류 (B) 교과 내용 오류 (C) UX 함정을 찾아 줄 번호와 구체적 수정안을 받게 한 뒤, 직접 패치하고 Playwright로 재현·검증한다. 수정 내용은 커밋 메시지와 사용자 보고에 파일별로 정리한다.
 4. **등록** — `data/labs.js` 에 항목 추가 (`author` 에 선생님 성함, `unit` 은 교과·단원, `added` 날짜).
-5. **썸네일** — `assets/img/thumbs/<id>/0.png` (944×522, 뷰포트 1180 폭에서 `#embed` 로 열어 상단을 잘라 캡처). `scripts/thumbs.js` 참고.
+5. **썸네일** — `assets/img/thumbs/<id>/0.png` (944×522, 뷰포트 1180 폭에서 `#embed` 로 열어 상단을 잘라 캡처). `scripts/thumbs.js` 참고. 한 파일에 실험이 여럿이면 `node scripts/thumbs.js physics/mechanics-energy:0 physics/mechanics-energy:1 …` 처럼 `:번호` 를 붙이면 `#exp=N&embed` 로 열어 `N.png` 로 저장한다.
 6. **확인** — 1830 폭 전체 화면, 1180 폭, 뷰어(`lab.html?id=...`)를 캡처해 눈으로 확인한 뒤 커밋·푸시.
 
 ## 검증 환경

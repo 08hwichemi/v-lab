@@ -49,6 +49,27 @@ window.VLAB = {
    */
   labs: [
     {
+      id: "mechanics-energy",
+      subject: "physics",
+      title: "역학과 에너지 가상 실험실",
+      summary: "포물선 운동, 단진자, 케플러 법칙, 인공위성 궤도, 도플러 효과, 일반 상대성 이론 6가지를 학생이 직접 조건을 바꾸고 측정·기록하는 실험실입니다. 측정 기록표와 그래프(발사각–거리, T²–L, T²–a³)가 들어 있고 기록은 표로 복사할 수 있습니다.",
+      file: "labs/physics/mechanics-energy.html",
+      author: "하영우",
+      grade: ["고2", "고3"],
+      unit: "역학과 에너지 · 시공간과 운동 · 탄성파와 소리",
+      tags: ["포물선 운동", "단진자", "케플러 법칙", "인공위성", "도플러 효과", "일반 상대성 이론", "중력 시간 지연"],
+      experiments: [
+        { title: "포물선 운동",     hash: "exp=0", thumb: "assets/img/thumbs/mechanics-energy/0.png", unit: "역학과 에너지 · 시공간과 운동", tags: ["발사각", "수평 도달 거리", "속도 벡터"] },
+        { title: "단진자",         hash: "exp=1", thumb: "assets/img/thumbs/mechanics-energy/1.png", unit: "역학과 에너지 · 탄성파와 소리", tags: ["주기", "T²–L 그래프", "역학적 에너지"] },
+        { title: "케플러 법칙",     hash: "exp=2", thumb: "assets/img/thumbs/mechanics-energy/2.png", unit: "역학과 에너지 · 시공간과 운동", tags: ["타원 궤도", "면적 속도", "T²–a³"] },
+        { title: "인공위성 궤도",   hash: "exp=3", thumb: "assets/img/thumbs/mechanics-energy/3.png", unit: "역학과 에너지 · 시공간과 운동", tags: ["뉴턴의 사고 실험", "원 궤도 속력", "탈출 속력"] },
+        { title: "도플러 효과",     hash: "exp=4", thumb: "assets/img/thumbs/mechanics-energy/4.png", unit: "역학과 에너지 · 탄성파와 소리", tags: ["파면", "진동수", "충격파"] },
+        { title: "일반 상대성 이론", hash: "exp=5", thumb: "assets/img/thumbs/mechanics-energy/5.png", unit: "역학과 에너지 · 시공간과 운동", tags: ["시공간의 휘어짐", "중력 시간 지연", "블랙홀"] }
+      ],
+      added: "2026-11-03",
+      featured: true
+    },
+    {
       id: "chem-smart-lab",
       subject: "chemistry",
       title: "화학 스마트 실험실",

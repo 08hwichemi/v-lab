@@ -214,7 +214,7 @@ function msProps(M){
   const L = M<0.43 ? 0.23*Math.pow(M,2.3) : M<2 ? Math.pow(M,4) : 1.4*Math.pow(M,3.5);
   const R = M<1 ? Math.pow(M,0.8) : Math.pow(M,0.57);
   const T = 5778*Math.pow(L/(R*R),0.25);
-  const t = 1e10*Math.pow(M,-2.5);
+  const t = Math.max(3e6, 1e10*Math.pow(M,-2.5));   // 대질량 별은 수백만 년 수준
   return {L,R,T,t};
 }
 const RfromLT = (L,T) => Math.sqrt(L)*Math.pow(5778/T,2);
@@ -245,7 +245,7 @@ function buildStages(M){
       fusion:'핵융합 없음 — 남은 열로 빛남',
       desc:'적색 왜성은 수소를 모두 소모한 뒤 <b>헬륨으로 이루어진 백색 왜성</b>이 될 것으로 예측됩니다. 하지만 수명이 우주의 나이보다 길어 <b>아직 이 단계에 이른 적색 왜성은 없습니다.</b>'});
   } else if(c==='mid'){
-    const gL = 1500*Math.pow(M,0.9), gT = 4200;
+    const gL = 1500*Math.pow(M,0.9), gT = 3500;
     S.push({key:'giant', name:'적색 거성', T:gT, L:gL, R:RfromLT(gL,gT), dur:ms.t*0.1, hr:true,
       fusion:'헬륨 핵 수축 + 껍질 수소 핵융합 → 이후 헬륨 핵융합(탄소·산소 생성)',
       desc:'중심핵의 수소가 바닥나면 헬륨 핵이 수축하며 온도가 올라가고, 핵 바깥 껍질에서 수소 핵융합이 일어나 <b>바깥층이 크게 팽창</b>합니다. 표면 온도는 낮아져 붉게 보이지만 크기가 매우 커서 <b>광도는 증가</b>합니다. 이후 중심핵에서 헬륨 핵융합으로 탄소와 산소가 만들어집니다.'});
@@ -290,6 +290,7 @@ function fmt(x, d=2){
   return x>=100 ? Math.round(x).toLocaleString() : x.toFixed(x>=10?1:d);
 }
 function fmtYear(y){
+  if(y>=1e12) return (y/1e12).toFixed(1)+'조 년';
   if(y>=1e8) return (y/1e8).toLocaleString(undefined,{maximumFractionDigits:y>=1e10?0:1})+'억 년';
   if(y>=1e4) return (y/1e4).toLocaleString(undefined,{maximumFractionDigits:1})+'만 년';
   return Math.round(y).toLocaleString()+'년';
@@ -303,7 +304,7 @@ function kRGB(K){
 }
 const rgbStr = (c,a=1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
 function colorName(T){
-  return T>30000?'청색':T>10000?'청백색':T>7500?'백색':T>6000?'황백색':T>5000?'황색':T>3700?'주황색':'적색';
+  return T>30000?'청색':T>10000?'청백색':T>7500?'백색':T>6000?'황백색':T>5000?'황색':T>3500?'주황색':'적색';
 }
 
 /* ---------- 상태 ---------- */
@@ -354,7 +355,7 @@ function buildTimeline(){
   const tl=$('timeline'); tl.innerHTML='';
   stages.forEach((s,i)=>{
     const c=document.createElement('button'); c.className='chip'; c.textContent=(i+1)+'. '+s.name;
-    c.onclick=()=>{ p=i; updateData(true); }; tl.appendChild(c);
+    c.onclick=()=>{ if(i<Math.floor(p)) trail=[]; p=i; updateData(true); }; tl.appendChild(c);
   });
 }
 
@@ -415,7 +416,7 @@ function pxRadius(R){
   if(R<=0) return 0;
   const lg=Math.log10(R);
   const base = lg<-2 ? 4+ (lg+5)/3*4 : 8+(lg+2)/5.5*170;
-  return Math.max(3, base*Math.min(1, SH/400));
+  return Math.max(3, base*Math.min(1, SH/400, SW/520));
 }
 function drawStar(cx,cy,pr,T,time,pulse=0){
   const c=kRGB(T), r=pr*(1+pulse*Math.sin(time*2)*0.03);
@@ -553,8 +554,8 @@ function renderStar(time){
     sctx.fillStyle='#9aa5d1'; sctx.font='12px sans-serif';
     sctx.fillText(`크기: 태양의 ${fmt(st.R)}배 (로그 축척)`, 14, H-14);
     sctx.strokeStyle='rgba(255,220,120,0.6)'; sctx.setLineDash([4,4]);
-    sctx.beginPath(); sctx.arc(W-30-sunPx*0.5,H-30-sunPx*0.5,sunPx*0.5,0,7); sctx.stroke(); sctx.setLineDash([]);
-    sctx.fillText('☉ 태양(1/2 축척)', W-120-sunPx*0.5, H-34-sunPx);
+    sctx.beginPath(); sctx.arc(W-24-sunPx,H-24-sunPx,sunPx,0,7); sctx.stroke(); sctx.setLineDash([]);
+    sctx.textAlign='right'; sctx.fillText('☉ 태양 (같은 로그 축척)', W-14, H-34-sunPx*2); sctx.textAlign='left';
   }
 }
 
@@ -577,9 +578,9 @@ function buildHRbg(){
     const y=hy(Math.pow(10,e)); c.beginPath(); c.moveTo(PAD.l,y); c.lineTo(HW-PAD.r,y); c.stroke();
     c.textAlign='right'; c.fillText('10'+String(e).split('').map(ch=>SUP[ch]).join(''),PAD.l-6,y+4);
   }
-  [100000,40000,20000,10000,6000,4000,3000].forEach(T=>{
+  [100000,30000,10000,6000,3000].forEach(T=>{
     const x=hx(T); c.beginPath(); c.moveTo(x,PAD.t); c.lineTo(x,HH-PAD.b); c.stroke();
-    c.textAlign='center'; c.fillText(T>=10000?(T/1000)+'천':T.toLocaleString(),x,HH-PAD.b+15);
+    c.textAlign='center'; c.fillText(T>=10000?(T/10000)+'만':T.toLocaleString(),x,HH-PAD.b+15);
   });
   c.fillStyle='#c7cff5'; c.font='12px sans-serif'; c.textAlign='center';
   c.fillText('표면 온도 (K) ← 높음   낮음 →',(PAD.l+HW-PAD.r)/2,HH-8);
@@ -623,7 +624,7 @@ function renderHR(time){
     hctx.fillStyle=g; hctx.beginPath(); hctx.arc(x,y,r*2.4,0,7); hctx.fill();
     hctx.fillStyle='#fff'; hctx.beginPath(); hctx.arc(x,y,3.5,0,7); hctx.fill();
     hctx.fillStyle='#fff'; hctx.font='bold 12px sans-serif'; hctx.textAlign= x>HW*0.6?'right':'left';
-    hctx.fillText(st.s.name, x+(x>HW*0.6?-12:12), y-10);
+    hctx.fillText(st.s.name, x+(x>HW*0.6?-12:12), y-20);
   }
 }
 
@@ -653,7 +654,7 @@ function drawRecords(){
   if(!records.length){ tb.innerHTML='<tr><td colspan="6" class="empty">아직 기록이 없습니다.</td></tr>'; return; }
   tb.innerHTML=records.map(r=>`<tr><td><b>${r.M} M☉</b></td><td>${r.cat}</td>
     <td><span class="swatch" style="background:${rgbStr(kRGB(r.T))};color:${rgbStr(kRGB(r.T))}"></span>${Math.round(r.T).toLocaleString()} K</td>
-    <td>${fmtYear(r.life)}</td><td>태양의 ${fmt(r.maxR)}배</td><td>${r.fate}</td></tr>`).join('');
+    <td>${fmtYear(r.life)}${r.life>UNIVERSE?' (우주 나이 초과)':''}</td><td>태양의 ${fmt(r.maxR)}배</td><td>${r.fate}</td></tr>`).join('');
 }
 
 /* ---------- 퀴즈 ---------- */

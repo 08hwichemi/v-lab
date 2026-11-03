@@ -42,6 +42,8 @@
   @media (max-width:760px){.grid{grid-template-columns:1fr}}
   .panel{border:1px solid var(--line);border-radius:10px;padding:14px;background:#fbfcfe}
   .panel h3{margin-top:0}
+  .grid>.panel{min-width:0}#t2 thead th{white-space:normal}
+  .canvas-box{overflow-x:auto}.canvas-box canvas{min-width:640px}
   table{width:100%;border-collapse:collapse;font-size:.9rem}
   th,td{border-bottom:1px solid var(--line);padding:6px 6px;text-align:left;vertical-align:top}
   th{color:var(--muted);font-weight:600;white-space:nowrap;width:30%}
@@ -324,8 +326,9 @@ function pointAt(p,s){
     if(s<=l)return[p[i-1][0]+dx*s/l,p[i-1][1]+dy*s/l,dx/l,dy/l];s-=l;}
   const n=p.length;return[p[n-1][0],p[n-1][1],1,0];
 }
-function depthKm(y){return Math.max(0,(y-SEA)*1.9);} // 단면도 위치 → 추정 깊이
+function depthKm(y){return Math.max(0,(y-245)*3.3);} // 단면도 위치 → 추정 깊이 (해양 지각 윗면 기준, 섭입판 바닥 ≈ 700 km)
 function addQuake(x,y,force){
+  if(!opt('cQuake'))return;
   const d=depthKm(y); const cat=force||(d<70?'S':d<300?'M':'D');
   quakes.push({x,y,life:1,cat}); qCount[cat]++; updCount();
 }
@@ -437,7 +440,7 @@ function drawRift(dt){
   arrow(230,215,150,215,'#5a4527');arrow(570,215,650,215,'#3d2d18');
   if(Math.random()<dt*1.2) spawnMagma(400+(Math.random()-.5)*30,400,400+(Math.random()-.5)*14,195,false);
   if(Math.random()<dt*0.5) spawnMagma(410,330,528,94,true);
-  if(Math.random()<dt*1.6) addQuake(400+(Math.random()-.5)*160,170+Math.random()*80);
+  if(Math.random()<dt*1.6){const x=400+(Math.random()-.5)*160;addQuake(x,topAt(x)+5+Math.random()*(bot(x)-topAt(x)-10));}
   drawMagma(dt);drawQuakes(dt);
   label('열곡대',400,108);label('호수',400,168,'#2a62b8');label('화산',528,74);
   label('대륙판',110,175);label('대륙판',690,175);label('정단층',300,232,'#4a3418');
@@ -478,16 +481,16 @@ function drawSubduction(dt,type){
   if(opt('cMagma')){const g=cx.createRadialGradient(600,322,0,600,322,28);g.addColorStop(0,'rgba(255,120,30,.9)');g.addColorStop(1,'rgba(255,60,0,0)');cx.fillStyle=g;cx.beginPath();cx.arc(600,322,28,0,7);cx.fill();}
   if(Math.random()<dt*0.9) spawnMagma(598+(Math.random()-.5)*16,322,volX,volY,true);
   if(Math.random()<dt*2.2){
-    const s=SLEN*0.38+Math.random()*SLEN*0.6; const[x,y]=pointAt(SLAB,s);
+    const s=SLEN*0.5+Math.random()*SLEN*0.48; const[x,y]=pointAt(SLAB,s);
     addQuake(x+(Math.random()-.5)*14,y-6+(Math.random()-.5)*14);
   }
   arrow(200,244,300,244,'#fff');
   arrow(780,type==='oc'?250:248,720,type==='oc'?250:248,type==='oc'?'#5a4527':'#fff');
   drawMagma(dt);drawQuakes(dt);
-  label('해구',440,285,'#123a7a');label('해양판',150,280);
+  label('해구',440,226,'#123a7a');label('해양판',150,280);
   label(type==='oc'?'대륙판':'해양판',735,type==='oc'?200:250);
   label(type==='oc'?'화산·습곡 산맥':'호상 열도(화산섬)',volX,volY-25);
-  label('섭입대',690,440,'#7a1d00');label('연약권',110,340);
+  label('섭입대',560,405,'#7a1d00');label('연약권',110,340);
   label('마그마 생성',600,290,'#9a2a00');label('바다',230,180,'#1d4f99');
 }
 
@@ -508,7 +511,7 @@ function drawCollision(dt){
   // 쌓인 눈
   if(h>.6){poly([[370,top(370)],[400,top(400)],[430,top(430)],[415,top(415)+8],[385,top(385)+8]],'#ffffff');}
   arrow(110,210,200,210,'#5a4527');arrow(690,210,600,210,'#3d2d18');
-  if(Math.random()<dt*1.8) addQuake(400+(Math.random()-.5)*240,top(400)+40+Math.random()*(bot(400)-top(400)));
+  if(Math.random()<dt*1.8){const x=400+(Math.random()-.5)*240,y=top(x)+6+Math.random()*(bot(x)-top(x)-12);addQuake(x,y,depthKm(y)<70?'S':'M');}
   drawQuakes(dt);
   label('대륙판',90,175);label('대륙판',710,175);
   label(h<1?'습곡 산맥 형성 중…':'습곡 산맥',400,Math.max(20,top(400)-18));
@@ -561,7 +564,7 @@ function loop(now){
   else if(scen==='oc'||scen==='oo')drawSubduction(dt,scen);
   else if(scen==='cc')drawCollision(dt);
   else drawTransform(dt);
-  drawMag(); // 실험 2
+  if(document.getElementById('t2').classList.contains('on'))drawMag(); // 실험 2 (탭이 보일 때만)
   requestAnimationFrame(loop);
 }
 
@@ -581,13 +584,14 @@ function drawMag(){
   const now=performance.now(),dt=Math.min(0.05,(now-mLast)/1000);mLast=now;
   if(mRun){mT+=dt*fillTime()/14;if(mT>=fillTime()){mT=fillTime();mRun=false;mBtn();}}
   mx.fillStyle='#f7f9fc';mx.fillRect(0,0,MW,MH);
-  const nowPol=polAt(mT);
+  const ref=polAt(fillTime());   // 실험이 끝났을 때의 자기장 = '현재'
+  const nowPol=polAt(mT)*ref;
   const prof=[];
   for(let x=0;x<MW;x++){
     const d=Math.abs(x+0.5-400),age=d/kmPerMyr();
     let c,v=0;
     if(age>mT){c='#8a8f99';}
-    else{const p=polAt(mT-age)*nowPol;c=p>0?'#1f3b6e':'#e8eef7';v=p;}
+    else{const p=polAt(mT-age)*ref;c=p>0?'#1f3b6e':'#e8eef7';v=p;}
     mx.fillStyle=c;mx.fillRect(x,MY0,1,MY1-MY0);prof.push(v);
   }
   mx.fillStyle='#d9302b';mx.fillRect(397,MY0,6,MY1-MY0);
@@ -606,7 +610,7 @@ function drawMag(){
   mx.fillText('자기 이상 (+ 정자극 / − 역자극)',6,GY+28);
   mx.textAlign='center';mx.fillStyle='#b8241f';mx.font='bold 12px sans-serif';mx.fillText('해령',400,4);
   document.getElementById('mTime').textContent=mT.toFixed(2);
-  document.getElementById('mPol').textContent=nowPol>0?'정자극기':'역자극기 (실험 시작 때와 반대)';
+  document.getElementById('mPol').textContent=nowPol>0?'정자극기 (현재와 같은 방향)':'역자극기 (현재와 반대 방향)';
 }
 function mBtn(){document.getElementById('mPlay').textContent=mRun?'⏸ 일시정지':(mT>=fillTime()?'✔ 완료':'▶ 해양저 확장 시작');}
 document.getElementById('mPlay').onclick=()=>{if(mT>=fillTime())return;mRun=!mRun;mBtn();};
@@ -614,7 +618,7 @@ function mResetAll(){mT=0;mRun=false;samples=[];renderTable();mBtn();}
 document.getElementById('mReset').onclick=mResetAll;
 const mRateEl=document.getElementById('mRate');
 mRateEl.oninput=()=>{mRate=+mRateEl.value;document.getElementById('mRateV').textContent=mRate;mResetAll();};
-document.getElementById('mHide').onchange=e=>{document.getElementById('mRateV').textContent=e.target.checked?'?':mRate;renderTable();};
+document.getElementById('mHide').onchange=e=>{document.getElementById('mRateV').textContent=e.target.checked?'?':mRate;mRateEl.style.visibility=e.target.checked?'hidden':'';renderTable();};
 document.getElementById('mClear').onclick=()=>{samples=[];renderTable();};
 mc.addEventListener('click',e=>{
   const r=mc.getBoundingClientRect(),x=(e.clientX-r.left)*MW/r.width,y=(e.clientY-r.top)*MH/r.height;
@@ -629,7 +633,7 @@ function renderTable(){
   const tb=document.getElementById('mTable');
   if(!samples.length){tb.innerHTML='<tr><td colspan="5" class="status">아직 측정한 지점이 없습니다.</td></tr>';return;}
   const hide=document.getElementById('mHide').checked;
-  tb.innerHTML=samples.map((s,i)=>`<tr><td>${i+1}</td><td>해령 ${s.x<400?'서쪽':'동쪽'}</td><td>${s.d.toFixed(0)}</td><td>${s.age.toFixed(2)}</td><td>${hide?'<i>직접 계산</i>':(s.d/s.age/10).toFixed(1)}</td></tr>`).join('');
+  tb.innerHTML=samples.map((s,i)=>`<tr><td>${i+1}</td><td>해령 ${s.x<400?'왼쪽':'오른쪽'}</td><td>${s.d.toFixed(0)}</td><td>${s.age.toFixed(2)}</td><td>${hide?'<i>직접 계산</i>':(s.d/s.age/10).toFixed(1)}</td></tr>`).join('');
 }
 
 /* =========================================================

@@ -117,12 +117,12 @@ textarea{background:#fff;color:#111;border-color:var(--border);border-radius:8px
   <div class="card">
     <h3>실험 조건</h3>
     <div class="btns" id="presets">
-      <button data-w="60" class="active">평상시</button>
+      <button data-w="50" class="active">평상시</button>
       <button data-w="15">엘니뇨</button>
       <button data-w="100">라니냐</button>
     </div>
-    <label class="sl" for="wind">무역풍 세기: <span id="windVal">60</span>%</label>
-    <input type="range" id="wind" min="0" max="100" value="60">
+    <label class="sl" for="wind">무역풍 세기: <span id="windVal">50</span>%</label>
+    <input type="range" id="wind" min="0" max="100" value="50">
     <div class="scale"><span>약함</span><span>평상시</span><span>강함</span></div>
 
     <div class="checks">
@@ -199,6 +199,7 @@ textarea{background:#fff;color:#111;border-color:var(--border);border-radius:8px
   <h2>✅ 확인 문제</h2>
   <div id="quiz"></div>
   <div id="score" style="font-weight:700"></div>
+  <div class="btns" style="margin-top:10px"><button id="quizReset">다시 풀기</button></div>
 </section>
 
 <footer>엘니뇨 가상 실험실 · 단순화된 교육용 모형으로, 실제 수치와는 차이가 있을 수 있습니다.</footer>
@@ -212,14 +213,14 @@ const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 const lerp = (a,b,t) => a + (b-a)*t;
 
 // ---------- 모형 ----------
-const W_NORMAL = 0.6;
-const sim = { wind: 0.6, anomaly: 0, months: 0, paused: false, probe: null, t: 0 };
+const W_NORMAL = 0.5;
+const sim = { wind: 0.5, anomaly: 0, months: 0, paused: false, probe: null, t: 0 };
 const opts = { walker: true, current: true, label: true };
 
 function targetAnomaly(w){ return (W_NORMAL - w) * 5.5; }
 function state(a){
   const tw = 29.0 - Math.max(0,a)*0.4 + Math.max(0,-a)*0.25;
-  const te = 24.5 + a*1.15;
+  const te = 24.5 + a;
   const thW = 150 - a*12;
   const thE = Math.max(20, 50 + a*24);
   const conv = clamp(a >= 0 ? 0.2 + a*0.14 : 0.2 + a*0.04, 0.1, 0.62);
@@ -336,7 +337,7 @@ function draw(s, dt){
 
   // 대기: 워커 순환
   const cx = lerp(xL, xR, s.conv);
-  const xE = xR - 20, ySurf = seaY - 26, yTop = H*0.07;
+  const xE = s.rainE > 0.45 ? xL + 20 : xR - 20, ySurf = seaY - 26, yTop = H*0.07;   // 엘니뇨 때는 하강 기류가 서태평양(인도네시아) 쪽
   if (opts.walker){
     const strength = clamp(sim.wind, 0, 1);
     const pts = [[xE,ySurf],[cx,ySurf],[cx,yTop],[xE,yTop],[xE,ySurf]];
@@ -353,10 +354,6 @@ function draw(s, dt){
       ctx.fillStyle = `rgba(255,230,160,${0.25 + strength*0.7})`;
       ctx.beginPath(); ctx.arc(x, y, 2.3, 0, 7); ctx.fill();
     });
-    if (opts.label){
-      txt("상승 기류", cx, yTop - 4 + 20, "#ffe6a0", 12, "center");
-      txt("하강 기류(건조)", xE - 6, (yTop+ySurf)/2, "#ffe6a0", 12, "right");
-    }
   }
 
   // 무역풍 화살표
@@ -386,6 +383,10 @@ function draw(s, dt){
     ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x-2, y+7); ctx.stroke();
   });
 
+  if (opts.walker && opts.label){
+    txt("상승 기류", cx, H*0.17 + 46, "#ffe6a0", 12, "center");
+    txt("하강 기류(건조)", xE + (xE < cx ? 6 : -6), (yTop+ySurf)/2, "#ffe6a0", 12, xE < cx ? "left" : "right");
+  }
   // 해수면 선
   ctx.strokeStyle = "rgba(255,255,255,.5)"; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(0,seaY); ctx.lineTo(W,seaY); ctx.stroke();
@@ -396,7 +397,7 @@ function draw(s, dt){
     txt(`${s.te.toFixed(1)}°C`, xR - 40, seaY + 20, "#fff", 14, "center", true);
     const mid = (xL+xR)/2;
     txt("수온약층", mid, depthY(thermAt(s, 0.5)) - 6, "#fff", 12, "center");
-    txt("따뜻한 해수", xL + 70, depthY(s.thW*0.55), "rgba(255,255,255,.85)", 12, "center");
+    txt("따뜻한 해수", xL + (xR-xL)*0.12, depthY(s.thW*0.35), "rgba(255,255,255,.85)", 12, "center");
     txt("차가운 심층수", mid, depthY(215), "rgba(200,225,255,.8)", 12, "center");
     if (opts.current && sim.wind > 0.2) txt("용승", xR - (xR-xL)*0.07, depthY(115), "#bfe6ff", 12, "center", true);
   }
@@ -439,8 +440,8 @@ function drawLand(){
   ctx.fillRect(0, seaY, xL + 30, H - seaY); ctx.fillRect(xR - 30, seaY, W, H - seaY);
   ctx.fillStyle = "rgba(0,0,0,0)";
   if (opts.label){
-    txt("인도네시아·호주", W*0.045, seaY - 52, "#d8f0c8", 12, "center", true);
-    txt("남아메리카(페루)", W - W*0.05, seaY - 102, "#f3e0bf", 12, "center", true);
+    txt("인도네시아·호주", 6, seaY - 52, "#d8f0c8", 12, "left", true);
+    txt("남아메리카(페루)", W - 6, seaY - 102, "#f3e0bf", 12, "right", true);
     txt("서태평양", xL + 45, H - 14, "rgba(255,255,255,.6)", 12, "center");
     txt("동태평양", xR - 45, H - 14, "rgba(255,255,255,.6)", 12, "center");
   }
@@ -487,7 +488,7 @@ function gResize(){
 function drawGraph(){
   g.clearRect(0,0,GW,GH);
   const L = 36, R = GW - 8, T = 10, B = GH - 24;
-  const yv = v => lerp(B, T, (v + 3) / 6);
+  const yv = v => lerp(B, T, (v + 3.5) / 7);
   g.fillStyle = "rgba(255,107,74,.12)"; g.fillRect(L, T, R-L, yv(0.5) - T);
   g.fillStyle = "rgba(74,168,255,.12)"; g.fillRect(L, yv(-0.5), R-L, B - yv(-0.5));
   g.strokeStyle = "#E6E8EC"; g.lineWidth = 1; g.fillStyle = "#6B7280"; g.font = "11px sans-serif"; g.textAlign = "right";
@@ -495,10 +496,11 @@ function drawGraph(){
   g.setLineDash([4,4]); g.strokeStyle = "#ff8a6a"; g.beginPath(); g.moveTo(L,yv(0.5)); g.lineTo(R,yv(0.5)); g.stroke();
   g.strokeStyle = "#7cc0ff"; g.beginPath(); g.moveTo(L,yv(-0.5)); g.lineTo(R,yv(-0.5)); g.stroke(); g.setLineDash([]);
   g.textAlign = "center"; g.fillText("경과 시간(개월) →", (L+R)/2, GH - 6);
+  { const N = 60, dx = (R - L) / (N - 1); for (let k = 0; k <= 48; k += 12){ const x = R - k*dx; g.strokeStyle = "#E6E8EC"; g.beginPath(); g.moveTo(x, T); g.lineTo(x, B); g.stroke(); g.textAlign = k ? "center" : "right"; g.fillText(k ? "-" + k : "지금", x + (k ? 0 : 2), B + 12); g.textAlign = "center"; } }
   if (hist.length < 2) return;
   const N = 60, dx = (R - L) / (N - 1), off = N - hist.length;
   g.lineWidth = 2.5; g.strokeStyle = "#C98A00"; g.beginPath();
-  hist.forEach((v,i) => { const x = L + (i+off)*dx, y = yv(clamp(v,-3,3)); i ? g.lineTo(x,y) : g.moveTo(x,y); });
+  hist.forEach((v,i) => { const x = L + (i+off)*dx, y = yv(clamp(v,-3.5,3.5)); i ? g.lineTo(x,y) : g.moveTo(x,y); });
   g.stroke();
 }
 
@@ -522,7 +524,7 @@ const impacts = {
 };
 let lastLabel = "";
 function updateUI(s){
-  const a = sim.anomaly, [name, cls] = label(a);
+  const a = +sim.anomaly.toFixed(2) + 0, [name, cls] = label(sim.anomaly);   // -0.00 표시 방지
   $("tw").textContent = s.tw.toFixed(1) + " °C";
   $("te").textContent = s.te.toFixed(1) + " °C";
   $("anom").textContent = (a >= 0 ? "+" : "") + a.toFixed(2) + " °C";
@@ -545,7 +547,8 @@ const rows = [];
 $("recordBtn").onclick = () => {
   const s = state(sim.anomaly);
   const pr = sim.probe ? `${tempAt(s, sim.probe.f, sim.probe.d).toFixed(1)}°C (${Math.round(sim.probe.d)}m)` : "-";
-  rows.push([rows.length + 1, Math.round(sim.wind*100) + "%", s.tw.toFixed(1), s.te.toFixed(1), (sim.anomaly>=0?"+":"") + sim.anomaly.toFixed(2), pr, label(sim.anomaly)[0]]);
+  const an = +sim.anomaly.toFixed(2) + 0;
+  rows.push([rows.length + 1, Math.round(sim.wind*100) + "%", s.tw.toFixed(1), s.te.toFixed(1), (an>=0?"+":"") + an.toFixed(2), pr, label(sim.anomaly)[0]]);
   renderLog();
 };
 $("clearBtn").onclick = () => { rows.length = 0; renderLog(); };
@@ -569,7 +572,8 @@ const quiz = [
   {q:"엘니뇨를 판단할 때 주로 사용하는 기준은?", o:["북극 해빙 면적","Niño 3.4 해역의 해수면 온도 편차","대서양의 염분","한반도의 기온"], a:1, e:"Niño 3.4 해역 해수면 온도가 평년보다 0.5 °C 이상 높은 상태가 일정 기간 지속되면 엘니뇨로 봅니다."}
 ];
 let score = 0, answered = 0;
-$("quiz").innerHTML = quiz.map((q,i) => `<div class="q"><b>${i+1}. ${q.q}</b><div class="opts">${q.o.map((o,j)=>`<button data-q="${i}" data-o="${j}">${"①②③④"[j]} ${o}</button>`).join("")}</div><div class="fb" id="fb${i}"></div></div>`).join("");
+function buildQuiz(){ score = 0; answered = 0; $("score").textContent = ""; $("quiz").innerHTML = quiz.map((q,i) => `<div class="q"><b>${i+1}. ${q.q}</b><div class="opts">${q.o.map((o,j)=>`<button data-q="${i}" data-o="${j}">${"①②③④"[j]} ${o}</button>`).join("")}</div><div class="fb" id="fb${i}"></div></div>`).join(""); }
+buildQuiz(); $("quizReset").onclick = buildQuiz;
 $("quiz").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
   const i = +b.dataset.q, j = +b.dataset.o, q = quiz[i];

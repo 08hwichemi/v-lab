@@ -47,8 +47,8 @@
   .ro small{display:block;color:var(--muted);font-size:.75rem}
   .ro b{font-size:1.15rem;font-variant-numeric:tabular-nums}
   .stage{margin-top:8px;padding:8px 12px;border-radius:9px;background:#eef4ff;font-weight:600;font-size:.92rem}
-  .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  @media (max-width:860px){.two{grid-template-columns:1fr}}
+  .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+  @media (max-width:860px){.two{grid-template-columns:minmax(0,1fr)}}
   table{width:100%;border-collapse:collapse;font-size:.88rem}
   th,td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:center;font-variant-numeric:tabular-nums}
   th{background:#f3f6fa;font-weight:600}
@@ -242,9 +242,9 @@ details{border-radius:10px;background:#fff}
       else{T=P.Tc-MOIST*(h-P.lcl);Td=T;stage='습윤 단열 상승 — 구름이 생기고 비가 내림 (숨은열 방출)';lapse='0.5 °C/100m';}
     }else{
       T=P.Ttop+DRY*(P.H-h);Td=P.Tdtop+DEW*(P.H-h);
-      stage=h<1?'비그늘 쪽 평지 도착 — 고온 건조한 바람':'건조 단열 하강 — 압축되며 1 °C/100 m씩 승온';lapse='1.0 °C/100m';
+      stage=h<1?(P.cloud?'비그늘 쪽 평지 도착 — 고온 건조한 바람':'비그늘 쪽 평지 도착 — 출발 때와 같은 공기 (푄 현상 없음)'):'건조 단열 하강 — 압축되며 1 °C/100 m씩 기온 상승';lapse='1.0 °C/100m';
     }
-    if(h<1&&x>0.5&&done) stage='도착! 출발 때보다 '+(P.Tend-P.T0).toFixed(1)+' °C 높고 건조한 바람이 되었습니다.';
+    if(h<1&&x>0.5&&done) stage=P.cloud?'도착! 출발 때보다 '+(P.Tend-P.T0).toFixed(1)+' °C 높고 건조한 바람이 되었습니다.':'도착. 구름이 생기지 않아 기온·습도가 출발 때와 같습니다 (푄 현상 없음).';
     return {h,T,Td,rh:RH(T,Td),stage,lapse};
   }
 
@@ -281,7 +281,7 @@ details{border-radius:10px;background:#fff}
     for(let a=0;a<=3000;a+=1000){ctx.fillText(a+' m',6,Y(a)-3);ctx.strokeStyle='rgba(30,50,80,.12)';ctx.beginPath();ctx.moveTo(0,Y(a));ctx.lineTo(w,Y(a));ctx.stroke();}
     // 응결 고도선
     if(P.cloud){ctx.setLineDash([6,5]);ctx.strokeStyle='#2b9a66';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(0,Y(P.lcl));ctx.lineTo(w*0.5,Y(P.lcl));ctx.stroke();ctx.setLineDash([]);
-      ctx.fillStyle='#1f7a50';ctx.font='bold 12px sans-serif';ctx.fillText('응결 고도 '+Math.round(P.lcl)+' m',8,Y(P.lcl)-5);}
+      ctx.fillStyle='#1f7a50';ctx.font='bold 12px sans-serif';ctx.textAlign='right';ctx.fillText('응결 고도 '+Math.round(P.lcl)+' m',w*0.5-6,Y(P.lcl)-5);ctx.textAlign='left';}
     // 산
     ctx.beginPath();ctx.moveTo(0,h);
     for(let i=0;i<=200;i++){const x=i/200;ctx.lineTo(Xp(x),Y(terrain(x)));}
@@ -329,7 +329,7 @@ details{border-radius:10px;background:#fff}
       ctx.fillStyle='#1d2733';ctx.beginPath();ctx.arc(px,py,3.5,0,7);ctx.fill();
       const txt=m.label+' '+m.T.toFixed(1)+'°C';ctx.font='bold 11px sans-serif';
       const tw=ctx.measureText(txt).width+10;let bx=Math.min(Math.max(px-tw/2,2),w-tw-2);
-      const by=m.label[0]==='C'?py-62:py-44;
+      const by=m.label[0]==='C'?py-62:(m.label[0]==='B'&&m.x-X0<0.25?py-26:py-44);
       ctx.fillStyle='rgba(255,255,255,.92)';ctx.fillRect(bx,by,tw,18);
       ctx.fillStyle='#1d2733';ctx.textAlign='left';ctx.fillText(txt,bx+5,by+13);
     });
@@ -350,7 +350,7 @@ details{border-radius:10px;background:#fff}
   function drawGraph(){
     const {w,h}=fit(graph), ctx=gctx;
     const L=46,R=12,T=14,B=36;
-    const tMin=-20,tMax=50,aMax=3200;
+    const tMin=-20,tMax=55,aMax=3200;
     const X=t=>L+(t-tMin)/(tMax-tMin)*(w-L-R), Y=a=>h-B-a/aMax*(h-T-B);
     ctx.clearRect(0,0,w,h);
     ctx.strokeStyle='#e6ebf1';ctx.lineWidth=1;ctx.fillStyle='#5f6b7a';ctx.font='11px sans-serif';

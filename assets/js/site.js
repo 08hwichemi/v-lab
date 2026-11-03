@@ -30,7 +30,7 @@
       if (exps && exps.length) {
         exps.forEach((e, i) => out.push({
           key: lab.id + ":" + i, lab, exp: i, title: e.title, summary: e.summary || lab.summary,
-          thumb: e.thumb || null, unit: e.unit || lab.unit, grade: lab.grade || [], subject: lab.subject,
+          thumb: e.thumb || null, unit: e.unit || lab.unit, grade: e.grade || lab.grade || [], subject: lab.subject,
           author: lab.author, tags: [...(lab.tags || []), ...(e.tags || [])], added: lab.added || "",
           count: (i + 1) + "/" + exps.length, featured: !!lab.featured, order
         }));

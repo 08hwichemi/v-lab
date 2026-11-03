@@ -44,6 +44,7 @@
       let cur = exps.length ? Math.min(Math.max(parseInt(p.get("exp") || "0", 10) || 0, 0), exps.length - 1) : null;
       const key = () => lab.id + (cur != null ? ":" + cur : "");
       const hashFor = i => (i != null ? `exp=${i}&embed` : "embed");
+      const meta = i => { const e = i != null ? exps[i] || {} : {}; return { unit: e.unit || lab.unit || "", grade: e.grade || lab.grade || [] }; };   // 실험별 단원·대상 (없으면 파일 값)
       const standaloneUrl = () => lab.file + (cur != null ? `#exp=${cur}` : "");
 
       document.getElementById("hdr").innerHTML = VL.header(lab.subject, { search: false });
@@ -71,8 +72,8 @@
             <h2>${esc(lab.title)}</h2>
             <p>${esc(lab.summary || "")}</p>
             <dl>
-              ${lab.unit ? `<dt>단원</dt><dd>${esc(lab.unit)}</dd>` : ""}
-              ${(lab.grade || []).length ? `<dt>대상</dt><dd>${esc(lab.grade.join(" · "))}</dd>` : ""}
+              ${meta(cur).unit ? `<dt>단원</dt><dd id="iUnit">${esc(meta(cur).unit)}</dd>` : ""}
+              ${meta(cur).grade.length ? `<dt>대상</dt><dd id="iGrade">${esc(meta(cur).grade.join(" · "))}</dd>` : ""}
               ${lab.author ? `<dt>제작</dt><dd>${esc(lab.author)}${lab.added ? ` · ${esc(lab.added)}` : ""}</dd>` : ""}
             </dl>
             ${exps.length ? `<div class="list" id="ilist">${exps.map((e, i) => `<button data-i="${i}" class="${i === cur ? "on" : ""}">${esc(e.title)}</button>`).join("")}</div>` : ""}
@@ -94,6 +95,7 @@
         document.getElementById("btnExt").href = standaloneUrl();
         document.querySelector(".open-new").href = standaloneUrl();
         document.title = `${exps[i].title} · ${lab.title} · V-Lab`;
+        { const m = meta(i), u = document.getElementById("iUnit"), g = document.getElementById("iGrade"); if (u) u.textContent = m.unit; if (g) g.textContent = m.grade.join(" · "); }
         recent.push(key());
         const tab = document.querySelector(`#etabs button.on`); if (tab) tab.scrollIntoView({ block: "nearest", inline: "nearest" });
       }

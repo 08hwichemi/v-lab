@@ -37,7 +37,7 @@ window.VLAB = {
    * summary     한두 문장 소개 (뷰어 정보 패널에 표시)
    * file        HTML 경로 (저장소 루트 기준)
    * author      제작자
-   * grade       대상 학년 배열            예) ["고2", "고3"]
+   * grade       대상 학년 배열            예) ["고2", "고3"]  (2022 개정: 일반 선택 → 고2, 진로 선택 → 고2·고3. experiments 항목에도 둘 수 있음)
    * unit        교과 · 단원               예) "물질과 에너지 · 용액의 성질" (2022 개정 교육과정 과목·단원명)
    * tags        검색 키워드 배열
    * thumbnail   (선택) 썸네일 이미지 경로. 없으면 회색 자리표시
@@ -85,8 +85,8 @@ window.VLAB = {
         { title: "끓는점 오름",       hash: "exp=2", thumb: "assets/img/thumbs/chem-smart-lab/2.png", unit: "물질과 에너지 · 용액의 성질", tags: ["증기압 곡선", "외부 압력"] },
         { title: "어는점 내림",       hash: "exp=3", thumb: "assets/img/thumbs/chem-smart-lab/3.png", unit: "물질과 에너지 · 용액의 성질", tags: ["결빙", "육각 격자"] },
         { title: "삼투압과 동적 평형", hash: "exp=4", thumb: "assets/img/thumbs/chem-smart-lab/4.png", unit: "물질과 에너지 · 용액의 성질", tags: ["반트호프", "역삼투"] },
-        { title: "중화 적정",         hash: "exp=5", thumb: "assets/img/thumbs/chem-smart-lab/5.png", unit: "화학 · 역동적인 화학 반응", tags: ["뷰렛", "지시약", "적정 곡선"] },
-        { title: "르샤틀리에 원리",   hash: "exp=6", thumb: "assets/img/thumbs/chem-smart-lab/6.png", unit: "화학 · 화학 평형", tags: ["평형 이동", "NO₂", "암모니아 합성"] }
+        { title: "중화 적정",         hash: "exp=5", thumb: "assets/img/thumbs/chem-smart-lab/5.png", unit: "화학 · 역동적인 화학 반응", grade: ["고2"], tags: ["뷰렛", "지시약", "적정 곡선"] },
+        { title: "르샤틀리에 원리",   hash: "exp=6", thumb: "assets/img/thumbs/chem-smart-lab/6.png", unit: "화학 · 화학 평형", grade: ["고2"], tags: ["평형 이동", "NO₂", "암모니아 합성"] }
       ],
       added: "2026-10-27",
       featured: true
@@ -98,7 +98,7 @@ window.VLAB = {
       summary: "분자 편집기로 탄소 화합물의 구조식을 직접 그리고, 펼친 구조식(모든 원자)·축약 구조식·골격 구조식으로 바꿔 가며 비교합니다. 분자식·분자량·불포화도·작용기가 실시간으로 나오고, 이성질체를 모두 찾는 과제에서 같은 물질인지 이성질체인지 바로 판정해 줍니다.",
       file: "labs/chemistry/organic-structure.html",
       author: "휘쌤",
-      grade: ["고1", "고2"],
+      grade: ["고2", "고3"],
       unit: "화학 반응의 세계 · 탄소 화합물과 반응",
       tags: ["구조식", "펼친 구조식", "축약 구조식", "이성질체", "작용기", "분자 편집기"],
       thumbnail: "assets/img/thumbs/organic-structure/0.png",
@@ -127,7 +127,7 @@ window.VLAB = {
       summary: "원자를 놓고 공유·비공유 전자쌍을 채워 옥텟을 완성하는 루이스 전자점식 연습. 단계별 미션(단일·다중 결합, 다원자 이온, 형식 전하, 옥텟의 예외)과 자유 그리기, 3분 도전 모드가 있고 형식 전하·쌍극자 모멘트·옥텟 상태를 표시할 수 있습니다.",
       file: "labs/chemistry/lewis-dot.html",
       author: "",
-      grade: ["고1", "고2"],
+      grade: ["고2"],
       unit: "화학 · 물질의 구조와 성질",
       tags: ["루이스 전자점식", "옥텟 규칙", "공유 결합", "형식 전하", "미션"],
       thumbnail: "assets/img/thumbs/lewis-dot/0.png",
@@ -140,7 +140,7 @@ window.VLAB = {
       summary: "2D 구조식을 그리고 3D로 변환해 전자쌍 반발 이론에 따른 분자 모양과 결합각을 확인합니다. 비공유 전자쌍·결합각·쌍극자 모멘트 표시, 극성 분석, 미션과 퀴즈가 들어 있습니다.",
       file: "labs/chemistry/vsepr-lab.html",
       author: "",
-      grade: ["고1", "고2"],
+      grade: ["고2"],
       unit: "화학 · 물질의 구조와 성질",
       tags: ["VSEPR", "전자쌍 반발", "분자 모양", "결합각", "극성", "3D"],
       thumbnail: "assets/img/thumbs/vsepr-lab/0.png",
@@ -153,7 +153,7 @@ window.VLAB = {
       summary: "여러 금속을 여러 수용액·묽은 염산에 넣어 반응 여부(금속 석출, 기포, 용액 색 변화)를 관찰하고, 전자저울로 질량 변화를 재고, 결과표와 순서 정하기로 금속의 이온화 경향 순서를 스스로 찾아냅니다. 원자·이온 수준 돋보기, 이온 수 그래프, 반응식 해석, 미션이 들어 있습니다.",
       file: "labs/chemistry/metal-ionization.html",
       author: "홍채린",
-      grade: ["고1", "고2"],
+      grade: ["고2", "고3"],
       unit: "화학 반응의 세계 · 산화 환원 반응",
       tags: ["이온화 경향", "산화 환원", "금속의 반응성", "석출", "실험 노트"],
       thumbnail: "assets/img/thumbs/metal-ionization/0.png",
@@ -166,7 +166,7 @@ window.VLAB = {
       summary: "볼타 전지와 다니엘 전지를 직접 조립합니다. 전극 금속·전해질·농도·염다리·저항을 고르고 전압계·전류계를 읽으며, 금속판 표면 확대 화면과 전압·전류 그래프로 산화 전극과 환원 전극에서 일어나는 일을 확인합니다. 미션·확인 문제와 전기화학 개념 정리가 들어 있습니다.",
       file: "labs/chemistry/chemical-cell.html",
       author: "홍채린",
-      grade: ["고1", "고2"],
+      grade: ["고2", "고3"],
       unit: "화학 반응의 세계 · 산화 환원 반응",
       tags: ["화학 전지", "볼타 전지", "다니엘 전지", "염다리", "표준 환원 전위", "분극"],
       thumbnail: "assets/img/thumbs/chemical-cell/0.png",
@@ -179,7 +179,7 @@ window.VLAB = {
       summary: "실제 별 목록으로 그린 밤하늘 위에 별자리 틀을 옮기고 돌려 제자리를 찾습니다. 계절별·북쪽·남반구 하늘과 황도 13궁, 대표 별·별무리·은하·성단·행성 정보, 내 위치와 날짜·시간의 진짜 하늘을 보여 주는 '오늘 밤' 모드, 별자리 이야기와 미션이 들어 있습니다.",
       file: "labs/earth/constellation.html",
       author: "홍채린",
-      grade: ["고1", "고2"],
+      grade: ["고2", "고3"],
       unit: "행성우주과학 · 태양과 별의 관측",
       tags: ["별자리", "계절별 별자리", "황도 12궁", "천구", "밤하늘 관측"],
       thumbnail: "assets/img/thumbs/constellation/0.png",
@@ -205,7 +205,7 @@ window.VLAB = {
       summary: "적도 태평양의 무역풍 세기를 조절하며 서·동태평양 수온, 수온약층 기울기, 용승, 워커 순환, 강수 지역이 어떻게 바뀌는지 봅니다. 바다를 클릭해 수온 측정기를 놓고, Niño 3.4 수온 편차 그래프와 데이터 기록표로 엘니뇨·라니냐를 판정합니다.",
       file: "labs/earth/elnino.html",
       author: "장미나",
-      grade: ["고2", "고3"],
+      grade: ["고2"],
       unit: "지구과학 · 대기와 해양의 상호작용",
       tags: ["엘니뇨", "라니냐", "무역풍", "용승", "워커 순환", "수온약층"],
       thumbnail: "assets/img/thumbs/elnino/0.png",
@@ -218,7 +218,7 @@ window.VLAB = {
       summary: "출발 기온·이슬점·산의 높이를 정하고 공기 덩어리가 산을 넘는 과정을 따라갑니다. 건조 단열 감률과 습윤 단열 감률, 상승 응결 고도에 따라 기온·이슬점·상대 습도가 어떻게 변하는지 고도–기온 그래프와 결과표로 확인하고, 높새바람을 설명합니다.",
       file: "labs/earth/foehn.html",
       author: "장미나",
-      grade: ["고1", "고2"],
+      grade: ["고2", "고3"],
       unit: "지구시스템과학 · 강수 과정과 대기의 운동",
       tags: ["푄 현상", "높새바람", "단열 변화", "건조 단열 감률", "습윤 단열 감률", "응결 고도"],
       thumbnail: "assets/img/thumbs/foehn/0.png",
@@ -231,7 +231,7 @@ window.VLAB = {
       summary: "수성·금성·화성·목성·토성을 골라 태양계를 위에서 본 모습과 지구에서 본 하늘을 나란히 보며 순행·역행·유, 이각, 합·충·구·최대 이각을 관찰합니다. 주요 현상이 자동으로 기록되어 역행 기간과 회합 주기를 재고, 최대 이각으로 궤도 반지름을 구하는 탐구 활동이 들어 있습니다.",
       file: "labs/earth/planet-motion.html",
       author: "장미나",
-      grade: ["고2", "고3"],
+      grade: ["고2"],
       unit: "지구과학 · 태양계 천체와 별과 우주의 진화",
       tags: ["겉보기 운동", "순행", "역행", "이각", "회합 주기", "내행성", "외행성"],
       thumbnail: "assets/img/thumbs/planet-motion/0.png",
@@ -244,7 +244,7 @@ window.VLAB = {
       summary: "별의 초기 질량(0.1~50 M☉)을 정하고 성운에서 원시별, 주계열성, 거성, 최후(백색 왜성·중성자별·블랙홀)까지의 진화를 재생합니다. 별 관측 창과 H-R도 위의 이동 경로, 단계별 온도·광도·반지름·핵융합 반응을 보며 질량에 따른 수명과 최종 단계를 표로 비교합니다.",
       file: "labs/earth/star-evolution.html",
       author: "장미나",
-      grade: ["고2", "고3"],
+      grade: ["고2"],
       unit: "지구과학 · 태양계 천체와 별과 우주의 진화",
       tags: ["별의 진화", "H-R도", "주계열성", "적색 거성", "백색 왜성", "초신성", "중성자별", "블랙홀"],
       thumbnail: "assets/img/thumbs/star-evolution/0.png",

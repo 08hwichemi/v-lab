@@ -113,7 +113,10 @@
         let list = view._pool.filter(it => (!state.grade || (it.grade || []).includes(state.grade)) && (!state.unit || it.unit === state.unit) && match(it, state.q));
         if (view.dataset.kind !== "recent") sortList(list);
         if (!list.length) {
-          grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><b>${state.q ? "검색 결과가 없습니다" : "준비 중입니다"}</b>${state.q ? "다른 키워드로 찾아보세요." : "실험이 등록되면 여기에 표시됩니다."}</div>`;
+          { const [h, t] = state.q ? ["검색 결과가 없습니다", "다른 키워드로 찾아보세요."]
+            : (state.grade || state.unit) && view._pool.length ? [`${state.grade ? state.grade + " 대상" : "이 단원"} 실험이 아직 없습니다`, "학년이나 단원을 '전체'로 바꾸면 모든 실험이 보입니다."]
+            : ["준비 중입니다", "실험이 등록되면 여기에 표시됩니다."];
+            grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><b>${h}</b>${t}</div>`; }
           return;
         }
         grid.innerHTML = list.map(card).join("");

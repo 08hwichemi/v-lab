@@ -240,7 +240,7 @@ body.vlab-embed .shell{grid-template-columns:minmax(0,1fr);max-width:1600px}
           <ol>
             <li>길이와 진폭을 고정하고 추의 질량만 바꾸며 주기 측정, 주기와 질량의 관계 정리</li>
             <li>실 길이를 0.2 m부터 2.0 m까지 바꾸며 주기 측정</li>
-            <li>T²–L 그래프를 그리고 추세선 기울기로 중력 가속도 g 구하기 (T² = 4π²L / g)</li>
+            <li>T²–L 그래프를 그리고 추세선 기울기로 중력 가속도 g 구하기 (T² = 4π²L / g 이므로 g = 4π² ÷ 기울기)</li>
             <li>에너지 막대에서 운동 에너지와 위치 에너지가 바뀌어도 합이 일정한지 확인</li>
             <li>g를 달로 바꾸기 전에 주기가 몇 배가 될지 예측하고 확인</li>
           </ol>
@@ -267,7 +267,7 @@ body.vlab-embed .shell{grid-template-columns:minmax(0,1fr);max-width:1600px}
           <canvas class="sim" aria-label="행성 공전 시뮬레이션 화면"></canvas>
           <p class="cap">거리 단위 AU(천문단위), 시간 단위 년 · 화살표 길이는 속력에 비례</p>
           <div class="readout"></div>
-          <div class="sectors" aria-live="polite"></div>
+          <div class="sectors"></div>
         </div>
         <div class="panel"><h3>실험 조건</h3><div class="ctls"></div></div>
       </div>
@@ -290,7 +290,7 @@ body.vlab-embed .shell{grid-template-columns:minmax(0,1fr);max-width:1600px}
           <summary>이것까지 알면 좋아요</summary>
           <ul>
             <li>1 AU는 지구와 태양 사이 평균 거리, 약 1억 5천만 km</li>
-            <li>AU와 년 단위를 쓰면 태양계 행성의 T²/a³ 값은 모두 1에 가까움. 이 값은 중심 천체(태양)의 질량으로 정해지므로, 목성 둘레를 도는 위성끼리는 다른 값이 나옴</li>
+            <li>AU와 년 단위를 쓰면 태양계 행성의 T²/a³ 값은 모두 1에 가까움. 이 값은 중심 천체의 질량으로 정해지므로, 목성 둘레를 도는 위성들은 서로는 같지만 태양 둘레를 도는 행성과는 다른 값이 나옴</li>
             <li>구간 넓이는 화면의 부채꼴 모양을 잘게 나눠 계산한 값</li>
           </ul>
         </details>
@@ -368,7 +368,7 @@ body.vlab-embed .shell{grid-template-columns:minmax(0,1fr);max-width:1600px}
         <details class="more">
           <summary>이것까지 알면 좋아요</summary>
           <ul>
-            <li>음원 속력이 소리 속력보다 빠르면 파면이 겹쳐 원뿔 모양 충격파가 생김 (소닉 붐)</li>
+            <li>음원 속력이 소리 속력 이상이면 파면이 겹쳐 원뿔 모양 충격파가 생김 (소닉 붐)</li>
             <li>관찰자가 정지한 음원 쪽으로 vo로 다가가면 f′ = f·(v + vo)/v</li>
             <li>빛에서도 같은 현상이 일어남. 멀어지는 별과 은하의 빛은 파장이 길어짐(적색 편이)</li>
           </ul>
@@ -390,7 +390,7 @@ body.vlab-embed .shell{grid-template-columns:minmax(0,1fr);max-width:1600px}
       </header>
       <div class="bench">
         <div class="stage">
-          <canvas class="sim drag" aria-label="일반 상대성 이론 시뮬레이션 화면"></canvas>
+          <canvas class="sim drag" tabindex="0" aria-label="일반 상대성 이론 시뮬레이션 화면. 방향키로 보는 방향을 바꿀 수 있음"></canvas>
           <p class="cap"></p>
           <div class="readout"></div>
         </div>
@@ -416,7 +416,7 @@ body.vlab-embed .shell{grid-template-columns:minmax(0,1fr);max-width:1600px}
             <li>그물망(고무막) 그림은 비유. 실제로는 3차원 공간과 시간이 함께 휘어지고, 고무막처럼 '아래쪽'이 있는 것은 아님</li>
             <li>빛이 휘는 정도는 보기 쉽게 크게 과장함. 태양 가장자리를 스치는 별빛은 약 1.75″(각초)만 휘어지며, 1919년 일식 관측으로 처음 확인됨</li>
             <li>시간 지연 계산식: t<sub>B</sub> = t<sub>A</sub> × √(1 − 2GM/rc²). 2GM/c²을 슈바르츠실트 반지름이라 하고, 블랙홀은 이 반지름(사건의 지평선) 안쪽에서 빛도 빠져나오지 못함</li>
-            <li>GPS 위성의 시계는 중력이 약한 높은 곳에 있어 지상보다 하루에 약 45 μs 빨리 감. 빠르게 움직여서 느려지는 효과(약 7 μs)를 합치면 하루 약 38 μs 차이 → 보정하지 않으면 위치 오차가 하루에 10 km 넘게 쌓임</li>
+            <li>GPS 위성의 시계는 중력이 약한 높은 곳에 있어 지상보다 하루에 약 45 μs 빨리 감. 빠르게 움직여서 느려지는 효과(약 7 μs)를 합치면 하루 약 38 μs 차이 → 보정하지 않으면 위치 오차가 하루에 10 km 넘게 쌓임. 이 실험실에서 지구를 고르고 시계 B를 1.0과 4.2 × 반지름에 두어 '하루에 늦어지는 시간'의 차이를 구하면 비슷한 값이 나옴 (1.0에서 읽는 60 μs는 아주 먼 곳과 비교한 값)</li>
           </ul>
         </details>
       </div>
@@ -531,7 +531,7 @@ const G_OPTS=[{v:9.8,t:'지구 9.8'},{v:3.7,t:'화성 3.7'},{v:1.6,t:'달 1.6'}]
    ========================================================= */
 mkLab('projectile',L=>{
   const st={v0:15,ang:45,h:0,g:9.8,rate:1,vec:true,strobe:true,run:false,t:0,fl:null,done:null,trails:[],ci:0};
-  const D=()=>{L.dirty=true;};
+  const D=()=>{if(!st.run&&st.done){st.done=null;recB.disabled=true;res.textContent='조건이 바뀌었어요. 다시 발사하면 결과가 나와요.';}L.dirty=true;};
   slider(L.ctl,{id:'p-v',label:'발사 속력',min:1,max:30,step:0.5,value:15,unit:'m/s',digits:1,onInput:v=>{st.v0=v;D();}});
   slider(L.ctl,{id:'p-a',label:'발사 각도',min:0,max:90,step:1,value:45,unit:'°',digits:0,onInput:v=>{st.ang=v;D();}});
   slider(L.ctl,{id:'p-h',label:'발사 높이',min:0,max:30,step:1,value:0,unit:'m',digits:0,onInput:v=>{st.h=v;D();}});
@@ -542,7 +542,7 @@ mkLab('projectile',L=>{
   const bw=el('div','btns');L.ctl.appendChild(bw);
   btn(bw,'발사','primary',launch);
   const recB=btn(bw,'이번 결과 기록','',record);recB.disabled=true;
-  btn(bw,'궤적 지우기','',()=>{st.trails=[];if(!st.run){st.done=null;recB.disabled=true;res.textContent='발사 버튼을 누르면 결과가 여기에 나와요.';}D();});
+  btn(bw,'궤적 지우기','',()=>{st.trails=[];st.run=false;st.done=null;recB.disabled=true;res.textContent='발사 버튼을 누르면 결과가 여기에 나와요.';L.dirty=true;});
   const R=readout(L.ro,[['t','시간','s'],['x','x','m'],['y','y','m'],['vx','vx','m/s'],['vy','vy','m/s']]);
   const res=L.sec.querySelector('.result');
   const rec=recorder(L.rec,'projectile',[{k:'ang',l:'발사각 (°)',d:0},{k:'v0',l:'속력 (m/s)',d:1},{k:'h',l:'높이 (m)',d:0},{k:'g',l:'g (m/s²)',d:1},{k:'T',l:'비행 시간 (s)',d:2},{k:'R',l:'도달 거리 (m)',d:2},{k:'H',l:'최고 높이 (m)',d:2}]);
@@ -551,8 +551,8 @@ mkLab('projectile',L=>{
 
   function plan(){const th=st.ang*DEG,vx=st.v0*Math.cos(th),vy=st.v0*Math.sin(th),g=st.g,h=st.h;const T=(vy+Math.sqrt(vy*vy+2*g*h))/g;return{v0:st.v0,ang:st.ang,h,g,vx,vy,T,R:vx*T,H:h+(vy>0?vy*vy/(2*g):0)};}
   const pos=(f,t)=>[f.vx*t,f.h+f.vy*t-0.5*f.g*t*t];
-  function launch(){st.fl=plan();st.t=0;st.run=true;st.done=null;recB.disabled=true;res.textContent='비행 중…';D();}
-  function finish(){st.run=false;const f=st.fl;st.done=f;st.trails.push({f,c:st.ci%4});st.ci++;if(st.trails.length>6)st.trails.shift();recB.disabled=false;res.innerHTML='비행 시간 <b>'+fx(f.T,2)+' s</b> · 수평 도달 거리 <b>'+fx(f.R,2)+' m</b> · 최고점 높이 <b>'+fx(f.H,2)+' m</b>';}
+  function launch(){const f=plan();if(!(f.T>1e-9)){st.run=false;st.done=null;recB.disabled=true;res.textContent='공이 바로 땅에 있어요. 발사 각도나 높이를 올려 주세요.';L.dirty=true;return;}st.fl=f;st.t=0;st.run=true;st.done=null;recB.disabled=true;res.textContent='비행 중…';L.dirty=true;}
+  function finish(){st.run=false;L.dirty=true;const f=st.fl;st.done=f;st.trails.push({f,c:st.ci%4});st.ci++;if(st.trails.length>6)st.trails.shift();recB.disabled=false;res.innerHTML='비행 시간 <b>'+fx(f.T,2)+' s</b> · 수평 도달 거리 <b>'+fx(f.R,2)+' m</b> · 최고점 높이 <b>'+fx(f.H,2)+' m</b>';}
   function record(){const f=st.done;if(!f)return;rec.add({ang:f.ang,v0:f.v0,h:f.h,g:f.g,T:f.T,R:f.R,H:f.H});recB.disabled=true;}
 
   L.animating=()=>st.run;
@@ -671,7 +671,7 @@ mkLab('kepler',L=>{
   const runB=btn(bw,'시작','primary',()=>{st.run=!st.run;runB.textContent=st.run?'일시 정지':'계속';});
   btn(bw,'처음부터','',()=>{st.run=false;runB.textContent='시작';reset();});
   const recB=btn(bw,'공전 주기 기록','',()=>{if(!st.mT)return;const T=st.mT,a3=Math.pow(st.a,3);rec.add({name:st.name,a:st.a,e:st.e,T,T2:T*T,a3,q:T*T/a3});recB.disabled=true;});recB.disabled=true;
-  L.ctl.appendChild(el('p','hint','행성이 한 바퀴를 다 돌면 공전 주기가 측정되고 [공전 주기 기록]이 켜져요.'));
+  L.ctl.appendChild(el('p','hint','행성이 한 바퀴를 다 돌면 공전 주기가 측정되고 [공전 주기 기록]이 켜져요. 오래 걸리면 시간 흐름을 1년이나 3년으로 올리세요.'));
   const R=readout(L.ro,[['t','경과 시간','년'],['r','태양까지 거리','AU'],['v','속력','km/s'],['T','공전 주기','']]);
   const rec=recorder(L.rec,'kepler',[{k:'name',l:'천체'},{k:'a',l:'a (AU)',d:3},{k:'e',l:'e',d:3},{k:'T',l:'T (년)',d:3},{k:'T2',l:'T²',d:3},{k:'a3',l:'a³',d:3},{k:'q',l:'T²/a³',d:3}]);
   L.drawChart=()=>scatter(L.chartCv,{points:rec.rows.map(r=>({x:r.a3,y:r.T2})),xLabel:'a³ (AU³)',yLabel:'T² (년²)',fit:true});
@@ -707,7 +707,7 @@ mkLab('kepler',L=>{
     const vAU=TAU*Math.sqrt(2/r-1/a),vmax=TAU*Math.sqrt(2/(a*(1-e))-1/a);
     let tx=-a*Math.sin(E),ty=b*Math.cos(E);const tl=Math.hypot(tx,ty)||1;tx/=tl;ty/=tl;
     ctx.setLineDash([3,4]);ctx.strokeStyle=hexA(C.muted,0.8);ctx.lineWidth=1;line(ctx,sx,cy,X(qx),Y(qy));ctx.setLineDash([]);
-    const al=22+46*vAU/vmax;arrow(ctx,X(qx),Y(qy),X(qx)+tx*al,Y(qy)-ty*al,C.rose,2,8);
+    const al=70*vAU/vmax;arrow(ctx,X(qx),Y(qy),X(qx)+tx*al,Y(qy)-ty*al,C.rose,2,8);
     ctx.fillStyle=C.accent;ctx.beginPath();ctx.arc(X(qx),Y(qy),6.5,0,TAU);ctx.fill();ctx.strokeStyle=C.panel;ctx.lineWidth=1.5;ctx.stroke();
     let bar=0.1;[0.1,0.2,0.5,1,2].forEach(o=>{if(o*s<=130)bar=o;});
     ctx.strokeStyle=C.ink;ctx.lineWidth=2;line(ctx,16,h-16,16+bar*s,h-16);text(ctx,bar+' AU',16,h-24,{mono:1,size:11});
@@ -733,6 +733,7 @@ mkLab('satellite',L=>{
   const bw=el('div','btns');L.ctl.appendChild(bw);
   btn(bw,'발사','primary',launch);
   const recB=btn(bw,'이번 결과 기록','',record);recB.disabled=true;
+  btn(bw,'멈춤','',()=>{st.run=false;L.dirty=true;});
   btn(bw,'궤적 지우기','',()=>{st.trails=[];if(!st.run){st.cur=null;recB.disabled=true;}L.dirty=true;});
   const R=readout(L.ro,[['alt','고도','km'],['v','속력','km/s'],['t','경과 시간','분'],['st','결과','']]);
   const rec=recorder(L.rec,'satellite',[{k:'h',l:'발사 높이 (km)',d:0},{k:'v',l:'발사 속력 (km/s)',d:2},{k:'res',l:'결과'},{k:'hi',l:'최고 고도 (km)',d:0},{k:'lo',l:'최저 고도 (km)',d:0},{k:'P',l:'주기 (분)',d:1}]);
@@ -752,13 +753,13 @@ mkLab('satellite',L=>{
     while(rem>1e-9&&guard++<4000){
       const hh=Math.min(4,rem);rk(c,hh);c.t+=hh;rem-=hh;
       const r=Math.hypot(c.x,c.y);
-      if(r<RE){const k=RE/r;c.x*=k;c.y*=k;c.pts.push([c.x,c.y]);c.minR=RE;c.status='crash';st.run=false;recB.disabled=false;break;}
+      if(r<RE){const k=RE/r;c.x*=k;c.y*=k;c.pts.push([c.x,c.y]);c.minR=RE;c.status='crash';st.run=false;L.dirty=true;recB.disabled=false;break;}
       c.maxR=Math.max(c.maxR,r);c.minR=Math.min(c.minR,r);
       const ang=Math.atan2(c.y,c.x);let d=ang-c.pa;if(d>Math.PI)d-=TAU;if(d<-Math.PI)d+=TAU;c.swept+=d;c.pa=ang;
       if(!c.period){const lp=c.pts[c.pts.length-1];if(Math.hypot(c.x-lp[0],c.y-lp[1])>RE*0.01)c.pts.push([c.x,c.y]);if(Math.abs(c.swept)>=TAU){c.period=c.t;c.status='orbit';c.pts.push([c.x,c.y]);recB.disabled=false;}}
       const eps=(c.vx*c.vx+c.vy*c.vy)/2-GM/r;
-      if(eps>=0&&r>6*RE){c.status='escape';st.run=false;recB.disabled=false;break;}
-      if(eps<0&&r>12*RE){c.status='far';st.run=false;recB.disabled=false;break;}
+      if(eps>=0&&r>6*RE){c.status='escape';st.run=false;L.dirty=true;recB.disabled=false;break;}
+      if(eps<0&&r>12*RE){c.status='far';st.run=false;L.dirty=true;recB.disabled=false;break;}
     }
   };
   L.draw=()=>{
@@ -791,26 +792,26 @@ mkLab('satellite',L=>{
    ========================================================= */
 mkLab('doppler',L=>{
   const c=340,SLOW=150,WM=14,XS=2,XE=WM-2;
-  const st={f:400,vs:100,run:false,t:0,x0:XS,emitN:0,waves:[],tEnd:Infinity,phase:'move',hm:8.75,audio:'off',ac:null,osc:null,gain:null,
+  const st={f:400,vs:100,run:false,recorded:false,t:0,x0:XS,emitN:0,waves:[],tEnd:Infinity,phase:'move',hm:8.75,audio:'off',ac:null,osc:null,gain:null,
     obs:[{n:'뒤 관찰자',x:0.7,arr:[],f:null,fl:0},{n:'앞 관찰자',x:WM-0.7,arr:[],f:null,fl:0}]};
   const shock=()=>st.vs>=c;
   const srcX=t=>st.x0+st.vs*Math.min(t,st.tEnd);
-  function restart(keep){st.t=0;st.waves=[];st.emitN=0;st.phase='move';st.x0=st.vs===0?WM/2:XS;st.tEnd=st.vs>0?(XE-XS)/st.vs:Infinity;st.obs.forEach(o=>{o.arr=[];o.fl=0;if(!keep)o.f=null;});if(!keep)recB.disabled=true;L.dirty=true;}
+  function restart(keep){st.t=0;st.waves=[];st.emitN=0;st.phase='move';st.x0=st.vs===0?WM/2:XS;st.tEnd=st.vs>0?(XE-XS)/st.vs:Infinity;st.obs.forEach(o=>{o.arr=[];o.fl=0;if(!keep)o.f=null;});if(!keep){st.recorded=false;recB.disabled=true;}L.dirty=true;}
   slider(L.ctl,{id:'d-f',label:'음원 진동수 f',min:200,max:1000,step:10,value:400,unit:'Hz',digits:0,onInput:v=>{st.f=v;restart();}});
   slider(L.ctl,{id:'d-v',label:'음원 속력 vs',min:0,max:500,step:5,value:100,unit:'m/s',digits:0,onInput:v=>{st.vs=v;restart();}});
-  seg(L.ctl,{label:'소리 듣기',options:[{v:'off',t:'끄기'},{v:'src',t:'음원'},{v:'back',t:'뒤 관찰자'},{v:'front',t:'앞 관찰자'}],value:'off',onChange:setAudio});
+  const audioSeg=seg(L.ctl,{label:'소리 듣기',options:[{v:'off',t:'끄기'},{v:'src',t:'음원'},{v:'back',t:'뒤 관찰자'},{v:'front',t:'앞 관찰자'}],value:'off',onChange:setAudio});
   const bw=el('div','btns');L.ctl.appendChild(bw);
   const runB=btn(bw,'시작','primary',()=>{st.run=!st.run;runB.textContent=st.run?'일시 정지':'계속';if(!st.run)silence();});
   btn(bw,'처음부터','',()=>{st.run=false;runB.textContent='시작';silence();restart();});
-  const recB=btn(bw,'이번 결과 기록','',()=>{rec.add({f:st.f,vs:st.vs,back:st.obs[0].f!=null?st.obs[0].f:'—',front:shock()?'충격파':(st.obs[1].f!=null?st.obs[1].f:'—')});recB.disabled=true;});recB.disabled=true;
-  L.ctl.appendChild(el('p','hint','진동수는 관찰자에게 파면이 도착하는 시간 간격으로 측정해요. 소리 듣기는 음량을 작게 하고 사용하세요.'));
+  const recB=btn(bw,'이번 결과 기록','',()=>{rec.add({f:st.f,vs:st.vs,back:st.obs[0].f!=null?st.obs[0].f:'—',front:shock()?'충격파':(st.obs[1].f!=null?st.obs[1].f:'—')});st.recorded=true;recB.disabled=true;});recB.disabled=true;
+  const hintD=el('p','hint','진동수는 관찰자에게 파면이 도착하는 시간 간격으로 측정해요. 소리 듣기는 [시작]을 누른 뒤에 들리고, 음량을 작게 하고 사용하세요.');L.ctl.appendChild(hintD);
   const R=readout(L.ro,[['c','소리의 속력'],['mach','음원 속력 ÷ 소리 속력'],['back','뒤 관찰자'],['front','앞 관찰자']]);
   R('c','340 m/s');
   const rec=recorder(L.rec,'doppler',[{k:'f',l:'음원 진동수 (Hz)',d:0},{k:'vs',l:'음원 속력 (m/s)',d:0},{k:'back',l:'뒤 관찰자 (Hz)',d:1},{k:'front',l:'앞 관찰자 (Hz)',d:1}]);
   restart();
 
   function ensureAudio(){if(st.ac)return true;try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return false;st.ac=new AC();st.osc=st.ac.createOscillator();st.gain=st.ac.createGain();st.gain.gain.value=0;st.osc.type='sine';st.osc.frequency.value=st.f;st.osc.connect(st.gain);st.gain.connect(st.ac.destination);st.osc.start();return true;}catch(e){st.ac=null;return false;}}
-  function setAudio(v){st.audio=v;if(v!=='off'&&ensureAudio()&&st.ac.state==='suspended'){st.ac.resume().catch(()=>{});}updateAudio();}
+  function setAudio(v){if(v!=='off'&&!ensureAudio()){hintD.textContent='이 브라우저는 소리 재생을 지원하지 않아요. 파면 그림과 진동수 값으로 비교해 보세요.';audioSeg.set('off',false);st.audio='off';return;}st.audio=v;if(v!=='off'&&st.ac.state==='suspended'){st.ac.resume().catch(()=>{});}updateAudio();}
   function silence(){if(st.gain)st.gain.gain.setTargetAtTime(0,st.ac.currentTime,0.03);}
   function audioF(){if(!st.run)return null;if(st.audio==='src')return st.phase==='move'?st.f:null;const o=st.audio==='front'?st.obs[1]:st.audio==='back'?st.obs[0]:null;if(!o||!o.f)return null;if(st.audio==='front'&&shock())return null;const last=o.arr[o.arr.length-1];if(last==null||st.t-last>3/o.f)return null;return o.f;}
   function updateAudio(){if(!st.ac)return;const fq=st.audio==='off'?null:audioF();const now=st.ac.currentTime;if(fq&&fq>30&&fq<8000){st.osc.frequency.setTargetAtTime(fq,now,0.02);st.gain.gain.setTargetAtTime(0.06,now,0.03);}else st.gain.gain.setTargetAtTime(0,now,0.03);}
@@ -826,7 +827,7 @@ mkLab('doppler',L=>{
     st.t=t1;
     const maxR=Math.hypot(WM,st.hm)+0.5;st.waves=st.waves.filter(wv=>c*(st.t-wv.te)<maxR);
     if(st.t>st.tEnd){st.phase='coast';if(!st.waves.length)restart(true);}
-    recB.disabled=!(st.obs[0].f&&(st.obs[1].f||shock()));
+    recB.disabled=st.recorded||!(st.obs[0].f&&(st.obs[1].f||shock()));
     updateAudio();
   };
   L.draw=()=>{
@@ -849,7 +850,7 @@ mkLab('doppler',L=>{
     ctx.fillStyle=st.phase==='move'?C.trace:hexA(C.trace,0.4);ctx.beginPath();ctx.arc(sx,sy,10,0,TAU);ctx.fill();
     text(ctx,'음원',sx,sy-18,{size:12,weight:600,color:C.ink,align:'center'});
     if(st.phase==='coast')text(ctx,'음원 정지 · 남은 파면이 지나가면 다시 시작',w/2,14,{size:11.5,align:'center',base:'middle'});
-    if(shock())text(ctx,'음원이 소리보다 빨라 파면이 겹침 → 충격파',w/2,h-12,{size:12,color:C.rose,align:'center',weight:600});
+    if(shock())text(ctx,'음원 속력이 소리 속력 이상 → 파면이 겹쳐 충격파',w/2,h-12,{size:12,color:C.rose,align:'center',weight:600});
     R('mach',(st.vs/c).toFixed(2));
     R('back',st.obs[0].f?st.obs[0].f.toFixed(1)+' Hz':'—');
     R('front',shock()?'충격파':(st.obs[1].f?st.obs[1].f.toFixed(1)+' Hz':'—'));
@@ -865,7 +866,7 @@ mkLab('relativity',L=>{
   const KIND={star:{eps:0.14,Rs:0.09},ns:{eps:0.06,Rs:0.035},bh:{eps:0.03,Rs:0}};
   const KN={star:'보통 별',ns:'중성자별',bh:'블랙홀'};
   const RES={out:'휘어져 지나감',hit:'천체 표면에 부딪힘',capture:'블랙홀에 빨려 들어감',orbit:'천체 주위를 맴돎'};
-  const CAPW='그물망은 휘어진 공간을 2차원으로 나타낸 비유 · 빛이 휘는 정도는 보기 쉽게 크게 과장함 · 화면을 끌면 보는 방향이 바뀜';
+  const CAPW='그물망은 휘어진 공간을 2차원으로 나타낸 비유 · 빛이 휘는 정도는 보기 쉽게 크게 과장함 · 화면을 끌거나 방향키를 누르면 보는 방향이 바뀜';
   const CAPT='시계 A는 천체에서 아주 먼 곳, 시계 B는 천체 가까이 · 화면 1초 동안 시계 A는 10분 흐름 · 왼쪽 그림의 깊이는 비율을 줄여 그림';
   const st={mode:'warp',mass:4,kind:'star',b:0.35,yaw:-0.5,tilt:0.95,paths:[],last:null,body:'ns',rx:2,trun:true,far:0};
   const D=()=>{L.dirty=true;};
@@ -878,17 +879,17 @@ mkLab('relativity',L=>{
   const gw=el('div','grp'),gt=el('div','grp');gt.hidden=true;L.ctl.append(gw,gt);
   // 휘어짐
   seg(gw,{label:'천체 종류',options:[{v:'star',t:'보통 별'},{v:'ns',t:'중성자별'},{v:'bh',t:'블랙홀'}],value:'star',onChange:v=>{st.kind=v;st.paths=[];st.last=null;recWB.disabled=true;D();}});
-  slider(gw,{id:'w-m',label:'천체 질량 (상대값)',min:1,max:10,step:0.5,value:4,unit:'',digits:1,onInput:v=>{st.mass=v;st.paths=[];st.last=null;recWB.disabled=true;D();}});
+  slider(gw,{id:'w-m',label:'천체 질량 (상대값)',min:1,max:10,step:0.5,value:4,unit:'',digits:1,onInput:v=>{st.mass=v;D();}});
   slider(gw,{id:'w-b',label:'중심에서 비켜 가는 거리',min:0.02,max:0.9,step:0.01,value:0.35,unit:'',digits:2,onInput:v=>{st.b=v;D();}});
   const bw=el('div','btns');gw.appendChild(bw);
   btn(bw,'빛 쏘기','primary',()=>shoot('light'));
   btn(bw,'공 굴리기','',()=>shoot('ball'));
   const recWB=btn(bw,'이번 결과 기록','',()=>{const p=st.last;if(!p||!p.done)return;recw.add({what:p.kind==='light'?'빛':'공',kind:KN[p.k],m:p.m,b:p.b,res:RES[p.end],def:p.end==='out'?p.def:'—'});recWB.disabled=true;});recWB.disabled=true;
   btn(bw,'경로 지우기','',()=>{st.paths=[];st.last=null;recWB.disabled=true;D();});
-  gw.appendChild(el('p','hint','빛과 공은 왼쪽에서 출발해 오른쪽으로 가요. 점선은 천체가 없을 때 지나갔을 직선 경로예요.'));
+  gw.appendChild(el('p','hint','빛과 공은 왼쪽에서 출발해 오른쪽으로 가요. 점선은 천체가 없을 때 지나갔을 직선 경로예요. 블랙홀의 검은 원은 빛이 붙잡히는 경계를 과장해 그린 것이에요.'));
   // 시간 지연
-  seg(gt,{label:'천체',options:Object.keys(BODIES).map(k=>({v:k,t:BODIES[k].n})),value:'ns',onChange:v=>{st.body=v;rxS.unit.textContent=v==='bh'?'× 지평선':'× 반지름';if(v==='bh'&&st.rx<1.05){st.rx=1.05;rxS.set(1.05,false);}D();}});
-  const rxS=slider(gt,{id:'t-r',label:'시계 B 위치 (중심에서 거리)',min:1,max:10,step:0.01,value:2,unit:'× 반지름',digits:2,onInput:v=>{if(st.body==='bh'&&v<1.05){v=1.05;rxS.set(v,false);}st.rx=v;D();}});
+  seg(gt,{label:'천체',options:Object.keys(BODIES).map(k=>({v:k,t:BODIES[k].n})),value:'ns',onChange:v=>{st.body=v;rxS.unit.textContent=v==='bh'?'× 지평선 반지름':'× 천체 반지름';const mn=v==='bh'?1.05:1;rxS.wrap.querySelectorAll('input').forEach(i=>{i.min=String(mn);});if(st.rx<mn){st.rx=mn;rxS.set(mn,false);}D();}});
+  const rxS=slider(gt,{id:'t-r',label:'시계 B 위치 (중심에서 거리)',min:1,max:10,step:0.01,value:2,unit:'× 천체 반지름',digits:2,onInput:v=>{if(st.body==='bh'&&v<1.05){v=1.05;rxS.set(v,false);}st.rx=v;D();}});
   const tb=el('div','btns');gt.appendChild(tb);
   const pauseB=btn(tb,'일시 정지','',()=>{st.trun=!st.trun;pauseB.textContent=st.trun?'일시 정지':'계속';});
   btn(tb,'두 시계 0으로 맞추기','',()=>{st.far=0;D();});
@@ -922,11 +923,12 @@ mkLab('relativity',L=>{
   L.cv.addEventListener('pointerdown',e=>{if(st.mode!=='warp')return;drag={x:e.clientX,y:e.clientY,yaw:st.yaw,tilt:st.tilt};try{L.cv.setPointerCapture(e.pointerId);}catch(err){}});
   L.cv.addEventListener('pointermove',e=>{if(!drag)return;st.yaw=drag.yaw+(e.clientX-drag.x)*0.008;st.tilt=clamp(drag.tilt+(e.clientY-drag.y)*0.006,0.3,1.5);D();});
   const endDrag=()=>{drag=null;};L.cv.addEventListener('pointerup',endDrag);L.cv.addEventListener('pointercancel',endDrag);
+  L.cv.addEventListener('keydown',e=>{if(st.mode!=='warp')return;const k={ArrowLeft:[-0.08,0],ArrowRight:[0.08,0],ArrowUp:[0,-0.06],ArrowDown:[0,0.06]}[e.key];if(!k)return;e.preventDefault();st.yaw+=k[0];st.tilt=clamp(st.tilt+k[1],0.3,1.5);D();});
 
   L.animating=()=>st.mode==='time'?st.trun:st.paths.some(p=>!p.done);
   L.step=dt=>{
     if(st.mode==='time'){if(st.trun)st.far+=dt*600;return;}
-    st.paths.forEach(p=>{if(p.done)return;p.shown+=dt*p.rate;if(p.shown>=p.pts.length){p.shown=p.pts.length;p.done=true;if(p===st.last)recWB.disabled=false;}});
+    st.paths.forEach(p=>{if(p.done)return;p.shown+=dt*p.rate;if(p.shown>=p.pts.length){p.shown=p.pts.length;p.done=true;L.dirty=true;if(p===st.last)recWB.disabled=false;}});
   };
 
   function drawWarp(ctx,w,h){
@@ -988,7 +990,7 @@ function show(id){
   document.querySelectorAll('nav.labs a').forEach(a=>{if(a.getAttribute('href')==='#'+id)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
   active=LABS[id];active.dirty=true;if(active.drawChart)requestAnimationFrame(()=>active.drawChart());
 }
-window.addEventListener('hashchange',()=>show(idFromHash()));
+window.addEventListener('hashchange',()=>{const before=active;show(idFromHash());if(active!==before)window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});});
 show(idFromHash());
 
 function markAll(){Object.values(LABS).forEach(l=>{l.dirty=true;});if(active&&active.drawChart)active.drawChart();}
@@ -999,7 +1001,7 @@ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(onTheme);
 if('ResizeObserver' in window){const ro=new ResizeObserver(ents=>{ents.forEach(en=>{const lab=en.target.__lab;if(!lab)return;lab.dirty=true;if(en.target.classList.contains('chart')&&lab.drawChart)lab.drawChart();});});Object.values(LABS).forEach(l=>{l.cv.__lab=l;ro.observe(l.cv);if(l.chartCv){l.chartCv.__lab=l;ro.observe(l.chartCv);}});}
 
 let last=performance.now();
-function frame(now){const dt=Math.min(0.05,Math.max(0,(now-last)/1000));last=now;if(active){if(active.step)active.step(dt);if(active.dirty||(active.animating&&active.animating())){active.dirty=false;active.draw();}}requestAnimationFrame(frame);}
+function frame(now){const dt=Math.min(0.05,Math.max(0,(now-last)/1000));last=now;if(active){try{if(active.step)active.step(dt);if(active.dirty||(active.animating&&active.animating())){const r=active.cv.getBoundingClientRect();if(r.width>=120&&r.height>=120){active.dirty=false;active.draw();}}}catch(e){console.error(e);}}requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
 })();
 </script>

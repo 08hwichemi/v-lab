@@ -151,6 +151,57 @@ input[type=range]{accent-color:#3182F6}
 body.vlab-embed{padding-block:16px 40px}
 body.vlab-embed .side{display:none}
 body.vlab-embed .shell{grid-template-columns:minmax(0,1fr);max-width:1600px}
+
+/* ===== 조작 편의 배치 (2026-11 휘쌤 요청): 스크롤 없이 실험 화면·측정값·실험 조건이 한 화면에 들어오게 =====
+   - 넓은 화면(900px 이상, 단독 실행 1001~1240px 제외): 실험대(.bench) 높이를 스크립트가 창 높이에 맞춰 정하고(layout), 캔버스는 남는 높이를 채움.
+     실험 조건 칸은 같은 높이에서 안쪽 스크롤, [발사]·[시작] 같은 버튼 줄은 아래에 붙어 늘 보임.
+   - 좁은 화면: 캔버스 16:10(휴대폰 1:1)을 유지하되 창 높이를 넘지 않게. */
+body{padding-block:16px 48px}
+body.vlab-embed{padding-block:12px 40px}
+.lab{gap:14px}
+.lab-head{max-width:none;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 14px}
+.lab-head .eyebrow{flex-basis:100%}
+body.vlab-embed .lab-head .eyebrow{display:none}
+.lab-head h2{font-size:25px;margin:0}
+.lab-head p{font-size:15px}
+.keys{flex-basis:100%;flex-direction:row;flex-wrap:wrap;gap:2px 30px;margin:2px 0 0;font-size:14.5px}
+.cvbox{position:relative;aspect-ratio:16/10;max-height:calc(100vh - 150px);min-height:260px}
+.cvbox canvas,.stage .cvbox canvas{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto}
+@media (max-width:640px){.cvbox{aspect-ratio:1/1}}
+@media (min-width:900px){
+  .bench{grid-template-columns:minmax(0,1fr) clamp(290px,25vw,340px);align-items:stretch}
+  .bench .stage{display:flex;flex-direction:column}
+  .bench .cvbox{flex:1 1 0;aspect-ratio:auto;max-height:none;min-height:200px}
+  .bench .panel{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+}
+/* 단독 실행(왼쪽 실험 목록이 보이는 폭)에서 본문이 좁을 때는 한 열로 */
+@media (min-width:1001px) and (max-width:1240px){
+  body:not(.vlab-embed) .bench{grid-template-columns:minmax(0,1fr)}
+  body:not(.vlab-embed) .bench .stage{display:block}
+  body:not(.vlab-embed) .bench .cvbox{aspect-ratio:16/10;max-height:calc(100vh - 150px);min-height:260px}
+  body:not(.vlab-embed) .bench .panel{overflow:visible}
+}
+/* 버튼 줄: 실험 조건 칸이 스크롤될 때도 아래에 붙어 보임 */
+.bench .panel .btns{position:sticky;bottom:-16px;z-index:1;background:#FFFFFF;padding:10px 0 12px;margin:-10px 0 -12px}
+/* 글자 크게 (측정값·조건) */
+.cap{font-size:13px}
+.readout{font-size:14.5px;gap:6px 22px}
+.readout .u{font-size:13px}
+.result{font-size:15px}
+.sectors{font-size:13.5px}
+.ctl-top label,.ctl-lab,.chk{font-size:15px}
+.num input{font-size:14px;width:84px}
+.num .unit{font-size:13px}
+.seg button{font-size:14px;padding:6px 11px}
+.btn{font-size:15px;padding:9px 16px}
+.btn.sm{font-size:13px}
+.hint{font-size:13.5px}
+.ctls,.grp{gap:14px}
+table{font-size:14px}
+th{font-size:13px}
+/* 기록 알림: 측정 기록 표가 화면 아래에 있을 때 잠깐 띄움 (누르면 표로 이동) */
+.vl-toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:12px;background:#111111;color:#FFFFFF;border:0;border-radius:12px;padding:11px 18px;font:inherit;font-size:14.5px;cursor:pointer;max-width:calc(100% - 32px)}
+.vl-toast b{font-weight:600;color:#9EC5FF;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -183,7 +234,7 @@ body.vlab-embed .shell{grid-template-columns:minmax(0,1fr);max-width:1600px}
       </header>
       <div class="bench">
         <div class="stage">
-          <canvas class="sim" aria-label="포물선 운동 시뮬레이션 화면"></canvas>
+          <div class="cvbox"><canvas class="sim" aria-label="포물선 운동 시뮬레이션 화면"></canvas></div>
           <p class="cap">공기 저항 무시 · 가로·세로 눈금 비율 같음</p>
           <div class="readout"></div>
           <div class="result" aria-live="polite">발사 버튼을 누르면 결과가 여기에 나와요.</div>
@@ -224,7 +275,7 @@ body.vlab-embed .shell{grid-template-columns:minmax(0,1fr);max-width:1600px}
       </header>
       <div class="bench">
         <div class="stage">
-          <canvas class="sim" aria-label="단진자 시뮬레이션 화면"></canvas>
+          <div class="cvbox"><canvas class="sim" aria-label="단진자 시뮬레이션 화면"></canvas></div>
           <p class="cap">배경 눈금 1칸 = 25 cm · 공기 저항 무시</p>
           <div class="readout"></div>
         </div>
@@ -264,7 +315,7 @@ body.vlab-embed .shell{grid-template-columns:minmax(0,1fr);max-width:1600px}
       </header>
       <div class="bench">
         <div class="stage">
-          <canvas class="sim" aria-label="행성 공전 시뮬레이션 화면"></canvas>
+          <div class="cvbox"><canvas class="sim" aria-label="행성 공전 시뮬레이션 화면"></canvas></div>
           <p class="cap">거리 단위 AU(천문단위), 시간 단위 년 · 화살표 길이는 속력에 비례</p>
           <div class="readout"></div>
           <div class="sectors"></div>
@@ -306,7 +357,7 @@ body.vlab-embed .shell{grid-template-columns:minmax(0,1fr);max-width:1600px}
       </header>
       <div class="bench">
         <div class="stage">
-          <canvas class="sim" aria-label="인공위성 궤도 시뮬레이션 화면"></canvas>
+          <div class="cvbox"><canvas class="sim" aria-label="인공위성 궤도 시뮬레이션 화면"></canvas></div>
           <p class="cap">지구 크기와 궤도는 실제 비율 · 공기 저항과 지구 자전 무시</p>
           <div class="readout"></div>
         </div>
@@ -345,7 +396,7 @@ body.vlab-embed .shell{grid-template-columns:minmax(0,1fr);max-width:1600px}
       </header>
       <div class="bench">
         <div class="stage">
-          <canvas class="sim" aria-label="도플러 효과 시뮬레이션 화면"></canvas>
+          <div class="cvbox"><canvas class="sim" aria-label="도플러 효과 시뮬레이션 화면"></canvas></div>
           <p class="cap">위에서 내려다본 모습 · 소리의 속력 340 m/s · 실제보다 150배 느리게 재생</p>
           <div class="readout"></div>
         </div>
@@ -390,7 +441,7 @@ body.vlab-embed .shell{grid-template-columns:minmax(0,1fr);max-width:1600px}
       </header>
       <div class="bench">
         <div class="stage">
-          <canvas class="sim drag" tabindex="0" aria-label="일반 상대성 이론 시뮬레이션 화면. 방향키로 보는 방향을 바꿀 수 있음"></canvas>
+          <div class="cvbox"><canvas class="sim drag" tabindex="0" aria-label="일반 상대성 이론 시뮬레이션 화면. 방향키로 보는 방향을 바꿀 수 있음"></canvas></div>
           <p class="cap"></p>
           <div class="readout"></div>
         </div>
@@ -499,7 +550,16 @@ function recorder(panel,key,cols){
     }
   });
   render();
-  return{add(r){rows.push(r);save();render();say(rows.length+'번째 기록을 추가했어요.');},get rows(){return rows;},onChange(f){ls.push(f);f(rows);}};
+  return{add(r){rows.push(r);save();render();say(rows.length+'번째 기록을 추가했어요.');toastRec(panel,rows.length);},get rows(){return rows;},onChange(f){ls.push(f);f(rows);}};
+}
+
+/* 기록 알림: 측정 기록 표가 화면 밖(아래)에 있으면 잠깐 알려 주고, 누르면 표로 이동 */
+let toastEl=null,toastT=0;
+function toastRec(panel,n){
+  const r=panel.getBoundingClientRect();if(r.top<window.innerHeight-60&&r.bottom>0)return;
+  if(!toastEl){toastEl=el('button','vl-toast');toastEl.type='button';toastEl.setAttribute('aria-live','polite');document.body.appendChild(toastEl);toastEl.addEventListener('click',()=>{const t=toastEl.__to;toastEl.hidden=true;if(t)t.scrollIntoView({behavior:'smooth',block:'start'});});}
+  toastEl.innerHTML='<span>'+n+'번째 기록을 추가했어요</span><b>측정 기록 표 보기 ↓</b>';toastEl.__to=panel;toastEl.hidden=false;
+  clearTimeout(toastT);toastT=setTimeout(()=>{toastEl.hidden=true;},4000);
 }
 
 /* ---------- 산점도 ---------- */
@@ -562,7 +622,7 @@ mkLab('projectile',L=>{
     const pv=plan();const show=st.run?st.fl:st.done;const ts=st.run?st.t:(st.done?st.done.T:0);
     const fls=st.trails.map(t=>t.f).concat([pv]);if(show)fls.push(show);
     const xMax=Math.max(10,...fls.map(f=>f.R))*1.08,yMax=Math.max(5,...fls.map(f=>Math.max(f.H,f.h)))*1.15;
-    const pt=24,pr=16,pb=30,ox=62,oy=h-pb;
+    const pt=24,pr=16,pb=st.vec?80:30,ox=62,oy=h-pb;   // 속도 벡터를 켜면 땅에 닿을 때 아래로 향하는 화살표(최대 72px)가 잘리지 않게 아래 여백을 늘림
     const s=Math.min((w-ox-pr)/xMax,(oy-pt)/yMax);const X=x=>ox+x*s,Y=y=>oy-y*s;
     const step=niceStep(Math.max(w-ox-pr,oy-pt)/s,8);
     ctx.lineWidth=1;
@@ -981,6 +1041,20 @@ mkLab('relativity',L=>{
 
 /* ---------- 화면 전환·반복 ---------- */
 let active=null;
+/* 넓은 화면에서 실험대(시뮬레이션 화면 + 실험 조건) 높이를 창 높이에 맞춤.
+   화면 비율은 16:10 보다 세로로 길어지지 않게, 너무 낮은 창에서는 최소 380px 를 지킴 */
+const wideMQ=window.matchMedia('(min-width:900px)'),soloMQ=window.matchMedia('(min-width:1001px) and (max-width:1240px)');
+function layout(){
+  if(!active)return;const bench=active.sec.querySelector('.bench');if(!bench)return;
+  if(!wideMQ.matches||(soloMQ.matches&&!document.body.classList.contains('vlab-embed'))){bench.style.height='';return;}
+  const stage=bench.querySelector('.stage'),box=stage&&stage.querySelector('.cvbox');if(!box)return;
+  const top=bench.getBoundingClientRect().top+window.scrollY;
+  const extra=stage.offsetHeight-box.offsetHeight;
+  const avail=window.innerHeight-top-14;
+  const ideal=box.offsetWidth*10/16+extra;
+  bench.style.height=Math.round(Math.max(380,Math.min(avail,ideal)))+'px';
+}
+let layT=0;window.addEventListener('resize',()=>{cancelAnimationFrame(layT);layT=requestAnimationFrame(layout);});
 const ORDER=['projectile','pendulum','kepler','satellite','doppler','relativity'];   // V-Lab 뷰어의 exp=N 번호 순서 (data/labs.js 와 같아야 함)
 function idFromHash(){const h=location.hash.slice(1);const m=h.match(/(?:^|&)exp=(\d+)/);if(m)return ORDER[+m[1]]||'projectile';return h.split('&')[0];}
 function show(id){
@@ -988,7 +1062,7 @@ function show(id){
   if(active&&active.leave)active.leave();
   Object.values(LABS).forEach(l=>{l.sec.hidden=l.id!==id;});
   document.querySelectorAll('nav.labs a').forEach(a=>{if(a.getAttribute('href')==='#'+id)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
-  active=LABS[id];active.dirty=true;if(active.drawChart)requestAnimationFrame(()=>active.drawChart());
+  active=LABS[id];active.dirty=true;layout();if(active.drawChart)requestAnimationFrame(()=>active.drawChart());
 }
 window.addEventListener('hashchange',()=>{const before=active;show(idFromHash());if(active!==before)window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});});
 show(idFromHash());
@@ -997,7 +1071,7 @@ function markAll(){Object.values(LABS).forEach(l=>{l.dirty=true;});if(active&&ac
 const mq=window.matchMedia('(prefers-color-scheme: dark)');const onTheme=()=>{readColors();markAll();};
 if(mq.addEventListener)mq.addEventListener('change',onTheme);else if(mq.addListener)mq.addListener(onTheme);
 new MutationObserver(onTheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
-if(document.fonts&&document.fonts.ready)document.fonts.ready.then(onTheme);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{layout();onTheme();});
 if('ResizeObserver' in window){const ro=new ResizeObserver(ents=>{ents.forEach(en=>{const lab=en.target.__lab;if(!lab)return;lab.dirty=true;if(en.target.classList.contains('chart')&&lab.drawChart)lab.drawChart();});});Object.values(LABS).forEach(l=>{l.cv.__lab=l;ro.observe(l.cv);if(l.chartCv){l.chartCv.__lab=l;ro.observe(l.chartCv);}});}
 
 let last=performance.now();

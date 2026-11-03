@@ -27,7 +27,9 @@ V-Lab/
 │   ├─ img/thumbs/         실험 썸네일
 │   └─ vendor/             외부 라이브러리 (openchemlib: 분자 편집기·화학 엔진)
 ├─ templates/lab-template.html   새 실험을 만들 때 복사해서 쓰는 뼈대
-└─ docs/DESIGN.md          디자인 가이드
+├─ scripts/thumbs.js       썸네일 자동 캡처 (Playwright)
+├─ docs/DESIGN.md          디자인 가이드
+└─ CLAUDE.md               작업 인수인계 메모 (현재 상태 · 외부 실험 올리는 절차)
 ```
 
 ## 실험 추가하기 (3단계)
@@ -71,13 +73,15 @@ experiments: [
   `<link rel="stylesheet" href="../../assets/css/lab-theme.css">`
 - 새로 만들 때는 `templates/lab-template.html` 을 복사해서 시작하세요. 헤더·탭·상태줄·캔버스·조작부·V-Lab 연동 코드가 들어 있습니다.
 - V-Lab 뷰어 안에서 열리면 주소 해시에 `embed` 가 붙습니다. 이때 자체 헤더를 숨기려면 `body.vlab-embed` 클래스를 쓰면 됩니다. (테마 CSS가 `.lab-header` 는 자동으로 숨깁니다.)
+- **다른 선생님이 자체 디자인으로 만든 파일**은 `lab-theme.css` 를 통째로 링크하지 않습니다. 공용 클래스(`.note` `.seg` `.btn` `.panel` `.row`)가 파일 안의 클래스와 겹쳐 레이아웃이 깨질 수 있기 때문입니다. 대신 글꼴·색 토큰 블록만 `<head>` 에 넣고, 파일 끝의 `</style>` 앞에 V-Lab 색·모서리에 맞춘 덮어쓰기 CSS를 붙입니다. 예: `labs/earth/constellation.html`, `labs/chemistry/chemical-cell.html`. 자세한 절차는 `CLAUDE.md` 에 있습니다.
 - 애니메이션 루프는 하나만 돌리고 `requestAnimationFrame` 을 이벤트 핸들러 안에서 호출하지 않습니다. (루프가 늘어나 점점 빨라지는 문제가 생깁니다.)
 - `alert()` 대신 화면 안의 `.note` 요소에 메시지를 씁니다.
 - 마우스 전용 이벤트(`mousedown`)보다 `pointerdown` 을 쓰면 태블릿에서도 동작합니다.
 
 ## 썸네일
 
-카드에 실제 실험 화면을 보여주는 것이 가장 알아보기 쉽습니다. 실험 화면을 캡처해 `assets/img/thumbs/` 에 넣고 등록부의 `thumbnail`(또는 `experiments[].thumb`) 에 경로를 적습니다. 권장 비율 16:10, 폭 800px 내외. 없으면 회색 자리표시가 나옵니다.
+카드에 실제 실험 화면을 보여주는 것이 가장 알아보기 쉽습니다. 실험 화면을 캡처해 `assets/img/thumbs/<실험ID>/0.png` 에 넣고 등록부의 `thumbnail`(또는 `experiments[].thumb`) 에 경로를 적습니다. 권장 비율 16:10, 폭 800px 내외. 없으면 회색 자리표시가 나옵니다.
+Playwright가 있으면 `node scripts/thumbs.js earth/elnino` 처럼 자동으로 캡처할 수 있습니다 (먼저 `python3 -m http.server 8765` 실행).
 
 ## 배포 (GitHub Pages)
 

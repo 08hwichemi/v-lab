@@ -38,7 +38,7 @@ window.VLAB = {
    * file        HTML 경로 (저장소 루트 기준)
    * author      제작자
    * grade       대상 학년 배열            예) ["고2", "고3"]
-   * unit        교과 · 단원               예) "화학Ⅱ · 용액의 성질"
+   * unit        교과 · 단원               예) "물질과 에너지 · 용액의 성질" (2022 개정 교육과정 과목·단원명)
    * tags        검색 키워드 배열
    * thumbnail   (선택) 썸네일 이미지 경로. 없으면 회색 자리표시
    * experiments (선택) 한 파일 안에 실험이 여럿일 때. 각 실험이 카드 하나로 표시됨
@@ -77,16 +77,16 @@ window.VLAB = {
       file: "labs/chemistry/chem-smart-lab.html",
       author: "휘쌤",
       grade: ["고2", "고3"],
-      unit: "화학Ⅱ · 용액과 평형",
+      unit: "물질과 에너지 · 화학",
       tags: ["총괄성", "묽은 용액", "화학 평형", "르샤틀리에", "결정 구조", "적정"],
       experiments: [
-        { title: "고체 결정 구조 3D", hash: "exp=0", thumb: "assets/img/thumbs/chem-smart-lab/0.png", unit: "화학Ⅱ · 고체의 구조", tags: ["단순 입방", "체심 입방", "면심 입방", "배위수"] },
-        { title: "증기압력 내림",     hash: "exp=1", thumb: "assets/img/thumbs/chem-smart-lab/1.png", unit: "화학Ⅱ · 묽은 용액의 성질", tags: ["라울 법칙", "몰분율"] },
-        { title: "끓는점 오름",       hash: "exp=2", thumb: "assets/img/thumbs/chem-smart-lab/2.png", unit: "화학Ⅱ · 묽은 용액의 성질", tags: ["증기압 곡선", "외부 압력"] },
-        { title: "어는점 내림",       hash: "exp=3", thumb: "assets/img/thumbs/chem-smart-lab/3.png", unit: "화학Ⅱ · 묽은 용액의 성질", tags: ["결빙", "육각 격자"] },
-        { title: "삼투압과 동적 평형", hash: "exp=4", thumb: "assets/img/thumbs/chem-smart-lab/4.png", unit: "화학Ⅱ · 묽은 용액의 성질", tags: ["반트호프", "역삼투"] },
-        { title: "중화 적정",         hash: "exp=5", thumb: "assets/img/thumbs/chem-smart-lab/5.png", unit: "화학Ⅰ · 산과 염기", tags: ["뷰렛", "지시약", "적정 곡선"] },
-        { title: "르샤틀리에 원리",   hash: "exp=6", thumb: "assets/img/thumbs/chem-smart-lab/6.png", unit: "화학Ⅱ · 화학 평형", tags: ["평형 이동", "NO₂", "암모니아 합성"] }
+        { title: "고체 결정 구조 3D", hash: "exp=0", thumb: "assets/img/thumbs/chem-smart-lab/0.png", unit: "물질과 에너지 · 물질의 세 가지 상태", tags: ["단순 입방", "체심 입방", "면심 입방", "배위수"] },
+        { title: "증기압력 내림",     hash: "exp=1", thumb: "assets/img/thumbs/chem-smart-lab/1.png", unit: "물질과 에너지 · 용액의 성질", tags: ["라울 법칙", "몰분율"] },
+        { title: "끓는점 오름",       hash: "exp=2", thumb: "assets/img/thumbs/chem-smart-lab/2.png", unit: "물질과 에너지 · 용액의 성질", tags: ["증기압 곡선", "외부 압력"] },
+        { title: "어는점 내림",       hash: "exp=3", thumb: "assets/img/thumbs/chem-smart-lab/3.png", unit: "물질과 에너지 · 용액의 성질", tags: ["결빙", "육각 격자"] },
+        { title: "삼투압과 동적 평형", hash: "exp=4", thumb: "assets/img/thumbs/chem-smart-lab/4.png", unit: "물질과 에너지 · 용액의 성질", tags: ["반트호프", "역삼투"] },
+        { title: "중화 적정",         hash: "exp=5", thumb: "assets/img/thumbs/chem-smart-lab/5.png", unit: "화학 · 역동적인 화학 반응", tags: ["뷰렛", "지시약", "적정 곡선"] },
+        { title: "르샤틀리에 원리",   hash: "exp=6", thumb: "assets/img/thumbs/chem-smart-lab/6.png", unit: "화학 · 화학 평형", tags: ["평형 이동", "NO₂", "암모니아 합성"] }
       ],
       added: "2026-10-27",
       featured: true
@@ -99,7 +99,7 @@ window.VLAB = {
       file: "labs/chemistry/organic-structure.html",
       author: "휘쌤",
       grade: ["고1", "고2"],
-      unit: "화학Ⅰ · 탄소 화합물",
+      unit: "화학 반응의 세계 · 탄소 화합물과 반응",
       tags: ["구조식", "펼친 구조식", "축약 구조식", "이성질체", "작용기", "분자 편집기"],
       thumbnail: "assets/img/thumbs/organic-structure/0.png",
       added: "2026-10-27",
@@ -114,7 +114,7 @@ window.VLAB = {
       file: "labs/chemistry/coin-entropy.html",
       author: "홍채린",
       grade: ["고2", "고3"],
-      unit: "화학Ⅱ · 반응의 자발성",
+      unit: "물질과 에너지 · 화학 변화의 자발성",
       tags: ["엔트로피", "자발적 반응", "동적 평형", "확률", "이항 분포"],
       thumbnail: "assets/img/thumbs/coin-entropy/0.png",
       added: "2026-10-28"
@@ -128,7 +128,7 @@ window.VLAB = {
       file: "labs/chemistry/lewis-dot.html",
       author: "",
       grade: ["고1", "고2"],
-      unit: "화학Ⅰ · 화학 결합",
+      unit: "화학 · 물질의 구조와 성질",
       tags: ["루이스 전자점식", "옥텟 규칙", "공유 결합", "형식 전하", "미션"],
       thumbnail: "assets/img/thumbs/lewis-dot/0.png",
       added: "2026-10-29"
@@ -141,7 +141,7 @@ window.VLAB = {
       file: "labs/chemistry/vsepr-lab.html",
       author: "",
       grade: ["고1", "고2"],
-      unit: "화학Ⅰ · 분자의 구조",
+      unit: "화학 · 물질의 구조와 성질",
       tags: ["VSEPR", "전자쌍 반발", "분자 모양", "결합각", "극성", "3D"],
       thumbnail: "assets/img/thumbs/vsepr-lab/0.png",
       added: "2026-10-29"
@@ -154,7 +154,7 @@ window.VLAB = {
       file: "labs/chemistry/metal-ionization.html",
       author: "홍채린",
       grade: ["고1", "고2"],
-      unit: "화학Ⅰ · 산화 환원 반응",
+      unit: "화학 반응의 세계 · 산화 환원 반응",
       tags: ["이온화 경향", "산화 환원", "금속의 반응성", "석출", "실험 노트"],
       thumbnail: "assets/img/thumbs/metal-ionization/0.png",
       added: "2026-11-02"
@@ -167,7 +167,7 @@ window.VLAB = {
       file: "labs/chemistry/chemical-cell.html",
       author: "홍채린",
       grade: ["고1", "고2"],
-      unit: "화학Ⅰ · 산화 환원 반응 · 화학 전지",
+      unit: "화학 반응의 세계 · 산화 환원 반응",
       tags: ["화학 전지", "볼타 전지", "다니엘 전지", "염다리", "표준 환원 전위", "분극"],
       thumbnail: "assets/img/thumbs/chemical-cell/0.png",
       added: "2026-11-02"
@@ -180,7 +180,7 @@ window.VLAB = {
       file: "labs/earth/constellation.html",
       author: "홍채린",
       grade: ["고1", "고2"],
-      unit: "지구과학Ⅰ · 별과 우주",
+      unit: "행성우주과학 · 태양과 별의 관측",
       tags: ["별자리", "계절별 별자리", "황도 12궁", "천구", "밤하늘 관측"],
       thumbnail: "assets/img/thumbs/constellation/0.png",
       added: "2026-11-02"
@@ -193,7 +193,7 @@ window.VLAB = {
       file: "labs/earth/plate-tectonics.html",
       author: "장미나",
       grade: ["고2", "고3"],
-      unit: "지구과학Ⅰ · 판 구조론과 대륙 분포의 변화",
+      unit: "지구시스템과학 · 지구 탄생과 생동하는 지구",
       tags: ["판 구조론", "판의 경계", "해양저 확장", "고지자기", "변환 단층"],
       thumbnail: "assets/img/thumbs/plate-tectonics/0.png",
       added: "2026-11-03"
@@ -206,7 +206,7 @@ window.VLAB = {
       file: "labs/earth/elnino.html",
       author: "장미나",
       grade: ["고2", "고3"],
-      unit: "지구과학Ⅰ · 대기와 해양의 상호 작용",
+      unit: "지구과학 · 대기와 해양의 상호작용",
       tags: ["엘니뇨", "라니냐", "무역풍", "용승", "워커 순환", "수온약층"],
       thumbnail: "assets/img/thumbs/elnino/0.png",
       added: "2026-11-03"
@@ -219,7 +219,7 @@ window.VLAB = {
       file: "labs/earth/foehn.html",
       author: "장미나",
       grade: ["고1", "고2"],
-      unit: "지구과학 · 대기의 변화 (단열 변화)",
+      unit: "지구시스템과학 · 강수 과정과 대기의 운동",
       tags: ["푄 현상", "높새바람", "단열 변화", "건조 단열 감률", "습윤 단열 감률", "응결 고도"],
       thumbnail: "assets/img/thumbs/foehn/0.png",
       added: "2026-11-03"
@@ -232,7 +232,7 @@ window.VLAB = {
       file: "labs/earth/planet-motion.html",
       author: "장미나",
       grade: ["고2", "고3"],
-      unit: "지구과학 · 행성의 운동",
+      unit: "지구과학 · 태양계 천체와 별과 우주의 진화",
       tags: ["겉보기 운동", "순행", "역행", "이각", "회합 주기", "내행성", "외행성"],
       thumbnail: "assets/img/thumbs/planet-motion/0.png",
       added: "2026-11-03"
@@ -245,7 +245,7 @@ window.VLAB = {
       file: "labs/earth/star-evolution.html",
       author: "장미나",
       grade: ["고2", "고3"],
-      unit: "지구과학Ⅰ · 별의 진화와 H-R도",
+      unit: "지구과학 · 태양계 천체와 별과 우주의 진화",
       tags: ["별의 진화", "H-R도", "주계열성", "적색 거성", "백색 왜성", "초신성", "중성자별", "블랙홀"],
       thumbnail: "assets/img/thumbs/star-evolution/0.png",
       added: "2026-11-03"

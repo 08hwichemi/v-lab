@@ -274,6 +274,7 @@
         @media print {
             body, html { overflow: visible !important; height: auto !important; background: white !important; }
             .sidebar, .action-footer, #print-hide-header, .file-upload-btn, .data-collection-box hr { display: none !important; }
+            .app-container { display: block !important; height: auto !important; width: auto !important; }
             .workspace { width: 100% !important; height: auto !important; padding: 0 !important; overflow: visible !important; position: static !important; }
             .step-content { display: none !important; }
             .step-content#stepfinal { display: block !important; padding: 0 !important; overflow: visible !important; }
@@ -302,12 +303,12 @@
             .print-photo-box img { max-width: 100% !important; max-height: 140px !important; object-fit: contain !important; margin-top: 5px !important; }
             .print-photo-title { font-size: 11pt !important; font-weight: 700 !important; border-bottom: 1px solid #000 !important; width: 100% !important; text-align: center !important; padding: 5px 0 !important; background: #F8FAFC !important; color: #000 !important; }
 
-            #p-sec-discussion { page-break-before: always !important; break-before: page !important; margin-top: 0 !important; }
+            #p-sec-discussion { margin-top: 0 !important; }   /* 고찰을 무조건 새 쪽으로 보내지 않음 (데이터가 적을 때 빈 쪽 방지) */
             #a4-report-sheet h2 { margin-bottom: 0 !important; }
             #a4-report-sheet table td, #a4-report-sheet table th { padding: 5px 8px !important; font-size: 10pt !important; }
             #a4-report-sheet table { margin-bottom: 12px !important; }
             #a4-report-sheet h3 { margin: 10px 0 8px 0 !important; font-size: 12pt !important; }
-            .print-photo-grid { gap: 8px !important; margin-bottom: 0 !important; page-break-inside: avoid !important; break-inside: avoid !important; }
+            .print-photo-grid { gap: 8px !important; margin-bottom: 0 !important; }
             .print-photo-box { height: 190px !important; page-break-inside: avoid !important; break-inside: avoid !important; }
             .print-photo-box img { max-height: 150px !important; }
             .print-photo-title { font-size: 9pt !important; padding: 3px 0 !important; }
@@ -507,7 +508,7 @@
         /* 공용 PC 안내 띠: 저장된 다른 학생 기록이 있을 때 */
         .resume-bar { position: absolute; top: 0; left: 0; right: 0; z-index: 40; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; background: #111; color: #fff; padding: 10px 4vw; font-size: 14px; line-height: 1.5; }
         .resume-bar[hidden] { display: none; }
-        @media (min-width: 901px) { .workspace.has-resume .step-content { padding-top: 84px; } }   /* 띠가 떠 있는 동안 제목이 가려지지 않게 */
+        @media (min-width: 901px) { .workspace.has-resume .step-content { padding-top: calc(var(--resume-h, 76px) + 10px); } }   /* 띠가 떠 있는 동안 제목이 가려지지 않게 */
         .resume-bar strong { color: #9EC5FF; }
         .resume-bar-actions { display: flex; gap: 8px; margin-left: auto; }
         .resume-bar button { font: inherit; font-size: 13.5px; font-weight: 600; padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,.5); background: transparent; color: #fff; cursor: pointer; }
@@ -515,6 +516,11 @@
         .resume-bar button.danger { border-color: #FCA5A5; color: #FCA5A5; }
         @media (max-width: 900px) { .pc-grid { grid-template-columns: 1fr; } .resume-bar { position: sticky; } }
         @media print { .profile-card, .resume-bar { display: none !important; } }
+        @media (max-width: 900px) { .data-mgmt { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; } .mgmt-btn { font-size: 12.5px; padding: 8px 6px; } }
+        #txt-discussion, #txt-conclusion, #txt-graph-note, textarea.custom-hypo { resize: vertical !important; min-height: 140px; }
+        .checklist-group.flash { box-shadow: 0 0 0 3px #E5484D; transition: box-shadow .3s; }
+        .quota-warn { margin: 0 0 6px; font-size: 12.5px; color: #E5484D; font-weight: 600; line-height: 1.4; }
+        .input-warning { font-size: 14px; }
     </style>
 </head>
 <body>
@@ -583,7 +589,7 @@
                         <li>값이 정확한데도 경고가 뜬다면 지우지 말고 <strong>고찰에서 원인을 분석</strong>하는 것이 좋은 탐구입니다.</li>
                     </ul>
                     <h3>사진 첨부</h3>
-                    <p>📷 버튼을 누르면 휴대폰·태블릿은 바로 카메라가 열립니다. 사진은 자동으로 압축되어 저장되고 보고서에 들어갑니다.</p>
+                    <p>📷 버튼을 누르면 휴대폰·태블릿에서는 카메라나 사진첩을 고를 수 있습니다. 사진은 자동으로 압축되어 저장되고 보고서에 들어갑니다.</p>
                 </div>
 
                 <div class="help-pane" id="help-save">
@@ -620,9 +626,9 @@
 
                 <div class="help-pane" id="help-faq">
                     <h3>Q. 실수로 창을 닫았어요.</h3>
-                    <p>같은 기기·같은 브라우저로 다시 열면 시작 화면에 <strong>"이어서 하기"</strong>가 나타납니다.</p>
+                    <p>같은 기기·같은 브라우저로 다시 열면 입력값이 그대로 복원되고, 위쪽에 <strong>"○○ 학생의 기록이 저장되어 있어요"</strong> 띠가 나타납니다. <strong>[내 기록이에요]</strong>를 누르면 됩니다.</p>
                     <h3>Q. 학교 컴퓨터를 다른 학생과 같이 써요.</h3>
-                    <p>내 실험이 끝나면 <strong>백업 파일을 받은 뒤</strong> 메뉴의 <span class="help-kbd">🔄 새 실험 시작</span>을 눌러 기록을 지워 주세요. 다음 학생이 시작 화면에서 이전 기록 안내를 보면 <strong>[새로 시작]</strong>을 누르면 됩니다.</p>
+                    <p>내 실험이 끝나면 <strong>백업 파일을 받은 뒤</strong> 메뉴의 <span class="help-kbd">🔄 새 실험 시작</span>을 눌러 기록을 지워 주세요. 다음 학생은 위쪽 띠의 <strong>[새로 시작]</strong>을 누르면 됩니다.</p>
                     <h3>Q. 다음 단계로 안 넘어가요.</h3>
                     <p>STEP 07의 <strong>안전 점검 항목 4개</strong>를 모두 체크했는지 확인하세요.</p>
                     <h3>Q. 그래프가 안 나와요.</h3>
@@ -709,7 +715,7 @@
                             <path d="M 430.0 100.0 A 62 62 0 0 0 458.1 93.2" fill="none" stroke="#111827" stroke-width="1.5" marker-end="url(#ar-thin)"/>
                             <text x="442.0" y="126.0" font-size="20" font-style="italic" fill="#111827" font-family="Georgia, serif">θ</text>
                             <!-- 줄 길이 l -->
-                            <text x="493.9" y="130.0" font-size="21" font-style="italic" fill="#111827" font-family="Georgia, serif">l</text>
+                            <text x="493.9" y="130.0" font-size="21" font-style="italic" fill="#111827" font-family="Georgia, serif">L</text>
                             <!-- 힘 분해 평행사변형 (점선) -->
                             <line x1="498.3" y1="250.1" x2="529.9" y2="312.0" stroke="#4B5563" stroke-width="1.3" stroke-dasharray="4 4"/>
                             <line x1="561.5" y1="295.9" x2="529.9" y2="312.0" stroke="#4B5563" stroke-width="1.3" stroke-dasharray="4 4"/>
@@ -907,7 +913,7 @@
                             <h3>왜 10회 왕복 시간을 잴까?</h3>
                             <p>사람이 스탑워치를 누르는 반응 시간에는 약 ±0.2초의 오차가 있습니다. 주기가 1~2초인 진자를 1회만 재면 이 오차가 결과를 크게 흔들지만, <strong>10회 왕복 시간을 재서 10으로 나누면</strong> 반응 오차의 영향이 1/10로 줄어듭니다.</p>
                             <h3>측정의 기준점 잡기</h3>
-                            <p>왕복 횟수는 <strong>최하점(가장 빠르게 지나는 지점)</strong>을 기준으로 세는 것이 좋습니다. 최하점에서는 추의 속력이 가장 빨라 통과 순간이 명확하기 때문입니다. 레이저 속도계(포토게이트)를 쓰면 이 지점을 자동으로 감지합니다.</p>
+                            <p>왕복 횟수는 <strong>최하점(가장 빠르게 지나는 지점)</strong>을 기준으로 세는 것이 좋습니다. 최하점에서는 추의 속력이 가장 빨라 통과 순간이 명확하기 때문입니다. 포토게이트(광센서 타이머)를 쓰면 이 지점을 자동으로 감지합니다. <strong>단, 추는 한 번 왕복할 때 최하점을 두 번 지나갑니다.</strong> 같은 방향으로 지날 때만 1회로 세고(예: 왼쪽→오른쪽 통과만), 포토게이트는 '진자(주기) 모드'로 설정하세요.</p>
                         </div>
                         <div class="text-area">
                             <h3>길이는 어디까지 재야 할까?</h3>
@@ -973,7 +979,8 @@
                         <h3>실험 전 안전 및 기구 점검</h3>
                         <p>실험을 시작하기 전에 <strong>안전 점검 항목을 모두 체크해야 다음 단계로 넘어갈 수 있습니다.</strong> 아래 기구·재료 목록은 체크하지 않아도 되며, 실험대 위에 있는지 <strong>눈으로 확인만</strong> 하면 됩니다.</p>
 
-                        <div class="checklist-group" style="border:2px solid var(--warning-red);">
+                        <p class="input-warning" id="gate-warn"></p>
+                        <div class="checklist-group" id="safety-checks" style="border:2px solid var(--warning-red);">
                             <div class="checklist-title">🛡️ 안전 점검 (필수 체크)</div>
                             <label class="check-item"><input type="checkbox" class="step7-check"> <span>진자가 흔들릴 반경에 사람·물건이 없도록 공간 확보</span></label>
                             <label class="check-item"><input type="checkbox" class="step7-check"> <span>스탠드가 넘어지지 않도록 바닥 고정 상태 확인</span></label>
@@ -984,7 +991,7 @@
                             <div class="checklist-title">⚙️ 기본 측정 장비 (확인)</div>
                             <ul class="action-list" style="margin:0;">
                                 <li>단진자 실험세트 (스탠드, 클램프, 매달기 지지대)</li>
-                                <li>레이저 속도계(포토게이트) 또는 스탑워치</li>
+                                <li>포토게이트(광센서 타이머) 또는 스탑워치</li>
                                 <li>줄자(또는 자), 전자저울, 각도기</li>
                             </ul>
                         </div>
@@ -1010,7 +1017,7 @@
                                 <circle cx="262" cy="345" r="17" fill="#0052FF"/>
                                 <line x1="262" y1="362" x2="262" y2="392" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4 4"/>
                                 <rect x="212" y="392" width="100" height="28" rx="6" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2"/>
-                                <text x="262" y="411" font-size="12" font-weight="700" fill="#92400E" text-anchor="middle" font-family="sans-serif">레이저 속도계</text>
+                                <text x="262" y="411" font-size="12" font-weight="700" fill="#92400E" text-anchor="middle" font-family="sans-serif">포토게이트</text>
                                 <text x="284" y="200" font-size="14" font-weight="700" fill="#0052FF" font-family="sans-serif">실 L</text>
                                 <text x="120" y="46" font-size="13" fill="#4B5563" font-family="sans-serif">클램프 · 지지대</text>
                                 <text x="200" y="462" font-size="13" fill="#94A3B8" text-anchor="middle" font-family="sans-serif">단진자 기본 배치 (최하점에 속도계 정렬)</text>
@@ -1033,7 +1040,7 @@
                         <ul class="action-list">
                             <li>스탠드에 클램프와 매달기 지지대를 단단히 고정합니다.</li>
                             <li>기본 실(무탄성 우레탄줄)에 기본 추(작은 구슬)를 묶고, <strong>추가 바닥이나 책상에 닿지 않는 높이</strong>로 지지대에 매답니다.</li>
-                            <li>레이저 속도계를 사용하는 조는 <strong>추의 최하점 통과 지점</strong>에 감지선이 오도록 정렬합니다. 스탑워치를 사용하는 조는 최하점 뒤에 기준 표시를 붙입니다.</li>
+                            <li>포토게이트를 사용하는 조는 <strong>추의 최하점 통과 지점</strong>에 감지선이 오도록 정렬합니다. 스탑워치를 사용하는 조는 최하점 뒤에 기준 표시를 붙입니다.</li>
                         </ul>
                         <div class="action-img" style="border: 1px solid var(--border-line); background:#fff; padding:5px; border-radius:6px;">
                             <svg viewBox="0 0 300 220" xmlns="http://www.w3.org/2000/svg" style="width:100%; height:auto;" role="img" aria-label="길이 측정 기준">
@@ -1090,7 +1097,7 @@
                     </div>
                     <div class="warning-banner">
                         <span class="warning-icon">⚠️</span>
-                        <p class="warning-text">경고: 추를 크게 흔들면 옆 모둠 학생이나 기구에 부딪힐 수 있습니다. 반드시 진폭 10° 이내의 작은 각도로만 진동시키십시오.</p>
+                        <p class="warning-text">경고: 추를 크게 흔들면 옆 모둠 학생이나 기구에 부딪힐 수 있습니다. 반드시 진폭 10° 이내의 작은 각도로만 진동시키십시오. (STEP 10의 진폭 비교 실험에서만 최대 20°까지)</p>
                     </div>
                     <ul class="action-list">
                         <li>각도기를 지지대 옆에 대고 <strong>추를 약 10° 이내</strong>로 당길 위치를 정한 뒤, 매 측정마다 같은 위치에서 놓을 수 있도록 표시해 둡니다.</li>
@@ -1113,7 +1120,7 @@
                         <p class="tip-text"><strong>측정 원리:</strong> 10회 왕복 시간을 재서 10으로 나누면 스탑워치 반응 오차가 1/10로 줄어듭니다. 길이와 왕복 시간을 입력하면 측정 주기와 이론 주기(T = 2π√(L/g)), 오차 경고가 자동 계산됩니다. <strong>측정 행은 원하는 만큼 ➕ 버튼으로 추가하고 ✕로 삭제할 수 있습니다.</strong></p>
                     </div>
                     <ul class="action-list">
-                        <li>STEP 08에서 측정한 길이를 첫 번째 행에 입력하고 측정을 시작합니다. 추를 정해둔 진폭 위치에서 가만히 놓고, <strong>최하점 통과를 기준으로 10회 왕복 시간</strong>을 잽니다.</li>
+                        <li>STEP 08에서 측정한 길이를 첫 번째 행에 입력하고 측정을 시작합니다. 추를 정해둔 진폭 위치에서 가만히 놓고, <strong>최하점 통과를 기준으로 10회 왕복 시간</strong>을 잽니다 (한 번 왕복에 최하점을 두 번 지나므로, 같은 방향 통과만 1회로 셉니다).</li>
                         <li>실 길이를 조절해 <strong>서로 다른 여러 길이</strong>(예: 20 / 40 / 60cm...)에서 같은 방법으로 측정합니다. 길이를 바꿀 때마다 줄자로 다시 정확히 잽니다.</li>
                         <li>이 실험의 조작 변인은 <strong>실의 길이</strong>입니다. 추의 무게와 진폭은 <strong>통제 변인</strong>이므로 매 행마다 같은 값이 기록되는지 스스로 확인하며 입력하세요.</li>
                     </ul>
@@ -1175,7 +1182,7 @@
                     </div>
                     <ul class="action-list">
                         <li>같은 길이·같은 추를 유지한 채, <strong>작은 진폭(약 5°)</strong>과 <strong>조금 큰 진폭(약 15~20°)</strong>에서 각각 측정합니다.</li>
-                        <li>두 주기가 거의 같다면 갈릴레이가 발견한 <strong>등시성</strong>을 직접 확인한 것입니다.</li>
+                        <li>두 주기가 거의 같다면 갈릴레이가 발견한 <strong>등시성</strong>을 직접 확인한 것입니다. (이론상 20°에서는 주기가 1 % 미만 길어지므로, 차이가 거의 안 보이는 것이 정상입니다.)</li>
                     </ul>
                 </div>
 
@@ -1527,6 +1534,7 @@
         }
 
         function stamp(key) {
+            if (!state.profile.startedAt) state.profile.startedAt = new Date().toISOString();   // 첫 측정값을 기록한 때 = 실험 시작
             state.timestamps[key] = new Date().toISOString();
             renderTimestamp(key);
         }
@@ -1566,13 +1574,14 @@
             saveTimer = setTimeout(saveState, 400);
         }
 
+        let quotaWarned = false;
         function saveState() {
-            if (!state.profile.startedAt) state.profile.startedAt = new Date().toISOString();   // 처음 무언가를 입력한 때 = 실험 시작
             state.profile.topic = PROFILE_TOPIC;
             try {
                 localStorage.setItem(STORE_KEY, JSON.stringify(state));
             } catch (e) {
-                alert('브라우저 저장 공간이 부족하여 자동 저장에 실패했습니다.\n왼쪽 메뉴의 [데이터 내보내기]로 JSON 백업 파일을 꼭 저장해 두세요.');
+                if (!quotaWarned) { quotaWarned = true; alert('브라우저 저장 공간이 부족하여 자동 저장에 실패했습니다.\n왼쪽 메뉴의 [데이터 내보내기]로 JSON 백업 파일을 꼭 저장해 두세요.'); }
+                const mg = document.querySelector('.data-mgmt'); if (mg && !mg.querySelector('.quota-warn')) { const w = document.createElement('p'); w.className = 'quota-warn'; w.textContent = '⚠️ 저장 공간 부족: 자동 저장이 안 되고 있어요. 지금 [데이터 내보내기]로 백업하세요.'; mg.prepend(w); }
             }
         }
 
@@ -1641,13 +1650,18 @@
         function applyStateToDom() {
             NUMBER_FIELDS.concat(TEXT_FIELDS).forEach(id => {
                 const el = document.getElementById(id);
-                if (el && state.values[id] !== undefined && state.values[id] !== '') el.value = state.values[id];
+                if (el) el.value = (state.values[id] !== undefined) ? state.values[id] : '';   // 백업 불러오기 뒤 옛 값이 남지 않게 빈 값도 반영
             });
             const checks = document.querySelectorAll('.step7-check');
             checks.forEach((c, i) => { c.checked = !!(state.safety && state.safety[i]); });
             IMAGE_MAP.forEach(m => {
                 const data = state.images[m.key];
                 if (data) { setImageEverywhere(m, data); markLabelUploaded(m.labelId); }
+                else {
+                    ['targetImg', 'thumbImg'].forEach(k => { const im = document.getElementById(m[k]); if (im) { im.removeAttribute('src'); im.style.display = 'none'; } });
+                    const lb = document.getElementById(m.labelId);
+                    if (lb && lb.firstChild && lb.firstChild.nodeType === Node.TEXT_NODE) lb.firstChild.nodeValue = '📷 사진 촬영 및 업로드';
+                }
             });
             renderExpA();
             renderExpB();
@@ -1777,6 +1791,7 @@
                 hypoLabel.className = 'data-label';
                 hypoLabel.textContent = '조작 변인과 가설 (이유 포함)';
                 const hypo = document.createElement('textarea');
+                hypo.className = 'custom-hypo';
                 hypo.style.cssText = 'width:100%; height:72px; padding:12px; font-size:1rem; line-height:1.6; border:1px solid var(--border-line); border-radius:6px; font-family:inherit; box-sizing:border-box; resize:none;';
                 hypo.placeholder = '예) 조작 변인: 실의 종류. 고탄성 고무줄은 진동 중 늘어나 유효 길이가 변하므로 무탄성 줄보다 주기가 길어질 것이다.';
                 hypo.value = exp.hypo || '';
@@ -1928,6 +1943,7 @@
             document.querySelectorAll('.step7-check').forEach(cb => {
                 cb.addEventListener('change', function () {
                     state.safety = Array.prototype.map.call(document.querySelectorAll('.step7-check'), c => c.checked);
+                    if (validateStep7Checkboxes()) { const w = document.getElementById('gate-warn'); if (w) w.classList.remove('show'); }
                     updateProgressBadges();
                     scheduleSave();
                 });
@@ -1956,16 +1972,25 @@
             if (w) w.hidden = !!(state.profile.id && state.profile.name);
         }
 
+        // 관문 안내: STEP 07 체크리스트로 스크롤하고 잠깐 강조
+        function showGateNotice(wanted) {
+            const warn = document.getElementById('gate-warn'), box = document.getElementById('safety-checks');
+            const name = wanted === 'final' ? '결과보고서' : 'STEP ' + String(wanted).padStart(2, '0');
+            if (warn) { warn.textContent = '⚠️ 아래 안전 점검 항목을 모두 체크하면 ' + name + '(으)로 이동할 수 있어요.'; warn.classList.add('show'); }
+            if (box) { box.scrollIntoView({ behavior: 'smooth', block: 'center' }); box.classList.add('flash'); setTimeout(function () { box.classList.remove('flash'); }, 2200); }
+        }
+
         // ---------------- 단계 이동 라우터 ----------------
-        function navigateStep(stepId) {
+        function navigateStep(stepId, opts) {
             let idx = masterSteps.indexOf(stepId);
             if (idx === -1) return;
 
-            // 준비물 미체크 시 STEP 07 화면으로 실제 이동
+            // 준비물 미체크 시 STEP 07 화면으로 실제 이동 (alert 대신 체크리스트를 강조해 안내)
             if (idx > masterSteps.indexOf('7') && !validateStep7Checkboxes()) {
-                alert('STEP 07의 안전 점검 항목을 모두 체크해야 실험 단계로 진입할 수 있습니다.');
+                const wanted = stepId;
                 stepId = '7';
                 idx = masterSteps.indexOf('7');
+                if (!(opts && opts.silent)) setTimeout(function () { showGateNotice(wanted); }, 50);
             }
             activeStepPointer = idx;
 
@@ -2096,7 +2121,8 @@
                 const vals = rows.map(r => fnum(r[f[0]])).filter(v => v > 0);
                 if (vals.length < 2) return;
                 const mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
-                if ((mx - mn) / mx > 0.05) out.push('통제 변인인 ' + f[1] + '이(가) 행마다 다릅니다(' + mn + ' ~ ' + mx + '). 실험 A의 조작 변인은 실의 길이 하나뿐이어야 합니다.');
+                const differs = f[0] === 'amp' ? (mx - mn) > 3 : (mx - mn) / mx > 0.05;   // 진폭은 각도기 눈금 오차를 감안해 3° 초과만
+                if (differs) out.push('통제 변인인 ' + f[1] + ' 값이 행마다 다릅니다(' + mn + ' ~ ' + mx + '). 실험 A의 조작 변인은 실의 길이 하나뿐이어야 합니다.');
             });
             return out;
         }
@@ -2141,8 +2167,9 @@
             const y = v => H - pad.b - (v / maxY) * (H - pad.t - pad.b);
             const sx = niceStep(maxX, 6), sy = niceStep(maxY, 5);
             const dec = s => (s >= 1 ? 0 : Math.min(3, Math.ceil(-Math.log10(s))));
+            const cw = ctx.canvas.clientWidth || W, fsc = cw < W ? Math.min(2, W / cw) : 1;   // 휴대폰에서 캔버스가 줄어들어도 눈금 글자가 읽히게
 
-            ctx.font = '11px sans-serif';
+            ctx.font = Math.round(11 * fsc) + 'px sans-serif';
             ctx.lineWidth = 1;
             // 세로 격자 + x 눈금
             for (let v = 0; v <= maxX + 1e-9; v += sx) {
@@ -2164,7 +2191,7 @@
             ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, H - pad.b); ctx.lineTo(W - pad.r, H - pad.b);
             ctx.stroke();
             // 축 이름
-            ctx.fillStyle = '#334155'; ctx.font = '600 13px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillStyle = '#334155'; ctx.font = '600 ' + Math.round(13 * fsc) + 'px sans-serif'; ctx.textAlign = 'center';
             ctx.fillText(xLabel, pad.l + (W - pad.l - pad.r) / 2, H - 12);
             ctx.save();
             ctx.translate(16, pad.t + (H - pad.t - pad.b) / 2);
@@ -2302,7 +2329,7 @@
 
         function gravitySummaryText(fit) {
             if (!fit) return '서로 다른 길이의 측정 데이터가 2개 이상 있어야 g를 계산할 수 있습니다.';
-            if (!fit.g) return '측정 데이터에서 길이가 길수록 주기가 짧아져 g를 계산할 수 없습니다. 입력값을 확인하세요.';
+            if (!fit.g) return fit.k === 0 ? '모든 길이에서 주기가 같게 입력되어 기울기가 0입니다. 길이별 왕복 시간을 확인하세요.' : '측정 데이터에서 길이가 길수록 주기가 짧아져 g를 계산할 수 없습니다. 입력값을 확인하세요.';
             return 'T²–L 그래프 기울기 k = ' + fit.k.toFixed(3) + ' s²/m (y절편 ' + fit.b.toFixed(3) + ' s², R² = ' + fit.r2.toFixed(4) +
                 ', 데이터 ' + fit.n + '개)  →  실험값 g = 4π²/k = ' + fit.g.toFixed(2) + ' m/s²  (기준값 9.8 m/s² 대비 오차 ' + fit.err.toFixed(1) + '%)';
         }
@@ -2568,7 +2595,7 @@
             document.getElementById('lbl-p-name').innerText = p.name || '(미입력)';
 
             // 실험 일시: 세션 시작 ~ 마지막 측정 기록
-            const tsList = Object.keys(state.timestamps).map(k => state.timestamps[k]).sort();
+            const tsList = Object.keys(state.timestamps).filter(k => k !== 'graph' && k !== 'custom').map(k => state.timestamps[k]).sort();   // 관찰 메모·가설 입력 시각은 제외
             let dtText = p.startedAt ? fmtDateTime(p.startedAt) : '(미기록)';
             if (tsList.length > 0) dtText += '  ~  ' + fmtDateTime(tsList[tsList.length - 1]) + ' (마지막 측정 기록)';
             document.getElementById('lbl-p-datetime').innerText = dtText;
@@ -2628,7 +2655,8 @@
                         saveState();
                         applyStateToDom();
                         fillProfileInputs();
-                        navigateStep(state.currentStep || '1');
+                        quotaWarned = false;
+                        navigateStep(state.currentStep || '1', { silent: true });
                         alert('백업 데이터를 성공적으로 불러왔습니다.');
                     } catch (err) {
                         alert('파일을 읽는 중 오류가 발생했습니다. 백업 파일이 손상되지 않았는지 확인하세요.');
@@ -2679,6 +2707,7 @@
             txt.appendChild(document.createTextNode(' 학생의 기록이 저장되어 있어요. 본인이면 그대로 이어서 하고, 아니라면 [새로 시작]을 누르세요.'));
             bar.hidden = false;
             bar.parentElement.classList.add('has-resume');
+            bar.parentElement.style.setProperty('--resume-h', bar.offsetHeight + 'px');
         }
         function ackResume() {
             const bar = document.getElementById('resume-bar');
@@ -2694,7 +2723,8 @@
             setupImportListener();
             setupProfileInputs();
             applyStateToDom();
-            navigateStep(state.currentStep && masterSteps.indexOf(state.currentStep) !== -1 ? state.currentStep : '1');
+            navigateStep(state.currentStep && masterSteps.indexOf(state.currentStep) !== -1 ? state.currentStep : '1', { silent: true });
+            window.addEventListener('beforeprint', compileFinalPrintPayload);   // FINAL 을 거치지 않고 Ctrl+P 해도 보고서가 채워지게
             let acked = false;
             try { acked = !!sessionStorage.getItem('pk2_resume_ack'); } catch (e) { acked = false; }
             if ((state.profile.id || state.profile.name) && !acked) showResumeBar();

@@ -636,6 +636,8 @@
   .hab-fence-tag{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#111;color:#fff;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:99px;white-space:nowrap;}
   .hab-fence.confirmed .hab-fence-tag{background:#7C3AED;}
   .hab-ghost{position:absolute;pointer-events:none;background:repeating-linear-gradient(0deg,#111 0 6px,transparent 6px 10px);z-index:3;}
+  .hab-ghost.preview{opacity:.3;z-index:2;}
+  .hab-ghost[hidden]{display:none;}
   .hab-ghost-cnt{position:absolute;left:50%;top:8px;transform:translateX(-50%);background:#111;color:#fff;font-size:12.5px;font-weight:600;padding:3px 9px;border-radius:99px;white-space:nowrap;}
   .hab-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;background:#111;color:#fff;border-radius:8px;padding:8px 12px;margin-bottom:8px;font-size:13.5px;line-height:1.5;}
   .hab-toolbar[hidden]{display:none;}
@@ -1750,6 +1752,7 @@ function habBuild(){
       <div class="hab-layer" id="habFences"></div>
       <div class="hab-layer" id="habInds"></div>
       <div class="hab-layer" id="habLabels"></div>
+      <div class="hab-ghost preview" id="habGhostPrev" hidden></div>
       <div class="hab-ghost" id="habGhost" hidden><span class="hab-ghost-cnt" id="habGhostCnt"></span></div>
       <div class="hab-toast" id="habToast" hidden></div>
     </div>`;
@@ -1767,6 +1770,7 @@ function habClear(){
   ['habRegions','habEnv','habFences','habInds','habLabels'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=''; });
   const tb=document.getElementById('habToolbar'); if(tb) tb.hidden=true;
   const g=document.getElementById('habGhost'); if(g) g.hidden=true;
+  const gp=document.getElementById('habGhostPrev'); if(gp) gp.hidden=true;
   const f=document.getElementById('habField'); if(f) f.classList.remove('fence-mode');
 }
 function habReset(){
@@ -1990,9 +1994,9 @@ function habStartFence(node, def){
   habBuild();
   const reg = HAB.regions[node.id]; if(!reg){ habSync(); if(!HAB.regions[node.id]) return; }
   const r = HAB.regions[node.id];
-  HAB.fenceMode = { nodeId:node.id, def, pos:0.5, vertical: r.w*HAB.w >= r.h*HAB.h };
+  HAB.fenceMode = { nodeId:node.id, def, pos:null, vertical: r.w*HAB.w >= r.h*HAB.h };
   const tb = document.getElementById('habToolbar'); tb.hidden = false;
-  document.getElementById('habToolText').innerHTML = `${def.icon} <b>${node.name}</b> 영역 위에서 마우스를 움직이거나 손가락으로 눌러 ${def.id==='island'?'바닷물이 차오를':'울타리를 세울'} 자리를 정하세요. 양쪽에 2마리 이상 있어야 해요.`;
+  document.getElementById('habToolText').innerHTML = `${def.icon} <b>${node.name}</b> 영역 안을 <b>클릭(터치)</b>해 ${def.id==='island'?'바닷물이 차오를':'울타리를 세울'} 자리를 정하세요. 다른 곳을 다시 클릭하면 옮겨져요. 양쪽에 2마리 이상 있어야 해요.`;
   document.getElementById('habField').classList.add('fence-mode');
   habUpdateGhost();
   const f=document.getElementById('habField'); if(f) f.scrollIntoView({behavior:'smooth', block:'center'});
@@ -2001,19 +2005,32 @@ function habCancelFence(){
   HAB.fenceMode = null;
   document.getElementById('habToolbar').hidden = true;
   document.getElementById('habGhost').hidden = true;
+  document.getElementById('habGhostPrev').hidden = true;
   document.getElementById('habField').classList.remove('fence-mode');
 }
 function habFieldPoint(e){ const r = document.getElementById('habField').getBoundingClientRect(); return {nx:(e.clientX-r.left)/r.width, ny:(e.clientY-r.top)/r.height}; }
+function habFencePosFrom(e){
+  const {nx,ny} = habFieldPoint(e); const r = HAB.regions[HAB.fenceMode.nodeId]; if(!r) return null;
+  if(nx<r.x || nx>r.x+r.w || ny<r.y || ny>r.y+r.h) return null;
+  return clamp(HAB.fenceMode.vertical ? (nx-r.x)/r.w : (ny-r.y)/r.h, 0.1, 0.9);
+}
 function habPointerMove(e){
-  if(!HAB.fenceMode) return;
-  const {nx,ny} = habFieldPoint(e); const r = HAB.regions[HAB.fenceMode.nodeId]; if(!r) return;
-  if(nx<r.x || nx>r.x+r.w || ny<r.y || ny>r.y+r.h) return;
-  HAB.fenceMode.pos = clamp(HAB.fenceMode.vertical ? (nx-r.x)/r.w : (ny-r.y)/r.h, 0.1, 0.9);
-  habUpdateGhost();
+  if(!HAB.fenceMode || e.pointerType==='touch') return;
+  const pos = habFencePosFrom(e); const gp = document.getElementById('habGhostPrev');
+  if(pos==null){ gp.hidden = true; return; }
+  const r = HAB.regions[HAB.fenceMode.nodeId];
+  if(HAB.fenceMode.vertical){ gp.style.left=((r.x+r.w*pos)*100)+'%'; gp.style.top=(r.y*100)+'%'; gp.style.width='3px'; gp.style.height=(r.h*100)+'%'; }
+  else { gp.style.left=(r.x*100)+'%'; gp.style.top=((r.y+r.h*pos)*100)+'%'; gp.style.width=(r.w*100)+'%'; gp.style.height='3px'; }
+  gp.hidden = false;
 }
 function habPointerDown(e){
   const {nx,ny} = habFieldPoint(e);
-  if(HAB.fenceMode){ habPointerMove(e); return; }
+  if(HAB.fenceMode){
+    const pos = habFencePosFrom(e); if(pos==null) return;
+    HAB.fenceMode.pos = pos; habUpdateGhost();
+    document.getElementById('habToolText').innerHTML = `${HAB.fenceMode.def.icon} 자리를 정했어요. 다른 곳을 클릭하면 옮겨지고, <b>[여기에 울타리 세우기]</b>를 누르면 확정돼요.`;
+    return;
+  }
   const id = habRegionAt(nx, ny);
   if(id && id!==state.focusId) setFocus(id);
 }
@@ -2027,6 +2044,7 @@ function habSplitCounts(){
 }
 function habUpdateGhost(){
   const fm = HAB.fenceMode, g = document.getElementById('habGhost'); if(!fm || !g) return;
+  if(fm.pos==null){ g.hidden = true; document.getElementById('habFenceOk').disabled = true; return; }
   const r = HAB.regions[fm.nodeId]; const c = habSplitCounts();
   if(fm.vertical){ g.style.left = (c.cut*100)+'%'; g.style.top = (r.y*100)+'%'; g.style.width = '3px'; g.style.height = (r.h*100)+'%'; }
   else { g.style.left = (r.x*100)+'%'; g.style.top = (c.cut*100)+'%'; g.style.width = (r.w*100)+'%'; g.style.height = '3px'; }

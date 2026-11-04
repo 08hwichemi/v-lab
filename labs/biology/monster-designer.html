@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>몬스터 디자이너 · V-Lab</title>
+<style>
+/* V-Lab 공용 글꼴·색 토큰만 가져옴 (공용 클래스는 이 파일의 클래스 이름과 겹치므로 lab-theme.css 전체는 쓰지 않음) */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+:root{--font: 'IBM Plex Sans KR', 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; --bg: #ffffff; --panel: #ffffff; --panel-2: #F7F8FA; --line: #E6E8EC; --line-2: #F0F1F3; --text: #111111; --text-2: #3F4652; --muted: #6B7280; --accent: #3182F6; --accent-soft: #EAF2FF; --ok: #12A66B; --warn: #F5A623; --err: #E5484D; --radius: 12px; --radius-sm: 8px;}
+</style>
+<style>
+  :root{
+    --forest:#1F4529;
+    --forest-deep:#122A18;
+    --forest-mid:#2A5A37;
+    --parchment:#FBF6E9;
+    --parchment-dim:#F1EAD4;
+    --ink:#1C2317;
+    --ink-soft:#4A5548;
+    --gold:#E8AC2E;
+    --gold-deep:#B9860F;
+    --red:#B4402B;
+    --ice:#4E9AA6;
+    --line:#D8CFAE;
+    --font-display:var(--font);
+    --font-body:var(--font);
+    --font-mono:var(--font);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 10%, rgba(255,255,255,0.04), transparent 40%),
+      linear-gradient(180deg,var(--forest-deep),var(--forest) 55%,#1A3E23);
+    color:var(--ink);
+    font-family:var(--font-body);
+    min-height:100vh;
+    padding:28px 16px 60px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .app{width:100%;max-width:1000px;}
+  .masthead{
+    display:flex;align-items:baseline;justify-content:space-between;
+    color:var(--parchment);margin-bottom:22px;padding:0 4px;
+    flex-wrap:wrap;gap:6px;
+  }
+  .masthead .brand{
+    font-family:var(--font-mono);letter-spacing:3px;font-size:11px;
+    color:var(--gold);text-transform:uppercase;
+  }
+  .masthead .status{
+    font-family:var(--font-mono);font-size:11px;color:#B9C9B7;letter-spacing:1px;
+  }
+
+  .rail{display:flex;gap:6px;margin-bottom:20px;padding:0 4px;}
+  .rail-seg{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,0.14);position:relative;overflow:hidden;}
+  .rail-seg.done{background:var(--gold);}
+  .rail-seg.active{background:linear-gradient(90deg,var(--gold),rgba(232,172,46,0.25));}
+
+  .stage{
+    background:var(--parchment);
+    border-radius:14px;
+    box-shadow:0 24px 60px -20px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.04);
+    padding:42px 44px;
+    position:relative;
+    min-height:420px;
+  }
+  .stage::before{
+    content:"";position:absolute;inset:10px;border:1px dashed var(--line);
+    border-radius:8px;pointer-events:none;
+  }
+  .eyebrow{font-family:var(--font-mono);font-size:11.5px;letter-spacing:2.5px;color:var(--gold-deep);text-transform:uppercase;margin:0 0 8px;}
+  h1.title{font-family:var(--font-display);font-size:29px;margin:0 0 10px;color:var(--ink);line-height:1.25;}
+  p.lede{font-size:14px;line-height:1.65;color:var(--ink-soft);max-width:680px;margin:0 0 26px;}
+  .hidden{display:none !important;}
+
+  .btn{font-family:var(--font-body);font-weight:700;font-size:14px;border:none;border-radius:8px;padding:13px 26px;cursor:pointer;transition:transform .12s ease, box-shadow .12s ease, opacity .12s ease;letter-spacing:.2px;}
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--forest);color:var(--parchment);}
+  .btn-primary:hover{background:var(--forest-mid);}
+  .btn-primary:disabled{opacity:.35;cursor:not-allowed;}
+  .btn-gold{background:var(--gold);color:var(--forest-deep);}
+  .btn-gold:hover{box-shadow:0 8px 18px -8px rgba(232,172,46,0.7);}
+  .btn-ghost{background:transparent;color:var(--ink-soft);border:1.5px solid var(--line);}
+  .btn-ghost:hover{border-color:var(--ink-soft);}
+  .btn-row{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap;}
+
+  /* species grid */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:8px;}
+  @media(max-width:720px){.grid{grid-template-columns:repeat(2,1fr);}}
+  .spec-card{border:2px solid var(--line);border-radius:10px;padding:14px;background:#fff;cursor:pointer;text-align:left;transition:border-color .12s, transform .12s;}
+  .spec-card:hover{transform:translateY(-2px);}
+  .spec-card.selected{border-color:var(--forest);background:#EFF5EE;}
+  .creature-thumb{width:74px;height:74px;margin-bottom:8px;}
+  .creature-thumb svg{width:100%;height:100%;display:block;}
+  .spec-name{font-family:var(--font-display);font-size:16px;font-weight:bold;margin:0 0 4px;}
+  .spec-desc{font-size:11.5px;color:var(--ink-soft);line-height:1.45;margin:0 0 10px;min-height:32px;}
+  .badge-row{display:flex;gap:6px;flex-wrap:wrap;}
+  .type-badge{display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-body);font-weight:700;font-size:11px;color:#fff;padding:4px 10px;border-radius:5px;white-space:nowrap;}
+
+  /* environment draw */
+  .draw-zone{display:flex;flex-direction:column;align-items:center;padding:20px 0 6px;}
+  .card-slot{width:280px;height:340px;perspective:1200px;margin-bottom:22px;}
+  .card-inner{position:relative;width:100%;height:100%;transition:transform .7s cubic-bezier(.2,.9,.25,1);transform-style:preserve-3d;}
+  .card-inner.flipped{transform:rotateY(180deg);}
+  .card-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px;text-align:center;}
+  .card-back{background:repeating-linear-gradient(45deg,var(--forest-mid) 0 2px, var(--forest) 2px 14px);border:3px solid var(--gold);color:var(--gold);}
+  .card-back .mark{font-family:var(--font-mono);font-size:12px;letter-spacing:3px;}
+  .card-front{background:var(--parchment);border:3px solid var(--forest);transform:rotateY(180deg);justify-content:flex-start;}
+  .card-front .icon{font-size:46px;margin-bottom:10px;}
+  .card-front .env-name{font-family:var(--font-display);font-size:19px;font-weight:bold;color:var(--ink);margin:0 0 10px;}
+  .card-front .env-desc{font-size:12.5px;color:var(--ink-soft);line-height:1.55;margin-bottom:14px;}
+  .pressure-tag{font-family:var(--font-mono);font-size:10.5px;background:var(--forest);color:var(--parchment);padding:8px 10px;border-radius:6px;line-height:1.5;}
+
+  /* recap */
+  .recap{display:flex;gap:12px;margin-bottom:26px;flex-wrap:wrap;align-items:stretch;}
+  .recap-chip{flex:1;min-width:220px;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:center;}
+  .recap-chip .creature-thumb{width:52px;height:52px;flex-shrink:0;margin-bottom:0;}
+  .recap-chip .label{font-family:var(--font-mono);font-size:10px;letter-spacing:2px;color:var(--gold-deep);text-transform:uppercase;margin-bottom:4px;}
+  .recap-chip .value{font-family:var(--font-display);font-size:15px;font-weight:bold;color:var(--ink);}
+  .recap-chip .sub{font-size:11px;color:var(--ink-soft);margin-top:2px;}
+
+  /* trait categories */
+  .trait-block{margin-bottom:26px;border-top:1px solid var(--line);padding-top:20px;}
+  .trait-block:first-of-type{border-top:none;padding-top:0;}
+  .trait-block h3{font-family:var(--font-display);font-size:17px;margin:0 0 4px;color:var(--ink);}
+  .trait-block .cat-hint{font-size:12px;color:var(--ink-soft);margin:0 0 12px;font-style:italic;}
+  .trait-options{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+  .trait-opt{width:128px;border:2px solid var(--line);border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;background:#fff;transition:border-color .1s, background .1s;}
+  .trait-opt:hover{border-color:var(--gold-deep);}
+  .trait-opt.on{border-color:var(--forest);background:#EFF5EE;}
+  .trait-opt .emo{font-size:22px;display:block;margin-bottom:6px;}
+  .trait-opt .lbl{font-size:11.5px;line-height:1.35;color:var(--ink);font-weight:600;}
+  .field label{display:block;font-family:var(--font-mono);font-size:11px;letter-spacing:1px;color:var(--forest);text-transform:uppercase;margin-bottom:6px;font-weight:bold;}
+  .field .hint{font-size:11.5px;color:var(--ink-soft);margin:2px 0 8px;font-style:italic;}
+  textarea, input[type=text]{width:100%;border:1.5px solid var(--line);border-radius:8px;padding:11px 12px;font-family:var(--font-body);font-size:13.5px;color:var(--ink);resize:vertical;background:#fff;}
+  textarea:focus, input[type=text]:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold-deep);}
+  textarea{min-height:60px;line-height:1.5;}
+  .field{margin-bottom:18px;}
+
+  .type-select{display:flex;flex-wrap:wrap;gap:8px;}
+  .type-opt{font-family:var(--font-body);font-size:12px;font-weight:700;color:#fff;padding:7px 12px;border-radius:6px;cursor:pointer;border:2px solid transparent;opacity:.55;transition:opacity .1s, border-color .1s;}
+  .type-opt.on{opacity:1;border-color:var(--ink);}
+  .type-note{font-size:11px;color:var(--ink-soft);margin-top:6px;}
+
+  .loading-wrap{display:flex;flex-direction:column;align-items:center;padding:60px 0;}
+  .spinner{width:46px;height:46px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--forest);animation:spin 0.9s linear infinite;margin-bottom:18px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading-wrap p{font-family:var(--font-mono);font-size:12px;color:var(--ink-soft);letter-spacing:1px;}
+
+  .result-top{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:24px;}
+  .score-dial{width:150px;height:150px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;background:conic-gradient(var(--gold) calc(var(--pct)*1%), var(--parchment-dim) 0);}
+  .score-dial::after{content:"";position:absolute;inset:12px;border-radius:50%;background:var(--parchment);}
+  .score-dial .num{position:relative;font-family:var(--font-display);font-size:34px;font-weight:bold;color:var(--forest);}
+  .score-text{flex:1;min-width:240px;}
+  .tier{font-family:var(--font-display);font-size:20px;font-weight:bold;color:var(--forest);margin:2px 0 8px;}
+  .feedback-txt{font-size:13.5px;line-height:1.6;color:var(--ink-soft);}
+
+  .strengths-improve{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:26px;}
+  .si-box{flex:1;min-width:240px;border-radius:10px;padding:14px 16px;}
+  .si-box.strength{background:#EBF3EA;border:1px solid #BFD9BC;}
+  .si-box.improve{background:#FBEFE7;border:1px solid #E7C6A9;}
+  .si-box h4{margin:0 0 8px;font-family:var(--font-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;}
+  .si-box.strength h4{color:#2F6B32;}
+  .si-box.improve h4{color:#A05A22;}
+  .si-box ul{margin:0;padding-left:18px;font-size:12.5px;line-height:1.6;color:var(--ink);}
+
+  .creature-compare{display:flex;align-items:center;justify-content:center;gap:22px;flex-wrap:wrap;margin-bottom:26px;}
+  .creature-panel{text-align:center;}
+  .creature-panel .frame{width:172px;height:172px;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:8px;}
+  .img-missing{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--parchment-dim);border-radius:6px;color:var(--ink-soft);font-size:11px;font-family:var(--font-mono);text-align:center;}
+  .creature-panel .frame svg{width:100%;height:100%;display:block;}
+  .creature-panel .cap{font-family:var(--font-mono);font-size:10px;letter-spacing:1.5px;color:var(--ink-soft);text-transform:uppercase;margin-top:8px;}
+  .creature-panel .cap-name{font-family:var(--font-display);font-size:14px;font-weight:bold;color:var(--ink);margin-top:2px;}
+  .compare-arrow{font-size:26px;color:var(--forest-mid);}
+
+  .final-card{background:linear-gradient(160deg,var(--forest),var(--forest-deep));border-radius:12px;padding:24px 26px;color:var(--parchment);border:1px solid rgba(232,172,46,0.4);}
+  .final-card .fc-eyebrow{font-family:var(--font-mono);font-size:10.5px;letter-spacing:2px;color:var(--gold);margin-bottom:6px;text-transform:uppercase;}
+  .final-card .fc-name{font-family:var(--font-display);font-size:24px;font-weight:bold;margin:0 0 4px;}
+  .final-card .fc-origin{font-size:12px;color:#B9C9B7;margin-bottom:14px;}
+  .final-card .fc-badges{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+  .final-card .fc-summary{font-size:12.5px;line-height:1.75;color:#E4EBDF;}
+  .final-card .fc-summary b{color:var(--gold);}
+  .final-card .fc-summary div{margin-bottom:8px;}
+
+  .err-note{font-size:11.5px;color:var(--red);background:#FBEAE6;border:1px solid #ECC3B9;padding:8px 12px;border-radius:6px;margin-bottom:16px;}
+  .studentinfo-box{margin-top:18px;border:2px dashed var(--line);border-radius:14px;padding:14px 16px;background:#FFFBEF;}
+  .studentinfo-box label{display:block;font-family:var(--font-mono);font-size:11.5px;letter-spacing:.5px;color:var(--forest);margin-bottom:8px;font-weight:bold;}
+  .studentinfo-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .studentinfo-row input{flex:1;min-width:140px;border:1.5px solid var(--line);border-radius:8px;padding:10px 14px;font-size:13px;font-family:var(--font-body);background:#fff;}
+
+  /* masthead help button */
+  .mast-right{display:flex;align-items:center;gap:12px;}
+  .help-btn{font-family:var(--font-body);font-size:12px;font-weight:700;background:rgba(232,172,46,0.15);color:var(--gold);border:1px solid rgba(232,172,46,0.55);border-radius:999px;padding:6px 14px;cursor:pointer;}
+  .help-btn:hover{background:rgba(232,172,46,0.3);}
+
+  /* help guide */
+  .help-guide{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:20px;}
+  .help-guide h3{font-family:var(--font-display);font-size:17px;margin:0 0 10px;color:var(--forest);}
+  .help-guide h4{font-family:var(--font-mono);font-size:11.5px;letter-spacing:1.5px;color:var(--gold-deep);text-transform:uppercase;margin:18px 0 8px;}
+  .help-guide p, .help-guide li{font-size:13px;line-height:1.7;color:var(--ink);}
+  .help-guide p{margin:0 0 8px;}
+  .help-guide ol, .help-guide ul{margin:0;padding-left:20px;}
+  .help-guide .formula{background:var(--forest);color:var(--parchment);border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.7;margin:6px 0 4px;}
+  .help-guide .formula b{color:var(--gold);}
+  .ex-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+  .ex-box{flex:1;min-width:230px;border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.6;}
+  .ex-box.good{background:#EBF3EA;border:1px solid #BFD9BC;}
+  .ex-box.bad{background:#FBEFE7;border:1px solid #E7C6A9;}
+  .ex-box .ex-tag{font-family:var(--font-mono);font-size:10.5px;font-weight:bold;letter-spacing:1px;display:block;margin-bottom:4px;}
+  .ex-box.good .ex-tag{color:#2F6B32;}
+  .ex-box.bad .ex-tag{color:#A05A22;}
+  details.help-more summary{cursor:pointer;font-weight:700;font-size:13px;color:var(--forest);margin-top:14px;}
+
+  /* help modal */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(10,24,14,0.6);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;z-index:50;overflow-y:auto;}
+  .modal-box{background:var(--parchment);border-radius:14px;max-width:760px;width:100%;padding:26px 26px 20px;position:relative;box-shadow:0 24px 60px -20px rgba(0,0,0,0.6);}
+  .modal-close{position:absolute;top:12px;right:14px;background:transparent;border:none;font-size:22px;cursor:pointer;color:var(--ink-soft);}
+
+  .thumb-empty{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--parchment-dim);font-size:24px;}
+  .char-count{font-family:var(--font-mono);font-size:10.5px;color:var(--ink-soft);text-align:right;margin-top:4px;}
+
+  /* font tuning */
+  body{font-size:15px;}
+  .btn,.help-btn,.type-badge,.type-opt{font-family:var(--font);}
+  .btn{font-size:15px;}
+  .eyebrow,.masthead .brand,.masthead .status,.si-num,.label,.cap,.fc-eyebrow,.help-guide h4,.ex-box .ex-tag{letter-spacing:1px;}
+  .trait-opt .lbl{font-size:12.5px;}
+  .spec-desc,.cat-hint,.hint,.edesc,.env-desc{font-style:normal;}
+
+  /* start screen help button */
+  .help-cta{display:flex;align-items:center;gap:14px;background:#FFF4D6;border:2px dashed var(--gold);border-radius:14px;padding:14px 18px;margin-bottom:20px;cursor:pointer;width:100%;text-align:left;font-family:var(--font-body);color:var(--ink);transition:transform .12s, box-shadow .12s;}
+  .help-cta:hover{transform:translateY(-2px);box-shadow:0 10px 20px -12px rgba(185,134,15,0.6);}
+  .help-cta .hc-icon{font-size:30px;}
+  .help-cta .hc-title{font-family:var(--font);font-size:18px;color:var(--forest);}
+  .help-cta .hc-sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+  .help-cta .hc-arrow{margin-left:auto;font-family:var(--font);font-size:14px;background:var(--forest);color:var(--parchment);padding:8px 16px;border-radius:999px;white-space:nowrap;}
+  .modal-box .help-guide{border:none;padding:4px 2px 0;margin-bottom:0;background:transparent;}
+
+  @media(max-width:600px){
+    .stage{padding:28px 18px;}
+    h1.title{font-size:23px;}
+    .masthead{flex-direction:column;align-items:flex-start;}
+  }
+
+  footer{color:#8FA48D;font-size:11px;font-family:var(--font-mono);text-align:center;margin-top:26px;}
+
+  /* stage intro cards on start screen */
+  .stage-intro{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px;}
+  .stage-intro-card{flex:1;min-width:260px;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:16px 18px;}
+  .stage-intro-card .si-num{font-family:var(--font-mono);font-size:10.5px;letter-spacing:2px;color:var(--gold-deep);text-transform:uppercase;margin-bottom:4px;}
+  .stage-intro-card .si-h{font-family:var(--font-display);font-size:17px;font-weight:bold;color:var(--ink);margin-bottom:6px;}
+  .stage-intro-card .si-b{font-size:12px;line-height:1.6;color:var(--ink-soft);}
+
+  /* image upload */
+  .upload-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .upload-preview{
+    width:140px;height:140px;border:2px dashed var(--line);border-radius:10px;
+    display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fff;flex-shrink:0;
+  }
+  .upload-preview img{width:100%;height:100%;object-fit:cover;}
+  .upload-empty{font-size:11px;color:var(--ink-soft);text-align:center;padding:10px;font-family:var(--font-mono);}
+  .upload-btn{cursor:pointer;}
+
+  /* environment picker grid (stage 2) */
+  .env-pick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;}
+  @media(max-width:720px){.env-pick-grid{grid-template-columns:repeat(2,1fr);}}
+  .env-pick-card{border:2px solid var(--line);border-radius:10px;padding:14px;background:#fff;cursor:pointer;transition:border-color .1s, transform .1s;}
+  .env-pick-card:hover{transform:translateY(-2px);}
+  .env-pick-card.on{border-color:var(--forest);background:#EFF5EE;}
+  .env-pick-card .icon{font-size:28px;margin-bottom:6px;}
+  .env-pick-card .ename{font-family:var(--font-display);font-size:14px;font-weight:bold;color:var(--ink);margin-bottom:4px;}
+  .env-pick-card .edesc{font-size:11px;color:var(--ink-soft);line-height:1.45;}
+  .env-pick-card .custom-tag{font-family:var(--font-mono);font-size:9px;background:var(--gold);color:var(--forest-deep);padding:2px 5px;border-radius:4px;margin-left:4px;}
+  .env-pick-card.add-card{display:flex;flex-direction:column;align-items:center;justify-content:center;border-style:dashed;color:var(--ink-soft);text-align:center;}
+  .add-env-form{background:#F1EAD4;border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:16px;}
+
+  /* printable report (PDF export via browser print) */
+  #printArea{display:none;}
+  #printArea .pr-page{
+    font-family:var(--font);color:#1C2317;
+    max-width:760px;margin:0 auto;padding:10px;
+  }
+  #printArea .pr-title{font-size:21px;font-weight:bold;margin:0 0 4px;}
+  #printArea .pr-meta{
+    font-family:var(--font);font-size:10.5px;color:#555;
+    border-bottom:2px solid #1C2317;padding-bottom:10px;margin-bottom:14px;
+  }
+  #printArea .pr-studentinfo{
+    font-family:var(--font);font-size:13px;font-weight:bold;color:#1C2317;
+    border:1px solid #999;border-radius:6px;padding:8px 12px;display:inline-block;
+    margin-bottom:14px;
+  }
+  #printArea .pr-img-missing{
+    width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+    background:#f0f0f0;color:#777;font-size:10px;font-family:var(--font);text-align:center;
+  }
+  #printArea h2{
+    font-size:14px;border-bottom:1px solid #bbb;padding-bottom:4px;margin:18px 0 8px;
+    font-family:var(--font);letter-spacing:1px;text-transform:uppercase;
+  }
+  #printArea .pr-field{margin-bottom:9px;font-size:12px;line-height:1.6;page-break-inside:avoid;}
+  #printArea .pr-field b{
+    display:block;font-family:var(--font);font-size:10px;letter-spacing:1px;
+    color:#555;text-transform:uppercase;margin-bottom:2px;font-weight:bold;
+  }
+  #printArea .pr-images{display:flex;align-items:center;gap:18px;margin:10px 0 16px;}
+  #printArea .pr-img-box{width:120px;height:120px;border:1px solid #999;border-radius:6px;overflow:hidden;flex-shrink:0;}
+  #printArea .pr-img-box svg, #printArea .pr-img-box img{width:100%;height:100%;object-fit:cover;display:block;}
+  #printArea .pr-img-cap{font-size:10.5px;text-align:center;margin-top:4px;color:#555;}
+  #printArea .pr-arrow{font-size:20px;color:#555;}
+  #printArea .pr-score{font-size:26px;font-weight:bold;}
+  #printArea ul{margin:4px 0 0;padding-left:18px;font-size:11.5px;line-height:1.55;}
+  #printArea .pr-badges{display:flex;gap:6px;margin:4px 0;}
+  #printArea .pr-badge{
+    display:inline-block;font-size:10px;font-weight:bold;color:#fff;
+    padding:3px 8px;border-radius:5px;
+  }
+  @media print{
+    body{background:#fff !important;padding:0 !important;}
+    .app{display:none !important;}
+    .modal-backdrop{display:none !important;}
+    #printArea{display:block !important;}
+    @page{margin:14mm;}
+  }
+  /* ===== V-Lab 공용 테마에 맞춘 덮어쓰기 ===== */
+  :root{--forest:#111111;--forest-deep:#111111;--forest-mid:#333333;--parchment:#ffffff;--parchment-dim:#F7F8FA;
+    --ink:#111111;--ink-soft:#6B7280;--gold:#3182F6;--gold-deep:#3182F6;--red:#E5484D;--line:#E6E8EC;}
+  body{background:#fff;color:#111;font-family:var(--font);font-size:15px;padding:20px 16px 48px;}
+  body.vlab-embed{padding:10px 16px 40px;}
+  b,strong{font-weight:700;}
+  .masthead{color:#111;margin-bottom:16px;}
+  .masthead .brand{font-family:var(--font);font-weight:600;font-size:12.5px;letter-spacing:.5px;color:#6B7280;}
+  .masthead .status{font-family:var(--font);font-size:12.5px;letter-spacing:0;color:#6B7280;}
+  .mast-right{margin-left:auto;}
+  body.vlab-embed .masthead .brand{display:none;}
+  body.vlab-embed #screen-start .eyebrow,body.vlab-embed #screen-start h1.title{display:none;}
+  .rail{margin-bottom:16px;}
+  .rail-seg{background:#E6E8EC;}
+  .rail-seg.done{background:#3182F6;}
+  .rail-seg.active{background:linear-gradient(90deg,#3182F6,#BFD8FB);}
+  .stage{background:#fff;border:1px solid #E6E8EC;border-radius:12px;box-shadow:none;padding:30px 34px 34px;}
+  .stage::before{display:none;}
+  .eyebrow{font-family:var(--font);font-weight:600;font-size:12.5px;letter-spacing:.5px;color:#3182F6;}
+  h1.title{font-family:var(--font);font-weight:700;letter-spacing:-0.01em;font-size:26px;color:#111;}
+  p.lede{font-size:15px;color:#3F4652;}
+  .btn{font-family:var(--font);font-weight:600;font-size:15px;border-radius:8px;padding:11px 20px;box-shadow:none;letter-spacing:0;}
+  .btn:hover{box-shadow:none;}
+  .btn-primary{background:#111;color:#fff;}
+  .btn-primary:hover{background:#333;}
+  .btn-gold{background:#3182F6;color:#fff;}
+  .btn-gold:hover{background:#2468D1;box-shadow:none;}
+  .btn-ghost{background:#fff;color:#111;border:1px solid #E6E8EC;}
+  .btn-ghost:hover{border-color:#111;}
+  .help-btn{font-family:var(--font);font-size:13px;font-weight:600;background:#fff;color:#111;border:1px solid #E6E8EC;border-radius:8px;padding:7px 12px;}
+  .help-btn:hover{background:#F7F8FA;border-color:#111;}
+  /* 카드류 */
+  .spec-card,.trait-opt,.env-pick-card{border:1px solid #E6E8EC;border-radius:8px;background:#fff;}
+  .spec-card:hover,.env-pick-card:hover{transform:none;border-color:#9CA3AF;}
+  .trait-opt:hover{border-color:#9CA3AF;}
+  .spec-card.selected,.trait-opt.on,.env-pick-card.on{border-color:#111;box-shadow:inset 0 0 0 1px #111;background:#F7F8FA;}
+  .spec-name{font-weight:700;letter-spacing:-0.01em;}
+  .spec-desc{font-size:12.5px;}
+  .type-badge{font-size:12px;border-radius:6px;}
+  .type-opt{font-size:13px;}
+  .type-opt.on{border-color:#111;}
+  .type-note{font-size:12.5px;}
+  /* 환경 카드 */
+  .card-face{border-radius:12px;}
+  .card-back{background:repeating-linear-gradient(45deg,#2A2A2A 0 2px,#111 2px 14px);border:2px solid #111;color:#fff;}
+  .card-back .mark{font-family:var(--mono);font-size:12.5px;letter-spacing:2px;}
+  .card-front{background:#fff;border:2px solid #111;}
+  .card-front .env-name{font-weight:700;letter-spacing:-0.01em;}
+  .card-front .env-desc{font-size:13.5px;}
+  .pressure-tag{font-family:var(--font);font-size:12.5px;background:#F7F8FA;color:#111;border:1px solid #E6E8EC;border-radius:8px;}
+  /* 요약 칩 · 형질 블록 */
+  .recap-chip{border:1px solid #E6E8EC;border-radius:8px;}
+  .recap-chip .label{font-family:var(--font);font-size:11.5px;letter-spacing:.5px;color:#6B7280;}
+  .recap-chip .value{font-weight:700;}
+  .recap-chip .sub{font-size:12.5px;}
+  .trait-block{border-top-color:#E6E8EC;}
+  .trait-block h3{font-weight:700;letter-spacing:-0.01em;}
+  .trait-block .cat-hint{font-size:13px;}
+  .trait-opt .lbl{font-size:13px;}
+  .field label{font-family:var(--font);font-size:13px;letter-spacing:0;color:#111;text-transform:none;font-weight:700;}
+  .field .hint{font-size:12.5px;}
+  textarea, input[type=text]{border:1px solid #E6E8EC;border-radius:8px;font-family:var(--font);font-size:14.5px;color:#111;}
+  textarea:focus, input[type=text]:focus{outline:2px solid #3182F6;outline-offset:1px;border-color:#3182F6;}
+  .char-count{font-family:var(--mono);font-size:12px;}
+  /* 점검 중 · 결과 */
+  .spinner{border-color:#E6E8EC;border-top-color:#111;}
+  .loading-wrap p{font-family:var(--font);font-size:14px;letter-spacing:0;color:#6B7280;}
+  .grade-note{font-size:13.5px;color:#6B7280;background:#F7F8FA;border:1px solid #E6E8EC;border-radius:8px;padding:9px 12px;margin:0 0 18px;line-height:1.5;}
+  .score-dial{background:conic-gradient(#3182F6 calc(var(--pct)*1%), #E6E8EC 0);}
+  .score-dial::after{background:#fff;}
+  .score-dial .num{font-weight:700;color:#111;position:relative;z-index:1;} /* ::after 원판 위에 숫자가 보이도록 */
+  .trait-block .cat-hint,.field .hint,.spec-desc,.card-front .env-desc,.env-pick-card .edesc{font-style:normal;}
+  .tier{font-weight:700;letter-spacing:-0.01em;color:#111;}
+  .feedback-txt{font-size:14.5px;color:#3F4652;}
+  .si-box{border-radius:8px;}
+  .si-box h4{font-family:var(--font);font-size:12.5px;letter-spacing:.3px;}
+  .si-box ul{font-size:13.5px;}
+  .creature-panel .frame{border:1px solid #E6E8EC;border-radius:12px;}
+  .img-missing{font-family:var(--font);font-size:12.5px;background:#F7F8FA;}
+  .creature-panel .cap{font-family:var(--font);font-size:11.5px;letter-spacing:1px;color:#6B7280;}
+  .creature-panel .cap-name{font-weight:700;}
+  .compare-arrow{color:#6B7280;}
+  .final-card{background:#F7F8FA;border:1px solid #E6E8EC;border-radius:12px;color:#111;}
+  .final-card .fc-eyebrow{font-family:var(--font);font-size:11.5px;letter-spacing:1px;color:#6B7280;}
+  .final-card .fc-name{font-weight:700;letter-spacing:-0.01em;}
+  .final-card .fc-origin{font-size:13px;color:#6B7280;}
+  .final-card .fc-summary{font-size:14px;color:#3F4652;}
+  .final-card .fc-summary b{color:#111;}
+  .err-note{font-size:13px;color:#E5484D;background:#FEF2F2;border:1px solid #F8CACA;border-radius:8px;}
+  .studentinfo-box{border:1px solid #E6E8EC;border-radius:12px;background:#F7F8FA;}
+  .studentinfo-box label{font-family:var(--font);font-size:13px;letter-spacing:0;color:#111;}
+  .studentinfo-row input{border:1px solid #E6E8EC;border-radius:8px;font-size:14.5px;font-family:var(--font);}
+  /* 도움말 */
+  .help-guide{border:1px solid #E6E8EC;border-radius:12px;}
+  .help-guide h3{font-weight:700;letter-spacing:-0.01em;color:#111;}
+  .help-guide h4{font-family:var(--font);font-size:12.5px;letter-spacing:.3px;color:#6B7280;}
+  .help-guide p, .help-guide li{font-size:14.5px;}
+  .help-guide .formula{background:#F7F8FA;color:#111;border:1px solid #E6E8EC;font-size:14px;}
+  .help-guide .formula b{color:#3182F6;}
+  .ex-box{font-size:13.5px;border-radius:8px;}
+  .ex-box .ex-tag{font-family:var(--font);font-size:12px;letter-spacing:0;}
+  details.help-more summary{font-size:14px;color:#3182F6;}
+  .modal-backdrop{background:rgba(17,17,17,.45);}
+  .modal-box{background:#fff;border:1px solid #E6E8EC;border-radius:12px;box-shadow:none;}
+  .help-cta{background:#F7F8FA;border:1px solid #E6E8EC;border-radius:12px;color:#111;font-family:var(--font);}
+  .help-cta:hover{transform:none;box-shadow:none;border-color:#111;}
+  .help-cta .hc-title{color:#111;font-weight:700;letter-spacing:-0.01em;}
+  .help-cta .hc-sub{font-size:13.5px;}
+  .help-cta .hc-arrow{background:#111;color:#fff;border-radius:8px;font-weight:600;}
+  .thumb-empty{background:#F7F8FA;}
+  footer{color:#6B7280;font-size:12.5px;font-family:var(--font);}
+  .stage-intro-card{border:1px solid #E6E8EC;border-radius:8px;}
+  .stage-intro-card .si-num{font-family:var(--font);font-size:12px;letter-spacing:.5px;color:#6B7280;}
+  .stage-intro-card .si-h{font-weight:700;letter-spacing:-0.01em;}
+  .stage-intro-card .si-b{font-size:13.5px;}
+  .upload-preview{border:1px dashed #D1D5DB;border-radius:8px;}
+  .upload-empty{font-family:var(--font);font-size:12.5px;}
+  .env-pick-card .ename{font-weight:700;font-size:15px;}
+  .env-pick-card .edesc{font-size:12.5px;}
+  .env-pick-card .custom-tag{font-family:var(--font);font-size:10.5px;background:#3182F6;color:#fff;}
+  .add-env-form{background:#F7F8FA;border:1px solid #E6E8EC;border-radius:12px;}
+  #printArea .pr-meta,#printArea .pr-img-missing,#printArea .pr-field b{font-size:11px;}
+  #printArea .pr-field b{letter-spacing:0;text-transform:none;}
+  #printArea h2{letter-spacing:0;text-transform:none;}
+  @media(max-width:600px){ .stage{padding:22px 16px 26px;} }
+  </style>
+</head>
+<body>
+<script>if(/embed/.test(location.hash))document.body.classList.add("vlab-embed");</script>
+<div class="app">
+  <div class="masthead">
+    <div class="brand">MONSTER DESIGNER · 몬스터 디자이너</div>
+    <div class="mast-right">
+      <div class="status" id="statusLine">START — 관측 준비</div>
+      <button class="help-btn" onclick="openHelp()" aria-label="도움말 열기">❓ 도움말</button>
+    </div>
+  </div>
+  <div class="rail" id="rail">
+    <div class="rail-seg active" data-seg="1"></div>
+    <div class="rail-seg" data-seg="2"></div>
+    <div class="rail-seg" data-seg="3"></div>
+    <div class="rail-seg" data-seg="4"></div>
+  </div>
+
+  <div class="stage">
+
+    <!-- SCREEN 0: START -->
+    <section id="screen-start">
+      <p class="eyebrow">Natural Selection Field Simulator</p>
+      <h1 class="title">몬스터 디자이너</h1>
+      <p class="lede">
+        생물이 새로운 환경에서 자연선택을 거쳐 어떻게 달라질지 직접 설계해 보세요. 이 게임은 두 단계로 진행됩니다.
+      </p>
+      <div class="stage-intro">
+        <div class="stage-intro-card">
+          <div class="si-num">1단계</div>
+          <div class="si-h">가이드 모드</div>
+          <div class="si-b">주어진 포켓몬과 무작위 환경 카드를 가지고, 정해진 선택지 중에서 외형·신체 구조·생리 특징을 고르고 그 이유를 서술합니다.</div>
+        </div>
+        <div class="stage-intro-card">
+          <div class="si-num">2단계</div>
+          <div class="si-h">자유 탐구 모드</div>
+          <div class="si-b">몬스터를 직접 정하고, 환경도 직접 고르거나 새로 추가하고, 변이와 그 이유를 자유롭게 서술합니다. 이미지 업로드는 원한다면 추가할 수 있는 선택 사항입니다.</div>
+        </div>
+      </div>
+
+      <button class="help-cta" type="button" onclick="openHelp()">
+        <span class="hc-icon">📖</span>
+        <span>
+          <span class="hc-title" style="display:block;">처음이라면 사용 방법을 먼저 확인해요!</span>
+          <span class="hc-sub" style="display:block;">이 웹앱이 무엇인지, 어떻게 진행하는지, 좋은 '이유'는 어떻게 쓰는지 알려드려요.</span>
+        </span>
+        <span class="hc-arrow">도움말 보기</span>
+      </button>
+      <p class="lede" style="font-size:13px;color:var(--ink-soft);">
+        ※ 실제 포켓몬 공식 일러스트 대신, 저작권 문제가 없는 원본 스케치와 여러분이 직접 올리는 이미지로 생물을 표현합니다.
+      </p>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="goToSpecies()">1단계부터 시작하기</button>
+        <button class="btn btn-ghost" onclick="goToS2Species()">2단계 바로 해보기</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 1: SPECIES SELECT -->
+    <section id="screen-species" class="hidden">
+      <p class="eyebrow">Step 1 — 관측 대상 선정</p>
+      <h1 class="title">기본 포켓몬을 선택하세요</h1>
+      <p class="lede">환경 변화를 겪게 될 개체군의 출발 형질입니다. 타입과 특징을 잘 살펴보세요.</p>
+      <div class="grid" id="speciesGrid"></div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goToStart()">이전</button>
+        <button class="btn btn-primary" id="toEnvBtn" disabled onclick="goToEnv()">다음: 환경 카드 뽑기</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 2: ENVIRONMENT DRAW -->
+    <section id="screen-env" class="hidden">
+      <p class="eyebrow">Step 2 — 환경 변화 관측</p>
+      <h1 class="title">환경 카드를 뽑아보세요</h1>
+      <p class="lede">이 개체군이 앞으로 마주할 환경 변화입니다. 이 환경은 여러분이 고를 수 없습니다 — 진짜 자연처럼요.</p>
+      <div class="draw-zone">
+        <div class="card-slot">
+          <div class="card-inner" id="cardInner">
+            <div class="card-face card-back"><div class="mark">TAP TO DRAW</div></div>
+            <div class="card-face card-front" id="cardFront"></div>
+          </div>
+        </div>
+        <button class="btn btn-gold" id="drawBtn" onclick="drawCard()">카드 뽑기</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goToSpecies()">이전</button>
+        <button class="btn btn-primary" id="toDesignBtn" disabled onclick="goToDesign()">다음: 몬스터 설계</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: DESIGN -->
+    <section id="screen-design" class="hidden">
+      <p class="eyebrow">Step 3 — 자연선택 논리 설계</p>
+      <h1 class="title">어떤 특징이 선택되었을까요?</h1>
+      <div class="recap" id="recap"></div>
+      <p class="lede" style="margin-bottom:18px;">
+        아래 세 영역에서 각각 하나씩 특징을 고르고, <b>그 특징을 가진 개체가 이 환경에서 왜 더 잘 살아남고 번식했을지</b> 이유를 서술하세요.
+        정답은 없습니다 — 여러분의 논리가 평가의 핵심입니다.<br>
+        <span style="font-size:13.5px;">💡 "살아남으려고 ~하게 변했다"가 아니라, "원래 그런 변이를 가진 개체가 더 많이 살아남아 자손을 남겼다"로 써 보세요.</span>
+      </p>
+
+      <div id="traitBlocks"></div>
+
+      <div class="field">
+        <label>새로운 타입 (최대 2개)</label>
+        <p class="hint">환경과 형질 변화에 어울리는 타입을 선택하세요.</p>
+        <div class="type-select" id="typeSelect"></div>
+        <div class="type-note" id="typeNote">0 / 2 선택됨</div>
+      </div>
+      <div class="field">
+        <label>몬스터 이름</label>
+        <input type="text" id="inName" placeholder="예: 알로라 꼬렛, 혹한모래두지 ...">
+      </div>
+
+      <div id="designErr" class="err-note hidden"></div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goToEnv()">이전</button>
+        <button class="btn btn-primary" onclick="submitDesign()">관측 기록 제출하기</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 4: LOADING -->
+    <section id="screen-loading" class="hidden">
+      <div class="loading-wrap">
+        <div class="spinner"></div>
+        <p>자연선택 논리를 자동으로 점검하는 중입니다...</p>
+      </div>
+    </section>
+
+    <!-- SCREEN 5: RESULT -->
+    <section id="screen-result" class="hidden">
+      <p class="eyebrow">Step 4 — 관측 결과</p>
+      <h1 class="title">자동 논리 점검 결과</h1>
+      <p class="grade-note">서술 길이와 핵심어로 매기는 참고용 점수예요. 최종 평가는 선생님이 합니다.</p>
+
+      <div class="creature-compare" id="creatureCompare"></div>
+
+      <div class="result-top">
+        <div class="score-dial" id="scoreDial" style="--pct:0;"><div class="num" id="scoreNum">0</div></div>
+        <div class="score-text">
+          <div class="tier" id="tierText"></div>
+          <div class="feedback-txt" id="feedbackText"></div>
+        </div>
+      </div>
+      <div class="strengths-improve">
+        <div class="si-box strength"><h4>잘한 점</h4><ul id="strengthsList"></ul></div>
+        <div class="si-box improve"><h4>더 보완하면 좋은 점</h4><ul id="improveList"></ul></div>
+      </div>
+
+      <div class="final-card" id="finalCard"></div>
+
+      <div class="studentinfo-box">
+        <label>👤 이름과 학번을 입력해주세요 (필수)</label>
+        <div class="studentinfo-row">
+          <input type="text" id="studentIdInput1" placeholder="학번 (예: 10203)" oninput="studentId=this.value">
+          <input type="text" id="studentNameInput1" placeholder="이름" oninput="studentName=this.value">
+        </div>
+        <div id="studentInfoErr1" class="err-note hidden" style="margin-top:10px;margin-bottom:0;">학번과 이름을 모두 입력해주세요.</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="printStage1Report()">📄 결과지 PDF로 저장</button>
+        <button class="btn btn-gold" onclick="goToS2Species()">2단계: 자유 탐구 모드로 이동 →</button>
+        <button class="btn btn-ghost" onclick="retrySameSpecies()">같은 포켓몬으로 새 환경 도전</button>
+        <button class="btn btn-ghost" onclick="goToStart()">처음부터 다시 시작</button>
+      </div>
+    </section>
+
+    <!-- ============ STAGE 2 ============ -->
+
+    <!-- S2 STEP 1: 나만의 몬스터 만들기 -->
+    <section id="screen-s2-species" class="hidden">
+      <p class="eyebrow">2단계 · Step 1 — 나만의 몬스터 만들기</p>
+      <h1 class="title">직접 관측 대상을 정의하세요</h1>
+      <p class="lede">이름과 특징을 적고, 원한다면 이 몬스터의 모습을 보여줄 이미지도 업로드하세요. (직접 그린 그림, 소장한 이미지 등 — 이미지는 선택 사항입니다)</p>
+
+      <div class="field">
+        <label>몬스터 이름</label>
+        <input type="text" id="s2Name" placeholder="예: 나만의 몬스터 이름...">
+      </div>
+      <div class="field">
+        <label>특징 설명</label>
+        <p class="hint">생김새, 서식지, 습성 등을 자유롭게 설명하세요. (10자 이상)</p>
+        <textarea id="s2Desc" placeholder="예: 등에 커다란 씨앗을 지고 다니며, 낮에는 햇볕이 잘 드는 초원에서 지낸다..."></textarea>
+      </div>
+      <div class="field">
+        <label>이미지 업로드 (선택)</label>
+        <div class="upload-row">
+          <div class="upload-preview" id="s2SpeciesPreview"><div class="upload-empty">이미지를 업로드하세요</div></div>
+          <label class="btn btn-ghost upload-btn">
+            파일 선택
+            <input type="file" accept="image/*" style="display:none" onchange="onS2SpeciesImage(this)">
+          </label>
+        </div>
+      </div>
+      <div class="field">
+        <label>타입 (최대 2개)</label>
+        <div class="type-select" id="s2TypeSelect"></div>
+        <div class="type-note" id="s2TypeNote">0 / 2 선택됨</div>
+      </div>
+
+      <div id="s2SpeciesErr" class="err-note hidden"></div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goToStart()">처음으로</button>
+        <button class="btn btn-primary" onclick="submitS2Species()">다음: 환경 선택</button>
+      </div>
+    </section>
+
+    <!-- S2 STEP 2: 환경 선택 -->
+    <section id="screen-s2-env" class="hidden">
+      <p class="eyebrow">2단계 · Step 2 — 환경 선택</p>
+      <h1 class="title">환경을 직접 선택하거나 추가하세요</h1>
+      <p class="lede">아래 카드 중 하나를 선택하거나, 원하는 환경이 없다면 직접 새로운 환경을 추가할 수 있습니다.</p>
+
+      <div class="env-pick-grid" id="s2EnvGrid"></div>
+
+      <div class="add-env-form hidden" id="s2AddEnvForm">
+        <div class="field">
+          <label>새 환경 이름</label>
+          <input type="text" id="s2NewEnvName" placeholder="예: 우주 정거장, 방사능 유출 지역...">
+        </div>
+        <div class="field">
+          <label>환경 설명</label>
+          <p class="hint">5자 이상으로 이 환경이 어떤 곳인지 설명하세요.</p>
+          <textarea id="s2NewEnvDesc" placeholder="예: 중력이 거의 없고 방사선 노출이 심한 우주 정거장 내부..."></textarea>
+        </div>
+        <div class="btn-row" style="margin-top:0;">
+          <button class="btn btn-primary" onclick="addCustomEnv()">이 환경 추가하고 선택하기</button>
+        </div>
+      </div>
+
+      <div id="s2EnvErr" class="err-note hidden"></div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goToS2Species()">이전</button>
+        <button class="btn btn-primary" onclick="submitS2Env()">다음: 변이와 결과 기록</button>
+      </div>
+    </section>
+
+    <!-- S2 STEP 3: 변이·이유 서술 + 최종 이미지 -->
+    <section id="screen-s2-observe" class="hidden">
+      <p class="eyebrow">2단계 · Step 3 — 변이와 결과 기록</p>
+      <h1 class="title">어떤 변화가 일어났나요?</h1>
+      <div class="recap" id="s2Recap"></div>
+
+      <div class="field">
+        <label>일어난 변이</label>
+        <p class="hint">원래 개체군 안에 어떤 변이를 가진 개체들이 있었을까요? 그중 어떤 형질이 이 환경에서 퍼지게 되었는지 서술하세요. (10자 이상)</p>
+        <textarea id="s2Variation" placeholder="예: 개체군 중 일부는 피부가 두껍고 표면에 은빛 비늘이 있는 변이를 가지고 태어났다..."></textarea>
+      </div>
+      <div class="field">
+        <label>자연선택된 이유</label>
+        <p class="hint">왜 그 변이를 가진 개체가 이 환경에서 더 잘 살아남고 번식할 수 있었을까요? (10자 이상)</p>
+        <textarea id="s2Reason" placeholder="예: 은빛 비늘이 방사선을 반사해 세포 손상을 줄여주었기 때문에 그 개체들이 더 오래 살아남아 자손을 많이 남겼고, 이 형질이 유전되며 세대가 지날수록 퍼졌다..."></textarea>
+      </div>
+      <div class="field">
+        <label>최종 모습 이미지 업로드 (선택)</label>
+        <p class="hint">변화가 끝난 뒤의 모습을 그리거나 준비한 이미지를 업로드하세요.</p>
+        <div class="upload-row">
+          <div class="upload-preview" id="s2FinalPreview"><div class="upload-empty">이미지를 업로드하세요</div></div>
+          <label class="btn btn-ghost upload-btn">
+            파일 선택
+            <input type="file" accept="image/*" style="display:none" onchange="onS2FinalImage(this)">
+          </label>
+        </div>
+      </div>
+      <div class="field">
+        <label>몬스터 이름</label>
+        <input type="text" id="s2FinalName" placeholder="예: 방사은린 이상해씨...">
+      </div>
+
+      <div id="s2ObserveErr" class="err-note hidden"></div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goToS2Env()">이전</button>
+        <button class="btn btn-primary" onclick="submitS2()">관측 기록 제출하기</button>
+      </div>
+    </section>
+
+    <!-- S2 RESULT -->
+    <section id="screen-s2-result" class="hidden">
+      <p class="eyebrow">2단계 · Step 4 — 관측 결과</p>
+      <h1 class="title">자동 논리 점검 결과</h1>
+      <p class="grade-note">서술 길이와 핵심어로 매기는 참고용 점수예요. 최종 평가는 선생님이 합니다.</p>
+
+      <div class="creature-compare" id="s2CreatureCompare"></div>
+
+      <div class="result-top">
+        <div class="score-dial" id="s2ScoreDial" style="--pct:0;"><div class="num" id="s2ScoreNum">0</div></div>
+        <div class="score-text">
+          <div class="tier" id="s2TierText"></div>
+          <div class="feedback-txt" id="s2FeedbackText"></div>
+        </div>
+      </div>
+      <div class="strengths-improve">
+        <div class="si-box strength"><h4>잘한 점</h4><ul id="s2StrengthsList"></ul></div>
+        <div class="si-box improve"><h4>더 보완하면 좋은 점</h4><ul id="s2ImproveList"></ul></div>
+      </div>
+
+      <div class="final-card" id="s2FinalCard"></div>
+
+      <div class="studentinfo-box">
+        <label>👤 이름과 학번을 입력해주세요 (필수)</label>
+        <div class="studentinfo-row">
+          <input type="text" id="studentIdInput2" placeholder="학번 (예: 10203)" oninput="studentId=this.value">
+          <input type="text" id="studentNameInput2" placeholder="이름" oninput="studentName=this.value">
+        </div>
+        <div id="studentInfoErr2" class="err-note hidden" style="margin-top:10px;margin-bottom:0;">학번과 이름을 모두 입력해주세요.</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="printStage2Report()">📄 결과지 PDF로 저장</button>
+        <button class="btn btn-gold" onclick="retryS2()">같은 몬스터로 새 환경 도전</button>
+        <button class="btn btn-ghost" onclick="goToSpecies()">1단계로 돌아가기</button>
+        <button class="btn btn-ghost" onclick="goToStart()">처음부터 다시 시작</button>
+      </div>
+    </section>
+
+  </div>
+  <footer>생명과학 · 생명의 연속성과 다양성 · 몬스터 디자이너</footer>
+</div>
+
+<div class="modal-backdrop hidden" id="helpModal" onclick="if(event.target===this)closeHelp()">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-label="도움말">
+    <button class="modal-close" onclick="closeHelp()" aria-label="닫기">✕</button>
+      <div class="help-guide" id="helpGuide">
+        <h3>📖 이 웹앱은 무엇인가요?</h3>
+        <p>
+          <b>몬스터 디자이너</b>는 생물이 <b>자연선택</b>을 거쳐 새로운 환경에 적응해 가는 과정을 직접 설계해 보는 활동입니다.
+          포켓몬의 '리전폼(지역 변이)'처럼, 같은 종이 다른 환경에서 살게 되면 오랜 세대에 걸쳐 어떤 모습으로 달라질지 상상하고,
+          <b>그 변화가 왜 일어났는지 과학적인 근거로 설명</b>하는 것이 목표입니다. 정답은 없고, 여러분의 <b>논리</b>가 평가됩니다.
+        </p>
+
+        <h4>진행 방법</h4>
+        <ol>
+          <li><b>관측 대상 고르기</b> — 1단계에서는 주어진 6마리 중 하나를, 2단계에서는 직접 만든 몬스터를 정합니다.</li>
+          <li><b>환경 정하기</b> — 1단계는 카드를 무작위로 뽑고, 2단계는 직접 고르거나 새 환경을 만듭니다.</li>
+          <li><b>변이와 이유 쓰기</b> — 어떤 특징을 가진 개체가 살아남았는지 고르고(또는 쓰고), 그 이유를 서술합니다.</li>
+          <li><b>점검 결과 보고 저장하기</b> — 자동 논리 점검 결과가 나오면, 학번·이름을 입력하고 <b>📄 결과지 PDF로 저장</b>을 누릅니다.</li>
+        </ol>
+
+        <h4>좋은 '이유'는 이렇게 씁니다</h4>
+        <div class="formula">
+          ① 원래 개체군 안에 <b>여러 변이</b>가 있었다 →
+          ② 이 환경에서는 그중 <b>특정 변이를 가진 개체가 더 잘 살아남아 자손을 많이 남겼다</b> (왜 유리한지 구체적으로!) →
+          ③ 그 형질이 <b>유전되어 여러 세대에 걸쳐</b> 개체군 전체에 퍼졌다
+        </div>
+        <div class="ex-row">
+          <div class="ex-box bad"><span class="ex-tag">✗ 아쉬운 예</span>추운 곳에서 살아야 해서 털이 두꺼워졌다.<br><small>→ 생물이 '필요해서' 스스로 변한 것처럼 썼어요.</small></div>
+          <div class="ex-box good"><span class="ex-tag">✓ 좋은 예</span>털이 두꺼운 개체는 체온을 덜 빼앗겨 혹한에서 더 오래 살아남고 자손을 많이 남겼다. 이 형질이 유전되며 세대가 지날수록 털이 두꺼운 개체의 비율이 늘었다.</div>
+        </div>
+
+        <details class="help-more">
+          <summary>더 알아두면 좋은 점 (오개념 · PDF 저장 · 주의사항)</summary>
+          <ul style="margin-top:8px;">
+            <li><b>흔한 오개념:</b> "살아남기 위해 ~하게 변했다", "환경에 맞추려고 노력해서 진화했다"는 표현은 자연선택이 아니라 <b>용불용설·목적론</b>적 설명입니다. 개체 하나가 일생 동안 변하는 것이 아니라, <b>개체군의 형질 비율이 세대를 거쳐 바뀌는 것</b>입니다.</li>
+            <li><b>타입 고르기:</b> 바뀐 환경과 형질에 어울리는 타입을 1~2개 고르세요. 왜 그 타입인지도 이유에 녹여 쓰면 더 좋아요.</li>
+            <li><b>PDF 저장:</b> 결과 화면에서 학번·이름을 입력하고 버튼을 누르면 인쇄 창이 뜹니다. 대상(프린터)을 <b>'PDF로 저장'</b>으로 바꾼 뒤 저장하세요.</li>
+            <li><b>주의:</b> 새로고침하거나 창을 닫으면 작성한 내용이 사라집니다. 결과지는 꼭 PDF로 저장하세요.</li>
+            <li><b>자동 논리 점검:</b> 점수는 서술 길이와 핵심어 포함 여부로 매기는 참고용이에요. 최종 평가는 선생님이 합니다.</li>
+          </ul>
+        </details>
+      </div>
+    <div class="btn-row" style="margin-top:16px;"><button class="btn btn-primary" onclick="closeHelp()">닫기</button></div>
+  </div>
+</div>
+
+<div id="printArea"></div>
+
+<script>
+/* ============================================================
+   DATA
+   ============================================================ */
+const TYPE_COLORS = {
+  "노말":"A8A878","불":"EE8130","물":"6390F0","풀":"7AC74C","전기":"D8B310",
+  "얼음":"70B8B4","격투":"C22E28","독":"A33EA1","땅":"C99A3E","비행":"8E77D6",
+  "에스퍼":"E0447A","벌레":"8E9B18","바위":"9C8A2E","고스트":"5F4A80",
+  "드래곤":"5A2FD1","악":"6B5648","강철":"9494AC","페어리":"C36C9E"
+};
+const ALL_TYPES = Object.keys(TYPE_COLORS);
+
+const SPECIES = [
+  {id:"bulba", name:"이상해씨", types:["풀","독"], plan:"quad", desc:"등에 씨앗을 지닌 작은 도마뱀형 포켓몬. 햇빛을 받아 광합성을 한다."},
+  {id:"squirtle", name:"꼬부기", types:["물"], plan:"shell", desc:"단단한 등껍질을 지닌 거북형 포켓몬. 입에서 물을 뿜는다."},
+  {id:"charmander", name:"파이리", types:["불"], plan:"quad", desc:"꼬리 끝에 불꽃이 타오르는 도마뱀형 포켓몬."},
+  {id:"pikachu", name:"피카츄", types:["전기"], plan:"round", desc:"볼주머니에 전기를 저장하는 설치류형 포켓몬."},
+  {id:"rattata", name:"꼬렛", types:["노말"], plan:"long", desc:"긴 몸과 날카로운 앞니를 가진 족제비형 포켓몬. 번식력이 강하다."},
+  {id:"sandshrew", name:"모래두지", types:["땅"], plan:"segmented", desc:"몸을 둥글게 말 수 있는 천산갑형 포켓몬. 사막 모래 속을 파고든다."}
+];
+
+const ENVIRONMENTS = [
+  {name:"극한 혹한지대", icon:"❄️", desc:"기온이 영하 40도까지 떨어지는 만년설 고원. 먹이는 드물고 체온을 지키기 어렵다.", pressure:"선택압 힌트: 체온 유지, 보호색, 지방/털 축적"},
+  {name:"전 지구적 사막화", icon:"🏜️", desc:"강수량이 급격히 줄고 대부분의 수원이 말라버린 척박한 땅.", pressure:"선택압 힌트: 수분 보존, 열 방출, 야행성 전환"},
+  {name:"심해 열수구 지대", icon:"🌊", desc:"빛이 거의 닿지 않는 깊은 바다. 수압이 매우 높다.", pressure:"선택압 힌트: 무광 환경 적응, 고압 저항, 발광 기관"},
+  {name:"활화산 지대", icon:"🌋", desc:"용암과 유독 화산가스가 뒤덮인 불안정한 지형.", pressure:"선택압 힌트: 내열성, 유독가스 해독, 단단한 표피"},
+  {name:"대도시 오염지대", icon:"🏭", desc:"미세먼지와 중금속으로 오염된 도심 하수구와 폐건물.", pressure:"선택압 힌트: 독소 해독, 은신, 인공구조물 활용"},
+  {name:"야행성 포식자의 등장", icon:"🌙", desc:"강력한 야행성 천적이 새롭게 이 지역에 유입되었다.", pressure:"선택압 힌트: 위장, 감각기관 발달, 활동시간 이동"},
+  {name:"고산 저산소 지대", icon:"⛰️", desc:"해발 5,000m 이상, 공기가 희박한 고산지대로 서식지 이동.", pressure:"선택압 힌트: 산소 운반 효율, 가벼운 체구, 강한 폐활량"},
+  {name:"염분 늪지대", icon:"🐊", desc:"밀물마다 염분 높은 바닷물이 서식지 전체를 뒤덮는 갯벌.", pressure:"선택압 힌트: 삼투압 조절, 양서 생활 적응"}
+];
+
+/* trait categories: 외형 / 신체 구조 / 생리적 적응 */
+const TRAIT_CATEGORIES = [
+  {
+    key:"appearance", title:"① 외형 (몸 색상·무늬)",
+    hint:"이 환경에서 눈에 띄지 않거나, 반대로 경고 신호를 보내려면 어떤 색과 무늬가 유리할까요?",
+    options:[
+      {id:"frost", emoji:"❄️", label:"흰색·은백색 위장", color:"#E7EEF2", pattern:"frost"},
+      {id:"camo", emoji:"🌑", label:"짙은 갈색·검정 위장", color:"#42352A", pattern:"camo"},
+      {id:"bioglow", emoji:"🌟", label:"형광빛 발광 무늬", color:"#2B2B3D", pattern:"bioglow"},
+      {id:"warning", emoji:"⚠️", label:"선명한 경고색 줄무늬", color:"#E8B62E", pattern:"warning"}
+    ]
+  },
+  {
+    key:"structure", title:"② 신체 구조 (부속 기관)",
+    hint:"이동, 방어, 체온 조절을 위해 어떤 신체 부위가 새로 발달했을까요?",
+    options:[
+      {id:"fur", emoji:"🧥", label:"두꺼운 털·지방층", mod:"fur"},
+      {id:"ears", emoji:"👂", label:"얇고 넓은 귀 (방열)", mod:"ears"},
+      {id:"webbed", emoji:"🦶", label:"물갈퀴·유선형 다리", mod:"webbed"},
+      {id:"claws", emoji:"🐾", label:"날카로운 발톱·굴착 다리", mod:"claws"}
+    ]
+  },
+  {
+    key:"physiology", title:"③ 생리적 적응 (피부·기관)",
+    hint:"몸 안팎의 기능 중 무엇이 바뀌어야 이 환경에서 살아남을 수 있었을까요?",
+    options:[
+      {id:"lungs", emoji:"🫁", label:"저산소 적응 (확장된 폐)", mod:"lungs"},
+      {id:"slime", emoji:"💧", label:"독소 해독 (끈적한 점막)", mod:"slime"},
+      {id:"plate", emoji:"🛡️", label:"체온 자동조절 피부", mod:"plate"},
+      {id:"glow", emoji:"✨", label:"무광 발광 기관", mod:"glow"}
+    ]
+  }
+];
+
+/* ============================================================
+   CREATURE SVG GENERATOR (original sketch-style art, no copyrighted assets)
+   ============================================================ */
+function shade(hex, amt){
+  const c = hex.replace('#','');
+  let r=parseInt(c.substring(0,2),16), g=parseInt(c.substring(2,4),16), b=parseInt(c.substring(4,6),16);
+  r=Math.min(255,Math.max(0,r+amt)); g=Math.min(255,Math.max(0,g+amt)); b=Math.min(255,Math.max(0,b+amt));
+  return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+
+function bodyByPlan(plan, color){
+  const stroke = '#1C2317';
+  const dark = shade(color, -45);
+  let shapes = '', head = {cx:100,cy:100,r:30}, torso = {cx:100,cy:115,r:50};
+  switch(plan){
+    case 'quad':
+      head = {cx:100,cy:72,r:30}; torso = {cx:100,cy:112,r:50};
+      shapes += `<path d="M40,150 Q15,128 20,92 Q30,120 48,140 Z" fill="${dark}" stroke="${stroke}" stroke-width="3"/>`;
+      shapes += `<ellipse cx="68" cy="160" rx="10" ry="16" fill="${dark}" stroke="${stroke}" stroke-width="2.5"/>`;
+      shapes += `<ellipse cx="132" cy="160" rx="10" ry="16" fill="${dark}" stroke="${stroke}" stroke-width="2.5"/>`;
+      shapes += `<ellipse cx="100" cy="118" rx="54" ry="38" fill="${color}" stroke="${stroke}" stroke-width="3"/>`;
+      shapes += `<circle cx="${head.cx}" cy="${head.cy}" r="${head.r}" fill="${color}" stroke="${stroke}" stroke-width="3"/>`;
+      break;
+    case 'shell':
+      head = {cx:100,cy:62,r:20}; torso = {cx:100,cy:108,r:55};
+      shapes += `<ellipse cx="70" cy="145" rx="9" ry="10" fill="${dark}" stroke="${stroke}" stroke-width="2.5"/>`;
+      shapes += `<ellipse cx="130" cy="145" rx="9" ry="10" fill="${dark}" stroke="${stroke}" stroke-width="2.5"/>`;
+      shapes += `<circle cx="${head.cx}" cy="${head.cy}" r="${head.r}" fill="${dark}" stroke="${stroke}" stroke-width="3"/>`;
+      shapes += `<path d="M38,120 Q38,62 100,58 Q162,62 162,120 Q162,152 100,154 Q38,152 38,120 Z" fill="${color}" stroke="${stroke}" stroke-width="3"/>`;
+      shapes += `<path d="M100,58 Q100,110 100,154 M55,75 Q100,95 145,75 M50,115 Q100,132 150,115" fill="none" stroke="${dark}" stroke-width="2"/>`;
+      break;
+    case 'round':
+      head = {cx:100,cy:100,r:54}; torso = {cx:100,cy:115,r:54};
+      shapes += `<path d="M148,128 Q170,138 163,118" fill="none" stroke="${stroke}" stroke-width="3"/>`;
+      shapes += `<ellipse cx="78" cy="164" rx="9" ry="8" fill="${dark}" stroke="${stroke}" stroke-width="2.5"/>`;
+      shapes += `<ellipse cx="122" cy="164" rx="9" ry="8" fill="${dark}" stroke="${stroke}" stroke-width="2.5"/>`;
+      shapes += `<ellipse cx="66" cy="66" rx="15" ry="20" fill="${color}" stroke="${stroke}" stroke-width="3"/>`;
+      shapes += `<ellipse cx="134" cy="66" rx="15" ry="20" fill="${color}" stroke="${stroke}" stroke-width="3"/>`;
+      shapes += `<circle cx="100" cy="115" r="54" fill="${color}" stroke="${stroke}" stroke-width="3"/>`;
+      break;
+    case 'long':
+      head = {cx:168,cy:112,r:20}; torso = {cx:108,cy:120,r:50};
+      shapes += `<path d="M42,122 Q12,108 8,78 Q18,102 44,116 Z" fill="${dark}" stroke="${stroke}" stroke-width="3"/>`;
+      shapes += `<ellipse cx="76" cy="146" rx="8" ry="12" fill="${dark}" stroke="${stroke}" stroke-width="2.5"/>`;
+      shapes += `<ellipse cx="146" cy="144" rx="8" ry="12" fill="${dark}" stroke="${stroke}" stroke-width="2.5"/>`;
+      shapes += `<ellipse cx="102" cy="122" rx="60" ry="26" fill="${color}" stroke="${stroke}" stroke-width="3"/>`;
+      shapes += `<path d="M170,100 L182,86 M182,102 L196,92" stroke="${stroke}" stroke-width="3" fill="none"/>`;
+      shapes += `<circle cx="${head.cx}" cy="${head.cy}" r="${head.r}" fill="${color}" stroke="${stroke}" stroke-width="3"/>`;
+      break;
+    case 'segmented':
+      head = {cx:42,cy:118,r:16}; torso = {cx:100,cy:116,r:56};
+      shapes += `<path d="M158,118 Q178,126 172,102" fill="none" stroke="${stroke}" stroke-width="3"/>`;
+      shapes += `<ellipse cx="66" cy="146" rx="8" ry="10" fill="${dark}" stroke="${stroke}" stroke-width="2.5"/>`;
+      shapes += `<ellipse cx="98" cy="150" rx="8" ry="10" fill="${dark}" stroke="${stroke}" stroke-width="2.5"/>`;
+      shapes += `<ellipse cx="130" cy="146" rx="8" ry="10" fill="${dark}" stroke="${stroke}" stroke-width="2.5"/>`;
+      shapes += `<ellipse cx="70" cy="120" rx="26" ry="22" fill="${color}" stroke="${stroke}" stroke-width="3"/>`;
+      shapes += `<ellipse cx="102" cy="110" rx="30" ry="26" fill="${color}" stroke="${stroke}" stroke-width="3"/>`;
+      shapes += `<ellipse cx="136" cy="118" rx="26" ry="22" fill="${color}" stroke="${stroke}" stroke-width="3"/>`;
+      shapes += `<circle cx="${head.cx}" cy="${head.cy}" r="${head.r}" fill="${color}" stroke="${stroke}" stroke-width="3"/>`;
+      break;
+  }
+  return {shapes, head, torso, dark};
+}
+
+function eyesSVG(head){
+  const off = Math.max(6, head.r*0.35);
+  const r1 = Math.max(3, head.r*0.16), r2 = Math.max(1.5, head.r*0.07);
+  const cy = head.cy - off*0.25;
+  return `
+    <circle cx="${head.cx-off}" cy="${cy}" r="${r1}" fill="#fff" stroke="#1C2317" stroke-width="1.5"/>
+    <circle cx="${head.cx-off}" cy="${cy}" r="${r2}" fill="#1C2317"/>
+    <circle cx="${head.cx+off}" cy="${cy}" r="${r1}" fill="#fff" stroke="#1C2317" stroke-width="1.5"/>
+    <circle cx="${head.cx+off}" cy="${cy}" r="${r2}" fill="#1C2317"/>
+  `;
+}
+
+function patternOverlay(key, torso, dark){
+  if(!key) return '';
+  switch(key){
+    case 'frost':
+      return `<ellipse cx="${torso.cx}" cy="${torso.cy}" rx="${torso.r*0.85}" ry="${torso.r*0.65}" fill="#ffffff" opacity="0.22"/>
+        <path d="M${torso.cx-16},${torso.cy-torso.r*0.55} l4,-9 l4,9 M${torso.cx+12},${torso.cy-torso.r*0.5} l4,-9 l4,9" stroke="#8FD3D8" stroke-width="2.5" fill="none"/>`;
+    case 'camo':
+      return `<ellipse cx="${torso.cx-18}" cy="${torso.cy-8}" rx="14" ry="9" fill="${dark}" opacity="0.55"/>
+        <ellipse cx="${torso.cx+16}" cy="${torso.cy+10}" rx="12" ry="8" fill="${dark}" opacity="0.55"/>`;
+    case 'bioglow':
+      return `<circle cx="${torso.cx-16}" cy="${torso.cy}" r="4" fill="#F0B72B"/>
+        <circle cx="${torso.cx+10}" cy="${torso.cy-14}" r="4" fill="#F0B72B"/>
+        <circle cx="${torso.cx+6}" cy="${torso.cy+16}" r="4" fill="#F0B72B"/>`;
+    case 'warning':
+      return `<path d="M${torso.cx-30},${torso.cy-18} l16,-10 M${torso.cx-12},${torso.cy+2} l18,-12 M${torso.cx+6},${torso.cy+20} l18,-12"
+        stroke="#1C2317" stroke-width="6" opacity="0.6" stroke-linecap="round"/>`;
+    default: return '';
+  }
+}
+
+function structureOverlay(key, torso, head){
+  if(!key) return '';
+  switch(key){
+    case 'fur':
+      let tufts='';
+      for(let i=-2;i<=2;i++){
+        const x = torso.cx + i*14, y = torso.cy - torso.r*0.75;
+        tufts += `<path d="M${x-5},${y+8} L${x},${y-6} L${x+5},${y+8} Z" fill="#fff" stroke="#1C2317" stroke-width="1.5"/>`;
+      }
+      return tufts;
+    case 'ears':
+      return `<ellipse cx="${head.cx-head.r*0.9}" cy="${head.cy-head.r*1.1}" rx="10" ry="16" fill="#fff" stroke="#1C2317" stroke-width="2.5" transform="rotate(-20 ${head.cx-head.r*0.9} ${head.cy-head.r*1.1})"/>
+        <ellipse cx="${head.cx+head.r*0.9}" cy="${head.cy-head.r*1.1}" rx="10" ry="16" fill="#fff" stroke="#1C2317" stroke-width="2.5" transform="rotate(20 ${head.cx+head.r*0.9} ${head.cy-head.r*1.1})"/>`;
+    case 'webbed':
+      return `<path d="M${torso.cx-40},${torso.cy+torso.r*0.75} q-6,10 4,14 q4,-8 10,-4 q-2,-10 -14,-10 Z" fill="#fff" stroke="#1C2317" stroke-width="2"/>
+        <path d="M${torso.cx+40},${torso.cy+torso.r*0.75} q6,10 -4,14 q-4,-8 -10,-4 q2,-10 14,-10 Z" fill="#fff" stroke="#1C2317" stroke-width="2"/>`;
+    case 'claws':
+      return `<path d="M${torso.cx-48},${torso.cy+torso.r*0.9} l-6,8 M${torso.cx-42},${torso.cy+torso.r*0.95} l-4,9 M${torso.cx+48},${torso.cy+torso.r*0.9} l6,8 M${torso.cx+42},${torso.cy+torso.r*0.95} l4,9"
+        stroke="#1C2317" stroke-width="3" stroke-linecap="round"/>`;
+    default: return '';
+  }
+}
+
+function physiologyOverlay(key, torso){
+  if(!key) return '';
+  switch(key){
+    case 'lungs':
+      return `<path d="M${torso.cx-24},${torso.cy-6} q10,14 0,26 M${torso.cx+24},${torso.cy-6} q-10,14 0,26" fill="none" stroke="#1C2317" stroke-width="1.5" opacity="0.5"/>`;
+    case 'slime':
+      return `<ellipse cx="${torso.cx-10}" cy="${torso.cy-torso.r*0.4}" rx="${torso.r*0.5}" ry="${torso.r*0.28}" fill="#ffffff" opacity="0.35"/>`;
+    case 'plate':
+      let lines='';
+      for(let i=-1;i<=1;i++){
+        const y = torso.cy + i*12;
+        lines += `<path d="M${torso.cx-torso.r*0.75},${y} L${torso.cx+torso.r*0.75},${y}" stroke="#1C2317" stroke-width="1.5" opacity="0.4"/>`;
+      }
+      return lines;
+    case 'glow':
+      return `<circle cx="${torso.cx-14}" cy="${torso.cy+6}" r="3.5" fill="#8FD3D8"/>
+        <circle cx="${torso.cx+18}" cy="${torso.cy-4}" r="3.5" fill="#8FD3D8"/>
+        <circle cx="${torso.cx}" cy="${torso.cy+18}" r="3.5" fill="#8FD3D8"/>`;
+    default: return '';
+  }
+}
+
+function creatureSVG({plan, color, pattern, structure, physiology}){
+  const {shapes, head, torso, dark} = bodyByPlan(plan, color);
+  const p = patternOverlay(pattern, torso, dark);
+  const s = structureOverlay(structure, torso, head);
+  const ph = physiologyOverlay(physiology, torso);
+  const eyes = eyesSVG(head);
+  return `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">${shapes}${p}${s}${ph}${eyes}</svg>`;
+}
+
+function baseCreatureSVG(species){
+  return creatureSVG({plan:species.plan, color:'#'+TYPE_COLORS[species.types[0]]});
+}
+function evolvedCreatureSVG(species, chosen){
+  const appearance = TRAIT_CATEGORIES[0].options.find(o=>o.id===chosen.appearance.optionId);
+  const structure = TRAIT_CATEGORIES[1].options.find(o=>o.id===chosen.structure.optionId);
+  const physiology = TRAIT_CATEGORIES[2].options.find(o=>o.id===chosen.physiology.optionId);
+  return creatureSVG({
+    plan: species.plan,
+    color: appearance.color,
+    pattern: appearance.pattern,
+    structure: structure.mod,
+    physiology: physiology.mod
+  });
+}
+
+/* ============================================================
+   STATE & NAVIGATION
+   ============================================================ */
+let state = {};
+let studentId = '';
+let studentName = '';
+let usedEnvIndices = [];
+
+function resetState(){
+  state = {
+    species:null, env:null,
+    traits:{appearance:{optionId:null,reasoning:''}, structure:{optionId:null,reasoning:''}, physiology:{optionId:null,reasoning:''}},
+    selectedTypes:[]
+  };
+}
+resetState();
+
+function showScreen(id){
+  document.querySelectorAll('.stage > section').forEach(s=>s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function setRail(step){
+  document.querySelectorAll('.rail-seg').forEach(seg=>{
+    const n = parseInt(seg.dataset.seg);
+    seg.classList.remove('done','active');
+    if(n < step) seg.classList.add('done'); else if(n === step) seg.classList.add('active');
+  });
+}
+function setStatus(t){ document.getElementById('statusLine').textContent = t; }
+
+function goToStart(){
+  resetState(); usedEnvIndices = [];
+  if(typeof resetS2 === 'function') resetS2();
+  const nameEl = document.getElementById('inName'); if(nameEl) nameEl.value = '';
+  document.getElementById('toEnvBtn').disabled = true;
+  showScreen('screen-start'); setRail(1); setStatus('START — 관측 준비');
+}
+function goToSpecies(){
+  renderSpeciesGrid();
+  showScreen('screen-species'); setRail(1); setStatus('1단계 · STEP 1 / 4 — 관측 대상 선정');
+}
+function goToEnv(){
+  document.getElementById('toDesignBtn').disabled = !state.env;
+  resetCardVisual();
+  showScreen('screen-env'); setRail(2); setStatus('1단계 · STEP 2 / 4 — 환경 변화 관측');
+}
+function goToDesign(){
+  renderRecap();
+  renderTraitBlocks();
+  renderTypeSelect();
+  showScreen('screen-design'); setRail(3); setStatus('1단계 · STEP 3 / 4 — 자연선택 논리 설계');
+}
+function retrySameSpecies(){
+  state.env = null;
+  state.traits = {appearance:{optionId:null,reasoning:''}, structure:{optionId:null,reasoning:''}, physiology:{optionId:null,reasoning:''}};
+  state.selectedTypes = [];
+  document.getElementById('inName').value = '';
+  goToEnv();
+}
+
+/* ---------------- species screen ---------------- */
+function renderSpeciesGrid(){
+  const grid = document.getElementById('speciesGrid');
+  grid.innerHTML = '';
+  SPECIES.forEach(sp=>{
+    const card = document.createElement('div');
+    card.className = 'spec-card' + (state.species && state.species.id===sp.id ? ' selected':'');
+    card.innerHTML = `
+      <div class="creature-thumb">${baseCreatureSVG(sp)}</div>
+      <div class="spec-name">${sp.name}</div>
+      <div class="spec-desc">${sp.desc}</div>
+      <div class="badge-row">${sp.types.map(t=>`<span class="type-badge" style="background:#${TYPE_COLORS[t]}">${t}</span>`).join('')}</div>
+    `;
+    card.onclick = ()=>{
+      state.species = sp;
+      document.getElementById('toEnvBtn').disabled = false;
+      renderSpeciesGrid();
+    };
+    grid.appendChild(card);
+  });
+}
+
+/* ---------------- environment draw screen ---------------- */
+function resetCardVisual(){
+  document.getElementById('cardInner').classList.remove('flipped');
+  document.getElementById('drawBtn').disabled = false;
+  document.getElementById('drawBtn').textContent = state.env ? '다시 뽑기' : '카드 뽑기';
+}
+function drawCard(){
+  if(usedEnvIndices.length >= ENVIRONMENTS.length) usedEnvIndices = [];
+  let idx;
+  do{ idx = Math.floor(Math.random()*ENVIRONMENTS.length); }while(usedEnvIndices.includes(idx) && usedEnvIndices.length < ENVIRONMENTS.length);
+  usedEnvIndices.push(idx);
+  const env = ENVIRONMENTS[idx];
+  state.env = env;
+  const front = document.getElementById('cardFront');
+  front.innerHTML = `
+    <div class="icon">${env.icon}</div>
+    <div class="env-name">${env.name}</div>
+    <div class="env-desc">${env.desc}</div>
+    <div class="pressure-tag">${env.pressure}</div>
+  `;
+  document.getElementById('cardInner').classList.remove('flipped');
+  void document.getElementById('cardInner').offsetWidth;
+  document.getElementById('cardInner').classList.add('flipped');
+  document.getElementById('toDesignBtn').disabled = false;
+  document.getElementById('drawBtn').textContent = '다시 뽑기';
+}
+
+/* ---------------- design screen ---------------- */
+function renderRecap(){
+  const recap = document.getElementById('recap');
+  const sp = state.species, env = state.env;
+  recap.innerHTML = `
+    <div class="recap-chip">
+      <div class="creature-thumb">${baseCreatureSVG(sp)}</div>
+      <div>
+        <div class="label">관측 대상</div>
+        <div class="value">${sp.name}</div>
+        <div class="sub">${sp.types.join(' · ')} 타입</div>
+      </div>
+    </div>
+    <div class="recap-chip">
+      <div style="font-size:36px;">${env.icon}</div>
+      <div>
+        <div class="label">환경 변화</div>
+        <div class="value">${env.name}</div>
+        <div class="sub">${env.desc}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderTraitBlocks(){
+  const wrap = document.getElementById('traitBlocks');
+  wrap.innerHTML = '';
+  TRAIT_CATEGORIES.forEach(cat=>{
+    const block = document.createElement('div');
+    block.className = 'trait-block';
+    const optsHtml = cat.options.map(o=>`
+      <div class="trait-opt ${state.traits[cat.key].optionId===o.id?'on':''}" data-cat="${cat.key}" data-opt="${o.id}">
+        <span class="emo">${o.emoji}</span>
+        <span class="lbl">${o.label}</span>
+      </div>
+    `).join('');
+    block.innerHTML = `
+      <h3>${cat.title}</h3>
+      <p class="cat-hint">${cat.hint}</p>
+      <div class="trait-options">${optsHtml}</div>
+      <div class="field" style="margin-bottom:0;">
+        <label>이 특징을 고른 이유 (선택이지만 점수의 핵심!)</label>
+        <p class="hint">환경의 선택압과 연결지어, 왜 이 특징을 가진 개체가 더 잘 살아남고 번식했을지 서술하세요. (작성하지 않아도 다음 단계로 진행할 수 있어요)</p>
+        <textarea data-reason="${cat.key}" placeholder="예: 옅은 색 덕분에 눈밭에서 천적의 눈에 잘 띄지 않아 포식을 피할 수 있었기 때문이다...">${state.traits[cat.key].reasoning}</textarea>
+      </div>
+    `;
+    wrap.appendChild(block);
+  });
+
+  wrap.querySelectorAll('.trait-opt').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const cat = el.dataset.cat, opt = el.dataset.opt;
+      state.traits[cat].optionId = opt;
+      wrap.querySelectorAll(`.trait-opt[data-cat="${cat}"]`).forEach(x=>x.classList.remove('on'));
+      el.classList.add('on');
+    });
+  });
+  wrap.querySelectorAll('textarea[data-reason]').forEach(ta=>{
+    ta.addEventListener('input', ()=>{ state.traits[ta.dataset.reason].reasoning = ta.value; });
+  });
+}
+
+function renderTypeSelect(){
+  const wrap = document.getElementById('typeSelect');
+  wrap.innerHTML = '';
+  ALL_TYPES.forEach(t=>{
+    const el = document.createElement('div');
+    el.className = 'type-opt' + (state.selectedTypes.includes(t) ? ' on':'');
+    el.style.background = '#'+TYPE_COLORS[t];
+    el.textContent = t;
+    el.onclick = ()=>{
+      if(state.selectedTypes.includes(t)){
+        state.selectedTypes = state.selectedTypes.filter(x=>x!==t);
+      } else {
+        if(state.selectedTypes.length>=2) return;
+        state.selectedTypes.push(t);
+      }
+      renderTypeSelect();
+    };
+    wrap.appendChild(el);
+  });
+  document.getElementById('typeNote').textContent = `${state.selectedTypes.length} / 2 선택됨`;
+}
+
+/* ---------------- submit & scoring ---------------- */
+async function submitDesign(){
+  const name = document.getElementById('inName').value.trim();
+  const errBox = document.getElementById('designErr');
+  const cats = TRAIT_CATEGORIES.map(c=>c.key);
+  const missing = cats.filter(k => !state.traits[k].optionId);
+
+  if(missing.length > 0 || state.selectedTypes.length===0 || !name){
+    errBox.textContent = '세 영역 모두 특징을 선택해 주세요. 타입도 1개 이상 선택하고, 몬스터 이름도 지어주세요. (이유 서술은 선택 사항입니다)';
+    errBox.classList.remove('hidden');
+    return;
+  }
+  errBox.classList.add('hidden');
+  const emptyReasons = TRAIT_CATEGORIES.filter(c=>!state.traits[c.key].reasoning.trim()).map(c=>c.title.replace(/^[①②③]\s*/,''));
+  if(emptyReasons.length > 0){
+    const ok = confirm(`아직 이유를 쓰지 않은 영역이 있어요:\n· ${emptyReasons.join('\n· ')}\n\n이유 서술이 점수의 핵심이라, 비워 두면 점수가 낮게 나올 수 있어요.\n그래도 제출할까요?`);
+    if(!ok) return;
+  }
+  state.name = name;
+
+  showScreen('screen-loading'); setStatus('논리 점검 중...');
+  /* 외부 서버 없이 바로 자동 점검 (잠깐 점검 화면을 보여 준 뒤 결과) */
+  await new Promise(r=>setTimeout(r, 600));
+  renderResult(fallbackEvaluation());
+}
+
+function fallbackEvaluation(){
+  let score = 35;
+  const pressureKeywords = state.env.pressure.replace('선택압 힌트: ','').split(',').map(s=>s.trim());
+  TRAIT_CATEGORIES.forEach(cat=>{
+    const reason = state.traits[cat.key].reasoning;
+    if(reason.length >= 25) score += 10;
+    else if(reason.length >= 12) score += 5;
+    pressureKeywords.forEach(k=>{
+      const key = k.split('/')[0].slice(0,2);
+      if(reason.includes(key)) score += 3;
+    });
+  });
+  score = Math.max(30, Math.min(95, Math.round(score)));
+  return {
+    score,
+    tier: score>=75 ? "탄탄한 인과 설계" : score>=55 ? "괜찮은 시도" : "논리를 더 연결해보세요",
+    feedback: "환경의 선택압과 학생이 서술한 이유 사이의 연결을 서술 길이·핵심어 포함 여부로 자동 점검한 참고용 점수입니다. 각 특징이 왜 '이 환경'에서만 특히 유리했는지 더 구체적인 인과관계로 설명해보면 좋겠습니다.",
+    strengths: [TRAIT_CATEGORIES.every(c=>state.traits[c.key].reasoning.trim()) ? "세 영역 모두 특징과 이유를 작성함" : "세 영역의 특징을 모두 선택함"],
+    improvements: ["선택한 특징이 선택압 힌트와 어떻게 연결되는지 더 구체적으로 서술해보세요."]
+  };
+}
+
+/* ---------------- result rendering ---------------- */
+function renderResult(ev){
+  state.lastEval = ev;
+  const score = Math.max(0, Math.min(100, Math.round(ev.score)));
+  document.getElementById('scoreDial').style.setProperty('--pct', score);
+  document.getElementById('scoreNum').textContent = score;
+  document.getElementById('tierText').textContent = ev.tier || '';
+  document.getElementById('feedbackText').textContent = ev.feedback || '';
+
+  const strengths = Array.isArray(ev.strengths) ? ev.strengths : [];
+  const improvements = Array.isArray(ev.improvements) ? ev.improvements : [];
+  document.getElementById('strengthsList').innerHTML = strengths.map(s=>`<li>${escapeHTML(s)}</li>`).join('') || '<li>-</li>';
+  document.getElementById('improveList').innerHTML = improvements.map(s=>`<li>${escapeHTML(s)}</li>`).join('') || '<li>-</li>';
+
+  document.getElementById('creatureCompare').innerHTML = `
+    <div class="creature-panel">
+      <div class="frame">${baseCreatureSVG(state.species)}</div>
+      <div class="cap">Before</div>
+      <div class="cap-name">${state.species.name}</div>
+    </div>
+    <div class="compare-arrow">→</div>
+    <div class="creature-panel">
+      <div class="frame">${evolvedCreatureSVG(state.species, state.traits)}</div>
+      <div class="cap">After</div>
+      <div class="cap-name">${escapeHTML(state.name)}</div>
+    </div>
+  `;
+
+  const badges = state.selectedTypes.map(t=>`<span class="type-badge" style="background:#${TYPE_COLORS[t]}">${t}</span>`).join('');
+  const catSummary = TRAIT_CATEGORIES.map(cat=>{
+    const chosen = cat.options.find(o=>o.id===state.traits[cat.key].optionId);
+    const r = state.traits[cat.key].reasoning.trim();
+    return `<div><b>${cat.title.replace(/^[①②③]\s*/,'')} — ${chosen.label}:</b> ${r ? escapeHTML(r) : '<span style="opacity:.6">(이유 미작성)</span>'}</div>`;
+  }).join('');
+  document.getElementById('finalCard').innerHTML = `
+    <div class="fc-eyebrow">Observed Monster</div>
+    <div class="fc-name">${escapeHTML(state.name)}</div>
+    <div class="fc-origin">기원: ${state.species.name} (${state.species.types.join('/')}) → ${state.env.name}</div>
+    <div class="fc-badges">${badges}</div>
+    <div class="fc-summary">${catSummary}</div>
+  `;
+
+  document.getElementById('studentIdInput1').value = studentId;
+  document.getElementById('studentNameInput1').value = studentName;
+  document.getElementById('studentInfoErr1').classList.add('hidden');
+
+  showScreen('screen-result'); setRail(4); setStatus('1단계 · STEP 4 / 4 — 관측 결과');
+}
+
+/* ============================================================
+   STAGE 2 — 자유 탐구 모드
+   ============================================================ */
+let s2 = {};
+function resetS2(){
+  s2 = {
+    name:'', desc:'', image:null, types:[],
+    env:null, customEnvs:[],
+    variation:'', reason:'', finalImage:null, finalName:''
+  };
+}
+resetS2();
+
+function readImageFile(inputEl, onLoaded){
+  const file = inputEl.files && inputEl.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){
+    alert('이미지 파일만 업로드할 수 있습니다.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    // 큰 사진은 최대 600px로 줄여 화면·PDF가 느려지지 않게 함
+    const img = new Image();
+    img.onload = ()=>{
+      const MAX = 600;
+      const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+      if(scale === 1){ onLoaded(e.target.result); return; }
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width*scale); c.height = Math.round(img.height*scale);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      onLoaded(c.toDataURL('image/jpeg', 0.88));
+    };
+    img.onerror = ()=>onLoaded(e.target.result);
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  inputEl.value = '';
+}
+
+/* ---------- Step 1: 나만의 몬스터 만들기 ---------- */
+function goToS2Species(){
+  document.getElementById('s2Name').value = s2.name;
+  document.getElementById('s2Desc').value = s2.desc;
+  renderS2ImagePreview('s2SpeciesPreview', s2.image);
+  renderS2TypeSelect();
+  document.getElementById('s2SpeciesErr').classList.add('hidden');
+  showScreen('screen-s2-species'); setRail(1); setStatus('2단계 · STEP 1 / 4 — 나만의 몬스터 만들기');
+}
+function renderS2ImagePreview(elId, dataUrl){
+  const el = document.getElementById(elId);
+  el.innerHTML = dataUrl
+    ? `<img src="${dataUrl}" alt="업로드한 이미지">`
+    : `<div class="upload-empty">이미지를 업로드하세요</div>`;
+}
+function onS2SpeciesImage(input){
+  readImageFile(input, (dataUrl)=>{
+    s2.image = dataUrl;
+    renderS2ImagePreview('s2SpeciesPreview', dataUrl);
+  });
+}
+function renderS2TypeSelect(){
+  const wrap = document.getElementById('s2TypeSelect');
+  wrap.innerHTML = '';
+  ALL_TYPES.forEach(t=>{
+    const el = document.createElement('div');
+    el.className = 'type-opt' + (s2.types.includes(t) ? ' on':'');
+    el.style.background = '#'+TYPE_COLORS[t];
+    el.textContent = t;
+    el.onclick = ()=>{
+      if(s2.types.includes(t)) s2.types = s2.types.filter(x=>x!==t);
+      else { if(s2.types.length>=2) return; s2.types.push(t); }
+      renderS2TypeSelect();
+    };
+    wrap.appendChild(el);
+  });
+  document.getElementById('s2TypeNote').textContent = `${s2.types.length} / 2 선택됨`;
+}
+function submitS2Species(){
+  s2.name = document.getElementById('s2Name').value.trim();
+  s2.desc = document.getElementById('s2Desc').value.trim();
+  const err = document.getElementById('s2SpeciesErr');
+  if(!s2.name || s2.desc.length < 10 || s2.types.length===0){
+    err.textContent = '이름, 10자 이상의 특징 설명, 타입(1개 이상)을 입력해 주세요. (이미지 업로드는 선택 사항입니다)';
+    err.classList.remove('hidden');
+    return;
+  }
+  err.classList.add('hidden');
+  goToS2Env();
+}
+
+/* ---------- Step 2: 환경 선택 (+커스텀 추가) ---------- */
+function goToS2Env(){
+  renderS2EnvGrid();
+  document.getElementById('s2EnvErr').classList.add('hidden');
+  document.getElementById('s2AddEnvForm').classList.add('hidden');
+  showScreen('screen-s2-env'); setRail(2); setStatus('2단계 · STEP 2 / 4 — 환경 선택');
+}
+function renderS2EnvGrid(){
+  const grid = document.getElementById('s2EnvGrid');
+  grid.innerHTML = '';
+  const all = ENVIRONMENTS.map(e=>({...e, custom:false})).concat(s2.customEnvs.map(e=>({...e, custom:true})));
+  all.forEach((env, i)=>{
+    const card = document.createElement('div');
+    const isOn = s2.env && s2.env.name === env.name;
+    card.className = 'env-pick-card' + (isOn ? ' on' : '');
+    card.innerHTML = `
+      <div class="icon">${env.icon}</div>
+      <div class="ename">${escapeHTML(env.name)}${env.custom ? ' <span class="custom-tag">직접 추가</span>' : ''}</div>
+      <div class="edesc">${escapeHTML(env.desc)}</div>
+    `;
+    card.onclick = ()=>{ s2.env = env; renderS2EnvGrid(); };
+    grid.appendChild(card);
+  });
+  const addCard = document.createElement('div');
+  addCard.className = 'env-pick-card add-card';
+  addCard.innerHTML = `<div class="icon">➕</div><div class="ename">환경 직접 추가하기</div>`;
+  addCard.onclick = ()=>{ document.getElementById('s2AddEnvForm').classList.toggle('hidden'); };
+  grid.appendChild(addCard);
+}
+function addCustomEnv(){
+  const name = document.getElementById('s2NewEnvName').value.trim();
+  const desc = document.getElementById('s2NewEnvDesc').value.trim();
+  if(!name || desc.length < 5){
+    alert('환경 이름과 5자 이상의 설명을 입력해 주세요.');
+    return;
+  }
+  const env = {name, desc, icon:'✏️', pressure:'학생이 직접 설정한 환경입니다.'};
+  s2.customEnvs.push(env);
+  s2.env = env;
+  document.getElementById('s2NewEnvName').value = '';
+  document.getElementById('s2NewEnvDesc').value = '';
+  document.getElementById('s2AddEnvForm').classList.add('hidden');
+  renderS2EnvGrid();
+}
+function submitS2Env(){
+  const err = document.getElementById('s2EnvErr');
+  if(!s2.env){
+    err.textContent = '환경 카드를 하나 선택하거나 새로 추가해 주세요.';
+    err.classList.remove('hidden');
+    return;
+  }
+  err.classList.add('hidden');
+  goToS2Observe();
+}
+
+/* ---------- Step 3: 변이·이유 서술 + 최종 이미지 업로드 ---------- */
+function goToS2Observe(){
+  document.getElementById('s2Recap').innerHTML = `
+    <div class="recap-chip">
+      <div class="creature-thumb" style="border-radius:8px;overflow:hidden;">${s2.image?`<img src="${s2.image}" style="width:100%;height:100%;object-fit:cover;">`:'<div class="thumb-empty">🐾</div>'}</div>
+      <div><div class="label">나의 몬스터</div><div class="value">${escapeHTML(s2.name)}</div><div class="sub">${s2.types.join(' · ')} 타입</div></div>
+    </div>
+    <div class="recap-chip">
+      <div style="font-size:36px;">${s2.env.icon}</div>
+      <div><div class="label">환경 변화</div><div class="value">${escapeHTML(s2.env.name)}</div><div class="sub">${escapeHTML(s2.env.desc)}</div></div>
+    </div>
+  `;
+  document.getElementById('s2Variation').value = s2.variation;
+  document.getElementById('s2Reason').value = s2.reason;
+  document.getElementById('s2FinalName').value = s2.finalName;
+  renderS2ImagePreview('s2FinalPreview', s2.finalImage);
+  document.getElementById('s2ObserveErr').classList.add('hidden');
+  showScreen('screen-s2-observe'); setRail(3); setStatus('2단계 · STEP 3 / 4 — 변이와 결과 기록');
+}
+function onS2FinalImage(input){
+  readImageFile(input, (dataUrl)=>{
+    s2.finalImage = dataUrl;
+    renderS2ImagePreview('s2FinalPreview', dataUrl);
+  });
+}
+async function submitS2(){
+  s2.variation = document.getElementById('s2Variation').value.trim();
+  s2.reason = document.getElementById('s2Reason').value.trim();
+  s2.finalName = document.getElementById('s2FinalName').value.trim();
+  const err = document.getElementById('s2ObserveErr');
+  if(s2.variation.length < 10 || s2.reason.length < 10 || !s2.finalName){
+    err.textContent = '변이 서술, 이유 서술(각 10자 이상), 몬스터 이름을 입력해 주세요. (최종 모습 이미지 업로드는 선택 사항입니다)';
+    err.classList.remove('hidden');
+    return;
+  }
+  err.classList.add('hidden');
+
+  showScreen('screen-loading'); setStatus('2단계 논리 점검 중...');
+  await new Promise(r=>setTimeout(r, 600));
+  renderS2Result(fallbackEvaluationStage2());
+}
+
+function fallbackEvaluationStage2(){
+  let score = 35;
+  if(s2.variation.length >= 30) score += 15; else if(s2.variation.length >= 15) score += 8;
+  if(s2.reason.length >= 30) score += 15; else if(s2.reason.length >= 15) score += 8;
+  if(s2.desc.length >= 20) score += 5;
+  score = Math.max(30, Math.min(95, Math.round(score)));
+  return {
+    score,
+    tier: score>=75 ? "탄탄한 인과 설계" : score>=55 ? "괜찮은 시도" : "논리를 더 연결해보세요",
+    feedback: "서술 길이를 기준으로 자동 점검한 참고용 점수입니다. 변이가 왜 이 환경에서만 특히 유리했는지 원인과 결과를 더 구체적으로 연결해서 서술해보면 좋겠습니다.",
+    strengths: ["변이와 이유를 모두 서술함"],
+    improvements: ["환경의 특징과 변이 사이의 인과관계를 더 구체적으로 설명해보세요."]
+  };
+}
+
+function renderS2Result(ev){
+  s2.lastEval = ev;
+  const score = Math.max(0, Math.min(100, Math.round(ev.score)));
+  document.getElementById('s2ScoreDial').style.setProperty('--pct', score);
+  document.getElementById('s2ScoreNum').textContent = score;
+  document.getElementById('s2TierText').textContent = ev.tier || '';
+  document.getElementById('s2FeedbackText').textContent = ev.feedback || '';
+
+  const strengths = Array.isArray(ev.strengths) ? ev.strengths : [];
+  const improvements = Array.isArray(ev.improvements) ? ev.improvements : [];
+  document.getElementById('s2StrengthsList').innerHTML = strengths.map(s=>`<li>${escapeHTML(s)}</li>`).join('') || '<li>-</li>';
+  document.getElementById('s2ImproveList').innerHTML = improvements.map(s=>`<li>${escapeHTML(s)}</li>`).join('') || '<li>-</li>';
+
+  document.getElementById('s2CreatureCompare').innerHTML = `
+    <div class="creature-panel">
+      <div class="frame">${s2.image ? `<img src="${s2.image}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;">` : `<div class="img-missing">이미지 없음</div>`}</div>
+      <div class="cap">Before</div>
+      <div class="cap-name">${escapeHTML(s2.name)}</div>
+    </div>
+    <div class="compare-arrow">→</div>
+    <div class="creature-panel">
+      <div class="frame">${s2.finalImage ? `<img src="${s2.finalImage}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;">` : `<div class="img-missing">이미지 없음</div>`}</div>
+      <div class="cap">After</div>
+      <div class="cap-name">${escapeHTML(s2.finalName)}</div>
+    </div>
+  `;
+
+  const badges = s2.types.map(t=>`<span class="type-badge" style="background:#${TYPE_COLORS[t]}">${t}</span>`).join('');
+  document.getElementById('s2FinalCard').innerHTML = `
+    <div class="fc-eyebrow">Observed Monster · 자유 탐구</div>
+    <div class="fc-name">${escapeHTML(s2.finalName)}</div>
+    <div class="fc-origin">기원: ${escapeHTML(s2.name)} → ${escapeHTML(s2.env.name)}</div>
+    <div class="fc-badges">${badges}</div>
+    <div class="fc-summary">
+      <div><b>변이:</b> ${escapeHTML(s2.variation)}</div>
+      <div><b>이유:</b> ${escapeHTML(s2.reason)}</div>
+    </div>
+  `;
+
+  document.getElementById('studentIdInput2').value = studentId;
+  document.getElementById('studentNameInput2').value = studentName;
+  document.getElementById('studentInfoErr2').classList.add('hidden');
+
+  showScreen('screen-s2-result'); setRail(4); setStatus('2단계 · STEP 4 / 4 — 관측 결과');
+}
+function retryS2(){
+  const keepName = s2.name, keepDesc = s2.desc, keepImage = s2.image, keepTypes = s2.types;
+  resetS2();
+  s2.name = keepName; s2.desc = keepDesc; s2.image = keepImage; s2.types = keepTypes;
+  goToS2Env();
+}
+
+/* ============================================================
+   PDF EXPORT (via browser print — students use "Save as PDF")
+   ============================================================ */
+function escapeHTML(s){
+  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function printStage1Report(){
+  const err = document.getElementById('studentInfoErr1');
+  if(!studentId.trim() || !studentName.trim()){
+    if(err) err.classList.remove('hidden');
+    const target = !studentId.trim() ? document.getElementById('studentIdInput1') : document.getElementById('studentNameInput1');
+    if(target) target.focus();
+    return;
+  }
+  if(err) err.classList.add('hidden');
+
+  const ev = state.lastEval || {};
+  const score = ev.score!=null ? Math.round(ev.score) : null;
+  const catRows = TRAIT_CATEGORIES.map(cat=>{
+    const chosen = cat.options.find(o=>o.id===state.traits[cat.key].optionId);
+    return `<div class="pr-field"><b>${escapeHTML(cat.title)}${chosen ? ' — ' + escapeHTML(chosen.label) : ''}</b>${escapeHTML(state.traits[cat.key].reasoning) || '(이유 미작성)'}</div>`;
+  }).join('');
+  const badges = state.selectedTypes.map(t=>`<span class="pr-badge" style="background:#${TYPE_COLORS[t]}">${escapeHTML(t)}</span>`).join('');
+  const strengths = (Array.isArray(ev.strengths)?ev.strengths:[]).map(s=>`<li>${escapeHTML(s)}</li>`).join('') || '<li>-</li>';
+  const improvements = (Array.isArray(ev.improvements)?ev.improvements:[]).map(s=>`<li>${escapeHTML(s)}</li>`).join('') || '<li>-</li>';
+
+  document.getElementById('printArea').innerHTML = `
+    <div class="pr-page">
+      <div class="pr-title">몬스터 디자이너 — 1단계 관측 기록지</div>
+      <div class="pr-meta">생명과학 · 생명의 연속성과 다양성 · 가이드 모드 · 출력일 ${new Date().toLocaleDateString('ko-KR')}</div>
+      <div class="pr-studentinfo">학번: ${escapeHTML(studentId)} 　 이름: ${escapeHTML(studentName)}</div>
+
+      <h2>기본 정보</h2>
+      <div class="pr-field"><b>관측 대상</b>${escapeHTML(state.species.name)} (${escapeHTML(state.species.types.join('/'))} 타입)</div>
+      <div class="pr-field"><b>환경 변화</b>${escapeHTML(state.env.name)} — ${escapeHTML(state.env.desc)}</div>
+      <div class="pr-field"><b>새로운 타입</b><div class="pr-badges">${badges}</div></div>
+      <div class="pr-field"><b>몬스터 이름</b>${escapeHTML(state.name)}</div>
+
+      <div class="pr-images">
+        <div><div class="pr-img-box">${baseCreatureSVG(state.species)}</div><div class="pr-img-cap">Before: ${escapeHTML(state.species.name)}</div></div>
+        <div class="pr-arrow">→</div>
+        <div><div class="pr-img-box">${evolvedCreatureSVG(state.species, state.traits)}</div><div class="pr-img-cap">After: ${escapeHTML(state.name)}</div></div>
+      </div>
+
+      <h2>자연선택 논리 설계</h2>
+      ${catRows}
+
+      <h2>자동 논리 점검 (참고용 · 최종 평가는 선생님이 합니다)</h2>
+      <div class="pr-field"><b>점수</b><span class="pr-score">${score!=null?score:'-'} / 100</span>${ev.tier?' — '+escapeHTML(ev.tier):''}</div>
+      <div class="pr-field"><b>피드백</b>${escapeHTML(ev.feedback)}</div>
+      <div class="pr-field"><b>잘한 점</b><ul>${strengths}</ul></div>
+      <div class="pr-field"><b>보완하면 좋은 점</b><ul>${improvements}</ul></div>
+    </div>
+  `;
+  window.print();
+}
+
+function printStage2Report(){
+  const err = document.getElementById('studentInfoErr2');
+  if(!studentId.trim() || !studentName.trim()){
+    if(err) err.classList.remove('hidden');
+    const target = !studentId.trim() ? document.getElementById('studentIdInput2') : document.getElementById('studentNameInput2');
+    if(target) target.focus();
+    return;
+  }
+  if(err) err.classList.add('hidden');
+
+  const ev = s2.lastEval || {};
+  const score = ev.score!=null ? Math.round(ev.score) : null;
+  const badges = s2.types.map(t=>`<span class="pr-badge" style="background:#${TYPE_COLORS[t]}">${escapeHTML(t)}</span>`).join('');
+  const strengths = (Array.isArray(ev.strengths)?ev.strengths:[]).map(s=>`<li>${escapeHTML(s)}</li>`).join('') || '<li>-</li>';
+  const improvements = (Array.isArray(ev.improvements)?ev.improvements:[]).map(s=>`<li>${escapeHTML(s)}</li>`).join('') || '<li>-</li>';
+  const beforeImg = s2.image ? `<img src="${s2.image}">` : `<div class="pr-img-missing">이미지 없음</div>`;
+  const afterImg = s2.finalImage ? `<img src="${s2.finalImage}">` : `<div class="pr-img-missing">이미지 없음</div>`;
+
+  document.getElementById('printArea').innerHTML = `
+    <div class="pr-page">
+      <div class="pr-title">몬스터 디자이너 — 2단계 관측 기록지</div>
+      <div class="pr-meta">생명과학 · 생명의 연속성과 다양성 · 자유 탐구 모드 · 출력일 ${new Date().toLocaleDateString('ko-KR')}</div>
+      <div class="pr-studentinfo">학번: ${escapeHTML(studentId)} 　 이름: ${escapeHTML(studentName)}</div>
+
+      <h2>기본 정보</h2>
+      <div class="pr-field"><b>나의 몬스터</b>${escapeHTML(s2.name)}</div>
+      <div class="pr-field"><b>특징 설명</b>${escapeHTML(s2.desc)}</div>
+      <div class="pr-field"><b>타입</b><div class="pr-badges">${badges}</div></div>
+      <div class="pr-field"><b>환경 변화</b>${escapeHTML(s2.env.name)} — ${escapeHTML(s2.env.desc)}</div>
+      <div class="pr-field"><b>몬스터 이름</b>${escapeHTML(s2.finalName)}</div>
+
+      <div class="pr-images">
+        <div><div class="pr-img-box">${beforeImg}</div><div class="pr-img-cap">Before: ${escapeHTML(s2.name)}</div></div>
+        <div class="pr-arrow">→</div>
+        <div><div class="pr-img-box">${afterImg}</div><div class="pr-img-cap">After: ${escapeHTML(s2.finalName)}</div></div>
+      </div>
+
+      <h2>변이와 결과 기록</h2>
+      <div class="pr-field"><b>일어난 변이</b>${escapeHTML(s2.variation)}</div>
+      <div class="pr-field"><b>자연선택된 이유</b>${escapeHTML(s2.reason)}</div>
+
+      <h2>자동 논리 점검 (참고용 · 최종 평가는 선생님이 합니다)</h2>
+      <div class="pr-field"><b>점수</b><span class="pr-score">${score!=null?score:'-'} / 100</span>${ev.tier?' — '+escapeHTML(ev.tier):''}</div>
+      <div class="pr-field"><b>피드백</b>${escapeHTML(ev.feedback)}</div>
+      <div class="pr-field"><b>잘한 점</b><ul>${strengths}</ul></div>
+      <div class="pr-field"><b>보완하면 좋은 점</b><ul>${improvements}</ul></div>
+    </div>
+  `;
+  window.print();
+}
+
+/* ---------------- help modal ---------------- */
+function openHelp(){
+  document.getElementById('helpModal').classList.remove('hidden');
+  document.querySelector('#helpModal .modal-box').scrollTop = 0;
+  document.getElementById('helpModal').scrollTop = 0;
+}
+function closeHelp(){ document.getElementById('helpModal').classList.add('hidden'); }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeHelp(); });
+
+/* 작성 중 새로고침·창 닫기 경고 */
+window.addEventListener('beforeunload', e=>{
+  if(document.body.classList.contains('vlab-embed')) return;   // V-Lab 뷰어 안에서는 다른 실험으로 옮길 때 확인창이 뜨지 않게
+  const onStart = !document.getElementById('screen-start').classList.contains('hidden');
+  if(!onStart && (state.species || s2.name)){ e.preventDefault(); e.returnValue = ''; }
+});
+
+/* init */
+goToStart();
+</script>
+</body>
+</html>

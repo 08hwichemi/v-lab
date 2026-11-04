@@ -70,6 +70,19 @@ window.VLAB = {
       featured: true
     },
     {
+      id: "pendulum-labnote",
+      subject: "physics",
+      title: "단진자 디지털 랩노트",
+      summary: "실제 단진자 실험을 위한 디지털 실험 노트입니다. 이론(단진자, 주기 공식, 등시성, 변인 통제) → 준비물 점검 → 실 길이·추의 질량·진폭을 바꾼 측정 기록(사진 첨부) → T–L, T²–L 그래프와 중력 가속도 계산 → 고찰 → A4 결과보고서 인쇄·PDF 저장까지 한 화면에서 진행합니다. 기록은 브라우저에 자동 저장되고 JSON으로 백업할 수 있습니다.",
+      file: "labs/physics/pendulum-labnote.html",
+      author: "송다혜",
+      grade: ["고2", "고3"],
+      unit: "역학과 에너지 · 탄성파와 소리",
+      tags: ["단진자", "주기", "랩노트", "실험 보고서", "T²–L 그래프", "중력 가속도", "변인 통제"],
+      thumbnail: "assets/img/thumbs/pendulum-labnote/0.png",
+      added: "2026-11-04"
+    },
+    {
       id: "chem-smart-lab",
       subject: "chemistry",
       title: "화학 스마트 실험실",
@@ -171,6 +184,32 @@ window.VLAB = {
       tags: ["화학 전지", "볼타 전지", "다니엘 전지", "염다리", "표준 환원 전위", "분극"],
       thumbnail: "assets/img/thumbs/chemical-cell/0.png",
       added: "2026-11-02"
+    },
+    {
+      id: "monster-designer",
+      subject: "biology",
+      title: "몬스터 디자이너",
+      summary: "환경이 바뀐 곳에서 생물이 자연선택을 거쳐 어떻게 달라질지 직접 설계하는 활동입니다. 1단계는 주어진 생물과 무작위 환경 카드로 외형·신체 구조·생리 특징을 고르고 그 이유를 서술하고, 2단계는 생물과 환경을 직접 정해 자유롭게 탐구합니다. 서술한 이유를 자동으로 점검해 점수와 피드백을 주고, 결과지를 PDF로 저장할 수 있습니다.",
+      file: "labs/biology/monster-designer.html",
+      author: "송다혜",
+      grade: ["고2"],
+      unit: "생명과학 · 생명의 연속성과 다양성",
+      tags: ["자연선택", "변이", "선택압", "적응", "진화", "환경 변화"],
+      thumbnail: "assets/img/thumbs/monster-designer/0.png",
+      added: "2026-11-04"
+    },
+    {
+      id: "speciation-lab",
+      subject: "biology",
+      title: "종분화 실험실",
+      summary: "한 종의 작은 무리(개체 10마리)에서 시작해 돌연변이, 자연선택, 지리적 격리, 생식적 격리를 거치며 여러 종으로 갈라지는 과정을 지켜보는 시뮬레이션입니다. 지리적 분포 지도와 계통수가 함께 그려지고, 각 단계의 예측과 서술형 답변을 모아 관찰 보고서를 PDF로 저장할 수 있습니다.",
+      file: "labs/biology/speciation-lab.html",
+      author: "송다혜",
+      grade: ["고2"],
+      unit: "생명과학 · 생명의 연속성과 다양성",
+      tags: ["종분화", "돌연변이", "자연선택", "지리적 격리", "생식적 격리", "계통수"],
+      thumbnail: "assets/img/thumbs/speciation-lab/0.png",
+      added: "2026-11-04"
     },
     {
       id: "constellation",

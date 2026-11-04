@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>종분화 실험실 · V-Lab</title>
+<style>
+/* V-Lab 공용 글꼴·색 토큰만 가져옴 (공용 클래스는 이 파일의 클래스 이름과 겹치므로 lab-theme.css 전체는 쓰지 않음) */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+:root{--font: 'IBM Plex Sans KR', 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; --bg: #ffffff; --panel: #ffffff; --panel-2: #F7F8FA; --line: #E6E8EC; --line-2: #F0F1F3; --text: #111111; --text-2: #3F4652; --muted: #6B7280; --accent: #3182F6; --accent-soft: #EAF2FF; --ok: #12A66B; --warn: #F5A623; --err: #E5484D; --radius: 12px; --radius-sm: 8px;}
+</style>
+<style>
+  :root{
+    --bg:#0f1b17;
+    --bg-alt:#132420;
+    --surface:#1c2b25;
+    --surface-alt:#24362e;
+    --line:#33473d;
+    --parchment:#f3ecd9;
+    --parchment-dim:#e6dcc0;
+    --parchment-line:#c9bb8f;
+    --ink:#eaf2ec;
+    --ink-soft:#9fb3a8;
+    --ink-dim:#6c8177;
+    --accent-mutation:#e8a33d;
+    --accent-mutation-soft:#4a3a20;
+    --accent-selection:#6fcf97;
+    --accent-selection-soft:#243c30;
+    --accent-isolation:#5b9bd5;
+    --accent-isolation-soft:#1f3448;
+    --accent-repro:#c792ea;
+    --danger:#e2665b;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at 15% 0%, #16261f 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 100%, #142520 0%, transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:var(--font);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+    word-break:keep-all;
+  }
+  .display{font-family:var(--font);}
+  .mono{font-family:var(--mono);}
+
+  /* ---------- layout shells ---------- */
+  #app{max-width:1280px;margin:0 auto;padding:20px 20px 60px;}
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 4px 22px;border-bottom:1px solid var(--line);margin-bottom:24px;
+    gap:12px;flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand .leaf{font-size:26px;}
+  .brand h1{font-size:22px;margin:0;font-weight:700;letter-spacing:.2px;}
+  .brand p{margin:2px 0 0;font-size:12.5px;color:var(--ink-soft);}
+  .top-right{display:flex;gap:18px;align-items:center;flex-wrap:wrap;}
+  .top-stats{display:flex;gap:18px;align-items:center;}
+  .stat{text-align:right;}
+  .stat .num{font-size:18px;font-weight:600;color:var(--accent-selection);}
+  .stat .lbl{font-size:10.5px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.08em;}
+  .btn-reset{
+    background:none;border:1px solid var(--line);color:var(--ink-soft);
+    padding:8px 14px;border-radius:999px;font-size:12.5px;cursor:pointer;
+    font-family:var(--font);transition:.15s;
+  }
+  .btn-reset:hover{border-color:var(--ink-soft);color:var(--ink);}
+
+  /* ---------- intro screen ---------- */
+  #intro{display:flex;flex-direction:column;align-items:center;text-align:center;padding:30px 10px 10px;}
+  #intro .kicker{color:var(--accent-mutation);font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:10px;font-weight:600;}
+  #intro h2{font-size:36px;margin:0 0 12px;font-weight:700;max-width:640px;line-height:1.3;}
+  #intro .sub{color:var(--ink-soft);max-width:580px;margin:0 0 18px;font-size:15px;line-height:1.7;}
+  .help-link{
+    background:var(--accent-mutation-soft);border:1px dashed var(--accent-mutation);color:var(--accent-mutation);
+    padding:10px 18px;border-radius:999px;font-size:13.5px;font-weight:700;cursor:pointer;
+    font-family:var(--font);margin-bottom:36px;transition:.15s;
+  }
+  .help-link:hover{filter:brightness(1.15);}
+  .picker{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;align-items:stretch;}
+  .divider-or{
+    display:flex;align-items:center;justify-content:center;
+    color:var(--ink-dim);font-family:var(--font);font-style:italic;font-size:16px;
+    width:36px;
+  }
+  .specimen-card{
+    background:var(--parchment);color:#2a2417;border-radius:18px;
+    width:290px;padding:26px 24px 24px;position:relative;
+    box-shadow:0 18px 40px -18px rgba(0,0,0,.55);
+    border:1px solid var(--parchment-line);
+    display:flex;flex-direction:column;align-items:center;
+    transition:transform .25s ease;
+  }
+  .specimen-card:hover{transform:translateY(-6px);}
+  .specimen-card .tag{
+    position:absolute;top:14px;left:14px;font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;color:#8a7a4d;font-weight:700;
+  }
+  .specimen-stage{
+    width:120px;height:120px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #fffdf3, #e9dfc0 70%);
+    display:flex;align-items:center;justify-content:center;
+    margin:14px 0 16px;border:1px solid var(--parchment-line);
+    animation:bob 3.2s ease-in-out infinite;
+  }
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  .specimen-card h3{font-family:var(--font);font-size:22px;margin:0 0 6px;font-weight:700;}
+  .specimen-card .desc{font-size:13px;line-height:1.6;color:#5a5138;margin:0 0 18px;min-height:58px;}
+  .specimen-card .traits{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:18px;}
+  .specimen-card .chip{
+    font-size:10.5px;background:#e4d8ae;color:#5a4c22;padding:4px 9px;border-radius:999px;font-weight:600;
+  }
+  .btn-start{
+    background:#2a2417;color:var(--parchment);border:none;border-radius:999px;
+    padding:11px 22px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:var(--font);
+    transition:.15s;letter-spacing:.02em;
+  }
+  .btn-start:hover{background:#463c26;}
+
+  /* ---------- help (visual slide popup) ---------- */
+  .help-modal{text-align:center;}
+  .hs-top{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px;}
+  .hs-step{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--c);}
+  .hs-count{font-size:11px;color:var(--ink-dim);font-family:var(--mono);}
+  .hs-title{font-family:var(--font);font-size:24px;margin:0;}
+  .hs-visual{
+    background:var(--bg-alt);border:1px solid var(--line);border-radius:16px;
+    padding:24px 14px;min-height:210px;margin:18px 0 16px;
+    display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;
+  }
+  .hs-caption{font-size:16px;line-height:1.75;color:var(--ink);max-width:540px;margin:0 auto;}
+  .hs-caption b{color:var(--c);}
+  .hs-sub{font-size:13px;color:var(--ink-soft);margin-top:8px;line-height:1.6;}
+  .hs-chips{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+  .hs-chip{font-size:12.5px;padding:6px 12px;border-radius:99px;background:var(--surface-alt);border:1px solid var(--line);color:var(--ink);font-weight:600;}
+  .hs-nav{display:flex;justify-content:space-between;align-items:center;margin-top:22px;gap:10px;}
+  .hs-dots{display:flex;gap:6px;align-items:center;}
+  .hs-dot{width:8px;height:8px;border-radius:99px;background:var(--line);cursor:pointer;border:none;padding:0;transition:.2s;}
+  .hs-dot.on{background:var(--c);width:24px;}
+  .hs-btn{
+    min-width:96px;padding:11px 16px;border-radius:10px;border:1px solid var(--line);background:var(--surface-alt);
+    color:var(--ink);font-family:var(--font);font-weight:700;font-size:13.5px;cursor:pointer;
+  }
+  .hs-btn.primary{background:var(--c);border-color:var(--c);color:#12190f;}
+  .hs-btn:disabled{visibility:hidden;}
+  .vis-col{display:flex;flex-direction:column;align-items:center;gap:8px;}
+  .vis-label{font-size:12px;color:var(--ink-soft);font-weight:600;}
+  .vis-arrow{font-size:28px;color:var(--ink-dim);}
+  .vis-big{font-size:42px;line-height:1;}
+  .mini-pop{display:grid;grid-template-columns:repeat(3,46px);gap:5px;background:var(--surface);padding:8px;border-radius:12px;border:1px solid var(--line);}
+  .mini-pop div{width:46px;height:46px;border-radius:9px;background:var(--surface-alt);display:flex;align-items:center;justify-content:center;}
+  .mini-pop div.mut{box-shadow:inset 0 0 0 2px var(--accent-mutation);}
+  .creature-xl{width:96px;height:96px;border-radius:50%;background:var(--parchment);display:flex;align-items:center;justify-content:center;border:1px solid var(--parchment-line);}
+  .flow-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;width:100%;margin-top:6px;}
+  .flow-pill{font-size:12.5px;font-weight:800;padding:7px 12px;border-radius:99px;color:#12190f;}
+  .flow-sep{color:var(--ink-dim);align-self:center;}
+  .mini-bar{width:180px;height:8px;background:var(--surface-alt);border-radius:99px;overflow:hidden;}
+  .mini-bar div{height:100%;width:100%;background:var(--accent-repro);}
+  .layout-sketch{display:grid;grid-template-columns:1fr 1.3fr;gap:8px;width:100%;max-width:440px;text-align:left;}
+  .ls-col{display:flex;flex-direction:column;gap:8px;}
+  .ls-box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12.5px;color:var(--ink-soft);line-height:1.5;}
+  .ls-box b{display:block;color:var(--ink);font-size:13px;}
+  .ls-box.tall{flex:1;}
+  .help-tips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+  .help-tip{font-size:12px;color:var(--ink-soft);background:var(--bg-alt);border:1px dashed var(--line);border-radius:10px;padding:8px 12px;max-width:260px;line-height:1.5;}
+  @media(max-width:560px){
+    .mini-pop{grid-template-columns:repeat(3,38px);}
+    .mini-pop div{width:38px;height:38px;}
+    .hs-visual{padding:16px 8px;gap:8px;}
+    .vis-arrow{transform:rotate(90deg);}
+  }
+  /* ---------- main screen ---------- */
+  #main{display:none;grid-template-columns:minmax(300px,.85fr) minmax(0,1.15fr);gap:22px;align-items:start;}
+  #main > div{min-width:0;}
+  #main > div:first-child{
+    position:sticky; top:20px; max-height:calc(100vh - 40px); overflow-y:auto; overflow-x:hidden;
+    padding-right:6px;
+  }
+  #main > div:first-child::-webkit-scrollbar{width:6px;}
+  #main > div:first-child::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+  @media(max-width:900px){
+    #main{grid-template-columns:1fr;}
+    #main > div:first-child{position:static;max-height:none;overflow:visible;padding-right:0;}
+  }
+
+  .panel{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;
+  }
+  .panel + .panel{margin-top:18px;}
+
+  /* species header */
+  .species-head{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+  .species-icon-lg{
+    width:92px;height:92px;border-radius:50%;background:var(--surface-alt);
+    display:flex;align-items:center;justify-content:center;border:1px solid var(--line);flex-shrink:0;
+  }
+  .species-head h2{margin:0;font-size:24px;font-weight:700;font-family:var(--font);word-break:keep-all;overflow-wrap:normal;}
+  .species-head .meta{font-size:13px;color:var(--ink-soft);margin-top:4px;}
+  .species-head .meta b{color:var(--accent-selection);font-weight:600;}
+
+  .badge-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+  .action-badge{
+    display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;
+    font-size:12px;font-weight:700;background:var(--surface-alt);border:1px solid var(--line);color:var(--ink-soft);
+  }
+  .action-badge.has-mutation{border-color:var(--accent-mutation);color:var(--accent-mutation);}
+  .action-badge.has-selection{border-color:var(--accent-selection);color:var(--accent-selection);}
+
+  /* population grid */
+  .pop-box{
+    background:var(--bg-alt);border:1px solid var(--line);border-radius:10px;
+    padding:14px;margin-bottom:16px;
+  }
+  .pop-box .pop-title{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
+  .pop-box .pop-title span{font-size:11.5px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.06em;}
+  .pop-box .pop-title b{font-size:16px;color:var(--ink);}
+  .pop-grid{display:flex;flex-wrap:wrap;gap:7px;min-height:60px;max-height:190px;overflow-y:auto;padding-right:2px;}
+  .pop-grid::-webkit-scrollbar{width:6px;}
+  .pop-grid::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+  .indiv{
+    width:56px;height:56px;background:var(--surface-alt);border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+    animation:pop-in .35s ease backwards;
+  }
+  .indiv.carrier{box-shadow:inset 0 0 0 2px var(--accent-mutation-soft);}
+  @keyframes pop-in{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+  .indiv-more{
+    align-self:center;font-size:13px;color:var(--ink-dim);padding:0 10px;font-family:var(--mono);
+  }
+  .legend{display:flex;flex-direction:column;gap:6px;margin-top:12px;font-size:12.5px;color:var(--ink-soft);}
+  .legend-row{display:flex;align-items:center;gap:8px;}
+  .legend-row .lg-name{flex:0 0 auto;min-width:120px;}
+  .legend-bar{flex:1;height:7px;background:var(--surface-alt);border-radius:99px;overflow:hidden;}
+  .legend-bar div{height:100%;background:var(--accent-mutation);}
+  .legend-row .lg-pct{font-family:var(--mono);font-size:11.5px;width:38px;text-align:right;}
+
+  .action-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  @media(max-width:640px){.action-grid{grid-template-columns:1fr;}}
+  .action-btn{
+    border:none;border-radius:10px;padding:16px 10px;font-size:14px;font-weight:700;
+    cursor:pointer;font-family:var(--font);color:#12190f;letter-spacing:.01em;
+    transition:.15s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+    text-align:center;line-height:1.3;
+  }
+  .action-btn .ab-icon{font-size:22px;}
+  .action-btn:hover{filter:brightness(1.08);transform:translateY(-2px);}
+  .action-btn.mutation{background:var(--accent-mutation);}
+  .action-btn.selection{background:var(--accent-selection);}
+  .action-btn.isolation{background:var(--accent-isolation);}
+  .action-note{text-align:center;margin-top:10px;font-size:12px;color:var(--ink-dim);line-height:1.6;}
+
+  .branched-note{
+    text-align:center;padding:18px;color:var(--ink-soft);font-size:14.5px;line-height:1.8;
+    background:var(--bg-alt);border-radius:10px;border:1px dashed var(--line);
+  }
+
+  /* log */
+  .log-list{display:flex;flex-direction:column;gap:10px;max-height:340px;overflow-y:auto;padding-right:4px;}
+  .log-list::-webkit-scrollbar{width:7px;}
+  .log-list::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+  .log-item{font-size:15px;line-height:1.8;color:var(--ink-soft);padding:14px 16px;background:var(--bg-alt);border-radius:10px;border-left:3px solid var(--line);}
+  .log-item:first-child{color:var(--ink);}
+  .log-item b{color:var(--ink);}
+
+  #geoWrap{max-height:230px;overflow-y:auto;overflow-x:auto;padding-right:2px;}
+  #geoWrap::-webkit-scrollbar{width:6px;}
+  #geoWrap::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+  .panel-sub{font-size:12px;color:var(--ink-dim);line-height:1.6;margin:-6px 0 14px;}
+  .geo-groups{display:flex;flex-wrap:wrap;gap:16px;}
+  .geo-cluster{
+    display:flex;align-items:center;gap:8px;background:var(--bg-alt);border:1px solid var(--line);
+    border-radius:12px;padding:12px;
+  }
+  .geo-card{
+    display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;
+    background:var(--parchment);border:1px solid var(--parchment-line);border-radius:10px;
+    padding:10px 12px;min-width:84px;transition:.15s;
+  }
+  .geo-card:hover{transform:translateY(-2px);}
+  .geo-card.geo-focus{outline:2px solid var(--accent-mutation);}
+  .geo-card.geo-unconfirmed{border-style:dashed;}
+  .geo-icon{width:38px;height:38px;display:flex;align-items:center;justify-content:center;}
+  .geo-name{font-size:11.5px;font-weight:700;color:#2a2417;text-align:center;line-height:1.3;}
+  .geo-pop{font-size:10px;color:#7a6c45;font-family:var(--mono);}
+  .geo-status{font-size:9px;color:#7a6c45;background:#e4d8ae;padding:2px 7px;border-radius:99px;margin-top:1px;}
+  .geo-status-ok{background:var(--accent-selection-soft);color:var(--accent-selection);}
+  .geo-barrier{font-size:22px;color:var(--ink-dim);}
+
+  #treeWrap{overflow:auto;max-height:400px;border-radius:10px;background:var(--bg-alt);border:1px solid var(--line);}
+  .tree-node-card{
+    background:var(--parchment);border:1px solid var(--parchment-line);border-radius:10px;
+    padding:8px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;
+    box-shadow:0 6px 14px -8px rgba(0,0,0,.5);width:158px;
+  }
+  .tree-node-card:hover{outline:2px solid var(--accent-selection);}
+  .tree-node-card .tn-icon{width:40px;height:40px;border-radius:50%;background:#fffdf3;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--parchment-line);}
+  .tree-node-card .tn-txt{overflow:hidden;}
+  .tree-node-card .tn-name{font-size:13px;font-weight:700;color:#2a2417;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tree-node-card .tn-pop{font-size:11px;color:#7a6c45;font-family:var(--mono);}
+  .tree-node-card.is-focus{outline:2px solid var(--accent-mutation);}
+  .tree-node-card.is-branched{opacity:.85;}
+  .tree-node-card.compact{width:122px;padding:6px 8px;gap:6px;}
+  .tree-node-card.compact .tn-icon{width:28px;height:28px;}
+  .tree-node-card.compact .tn-name{font-size:11px;}
+  .tree-node-card.compact .tn-pop{font-size:9px;}
+  .tree-node-card.is-unconfirmed{border-style:dashed;opacity:.72;}
+
+  .panel-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;}
+  .panel-title h3{margin:0;font-size:15px;font-weight:700;font-family:var(--font);}
+  .panel-title .hint{font-size:11px;color:var(--ink-dim);text-align:right;}
+
+  /* modal */
+  .overlay{
+    position:fixed;inset:0;background:rgba(8,14,11,.72);backdrop-filter:blur(2px);
+    display:none;align-items:center;justify-content:center;z-index:50;padding:20px;
+  }
+  .modal{
+    background:var(--surface);border:1px solid var(--line);border-radius:16px;
+    width:100%;max-width:540px;padding:26px;max-height:86vh;overflow-y:auto;
+    animation:modal-in .2s ease;position:relative;
+  }
+  .modal.wide{max-width:660px;}
+  @keyframes modal-in{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+  .modal .m-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin-bottom:6px;}
+  .modal h3{margin:0 0 6px;font-size:19px;font-family:var(--font);}
+  .modal .m-sub{font-size:13px;color:var(--ink-soft);margin:0 0 18px;line-height:1.6;}
+  .m-warn{font-size:12.5px;color:var(--accent-mutation);background:var(--accent-mutation-soft);border-radius:9px;padding:10px 12px;margin:-6px 0 16px;line-height:1.6;}
+  .option-list{display:flex;flex-direction:column;gap:10px;}
+  .option-card{
+    background:var(--bg-alt);border:1px solid var(--line);border-radius:11px;padding:13px 14px;
+    cursor:pointer;text-align:left;display:flex;gap:12px;align-items:flex-start;
+    font-family:var(--font);color:var(--ink);width:100%;transition:.15s;
+  }
+  .option-card:hover{border-color:var(--accent-mutation);transform:translateX(2px);}
+  .option-card .oc-icon{font-size:20px;}
+  .option-card .oc-label{font-weight:700;font-size:13.5px;margin-bottom:3px;}
+  .option-card .oc-desc{font-size:12px;color:var(--ink-soft);line-height:1.5;}
+
+  .spec-result{display:flex;gap:14px;margin:18px 0;}
+  .spec-card{flex:1;background:var(--parchment);color:#2a2417;border-radius:12px;padding:16px 12px;text-align:center;}
+  .spec-card .sc-icon{width:86px;height:86px;border-radius:50%;background:#fffdf3;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;border:1px solid var(--parchment-line);}
+  .spec-card h4{margin:0 0 4px;font-size:15px;font-family:var(--font);}
+  .spec-card p{margin:0;font-size:11px;color:#6a5e3c;}
+  .btn-continue{
+    width:100%;background:var(--ink);color:#12190f;border:none;border-radius:10px;padding:13px;
+    font-weight:700;font-size:13.5px;cursor:pointer;margin-top:6px;font-family:var(--font);
+  }
+  .close-x{position:absolute;top:16px;right:18px;background:none;border:none;color:var(--ink-dim);font-size:18px;cursor:pointer;}
+
+  .empty-hint{font-size:12px;color:var(--ink-dim);text-align:center;padding:14px;}
+
+  .random-card{background:var(--accent-mutation-soft);border:1px dashed var(--accent-mutation);margin-bottom:14px;}
+  .random-card .oc-label{color:var(--accent-mutation);}
+
+  .action-btn.btn-disabled{opacity:.38;cursor:not-allowed;filter:grayscale(.5);pointer-events:none;}
+
+  /* selection judgment rows */
+  .judge-list{display:flex;flex-direction:column;gap:12px;margin-bottom:16px;}
+  .judge-row{background:var(--bg-alt);border:1px solid var(--line);border-radius:11px;padding:12px 14px;}
+  .judge-label{font-weight:700;font-size:13.5px;margin-bottom:9px;}
+  .judge-btns{display:flex;gap:8px;flex-wrap:wrap;}
+  .judge-btn{
+    flex:1;min-width:110px;padding:10px 8px;border-radius:9px;border:1px solid var(--line);background:var(--surface-alt);
+    color:var(--ink-soft);font-family:var(--font);font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s;
+  }
+  .judge-btn:hover{border-color:var(--ink-soft);}
+  .judge-btn.sel-adv{background:var(--accent-selection-soft);border-color:var(--accent-selection);color:var(--accent-selection);}
+  .judge-btn.sel-dis{background:#3a2321;border-color:var(--danger);color:var(--danger);}
+  .judge-btn.sel-neu{background:#2c3330;border-color:var(--ink-soft);color:var(--ink);}
+
+  .reason-label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:8px;font-weight:600;}
+  .reason-input{
+    width:100%;min-height:70px;background:var(--bg-alt);border:1px solid var(--line);border-radius:10px;
+    color:var(--ink);font-family:var(--font);font-size:13px;padding:11px 12px;resize:vertical;margin-bottom:16px;
+  }
+  .reason-input:focus{outline:none;border-color:var(--accent-selection);}
+
+  /* selection result */
+  .result-list{display:flex;flex-direction:column;gap:8px;margin:4px 0 16px;}
+  .result-row{background:var(--bg-alt);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.6;border-left:3px solid var(--line);}
+  .result-row.ok{border-left-color:var(--accent-selection);}
+  .result-row.no{border-left-color:var(--danger);}
+  .result-row .rr-title{font-weight:700;margin-bottom:2px;}
+  .result-row .rr-meta{color:var(--ink-soft);font-size:12.5px;}
+  .why-box{background:var(--accent-selection-soft);border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.7;color:var(--ink);margin-bottom:12px;}
+
+  .isolating-note{
+    background:var(--accent-isolation-soft);border:1px dashed var(--accent-isolation);border-radius:12px;
+    padding:16px;margin-bottom:16px;
+  }
+  .iso-title{font-weight:700;font-size:14px;color:var(--accent-isolation);margin-bottom:6px;}
+  .iso-desc{font-size:12.5px;color:var(--ink-soft);line-height:1.6;margin-bottom:12px;}
+  .iso-desc:last-child{margin-bottom:0;}
+  .iso-bar{height:8px;background:var(--surface-alt);border-radius:99px;overflow:hidden;}
+  .iso-bar-fill{height:100%;background:var(--accent-isolation);transition:width .3s ease;}
+  .iso-progress{font-size:11px;color:var(--accent-isolation);margin-top:6px;font-family:var(--mono);text-align:right;}
+
+  .log-item.log-mutation{border-left-color:var(--accent-mutation);}
+  .log-item.log-selection{border-left-color:var(--accent-selection);}
+  .log-item.log-isolation{border-left-color:var(--accent-isolation);}
+  .log-item.log-confirm{border-left-color:var(--accent-repro);background:#2b2236;color:var(--ink);}
+  .log-item.log-progress{border-left-color:var(--ink-dim);font-style:italic;}
+  .log-note{opacity:.88;font-size:13.5px;display:block;margin-top:6px;}
+
+  .score-pill{display:inline-block;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--accent-selection-soft);color:var(--accent-selection);margin-left:6px;}
+  /* ===== V-Lab 공용 테마에 맞춘 덮어쓰기 ===== */
+  /* 색 토큰: 어두운 초록·양피지 바탕을 흰 바탕 미니멀 테마로. 돌연변이·자연선택·격리·생식적 격리의
+     의미 색은 색상은 그대로 두고 흰 바탕에서 읽히도록 채도·명도만 조정 */
+  :root{
+    --bg:#ffffff; --bg-alt:#F7F8FA; --surface:#ffffff; --surface-alt:#F0F1F3; --line:#E6E8EC;
+    --parchment:#F7F8FA; --parchment-dim:#F0F1F3; --parchment-line:#B5BCC6; /* 계통수 가지 선 색 */
+    --ink:#111111; --ink-soft:#3F4652; --ink-dim:#6B7280;
+    --accent-mutation:#D97706; --accent-mutation-soft:#FFF4E0;
+    --accent-selection:#12A66B; --accent-selection-soft:#E6F7EE;
+    --accent-isolation:#3182F6; --accent-isolation-soft:#EAF2FF;
+    --accent-repro:#7C3AED; --accent-repro-soft:#F3ECFF;
+    --danger:#E5484D; --radius:12px;
+  }
+  body{background:#ffffff;color:#111;font-family:var(--font);font-size:15px;letter-spacing:-0.012em;}
+  .display,.specimen-card h3,.hs-title,.species-head h2,.panel-title h3,.modal h3,.spec-card h4,.brand h1,#intro h2{font-family:var(--font);font-weight:700;letter-spacing:-0.01em;}
+  .divider-or{font-family:var(--font);color:#6B7280;}
+  button,input,textarea{font-family:var(--font);}
+
+  /* 상단 바 */
+  .topbar{padding:6px 0 16px;margin-bottom:20px;}
+  .brand h1{font-size:22px;}
+  .brand p{font-size:14px;color:#6B7280;}
+  .stat .num{color:#111;font-size:19px;}
+  .stat .lbl{font-size:12px;color:#6B7280;letter-spacing:.04em;}
+  .btn-reset{font-size:14px;padding:8px 14px;border-radius:8px;border:1px solid #E6E8EC;color:#111;background:#fff;}
+  .btn-reset:hover{background:#F7F8FA;border-color:#D9DDE3;color:#111;}
+  body.vlab-embed .topbar .brand{display:none;}
+  body.vlab-embed .topbar{justify-content:flex-end;padding:0 0 12px;margin-bottom:16px;}
+  body.vlab-embed #app{padding-top:14px;}
+
+  /* 시작 화면 */
+  #intro{padding-top:18px;}
+  #intro .kicker{font-size:13px;}
+  #intro h2{font-size:32px;color:#111;}
+  #intro .sub{font-size:15.5px;color:#3F4652;}
+  .help-link{font-size:14.5px;border-radius:8px;border:1px dashed #D97706;background:#FFF4E0;color:#B45309;}
+  .help-link:hover{filter:none;background:#FFEBC7;}
+  .specimen-card{background:#fff;color:#111;border:1px solid #E6E8EC;border-radius:12px;box-shadow:none;}
+  .specimen-card:hover{transform:translateY(-3px);border-color:#D9DDE3;}
+  .specimen-card .tag{font-size:12px;color:#6B7280;}
+  .specimen-stage{background:#F7F8FA;border:1px solid #E6E8EC;}
+  .specimen-card h3{font-size:22px;}
+  .specimen-card .desc{font-size:14.5px;color:#3F4652;}
+  .specimen-card .chip{font-size:12.5px;background:#F0F1F3;color:#3F4652;}
+  .btn-start{background:#111;color:#fff;border-radius:8px;font-size:15px;padding:11px 22px;}
+  .btn-start:hover{background:#333;}
+
+  /* 도움말 */
+  .hs-step{font-size:12px;}
+  .hs-count{font-size:12px;color:#6B7280;}
+  .hs-title{font-size:24px;}
+  .hs-visual{background:#F7F8FA;border:1px solid #E6E8EC;border-radius:12px;}
+  .hs-caption{font-size:16.5px;color:#111;}
+  .hs-sub{font-size:14px;color:#3F4652;}
+  .hs-chip{font-size:13px;background:#fff;border:1px solid #E6E8EC;color:#111;}
+  .hs-btn{font-size:14.5px;border-radius:8px;background:#fff;border:1px solid #E6E8EC;color:#111;}
+  .hs-btn.primary{background:#111;border-color:#111;color:#fff;}
+  .vis-label{font-size:13px;color:#3F4652;}
+  .vis-arrow{color:#9AA1AB;}
+  .mini-pop{background:#fff;border:1px solid #E6E8EC;border-radius:8px;}
+  .mini-pop div{background:#F0F1F3;border-radius:8px;}
+  .creature-xl{background:#F7F8FA;border:1px solid #E6E8EC;}
+  .flow-pill{color:#fff;font-size:13px;}
+  .flow-sep{color:#9AA1AB;}
+  .mini-bar{background:#E6E8EC;}
+  .ls-box{background:#fff;border:1px solid #E6E8EC;border-radius:8px;font-size:13.5px;color:#3F4652;}
+  .ls-box b{color:#111;font-size:14px;}
+  .help-tip{font-size:13px;color:#3F4652;background:#F7F8FA;border:1px dashed #D9DDE3;border-radius:8px;}
+
+  /* 메인 화면 */
+  #main > div:first-child::-webkit-scrollbar-thumb{background:#D9DDE3;}
+  .panel{background:#fff;border:1px solid #E6E8EC;border-radius:12px;}
+  .species-icon-lg{background:#F7F8FA;border:1px solid #E6E8EC;}
+  .species-head h2{font-size:24px;}
+  .species-head .meta{font-size:14px;color:#6B7280;}
+  .action-badge{font-size:13px;background:#F7F8FA;border:1px solid #E6E8EC;color:#6B7280;}
+  .action-badge.has-mutation{background:#FFF4E0;}
+  .action-badge.has-selection{background:#E6F7EE;}
+  .pop-box{background:#F7F8FA;border:1px solid #E6E8EC;border-radius:8px;}
+  .pop-box .pop-title span{font-size:12.5px;color:#6B7280;text-transform:none;letter-spacing:0;}
+  .pop-box .pop-title b{font-size:16px;color:#111;}
+  .indiv{background:#fff;border:1px solid #E6E8EC;border-radius:8px;}
+  .indiv.carrier{border-color:#F0B860;box-shadow:inset 0 0 0 2px #FBE3B3;}
+  .indiv-more{font-size:13.5px;color:#6B7280;}
+  .legend{font-size:13.5px;color:#3F4652;}
+  .legend-bar{background:#E6E8EC;}
+  .legend-row .lg-pct{font-size:12.5px;width:42px;}
+  .action-btn{color:#fff;border-radius:8px;font-size:14.5px;}
+  .action-btn:hover{filter:brightness(1.06);transform:translateY(-1px);}
+  .action-btn.btn-disabled{opacity:.35;filter:grayscale(.6);}
+  .action-note{font-size:13px;color:#6B7280;}
+  .branched-note{background:#F7F8FA;border:1px dashed #D9DDE3;border-radius:8px;color:#3F4652;}
+
+  .log-list::-webkit-scrollbar-thumb{background:#D9DDE3;}
+  .log-item{background:#F7F8FA;border-radius:8px;color:#3F4652;}
+  .log-item:first-child,.log-item b{color:#111;}
+  .log-item.log-confirm{background:var(--accent-repro-soft);}
+  .log-note{font-size:14px;}
+
+  .panel-sub{font-size:13.5px;color:#6B7280;}
+  .panel-title .hint{font-size:12.5px;color:#6B7280;}
+  .geo-cluster{background:#F7F8FA;border:1px solid #E6E8EC;border-radius:8px;}
+  .geo-card{background:#fff;border:1px solid #E6E8EC;border-radius:8px;}
+  .geo-card:hover{border-color:#D9DDE3;}
+  .geo-name{font-size:13px;color:#111;}
+  .geo-pop{font-size:12px;color:#6B7280;}
+  .geo-status{font-size:12px;color:#3F4652;background:#F0F1F3;}
+  .geo-status-ok{background:#E6F7EE;color:#0E8A58;}
+  .geo-barrier{color:#6B7280;}
+  .empty-hint{font-size:13.5px;color:#6B7280;}
+
+  #treeWrap{background:#F7F8FA;border:1px solid #E6E8EC;border-radius:8px;}
+  .tree-node-card{background:#fff;border:1px solid #D9DDE3;border-radius:8px;box-shadow:none;}
+  .tree-node-card .tn-icon{background:#F7F8FA;border:1px solid #E6E8EC;}
+  .tree-node-card .tn-name{font-size:14px;color:#111;}
+  .tree-node-card .tn-txt{min-width:0;}
+  .tree-node-card .tn-pop{font-family:var(--font);font-size:12px;color:#6B7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tree-node-card.compact .tn-name{font-size:12.5px;}
+  .tree-node-card.compact .tn-pop{font-size:11px;}
+
+  /* 모달 */
+  .overlay{background:rgba(17,17,17,.45);}
+  .modal{background:#fff;border:1px solid #E6E8EC;border-radius:12px;}
+  .modal .m-kicker{font-size:12px;}
+  .modal h3{font-size:20px;}
+  .modal .m-sub{font-size:14.5px;color:#3F4652;}
+  .m-warn{font-size:13.5px;color:#B45309;background:#FFF4E0;border-radius:8px;}
+  .option-card{background:#fff;border:1px solid #E6E8EC;border-radius:8px;color:#111;}
+  .option-card:hover{border-color:#111;transform:none;background:#F7F8FA;}
+  .option-card .oc-label{font-size:15px;}
+  .option-card .oc-desc{font-size:13.5px;color:#6B7280;}
+  .random-card{background:#FFF4E0;border:1px dashed #D97706;}
+  .random-card:hover{background:#FFEBC7;}
+  .random-card .oc-label{color:#B45309;}
+  .spec-card{background:#F7F8FA;color:#111;border:1px solid #E6E8EC;border-radius:8px;}
+  .spec-card .sc-icon{background:#fff;border:1px solid #E6E8EC;}
+  .spec-card h4{font-size:16px;}
+  .spec-card p{font-size:12.5px;color:#6B7280;}
+  .btn-continue{background:#111;color:#fff;border-radius:8px;font-size:15px;}
+  .btn-continue:hover{background:#333;}
+  .close-x{color:#6B7280;font-size:20px;}
+  .judge-row{background:#F7F8FA;border:1px solid #E6E8EC;border-radius:8px;}
+  .judge-label{font-size:15px;}
+  .judge-btn{font-size:14px;border-radius:8px;background:#fff;border:1px solid #E6E8EC;color:#3F4652;}
+  .judge-btn:hover{border-color:#111;}
+  .judge-btn.sel-adv{background:#E6F7EE;border-color:#12A66B;color:#0E8A58;font-weight:700;}
+  .judge-btn.sel-dis{background:#FDECEC;border-color:#E5484D;color:#C53030;font-weight:700;}
+  .judge-btn.sel-neu{background:#111;border-color:#111;color:#fff;font-weight:700;}
+  .reason-label{font-size:13.5px;color:#3F4652;}
+  .reason-input{background:#fff;border:1px solid #E6E8EC;border-radius:8px;color:#111;font-size:14.5px;}
+  .reason-input::placeholder{color:#9AA1AB;}
+  .reason-input:focus{border-color:#3182F6;}
+  .result-row{background:#F7F8FA;border-radius:8px;font-size:14px;}
+  .result-row .rr-meta{font-size:13.5px;color:#6B7280;}
+  .why-box{background:#E6F7EE;border-radius:8px;font-size:14px;color:#111;}
+  .isolating-note{border-radius:8px;}
+  .iso-title{font-size:15px;}
+  .iso-desc{font-size:13.5px;color:#3F4652;}
+  .iso-bar{background:#E6E8EC;}
+  .iso-progress{font-size:12.5px;}
+  .score-pill{font-size:12.5px;}
+  .modal .btn-continue[style*="--surface-alt"]{border:1px solid #E6E8EC;}
+</style>
+</head>
+<body>
+<script>if(/embed/.test(location.hash))document.body.classList.add("vlab-embed");</script>
+<div id="app">
+
+  <div class="topbar">
+    <div class="brand">
+      <span class="leaf">🧬</span>
+      <div>
+        <h1>종분화 실험실</h1>
+        <p>돌연변이 · 자연선택 · 지리적 격리 · 생식적 격리로 새로운 종을 탄생시켜 보세요</p>
+      </div>
+    </div>
+    <div class="top-right">
+      <div class="top-stats" id="topStats" style="display:none;">
+        <div class="stat"><div class="num mono" id="statSpecies">1</div><div class="lbl">확정된 종</div></div>
+        <div class="stat"><div class="num mono" id="statGen">0</div><div class="lbl">진행 단계</div></div>
+        <div class="stat"><div class="num mono" id="statScore">-</div><div class="lbl">예측 정답률</div></div>
+      </div>
+      <button class="btn-reset" onclick="openHelp()">❓ 도움말</button>
+      <button class="btn-reset" id="btnReset" style="display:none;" onclick="resetGame()">🔄 처음부터 다시</button>
+    </div>
+  </div>
+
+  <!-- INTRO -->
+  <div id="intro">
+    <div class="kicker">시작할 종 선택</div>
+    <h2>한 종의 작은 무리에서 시작해<br>여러 종으로 갈라지는 과정을 지켜보세요</h2>
+    <p class="sub">개체 10마리로 시작합니다. 돌연변이로 변이가 생기고, 환경이 특정 형질을 선택하고, 무리가 지리적으로 갈라져 각자 진화하다 보면 — 서로 교배할 수 없는 새로운 종이 탄생합니다.</p>
+    <button class="help-link" onclick="openHelp()">❓ 처음이라면 먼저 눌러보세요 — 그림으로 보는 사용 방법</button>
+    <div class="picker">
+      <div class="specimen-card">
+        <div class="tag">Animalia</div>
+        <div class="specimen-stage" id="animalPreview"></div>
+        <h3>몽글이</h3>
+        <p class="desc">둥글둥글한 몸에 짧은 다리로 아장아장 걷는 잡식성 생물. 온화한 숲 지대에 무리 지어 산다.</p>
+        <div class="traits">
+          <span class="chip">털색</span><span class="chip">몸집</span><span class="chip">귀 모양</span><span class="chip">다리 길이</span>
+        </div>
+        <button class="btn-start" onclick="startGame('animal')">몽글이로 시작하기</button>
+      </div>
+      <div class="divider-or">or</div>
+      <div class="specimen-card">
+        <div class="tag">Plantae</div>
+        <div class="specimen-stage" id="plantPreview"></div>
+        <h3>새싹이</h3>
+        <p class="desc">가느다란 줄기 끝에 작은 꽃을 피우는 초본 식물. 볕이 잘 드는 들판에 군락을 이룬다.</p>
+        <div class="traits">
+          <span class="chip">꽃색</span><span class="chip">잎 크기</span><span class="chip">줄기 길이</span><span class="chip">가시</span>
+        </div>
+        <button class="btn-start" onclick="startGame('plant')">새싹이로 시작하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="main">
+    <div>
+      <div class="panel" id="speciesPanel"></div>
+      <div class="panel">
+        <div class="panel-title"><h3>📖 관찰 기록</h3><span class="hint">선택한 무리의 기록 · 최근 순</span></div>
+        <div class="log-list" id="logList"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><h3>📄 서술형 보고서</h3></div>
+        <p class="panel-sub">자연선택 단계에서 작성한 예측과 서술형 답변을 모아 보고서로 만들어요. 버튼을 누르면 인쇄 창이 열리는데, 대상(프린터)에서 <b>'PDF로 저장'</b>을 선택하면 파일로 저장할 수 있어요.</p>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <input id="studentIdInput" class="reason-input" style="min-height:auto;margin-bottom:0;flex:1;" placeholder="학번">
+          <input id="studentNameInput" class="reason-input" style="min-height:auto;margin-bottom:0;flex:1.4;" placeholder="이름">
+        </div>
+        <label class="reason-label">1. 활동을 통해 배우고 느낀 점을 서술하세요. <b style="color:var(--accent-mutation);">(필수)</b></label>
+        <textarea id="reflectionInput" class="reason-input" placeholder="이번 활동을 하면서 새롭게 알게 된 점이나 느낀 점을 자유롭게 적어보세요."></textarea>
+        <label class="reason-label">2. 이 게임의 과학적 오류 또는 개선의견이 있으면 써주세요. <span style="color:var(--ink-dim);">(선택)</span></label>
+        <textarea id="feedbackInput" class="reason-input" placeholder="게임을 하면서 발견한 오류나, 실제 종분화와 다른 점, 더 좋아졌으면 하는 점을 적어보세요."></textarea>
+        <button class="btn-continue" style="margin-top:0;" onclick="openReasoningReport()">📄 보고서 PDF로 저장</button>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title"><h3>🗺️ 지리적 분포</h3><span class="hint" id="geoHint"></span></div>
+        <p class="panel-sub">지리적으로 격리된 무리는 장벽을 사이에 두고 서로 다른 공간에 놓여요. 격리 직후에는 아직 서로 다른 종이 아니에요. 카드를 누르면 그 무리로 이동해 진화시킬 수 있어요.</p>
+        <div id="geoWrap"><div id="geoMap"></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><h3>🌳 계통수</h3><span class="hint">점선 = 종분화 진행 중 · 실선 = 확정된 종</span></div>
+        <div id="treeWrap"><svg id="treeSvg" xmlns="http://www.w3.org/2000/svg"></svg></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- overlay / modal -->
+<div class="overlay" id="overlay">
+  <div class="modal" id="modalBody"></div>
+</div>
+
+
+<script>
+/* ============================= STATE ============================= */
+let state = {
+  baseType:null, nodes:{}, rootId:null, focusId:null, generation:0, isolationEvents:[]
+};
+let idCounter = 1;
+
+const ISO_TARGET = 3;        // 생식적 격리 확정에 필요한 진행 횟수 (두 무리 합산)
+const INITIAL_RATIO = 0.2;   // 새 돌연변이가 처음 나타나는 비율
+const CARRYING_CAPACITY = 300;
+
+const MUTATION_DEFS = {
+  animal:[
+    {id:'hue', label:'털색 변화', icon:'🎨', desc:'무리 중 일부의 털색이 원래와 다르게 나타납니다.'},
+    {id:'size', label:'몸집 크기 변화', icon:'📏', desc:'무리 중 일부의 몸집이 커지거나 작아집니다.'},
+    {id:'earShape', label:'귀 모양 변화', icon:'👂', desc:'무리 중 일부의 귀 모양이 바뀝니다.'},
+    {id:'legLength', label:'다리 길이 변화', icon:'🦵', desc:'무리 중 일부의 다리가 길어집니다.'}
+  ],
+  plant:[
+    {id:'hue', label:'꽃 색깔 변화', icon:'🎨', desc:'일부 개체의 꽃 색깔이 다르게 핍니다.'},
+    {id:'leafSize', label:'잎 크기 변화', icon:'🍃', desc:'일부 개체의 잎이 더 크거나 작게 자랍니다.'},
+    {id:'stemHeight', label:'줄기 길이 변화', icon:'🌾', desc:'일부 개체의 줄기가 더 길게 자랍니다.'},
+    {id:'thorns', label:'가시 유무 변화', icon:'🌵', desc:'일부 개체에게 가시가 돋거나 없어집니다.'}
+  ]
+};
+
+/* effects: 형질이 '증가/생김' 방향으로 바뀌었을 때의 효과. 반대 방향이면 효과도 반대.
+   hueFavored: 그 환경에서 유리한 색 계열 */
+const SELECTION_DEFS = {
+  animal:[
+    {id:'cold', label:'기온이 급격히 낮아졌다', icon:'❄️', desc:'혹독한 추위가 찾아왔습니다.',
+      effects:{size:'adv', earShape:'dis', legLength:'dis'},
+      why:'몸집이 크면 부피에 비해 표면적이 작아 열을 덜 잃어 추위에 유리하고, 몸집이 작아지면 불리합니다. 귀·다리처럼 몸 밖으로 튀어나온 부분이 뾰족하거나 길어지면 열을 잃기 쉬워 불리합니다. 털의 색깔 종류는 체온 유지에 큰 차이를 만들지 않습니다.'},
+    {id:'predator', label:'새로운 포식자가 나타났다', icon:'🦅', desc:'무리를 위협하는 새로운 포식자가 나타났습니다.',
+      effects:{earShape:'adv', legLength:'adv'},
+      why:'뾰족하게 선 귀는 소리를 잘 모아 포식자를 빨리 알아챌 수 있고, 다리가 길면 더 빨리 도망칠 수 있어 유리합니다. 이 시뮬레이션에서 몸집과 털색은 큰 영향이 없도록 설정했어요.'},
+    {id:'food', label:'먹이가 부족해졌다', icon:'🍂', desc:'서식지의 먹이가 눈에 띄게 줄었습니다.',
+      effects:{size:'dis', legLength:'adv'},
+      why:'몸집이 작으면 살아가는 데 필요한 먹이 양이 적어 유리하고, 몸집이 커지면 불리합니다. 다리가 길면 더 넓은 지역을 돌아다니며 먹이를 찾을 수 있어 유리합니다.'},
+    {id:'humid', label:'서식지가 습해져 수풀이 우거졌다', icon:'💧', desc:'비가 잦아지고 초록빛 수풀이 무성해졌습니다.',
+      effects:{}, hueFavored:['초록','청록'],
+      why:'초록빛 수풀이 우거지면 초록·청록 계열의 털색을 가진 개체가 포식자 눈에 덜 띄어(보호색) 유리합니다. 원래 초록 계열이던 털색이 다른 색으로 바뀌면 오히려 눈에 띄어 불리합니다. 다른 형질은 큰 영향이 없습니다.'}
+  ],
+  plant:[
+    {id:'drought', label:'가뭄이 찾아왔다', icon:'☀️', desc:'오랫동안 비가 내리지 않았습니다.',
+      effects:{leafSize:'dis'},
+      why:'잎이 작으면 증산 작용으로 잃는 수분이 줄어 가뭄에 유리하고, 잎이 커지면 불리합니다. 이 시뮬레이션에서 줄기 길이·가시·꽃색은 큰 영향이 없도록 설정했어요.'},
+    {id:'herbivore', label:'초식동물이 늘어났다', icon:'🐛', desc:'잎과 줄기를 먹는 초식동물이 크게 늘었습니다.',
+      effects:{thorns:'adv'},
+      why:'가시가 있으면 초식동물이 뜯어먹기 어려워 유리하고, 가시가 없어지면 불리합니다. 다른 형질은 큰 영향이 없습니다.'},
+    {id:'shade', label:'큰 나무가 자라 그늘이 졌다', icon:'🌳', desc:'주변에 큰 나무들이 자라 볕이 잘 들지 않게 되었습니다.',
+      effects:{stemHeight:'adv', leafSize:'adv'},
+      why:'줄기가 길면 잎을 더 높이 올려 빛을 받기 유리하고, 잎이 크면 약한 빛도 더 많이 받아 광합성에 유리합니다. 잎이 작아지면 불리합니다.'},
+    {id:'wind', label:'바람이 강해졌다', icon:'🌬️', desc:'거센 바람이 자주 부는 지역이 되었습니다.',
+      effects:{stemHeight:'dis', leafSize:'dis'},
+      why:'줄기가 길면 바람에 꺾이기 쉽고, 잎이 크면 바람을 많이 받아 찢어지기 쉬워 불리합니다. 반대로 잎이 작아지면 유리합니다.'}
+  ]
+};
+const ISOLATION_DEFS = [
+  {id:'mountain', label:'거대한 산맥이 솟아올랐다', icon:'⛰️', desc:'무리가 산맥을 사이에 두고 두 지역으로 갈라집니다.'},
+  {id:'river', label:'큰 강이 새로 흐르기 시작했다', icon:'🏞️', desc:'무리가 강을 사이에 두고 두 지역으로 갈라집니다.'},
+  {id:'island', label:'바닷물이 차올라 섬이 생겼다', icon:'🏝️', desc:'일부 무리가 섬에 고립되어 서로 오갈 수 없게 됩니다.'}
+];
+
+const EFFECT_WORD = {adv:'유리', dis:'불리', neu:'영향 없음'};
+
+/* ============================= UTIL ============================= */
+function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function nextId(){ idCounter++; return 'sp'+idCounter; }
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function hashStr(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619);} return h>>>0; }
+function seededRandom(seed){
+  let t = seed>>>0;
+  return function(){
+    t += 0x6D2B79F5;
+    let r = Math.imul(t ^ (t>>>15), 1|t);
+    r ^= r + Math.imul(r ^ (r>>>7), 61|r);
+    return ((r ^ (r>>>14))>>>0)/4294967296;
+  };
+}
+function seededShuffle(arr, rnd){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+function pct(r){ return Math.round(r*100); }
+
+/* ============================= CREATURE RENDER ============================= */
+function creatureSVG(traits, baseType, px){
+  px = px||36;
+  const hue = ((traits.hue%360)+360)%360;
+  if(baseType==='animal'){
+    const size = traits.size||1;
+    const bodyR = 10*size;
+    const legH = 7*(traits.legLength||1);
+    const fur = `hsl(${hue} 60% 56%)`;
+    const cx=16, cy=16;
+    const ears = traits.earShape==='pointy'
+      ? `<polygon points="${cx-9},${cy-bodyR-1} ${cx-5},${cy-bodyR+7} ${cx-13},${cy-bodyR+7}" fill="${fur}"/>
+         <polygon points="${cx+9},${cy-bodyR-1} ${cx+5},${cy-bodyR+7} ${cx+13},${cy-bodyR+7}" fill="${fur}"/>`
+      : `<circle cx="${cx-8}" cy="${cy-bodyR+1}" r="4.6" fill="${fur}"/>
+         <circle cx="${cx+8}" cy="${cy-bodyR+1}" r="4.6" fill="${fur}"/>`;
+    return `<svg viewBox="0 0 32 54" width="${px}" height="${px}">
+      <line x1="${cx-4}" y1="${cy+bodyR-2}" x2="${cx-4}" y2="${cy+bodyR-2+legH}" stroke="${fur}" stroke-width="3" stroke-linecap="round"/>
+      <line x1="${cx+4}" y1="${cy+bodyR-2}" x2="${cx+4}" y2="${cy+bodyR-2+legH}" stroke="${fur}" stroke-width="3" stroke-linecap="round"/>
+      ${ears}
+      <circle cx="${cx}" cy="${cy}" r="${bodyR}" fill="${fur}"/>
+      <circle cx="${cx-4}" cy="${cy-2}" r="1.5" fill="#20180c"/>
+      <circle cx="${cx+4}" cy="${cy-2}" r="1.5" fill="#20180c"/>
+      <path d="M ${cx-2.5} ${cy+3} Q ${cx} ${cy+5} ${cx+2.5} ${cy+3}" stroke="#20180c" stroke-width="1" fill="none" stroke-linecap="round"/>
+    </svg>`;
+  } else {
+    const stemH = 13*(traits.stemHeight||1);
+    const leafW = 8*(traits.leafSize||1);
+    const flower = `hsl(${hue} 65% 60%)`;
+    const baseY=58, topY=baseY-stemH;
+    let thorn = '';
+    if(traits.thorns){
+      [0.28, 0.55, 0.82].forEach((t,i)=>{
+        const y = baseY - stemH*t;
+        const side = i%2===0 ? 1 : -1;
+        thorn += `<polygon points="16,${y} ${16+side*7},${y-3} 16,${y-6}" fill="#8a5a2b" stroke="#5a3717" stroke-width="0.6"/>`;
+      });
+    }
+    return `<svg viewBox="0 0 32 64" width="${px}" height="${px}">
+      <line x1="16" y1="${baseY}" x2="16" y2="${topY}" stroke="#4a7a4a" stroke-width="2.4" stroke-linecap="round"/>
+      <ellipse cx="${16-leafW/2-1.5}" cy="${topY+stemH*0.45}" rx="${leafW/2}" ry="${leafW/3.2}" fill="#5c9a5c" transform="rotate(-25 ${16-leafW/2-1.5} ${topY+stemH*0.45})"/>
+      <ellipse cx="${16+leafW/2+1.5}" cy="${topY+stemH*0.55}" rx="${leafW/2}" ry="${leafW/3.2}" fill="#5c9a5c" transform="rotate(25 ${16+leafW/2+1.5} ${topY+stemH*0.55})"/>
+      ${thorn}
+      <circle cx="16" cy="${topY-4}" r="4.6" fill="${flower}"/>
+      <circle cx="11.6" cy="${topY-2}" r="3" fill="${flower}"/>
+      <circle cx="20.4" cy="${topY-2}" r="3" fill="${flower}"/>
+      <circle cx="16" cy="${topY-8}" r="3" fill="${flower}"/>
+      <circle cx="16" cy="${topY-4}" r="1.8" fill="#fff6d8"/>
+    </svg>`;
+  }
+}
+
+/* ============================= TRAIT WORDS ============================= */
+function hueWord(h){
+  h=((h%360)+360)%360;
+  if(h<20||h>=340) return '빨강';
+  if(h<45) return '주황';
+  if(h<70) return '노랑';
+  if(h<170) return '초록';
+  if(h<200) return '청록';
+  if(h<255) return '파랑';
+  if(h<290) return '보라';
+  return '분홍';
+}
+const HUE_ADJ = {'빨강':'빨간','주황':'주황','노랑':'노란','초록':'초록','청록':'청록','파랑':'파란','보라':'보라','분홍':'분홍'};
+
+// 형질이 '증가하거나 생기는' 방향의 변화인지 (+1) 반대인지 (-1)
+function directionOf(traitId, value, base){
+  switch(traitId){
+    case 'earShape': return value==='pointy' ? 1 : -1;
+    case 'thorns': return value ? 1 : -1;
+    default: return value > base ? 1 : -1;
+  }
+}
+
+function mutationLabel(traitId, value, base){
+  const up = directionOf(traitId, value, base) > 0;
+  switch(traitId){
+    case 'hue': return `${state.baseType==='animal'?'털색':'꽃색'}이 ${hueWord(value)} 계열로 바뀜`;
+    case 'size': return up ? '몸집이 커짐' : '몸집이 작아짐';
+    case 'earShape': return up ? '귀가 뾰족해짐' : '귀가 둥글어짐';
+    case 'legLength': return '다리가 길어짐';
+    case 'leafSize': return up ? '잎이 커짐' : '잎이 작아짐';
+    case 'stemHeight': return '줄기가 길어짐';
+    case 'thorns': return up ? '가시가 생김' : '가시가 없어짐';
+    default: return traitId;
+  }
+}
+
+function adjectiveFor(traitId, traits){
+  if(!traitId) traitId='hue';
+  switch(traitId){
+    case 'hue': return HUE_ADJ[hueWord(traits.hue)];
+    case 'size': return traits.size>1?'거대':(traits.size<1?'꼬마':'');
+    case 'earShape': return traits.earShape==='pointy'?'뾰족귀':'둥근귀';
+    case 'legLength': return traits.legLength>1?'롱다리':'';
+    case 'leafSize': return traits.leafSize>1?'왕잎':(traits.leafSize<1?'좀잎':'');
+    case 'stemHeight': return traits.stemHeight>1?'장대':'';
+    case 'thorns': return traits.thorns?'가시':'민가시';
+    default: return '';
+  }
+}
+function generateName(traits, highlightTraitId, extraTaken){
+  extraTaken = extraTaken || [];
+  const base = state.baseType==='animal' ? '몽글이' : '새싹이';
+  let adj = adjectiveFor(highlightTraitId, traits) || adjectiveFor('hue', traits);
+  let name = adj+base, n=1;
+  while(Object.values(state.nodes).some(nd=>nd.name===name) || extraTaken.includes(name)){
+    n++; name=adj+base+n;
+  }
+  return name;
+}
+
+/* ============================= NODE / GAME LOGIC ============================= */
+function mkNode(id,name,parentId,depth,traits,pop){
+  return {id,name,parentId,depth,children:[],baseTraits:traits,population:pop,
+    mutations:[],selections:[],status:'active',log:[],
+    confirmedSpecies:true, isolationProgress:0, isolationTarget:ISO_TARGET, pairSeq:null};
+}
+function pushLog(node, text, kind){ node.log.unshift({text, kind: kind||'info'}); }
+
+function startGame(baseType){
+  state.baseType = baseType;
+  idCounter = 1;
+  const base = baseType==='animal'
+    ? {hue:205,size:1,earShape:'round',legLength:1}
+    : {hue:330,stemHeight:1,leafSize:1,thorns:false};
+  const rootId='sp1';
+  const node = mkNode(rootId, baseType==='animal'?'몽글이':'새싹이', null, 0, base, 10);
+  pushLog(node, `탄생 — 개체 10마리로 이루어진 최초의 무리가 관찰되었습니다. 먼저 🧬 돌연변이로 무리 안에 변이를 만들어 보세요.`, 'info');
+  state.nodes = {[rootId]:node};
+  state.rootId = rootId;
+  state.focusId = rootId;
+  state.generation = 0;
+  state.isolationEvents = [];
+  document.getElementById('intro').style.display='none';
+  document.getElementById('main').style.display='grid';
+  document.getElementById('topStats').style.display='flex';
+  document.getElementById('btnReset').style.display='inline-block';
+  window.scrollTo(0,0);
+  render();
+}
+
+function resetGame(){
+  if(!confirm('지금까지의 진화 기록과 작성한 서술형 답변이 모두 사라집니다. 처음부터 다시 시작할까요?')) return;
+  document.getElementById('main').style.display='none';
+  document.getElementById('topStats').style.display='none';
+  document.getElementById('btnReset').style.display='none';
+  document.getElementById('intro').style.display='flex';
+  state = {baseType:null,nodes:{},rootId:null,focusId:null,generation:0,isolationEvents:[]};
+  window.scrollTo(0,0);
+}
+
+// 단계적으로 커지는 형질: 같은 형질의 다음 변이는 항상 한 단계 더 뚜렷해지며 최대치에서 멈춤
+const STAGE_VALUES = {
+  legLength: [1.7, 2.4, 3.1],
+  stemHeight: [1.9, 2.7, 3.5],
+  sizeUp: [1.25, 1.45, 1.6],
+  sizeDown: [0.8, 0.65, 0.5],
+  leafSizeUp: [1.4, 1.8, 2.2],
+  leafSizeDown: [0.7, 0.5, 0.35]
+};
+function nextStageValue(current, stages){
+  const idx = stages.findIndex(v=>Math.abs(v-current)<0.001);
+  return stages[Math.min(stages.length-1, idx+1)];
+}
+function isMaxed(traitId, base){
+  const near=(a,b)=>Math.abs(a-b)<0.001;
+  switch(traitId){
+    case 'legLength': return near(base.legLength, 3.1);
+    case 'stemHeight': return near(base.stemHeight, 3.5);
+    case 'size': return near(base.size,1.6)||near(base.size,0.5);
+    case 'leafSize': return near(base.leafSize,2.2)||near(base.leafSize,0.35);
+    default: return false;
+  }
+}
+function mutateValue(traitId, base){
+  switch(traitId){
+    case 'hue': return (base.hue + 55 + Math.floor(Math.random()*190)) % 360;
+    case 'size':
+      if(base.size>1) return nextStageValue(base.size, STAGE_VALUES.sizeUp);
+      if(base.size<1) return nextStageValue(base.size, STAGE_VALUES.sizeDown);
+      return Math.random()<0.5 ? STAGE_VALUES.sizeUp[0] : STAGE_VALUES.sizeDown[0];
+    case 'earShape': return base.earShape==='round' ? 'pointy' : 'round';
+    case 'legLength': return nextStageValue(base.legLength, STAGE_VALUES.legLength);
+    case 'leafSize':
+      if(base.leafSize>1) return nextStageValue(base.leafSize, STAGE_VALUES.leafSizeUp);
+      if(base.leafSize<1) return nextStageValue(base.leafSize, STAGE_VALUES.leafSizeDown);
+      return Math.random()<0.5 ? STAGE_VALUES.leafSizeUp[0] : STAGE_VALUES.leafSizeDown[0];
+    case 'stemHeight': return nextStageValue(base.stemHeight, STAGE_VALUES.stemHeight);
+    case 'thorns': return !base.thorns;
+    default: return base[traitId];
+  }
+}
+
+function resolveMutation(node, def){
+  const baseValue = node.baseTraits[def.id];
+  const value = mutateValue(def.id, node.baseTraits);
+  const label = mutationLabel(def.id, value, baseValue);
+  node.mutations.push({traitId:def.id, label, value, baseValue, ratio:INITIAL_RATIO});
+  pushLog(node, `🧬 <b>돌연변이</b> — <b>${label}</b>. 무리의 약 ${pct(INITIAL_RATIO)}%에서 이 형질이 나타났습니다. 돌연변이는 환경과 상관없이 무작위로 일어나요.`, 'mutation');
+  state.generation++;
+  markIsolationProgress(node);
+}
+
+// 실제 효과: 그 환경에서 이 변이 형질이 유리/불리/영향 없음 중 무엇인가
+function traitEffect(def, m){
+  if(m.traitId==='hue'){
+    const fav = def.hueFavored || [];
+    if(fav.length===0) return 'neu';
+    const nowFav = fav.includes(hueWord(m.value));
+    const wasFav = fav.includes(hueWord(m.baseValue));
+    if(nowFav && !wasFav) return 'adv';
+    if(!nowFav && wasFav) return 'dis';
+    return 'neu';
+  }
+  const eff = (def.effects||{})[m.traitId];
+  if(!eff) return 'neu';
+  const dir = directionOf(m.traitId, m.value, m.baseValue);
+  if(dir>0) return eff;
+  return eff==='adv' ? 'dis' : 'adv';
+}
+
+function resolveSelection(node, def, judgments, reason){
+  judgments = judgments || {};
+  const before = node.population;
+  let net = 0;
+  const results = [];
+
+  node.mutations.forEach(m=>{
+    const actual = traitEffect(def, m);
+    const ratioBefore = m.ratio;
+    if(actual==='adv') m.ratio = clamp(m.ratio + 0.25 + Math.random()*0.15, 0.02, 0.98);
+    else if(actual==='dis') m.ratio = clamp(m.ratio - 0.22 - Math.random()*0.12, 0.02, 0.98);
+    else m.ratio = clamp(m.ratio + (Math.random()-0.5)*0.1, 0.02, 0.98); // 선택과 무관한 우연한 변동(유전적 부동)
+    net += actual==='adv' ? ratioBefore*2 : (actual==='dis' ? -ratioBefore*2 : 0);
+    const judgment = judgments[m.traitId] || null;
+    results.push({traitId:m.traitId, label:m.label, judgment, actual,
+      correct: judgment ? judgment===actual : null, ratioBefore, ratioAfter:m.ratio});
+  });
+
+  const surviveDip = clamp(0.62 + net*0.12 + Math.random()*0.1, 0.35, 0.92);
+  const floor = Math.min(6, before);   // 작은 무리가 자연선택으로 늘어나는 일이 없게 (하한은 현재 수를 넘지 않음)
+  const dipped = Math.max(floor, Math.round(before*surviveDip));
+  const growth = clamp(1.35 + net*0.15 + Math.random()*0.3, 1.05, 2.1);
+  const after = Math.min(CARRYING_CAPACITY, Math.max(floor, Math.round(dipped*growth)));
+  node.population = after;
+
+  const entry = {
+    id:def.id, label:def.label, icon:def.icon, desc:def.desc, why:def.why,
+    results, reason: reason||'', speciesName: node.name,
+    popBefore: before, popAfter: after, generation: state.generation+1, nodeId: node.id
+  };
+  node.selections.push(entry);
+
+  let logText = `🌿 <b>자연선택</b> — ${def.label}. ${def.desc}`;
+  if(results.length>0){
+    results.forEach(r=>{
+      const mark = r.correct===null ? '' : (r.correct ? ' ✅' : ' ❌');
+      const jw = r.judgment ? EFFECT_WORD[r.judgment] : '판단 안 함';
+      logText += `<span class="log-note">• '${r.label}': 내 예측 <b>${jw}</b> / 실제 <b>${EFFECT_WORD[r.actual]}</b>${mark} · 비율 ${pct(r.ratioBefore)}% → ${pct(r.ratioAfter)}%</span>`;
+    });
+  } else {
+    logText += `<span class="log-note">• 무리에 변이가 없어서 자연선택이 특정 형질을 골라낼 수 없었어요. 개체수만 변했어요.</span>`;
+  }
+  logText += `<span class="log-note">• 개체수 ${before} → ${after}마리${after>=CARRYING_CAPACITY?' (서식지가 감당할 수 있는 최대치)':''}</span>`;
+  if(def.why) logText += `<span class="log-note">🔎 실제로는: ${def.why}</span>`;
+  if(reason && reason.trim()) logText += `<span class="log-note">📝 내 이유: "${escapeHtml(reason.trim())}"</span>`;
+  pushLog(node, logText, 'selection');
+  state.generation++;
+  markIsolationProgress(node);
+  return entry;
+}
+
+function siblingOf(node){
+  if(!node.pairSeq) return null;
+  const ev = state.isolationEvents[node.pairSeq-1];
+  if(!ev) return null;
+  return state.nodes[ev.childAId===node.id ? ev.childBId : ev.childAId];
+}
+
+// 생식적 격리는 '두 무리 사이의 관계'이므로 두 무리의 진화를 합산해 진행도를 올림
+function markIsolationProgress(node){
+  if(node.confirmedSpecies!==false || !node.pairSeq) return;
+  const ev = state.isolationEvents[node.pairSeq-1];
+  ev.progress = (ev.progress||0)+1;
+  const a = state.nodes[ev.childAId], b = state.nodes[ev.childBId];
+  [a,b].forEach(n=>{ n.isolationProgress = ev.progress; });
+  const sib = siblingOf(node);
+  if(ev.progress >= ev.target){
+    [a,b].forEach(n=>{
+      n.confirmedSpecies = true;
+      const s = n===a ? b : a;
+      pushLog(n, `🔒 <b>생식적 격리 완성</b> — 오랫동안 따로 진화하며 차이가 쌓여, '${n.name}'와(과) '${s.name}'은(는) 이제 다시 만나도 서로 교배해 생식 능력이 있는 자손을 남길 수 없습니다. 두 무리는 <b>서로 다른 종</b>으로 확정되었습니다.`, 'confirm');
+    });
+  } else {
+    pushLog(node, `⏳ 종분화 진행 중 (진행도 ${ev.progress}/${ev.target}) — '${sib?sib.name:''}' 무리와의 차이가 쌓이고 있어요. 두 무리 중 어느 쪽에서 진화가 일어나도 진행도가 올라가요.`, 'progress');
+  }
+}
+
+function resolveIsolation(node, def){
+  pushLog(node, `🏔️ <b>지리적 격리 시작</b> — ${def.label}. ${def.desc} 두 무리는 이제 서로 오갈 수 없어 유전자 흐름이 끊겼지만, 아직 서로 다른 종은 아닙니다.`, 'isolation');
+
+  const total = node.population;
+  const splitRatio = 0.68+Math.random()*0.14; // 큰 무리 68~82%, 작은 무리 18~32%
+  // 두 무리의 합이 격리 전 개체수와 같아야 함 (예전엔 최소 8·6으로 올려서 10마리 → 14마리로 늘어나 보였음)
+  const popA = Math.min(total-2, Math.max(2, Math.round(total*splitRatio)));
+  const popB = total-popA;
+
+  // A: 큰 무리 — 형질이 무리 안 비율에 따른 확률로 고정됨
+  const traitsA = {...node.baseTraits};
+  node.mutations.forEach(m=>{ if(Math.random()<m.ratio) traitsA[m.traitId] = m.value; });
+
+  // B: 작은 무리 — 창시자 효과: 소수만 떨어져 나가 형질 구성이 우연에 크게 좌우됨.
+  // 실제로 돌연변이로 나타난 적 없는 형질은 절대 만들지 않음.
+  const traitsB = {...node.baseTraits};
+  node.mutations.forEach(m=>{
+    const founderRatio = clamp(m.ratio + (Math.random()-0.5)*0.6, 0.05, 0.95);
+    if(Math.random()<founderRatio) traitsB[m.traitId] = m.value;
+  });
+
+  const sameOnAll = Object.keys(traitsA).every(k=>String(traitsA[k])===String(traitsB[k]));
+  if(sameOnAll && node.mutations.length>0){
+    const m = pickRandom(node.mutations);
+    traitsB[m.traitId] = (String(traitsB[m.traitId])===String(m.value)) ? node.baseTraits[m.traitId] : m.value;
+  }
+
+  const changedA = Object.keys(traitsA).find(k=>String(traitsA[k])!==String(node.baseTraits[k]));
+  const changedB = Object.keys(traitsB).find(k=>String(traitsB[k])!==String(node.baseTraits[k]));
+  const fallback = node.mutations.length ? node.mutations[node.mutations.length-1].traitId : null;
+
+  const idA = nextId(), idB = nextId();
+  const nameA = generateName(traitsA, changedA || fallback);
+  const nameB = generateName(traitsB, changedB || fallback, [nameA]);
+
+  const seq = state.isolationEvents.length + 1;
+  const childA = mkNode(idA, nameA, node.id, node.depth+1, traitsA, popA);
+  const childB = mkNode(idB, nameB, node.id, node.depth+1, traitsB, popB);
+  [childA, childB].forEach(c=>{ c.confirmedSpecies=false; c.isolationProgress=0; c.pairSeq=seq; });
+
+  const noVar = node.mutations.length===0;
+  pushLog(childA, `✨ '${node.name}' 무리에서 갈라진 큰 무리, 잠정적으로 <b>${nameA}</b>라고 부릅니다. 원래 무리의 형질 구성을 대체로 이어받았어요. ${noVar?'격리 전에 변이가 없어서 아직 조상과 똑같은 모습이에요. ':''}아직 '${nameB}'와(과) 같은 종이며, 진화가 더 쌓이면 종분화가 확정됩니다.`, 'isolation');
+  pushLog(childB, `✨ '${node.name}' 무리에서 갈라진 소수 무리, 잠정적으로 <b>${nameB}</b>라고 부릅니다. 적은 수만 떨어져 나가서 우연히 어떤 개체가 포함되었느냐에 따라 형질 구성이 원래 무리와 달라질 수 있어요(창시자 효과). 아직 '${nameA}'와(과) 같은 종입니다.`, 'isolation');
+
+  node.children = [idA, idB];
+  node.status = 'branched';
+  node.isolationInfo = def;
+  state.nodes[idA] = childA;
+  state.nodes[idB] = childB;
+  state.generation++;
+
+  state.isolationEvents.push({
+    seq, parentId: node.id, parentName: node.name,
+    childAId: idA, childAName: nameA, childBId: idB, childBName: nameB,
+    progress:0, target:ISO_TARGET
+  });
+  node.branchSeq = seq;
+
+  return {parentName:node.name, nameA, idA, popA, traitsA, nameB, idB, popB, traitsB, noVar};
+}
+
+/* ============================= SCORE ============================= */
+function predictionStats(){
+  let judged=0, correct=0;
+  Object.values(state.nodes).forEach(n=>(n.selections||[]).forEach(s=>(s.results||[]).forEach(r=>{
+    if(r.judgment){ judged++; if(r.correct) correct++; }
+  })));
+  return {judged, correct};
+}
+
+/* ============================= RENDER: SPECIES PANEL ============================= */
+function renderActionBadges(node){
+  const total = MUTATION_DEFS[state.baseType].length;
+  const mCount = node.mutations.length, sCount = node.selections.length;
+  return `<div class="badge-row">
+    <span class="action-badge ${mCount?'has-mutation':''}">🧬 돌연변이 ${mCount}/${total}</span>
+    <span class="action-badge ${sCount?'has-selection':''}">🌿 자연선택 ${sCount}회</span>
+  </div>`;
+}
+
+// 개체 그림은 실제 비율과 일치하도록 배치하고, 렌더할 때마다 섞이지 않도록 고정 난수 사용
+function renderPopulationGrid(node){
+  const traits = node.baseTraits;
+  const muts = node.mutations;
+  const total = node.population;
+  const shown = Math.min(24, total);
+  const rnd = seededRandom(hashStr(node.id+'|'+muts.map(m=>m.ratio.toFixed(3)).join(',')+'|'+total));
+  const individuals = Array.from({length:shown}, ()=>({...traits, _carrier:false}));
+  muts.forEach(m=>{
+    const count = Math.round(m.ratio*shown);
+    const flags = seededShuffle(Array.from({length:shown}, (_,i)=>i<count), rnd);
+    flags.forEach((f,i)=>{ if(f){ individuals[i][m.traitId]=m.value; individuals[i]._carrier=true; } });
+  });
+  let html = '<div class="pop-grid">';
+  individuals.forEach(t=>{
+    html += `<div class="indiv ${t._carrier?'carrier':''}" title="${t._carrier?'변이 형질 보유':'기존 형질'}">${creatureSVG(t, state.baseType, 48)}</div>`;
+  });
+  if(total>shown) html += `<div class="indiv-more mono">+${total-shown}</div>`;
+  html += '</div>';
+  if(muts.length>0){
+    html += `<div class="legend">${muts.map(m=>`<div class="legend-row"><span class="lg-name">${m.label}</span><div class="legend-bar"><div style="width:${pct(m.ratio)}%"></div></div><span class="lg-pct">${pct(m.ratio)}%</span></div>`).join('')}</div>`;
+  } else {
+    html += `<div class="legend"><span>아직 변이가 없어요 — 모든 개체가 같은 형질을 가지고 있어요.</span></div>`;
+  }
+  return html;
+}
+
+function availableMutationDefs(node){
+  return MUTATION_DEFS[state.baseType].filter(d=>
+    !node.mutations.some(m=>m.traitId===d.id) && !isMaxed(d.id, node.baseTraits));
+}
+
+function renderSpeciesStatus(node){
+  const sib = siblingOf(node);
+  if(node.confirmedSpecies===false){
+    const p = Math.min(100, Math.round((node.isolationProgress/node.isolationTarget)*100));
+    return `<div class="isolating-note">
+      <div class="iso-title">🌱 종분화 진행 중</div>
+      <div class="iso-desc">'${sib?sib.name:''}' 무리와 지리적으로 격리된 지 얼마 안 됐어요. 두 무리 중 어느 쪽이든 돌연변이·자연선택을 겪으며 차이가 쌓이면, 서로 교배할 수 없는 다른 종으로 확정됩니다.</div>
+      <div class="iso-bar"><div class="iso-bar-fill" style="width:${p}%"></div></div>
+      <div class="iso-progress">진행도 ${node.isolationProgress} / ${node.isolationTarget}</div>
+    </div>`;
+  }
+  if(node.parentId){
+    return `<div class="isolating-note" style="border-style:solid;border-color:var(--accent-repro);background:var(--accent-repro-soft);">
+      <div class="iso-title" style="color:var(--accent-repro);">🔒 종분화 완료</div>
+      <div class="iso-desc">함께 갈라진 '${sib?sib.name:''}'와(과) 다시 만나도 교배해서 자손을 남길 수 없는, 독립된 종으로 확정되었습니다.</div>
+    </div>`;
+  }
+  return '';
+}
+
+function renderSpeciesPanel(){
+  const node = state.nodes[state.focusId];
+  const el = document.getElementById('speciesPanel');
+  if(!node){ el.innerHTML=''; return; }
+
+  let html = `
+    <div class="species-head">
+      <div class="species-icon-lg">${creatureSVG(node.baseTraits, state.baseType, 66)}</div>
+      <div>
+        <h2>${node.name}</h2>
+        <div class="meta">개체수 <b class="mono">${node.population}</b>마리 · ${node.depth===0?'최초의 조상 무리':`${node.depth}번째 분화`}</div>
+      </div>
+    </div>
+    ${renderSpeciesStatus(node)}
+    ${renderActionBadges(node)}
+    <div class="pop-box">
+      <div class="pop-title"><span>현재 무리 (변이 형질 비율)</span><b class="mono">${node.population} 마리</b></div>
+      ${renderPopulationGrid(node)}
+    </div>
+  `;
+
+  if(node.status==='branched'){
+    html += `<div class="branched-note">이 무리는 이미 지리적으로 갈라져 두 무리가 되었습니다.<br>오른쪽 <b>🗺️ 지리적 분포</b>나 <b>🌳 계통수</b>에서 갈라진 무리를 눌러 계속 진화시켜 보세요.</div>`;
+  } else {
+    const noMoreMutations = availableMutationDefs(node).length===0;
+    const tooSmall = node.population < 4;   // 2마리씩도 안 나뉘는 무리는 격리 불가 (자연선택을 거치면 수가 회복됨)
+    const isoLocked = node.confirmedSpecies===false || tooSmall;
+    html += `<div class="action-grid">
+      <button class="action-btn mutation ${noMoreMutations?'btn-disabled':''}" onclick="openMutationModal()"><span class="ab-icon">🧬</span>돌연변이<br>발생시키기</button>
+      <button class="action-btn selection" onclick="openSelectionModal()"><span class="ab-icon">🌿</span>자연선택<br>적용하기</button>
+      <button class="action-btn isolation ${isoLocked?'btn-disabled':''}" onclick="openIsolationModal()"><span class="ab-icon">🏔️</span>지리적으로<br>격리시키기</button>
+    </div>
+    <div class="action-note">${tooSmall
+      ? '🐾 무리가 너무 작아 지금은 격리할 수 없어요. 자연선택을 거치면서 수가 늘어나면 다시 갈라 볼 수 있어요.'
+      : isoLocked
+      ? '⏳ 종분화가 확정된 뒤에 다시 지리적으로 격리할 수 있어요. 지금은 돌연변이와 자연선택으로 두 무리의 차이를 쌓아 보세요.'
+      : (noMoreMutations
+        ? '이 무리에서 나타날 수 있는 변이는 모두 나타났어요. 자연선택을 적용하거나 지리적으로 격리해 보세요.'
+        : '돌연변이로 변이를 만들고 → 자연선택으로 유리한 형질을 늘리고 → 지리적 격리로 무리를 갈라 보세요. 막히면 위의 ❓ 도움말을 눌러요.')}</div>`;
+  }
+  el.innerHTML = html;
+}
+
+/* ============================= RENDER: LOG ============================= */
+function renderLog(){
+  const node = state.nodes[state.focusId];
+  const el = document.getElementById('logList');
+  if(!node || node.log.length===0){ el.innerHTML = '<div class="empty-hint">아직 기록이 없습니다.</div>'; return; }
+  el.innerHTML = node.log.map(l=>`<div class="log-item log-${l.kind||'info'}">${l.text}</div>`).join('');
+}
+
+/* ============================= RENDER: GEO MAP ============================= */
+function renderGeoMap(){
+  const el = document.getElementById('geoMap');
+  const hint = document.getElementById('geoHint');
+  const leaves = Object.values(state.nodes).filter(n=>n.status==='active');
+  if(hint) hint.textContent = `${leaves.length}개 무리 관찰 중`;
+  if(leaves.length===0){ el.innerHTML = '<div class="empty-hint">아직 관찰 중인 무리가 없습니다.</div>'; return; }
+
+  const groups = {}, order = [];
+  leaves.forEach(n=>{
+    const key = n.parentId || 'root';
+    if(!groups[key]){ groups[key]=[]; order.push(key); }
+    groups[key].push(n);
+  });
+
+  let html = '<div class="geo-groups">';
+  order.forEach(key=>{
+    const members = groups[key];
+    const parent = key!=='root' ? state.nodes[key] : null;
+    const isoDef = parent ? parent.isolationInfo : null;
+    html += `<div class="geo-cluster">`;
+    members.forEach((n,i)=>{
+      const isFocus = n.id===state.focusId;
+      let statusTag;
+      if(n.id===state.rootId) statusTag = `<div class="geo-status">🌱 시작 종</div>`;
+      else if(n.confirmedSpecies===false) statusTag = `<div class="geo-status">⏳ 진행중</div>`;
+      else statusTag = `<div class="geo-status geo-status-ok">🔒 확정</div>`;
+      html += `<div class="geo-card ${n.confirmedSpecies===false?'geo-unconfirmed':''} ${isFocus?'geo-focus':''}" onclick="setFocus('${n.id}')">
+        <div class="geo-icon">${creatureSVG(n.baseTraits, state.baseType, 38)}</div>
+        <div class="geo-name">${n.name}</div>
+        <div class="geo-pop">${n.population}마리</div>
+        ${statusTag}
+      </div>`;
+      if(i<members.length-1 && isoDef){
+        html += `<div class="geo-barrier" title="${isoDef.label}">${isoDef.icon}</div>`;
+      }
+    });
+    html += `</div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function setFocus(id){ state.focusId = id; render(); }
+
+/* ============================= RENDER: TREE ============================= */
+function computeLayout(){
+  const totalNodes = Object.keys(state.nodes).length;
+  const dense = totalNodes > 8;
+  const leafGap = dense?56:78, depthGap = dense?150:190, padX=dense?66:90, padY=dense?36:46;
+  const positions = {};
+  let leafCounter = 0;
+  function visit(id){
+    const node = state.nodes[id];
+    if(node.children.length===0){
+      positions[id] = {x: node.depth*depthGap+padX, y: leafCounter*leafGap+padY};
+      leafCounter++;
+    } else {
+      node.children.forEach(visit);
+      const ys = node.children.map(c=>positions[c].y);
+      positions[id] = {x: node.depth*depthGap+padX, y: (Math.min(...ys)+Math.max(...ys))/2};
+    }
+  }
+  visit(state.rootId);
+  let maxDepth=0;
+  Object.values(state.nodes).forEach(n=>maxDepth=Math.max(maxDepth,n.depth));
+  return {
+    positions, dense,
+    width: maxDepth*depthGap+padX*2+82,
+    height: Math.max(160, leafCounter*leafGap+padY*2-24)
+  };
+}
+
+function renderTree(){
+  const {positions, dense, width, height} = computeLayout();
+  const svg = document.getElementById('treeSvg');
+  svg.setAttribute('width', width);
+  svg.setAttribute('height', height);
+  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+  const cardW = dense?132:170, cardH = dense?46:58, iconPx = dense?22:30; // V-Lab: 글자 키움에 맞춰 카드 폭 넓힘
+  const edgeOffset = cardW*0.42;
+
+  let edges = '';
+  Object.values(state.nodes).forEach(n=>{
+    n.children.forEach(cid=>{
+      const p = positions[n.id], c = positions[cid];
+      if(!p||!c) return;
+      const unconfirmed = state.nodes[cid].confirmedSpecies===false;
+      const midX = (p.x+c.x)/2;
+      edges += `<path d="M ${p.x+edgeOffset} ${p.y} C ${midX} ${p.y}, ${midX} ${c.y}, ${c.x-8} ${c.y}"
+        stroke="var(--parchment-line)" stroke-width="2" fill="none"
+        opacity="${unconfirmed?0.45:0.85}" ${unconfirmed?'stroke-dasharray="5 5"':''}/>`;
+    });
+  });
+
+  let nodesHtml = '';
+  Object.values(state.nodes).forEach(n=>{
+    const pos = positions[n.id];
+    if(!pos) return;
+    const isFocus = n.id===state.focusId;
+    const unconfirmed = n.confirmedSpecies===false;
+    const cardCls = `tree-node-card ${dense?'compact':''} ${isFocus?'is-focus':''} ${n.status==='branched'?'is-branched':''} ${unconfirmed?'is-unconfirmed':''}`;
+    const tag = n.id===state.rootId ? '· 조상종' : (unconfirmed ? '· 진행중' : '· 확정종');
+    nodesHtml += `<foreignObject x="${pos.x-8}" y="${pos.y-cardH/2}" width="${cardW}" height="${cardH}">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="${cardCls}" onclick="setFocus('${n.id}')">
+        <div class="tn-icon">${creatureSVG(n.baseTraits, state.baseType, iconPx)}</div>
+        <div class="tn-txt">
+          <div class="tn-name">${n.name}</div>
+          <div class="tn-pop">${n.population}마리 ${tag}</div>
+        </div>
+      </div>
+    </foreignObject>`;
+  });
+
+  svg.innerHTML = `<g>${edges}${nodesHtml}</g>`;
+}
+
+/* ============================= MASTER RENDER ============================= */
+function render(){
+  const confirmedCount = Object.values(state.nodes).filter(n=>n.confirmedSpecies===true && n.status!=='branched').length;   // 이미 갈라져 사라진 조상 무리는 세지 않음
+  document.getElementById('statSpecies').textContent = confirmedCount;
+  document.getElementById('statGen').textContent = state.generation;
+  const {judged, correct} = predictionStats();
+  document.getElementById('statScore').textContent = judged ? `${Math.round(correct/judged*100)}%` : '-';
+  renderSpeciesPanel();
+  renderLog();
+  renderGeoMap();
+  renderTree();
+}
+
+/* ============================= MODALS ============================= */
+function openOverlay(html, wide){
+  const body = document.getElementById('modalBody');
+  body.classList.toggle('wide', !!wide);
+  body.innerHTML = html;
+  body.scrollTop = 0;
+  document.getElementById('overlay').style.display = 'flex';
+}
+function closeOverlay(){ document.getElementById('overlay').style.display = 'none'; }
+
+/* ============================= HELP (visual slides) ============================= */
+let helpIndex = 0;
+function helpSlides(){
+  const B = {hue:205,size:1,earShape:'round',legLength:1};   // 원래 형질
+  const M = {...B, size:1.45};                              // 돌연변이 형질 (몸집 커짐)
+  const S1 = {...B, size:1.45, earShape:'pointy'};          // 갈라진 종 1
+  const S2 = {...B, hue:320, legLength:1.7};                // 갈라진 종 2
+  const svg = (t,px)=>creatureSVG(t,'animal',px);
+  const mini = (list)=>`<div class="mini-pop">${list.map(m=>`<div class="${m?'mut':''}">${svg(m?M:B,38)}</div>`).join('')}</div>`;
+  const pill = (txt,c)=>`<span class="flow-pill" style="background:${c};">${txt}</span>`;
+
+  return [
+    { step:'시작하기', c:'var(--accent-mutation)', title:'한 종이 두 종으로!',
+      visual:`
+        <div class="vis-col"><div class="creature-xl">${svg(B,70)}</div><span class="vis-label">처음 무리</span></div>
+        <span class="vis-arrow">➜</span>
+        <div class="vis-col"><div style="display:flex;gap:8px;"><div class="creature-xl">${svg(S1,70)}</div><div class="creature-xl">${svg(S2,70)}</div></div><span class="vis-label">서로 다른 두 종</span></div>
+        <div class="flow-row">
+          ${pill('🧬 돌연변이','var(--accent-mutation)')}<span class="flow-sep">›</span>
+          ${pill('🌿 자연선택','var(--accent-selection)')}<span class="flow-sep">›</span>
+          ${pill('🏔️ 지리적 격리','var(--accent-isolation)')}<span class="flow-sep">›</span>
+          ${pill('🔒 생식적 격리','var(--accent-repro)')}
+        </div>`,
+      caption:`새로운 종이 생기는 <b>종분화</b>를 직접 실험해요.<br>이 <b>네 단계</b>만 기억하면 돼요!`
+    },
+    { step:'1단계 · 돌연변이', c:'var(--accent-mutation)', title:'🧬 변이가 생겨요',
+      visual:`
+        <div class="vis-col">${mini([0,0,0,0,0,0])}<span class="vis-label">모두 같은 모습</span></div>
+        <span class="vis-arrow">➜</span>
+        <div class="vis-col">${mini([0,1,0,0,0,0])}<span class="vis-label">일부만 몸집이 커짐</span></div>`,
+      caption:`무리 중 <b>일부 개체</b>에 새 형질이 <b>무작위로</b> 생겨요.`,
+      chips:['🎲 무작위로','👆 직접 고르기'],
+      sub:'돌연변이는 환경이 필요로 해서 생기는 게 아니에요.'
+    },
+    { step:'2단계 · 자연선택', c:'var(--accent-selection)', title:'🌿 유리한 형질이 늘어나요',
+      visual:`
+        <div class="vis-col">${mini([0,1,0,0,1,0])}<span class="vis-label">큰 몸집 33%</span></div>
+        <div class="vis-col"><span class="vis-big">❄️</span><span class="vis-label">추위가 옴</span></div>
+        <div class="vis-col">${mini([1,1,0,1,1,1])}<span class="vis-label">큰 몸집 83%</span></div>`,
+      caption:`환경에 <b>유리한 형질</b>을 가진 개체가 더 많이 살아남아<br>그 형질의 <b>비율이 늘어요</b>.`,
+      chips:['🙆 유리','🙅 불리','🤷 영향 없음'],
+      sub:'먼저 예측하고 이유를 적은 뒤, 결과로 정답을 확인해요.'
+    },
+    { step:'3단계 · 지리적 격리', c:'var(--accent-isolation)', title:'🏔️ 무리가 갈라져요',
+      visual:`
+        <div class="vis-col">${mini([1,1,0,1,1,1])}<span class="vis-label">큰 무리</span></div>
+        <div class="vis-col"><span class="vis-big">⛰️</span><span class="vis-label">오갈 수 없음</span></div>
+        <div class="vis-col"><div class="mini-pop" style="grid-template-columns:repeat(2,46px);">${[0,1,0,0].map(m=>`<div class="${m?'mut':''}">${svg(m?M:B,38)}</div>`).join('')}</div><span class="vis-label">작은 무리</span></div>`,
+      caption:`장벽 때문에 <b>교배가 끊기고</b> 각자 따로 진화해요.<br>하지만 아직은 <b>같은 종</b>이에요!`,
+      chips:['⛰️ 산맥','🏞️ 강','🏝️ 섬'],
+      sub:'작은 무리는 우연히 형질 구성이 달라질 수 있어요 (창시자 효과).'
+    },
+    { step:'4단계 · 생식적 격리', c:'var(--accent-repro)', title:'🔒 새로운 종 탄생!',
+      visual:`
+        <div class="vis-col"><div class="creature-xl">${svg(S1,70)}</div><span class="vis-label">무리 A</span></div>
+        <div class="vis-col"><span class="vis-big">🚫</span><span class="vis-label">교배 불가</span></div>
+        <div class="vis-col"><div class="creature-xl">${svg(S2,70)}</div><span class="vis-label">무리 B</span></div>
+        <div class="flow-row" style="flex-direction:column;align-items:center;gap:6px;">
+          <div class="mini-bar"><div></div></div><span class="vis-label">두 무리 합쳐 돌연변이·자연선택 3번</span>
+        </div>`,
+      caption:`따로 진화하며 차이가 쌓이면 다시 만나도<br><b>자손을 남길 수 없어요</b> → <b>서로 다른 종</b> 확정!`,
+      sub:'계통수의 점선(진행 중)이 실선(확정)으로 바뀌어요.'
+    },
+    { step:'화면 & 제출', c:'var(--accent-selection)', title:'📋 화면 보는 법',
+      visual:`
+        <div class="layout-sketch">
+          <div class="ls-col">
+            <div class="ls-box"><b>🐾 현재 무리</b>개체 모습 · 형질 비율 · 버튼 3개</div>
+            <div class="ls-box"><b>📖 관찰 기록</b>결과와 예측 정답</div>
+            <div class="ls-box"><b>📄 보고서</b>느낀 점 → PDF 저장</div>
+          </div>
+          <div class="ls-col">
+            <div class="ls-box tall"><b>🗺️ 지리적 분포</b>카드를 눌러 다른 무리로 이동</div>
+            <div class="ls-box tall"><b>🌳 계통수</b>점선 = 진행 중<br>실선 = 확정된 종</div>
+          </div>
+        </div>`,
+      caption:`다 하면 느낀 점을 쓰고 <b>📄 PDF로 저장</b>해 제출해요.`,
+      tips:['⏳ 버튼 한 번 = 실제로는 수천~수백만 년','🔎 실제와 다른 점을 찾으면 보고서 2번에!']
+    }
+  ];
+}
+
+function renderHelp(){
+  const slides = helpSlides();
+  const s = slides[helpIndex];
+  const last = helpIndex===slides.length-1;
+  const startLabel = state.baseType ? '확인했어요' : '시작하기 🚀';
+  const html = `
+    <button class="close-x" onclick="closeOverlay()" aria-label="닫기">✕</button>
+    <div class="help-modal" style="--c:${s.c};">
+      <div class="hs-top"><span class="hs-step">${s.step}</span><span class="hs-count">${helpIndex+1} / ${slides.length}</span></div>
+      <h3 class="hs-title">${s.title}</h3>
+      <div class="hs-visual">${s.visual}</div>
+      <p class="hs-caption">${s.caption}</p>
+      ${s.chips?`<div class="hs-chips">${s.chips.map(c=>`<span class="hs-chip">${c}</span>`).join('')}</div>`:''}
+      ${s.sub?`<div class="hs-sub">${s.sub}</div>`:''}
+      ${s.tips?`<div class="help-tips">${s.tips.map(t=>`<span class="help-tip">${t}</span>`).join('')}</div>`:''}
+      <div class="hs-nav">
+        <button class="hs-btn" onclick="helpGo(-1)" ${helpIndex===0?'disabled':''}>← 이전</button>
+        <div class="hs-dots">${slides.map((_,i)=>`<button class="hs-dot ${i===helpIndex?'on':''}" onclick="helpJump(${i})" aria-label="${i+1}번째 설명"></button>`).join('')}</div>
+        ${last
+          ? `<button class="hs-btn primary" onclick="closeOverlay()">${startLabel}</button>`
+          : `<button class="hs-btn primary" onclick="helpGo(1)">다음 →</button>`}
+      </div>
+    </div>`;
+  openOverlay(html, true);
+}
+function openHelp(){ helpIndex = 0; renderHelp(); }
+function helpGo(d){ helpIndex = clamp(helpIndex+d, 0, helpSlides().length-1); renderHelp(); }
+function helpJump(i){ helpIndex = i; renderHelp(); }
+function helpIsOpen(){ return document.getElementById('overlay').style.display==='flex' && !!document.querySelector('#modalBody .help-modal'); }
+
+function openMutationModal(){
+  const node = state.nodes[state.focusId];
+  const avail = availableMutationDefs(node);
+  if(avail.length===0){
+    openOverlay(`
+      <button class="close-x" onclick="closeOverlay()">✕</button>
+      <div class="m-kicker" style="color:var(--accent-mutation);">돌연변이</div>
+      <h3>이 무리에는 더 이상 새로운 변이가 없습니다</h3>
+      <p class="m-sub">이 시뮬레이션에서 나타날 수 있는 변이는 모두 나타났어요. 지리적으로 격리해 무리를 나누면, 갈라진 무리에서 다시 새로운 돌연변이가 나타날 수 있어요.</p>
+    `);
+    return;
+  }
+  const options = avail.map(d=>`
+    <button class="option-card" onclick="chooseMutation('${d.id}')">
+      <div class="oc-icon">${d.icon}</div>
+      <div><div class="oc-label">${d.label}</div><div class="oc-desc">${d.desc}</div></div>
+    </button>`).join('');
+  openOverlay(`
+    <button class="close-x" onclick="closeOverlay()">✕</button>
+    <div class="m-kicker" style="color:var(--accent-mutation);">돌연변이</div>
+    <h3>어떤 돌연변이가 나타났을까요?</h3>
+    <p class="m-sub">실제 돌연변이는 <b style="color:var(--ink);">환경이 필요로 해서 생기는 게 아니라 무작위로</b> 일어나요. 실제처럼 무작위로 정할 수도 있고, 실험을 위해 직접 고를 수도 있어요. (한 무리 안에서 같은 형질은 한 번만 변이가 일어나요)</p>
+    <button class="option-card random-card" onclick="chooseRandomMutation()">
+      <div class="oc-icon">🎲</div>
+      <div><div class="oc-label">무작위로 결정하기 (추천)</div><div class="oc-desc">실제 돌연변이처럼, 어떤 형질이 바뀔지 무작위로 정해집니다.</div></div>
+    </button>
+    <div class="option-list">${options}</div>
+  `);
+}
+function chooseRandomMutation(){
+  const node = state.nodes[state.focusId];
+  const avail = availableMutationDefs(node);
+  if(avail.length===0) return;
+  resolveMutation(node, pickRandom(avail));
+  closeOverlay(); render();
+}
+function chooseMutation(id){
+  const node = state.nodes[state.focusId];
+  const def = MUTATION_DEFS[state.baseType].find(d=>d.id===id);
+  resolveMutation(node, def);
+  closeOverlay(); render();
+}
+
+let pendingSelectionId = null;
+let pendingJudgments = {};
+let pendingReasonText = '';
+
+function openSelectionModal(){
+  pendingSelectionId = null; pendingJudgments = {}; pendingReasonText = '';
+  const node = state.nodes[state.focusId];
+  const defs = SELECTION_DEFS[state.baseType];
+  const options = defs.map(d=>`
+    <button class="option-card" onclick="showSelectionReasonStep('${d.id}')">
+      <div class="oc-icon">${d.icon}</div>
+      <div><div class="oc-label">${d.label}</div><div class="oc-desc">${d.desc}</div></div>
+    </button>`).join('');
+  openOverlay(`
+    <button class="close-x" onclick="closeOverlay()">✕</button>
+    <div class="m-kicker" style="color:var(--accent-selection);">자연선택</div>
+    <h3>어떤 환경 변화가 일어났을까요?</h3>
+    <p class="m-sub">환경이 변하면 그 환경에 유리한 형질을 가진 개체가 더 많이 살아남아 자손을 남깁니다. 환경을 고른 뒤, 지금 무리에 있는 변이가 유리할지 불리할지 예측해 보세요.</p>
+    ${node.mutations.length===0?`<div class="m-warn">⚠️ 이 무리에는 아직 변이가 없어요. 변이가 없으면 자연선택이 골라낼 형질이 없어서 개체수만 변해요. 먼저 🧬 돌연변이를 만들어 보는 걸 추천해요.</div>`:''}
+    <div class="option-list">${options}</div>
+  `);
+}
+function showSelectionReasonStep(id){ pendingSelectionId = id; renderSelectionReasonModal(); }
+function setJudgment(traitId, val){
+  const ta = document.getElementById('reasonInput');
+  if(ta) pendingReasonText = ta.value;
+  pendingJudgments[traitId] = (pendingJudgments[traitId]===val) ? undefined : val;
+  renderSelectionReasonModal();
+}
+function renderSelectionReasonModal(){
+  const node = state.nodes[state.focusId];
+  const def = SELECTION_DEFS[state.baseType].find(d=>d.id===pendingSelectionId);
+  let body;
+  if(node.mutations.length>0){
+    body = `<div class="judge-list">` + node.mutations.map(m=>{
+      const cur = pendingJudgments[m.traitId];
+      return `<div class="judge-row">
+        <div class="judge-label">🧬 ${m.label} <span style="color:var(--ink-dim);font-weight:500;">(현재 ${pct(m.ratio)}%)</span></div>
+        <div class="judge-btns">
+          <button class="judge-btn ${cur==='adv'?'sel-adv':''}" onclick="setJudgment('${m.traitId}','adv')">🙆 유리하다</button>
+          <button class="judge-btn ${cur==='dis'?'sel-dis':''}" onclick="setJudgment('${m.traitId}','dis')">🙅 불리하다</button>
+          <button class="judge-btn ${cur==='neu'?'sel-neu':''}" onclick="setJudgment('${m.traitId}','neu')">🤷 영향 없다</button>
+        </div>
+      </div>`;
+    }).join('') + `</div>`;
+  } else {
+    body = `<p class="m-sub">이 무리에는 아직 뚜렷한 변이 형질이 없어요. 이 환경 변화는 특정 형질과 상관없이 개체수에만 영향을 줍니다.</p>`;
+  }
+  openOverlay(`
+    <button class="close-x" onclick="closeOverlay()">✕</button>
+    <div class="m-kicker" style="color:var(--accent-selection);">자연선택 · 예측하기</div>
+    <h3>${def.icon} ${def.label}</h3>
+    <p class="m-sub">${def.desc} 각 변이가 이 환경에서 어떤 영향을 받을지 예측해 보세요. 결과는 내 예측이 아니라 실제 형질과 환경의 관계에 따라 정해져요.</p>
+    ${body}
+    <label class="reason-label">💭 왜 그렇게 예측했는지 이유를 적어보세요. (보고서에 들어가요)</label>
+    <textarea id="reasonInput" class="reason-input" placeholder="예: 몸집이 크면 열을 잘 유지할 수 있어서 추위에 유리할 것 같다.">${escapeHtml(pendingReasonText)}</textarea>
+    <button class="btn-continue" onclick="confirmSelection()">이 환경 변화 적용하기</button>
+    <button class="btn-continue" style="background:var(--surface-alt);color:var(--ink);margin-top:8px;" onclick="openSelectionModal()">← 다른 환경 고르기</button>
+  `);
+}
+function confirmSelection(){
+  const ta = document.getElementById('reasonInput');
+  const reason = ta ? ta.value : pendingReasonText;
+  const node = state.nodes[state.focusId];
+  const def = SELECTION_DEFS[state.baseType].find(d=>d.id===pendingSelectionId);
+  const entry = resolveSelection(node, def, {...pendingJudgments}, reason);
+  pendingSelectionId=null; pendingJudgments={}; pendingReasonText='';
+  render();
+  showSelectionResult(entry);
+}
+function showSelectionResult(e){
+  const judged = e.results.filter(r=>r.judgment);
+  const correct = judged.filter(r=>r.correct).length;
+  const rows = e.results.length ? e.results.map(r=>{
+    const cls = r.correct===null ? '' : (r.correct?'ok':'no');
+    const mark = r.correct===null ? '' : (r.correct?' ✅ 정답':' ❌ 오답');
+    return `<div class="result-row ${cls}">
+      <div class="rr-title">🧬 ${r.label}${mark}</div>
+      <div class="rr-meta">내 예측: ${r.judgment?EFFECT_WORD[r.judgment]:'판단 안 함'} · 실제: <b style="color:var(--ink);">${EFFECT_WORD[r.actual]}</b> · 비율 ${pct(r.ratioBefore)}% → ${pct(r.ratioAfter)}%</div>
+    </div>`;
+  }).join('') : `<p class="m-sub">변이가 없어 형질 비율 변화는 없었어요.</p>`;
+  openOverlay(`
+    <div class="m-kicker" style="color:var(--accent-selection);">자연선택 결과</div>
+    <h3>${e.icon} ${e.label} ${judged.length?`<span class="score-pill">${correct}/${judged.length} 정답</span>`:''}</h3>
+    <p class="m-sub">개체수: ${e.popBefore}마리 → ${e.popAfter}마리</p>
+    <div class="result-list">${rows}</div>
+    <div class="why-box">🔎 <b>실제 인과관계</b><br>${e.why}</div>
+    <p class="m-sub" style="margin-bottom:8px;">💡 '영향 없음'인 형질도 비율이 조금 달라질 수 있어요. 자연선택과 상관없이 우연히 비율이 바뀌는 <b style="color:var(--ink);">유전적 부동</b> 때문이에요.</p>
+    <button class="btn-continue" onclick="closeOverlay()">확인</button>
+  `);
+}
+
+function openIsolationModal(){
+  const node = state.nodes[state.focusId];
+  if(node.confirmedSpecies===false) return;
+  const options = ISOLATION_DEFS.map(d=>`
+    <button class="option-card" onclick="chooseIsolation('${d.id}')">
+      <div class="oc-icon">${d.icon}</div>
+      <div><div class="oc-label">${d.label}</div><div class="oc-desc">${d.desc}</div></div>
+    </button>`).join('');
+  openOverlay(`
+    <button class="close-x" onclick="closeOverlay()">✕</button>
+    <div class="m-kicker" style="color:var(--accent-isolation);">지리적 격리</div>
+    <h3>무리를 갈라놓을 사건을 선택하세요</h3>
+    <p class="m-sub">지리적으로 갈라지면 두 무리는 서로 오가며 교배할 수 없게 되고, 각자 다른 환경에서 진화하기 시작합니다. 다만 <b style="color:var(--ink);">격리가 시작된다고 바로 다른 종이 되는 건 아니에요.</b> 두 무리에 차이가 충분히 쌓여 생식적으로 격리되어야 서로 다른 종이 됩니다.</p>
+    ${node.mutations.length===0?`<div class="m-warn">⚠️ 이 무리에는 아직 변이가 없어서, 갈라진 두 무리가 똑같은 모습으로 출발해요. 돌연변이를 먼저 만들면 두 무리의 차이를 더 잘 관찰할 수 있어요.</div>`:''}
+    <div class="option-list">${options}</div>
+  `);
+}
+function chooseIsolation(id){
+  const def = ISOLATION_DEFS.find(d=>d.id===id);
+  const node = state.nodes[state.focusId];
+  if(node.population < 4){ closeOverlay(); return; }
+  const result = resolveIsolation(node, def);
+  closeOverlay();
+  render();
+  showIsolationResult(result);
+}
+
+function showIsolationResult(r){
+  openOverlay(`
+    <div class="m-kicker" style="color:var(--accent-isolation);">지리적 격리 시작</div>
+    <h3>무리가 두 갈래로 갈라졌습니다 🏔️</h3>
+    <p class="m-sub">'${r.parentName}' 무리가 지리적으로 갈라져 서로 오갈 수 없게 되었습니다. 아직 같은 종이에요 — 두 무리가 각자 돌연변이와 자연선택을 겪으며 차이가 쌓이면(두 무리 합쳐 ${ISO_TARGET}번), 서로 교배할 수 없는 다른 종으로 확정됩니다.</p>
+    <div class="spec-result">
+      <div class="spec-card">
+        <div class="sc-icon">${creatureSVG(r.traitsA, state.baseType, 58)}</div>
+        <h4>${r.nameA}</h4>
+        <p>${r.popA}마리 · 큰 무리</p>
+      </div>
+      <div class="spec-card">
+        <div class="sc-icon">${creatureSVG(r.traitsB, state.baseType, 58)}</div>
+        <h4>${r.nameB}</h4>
+        <p>${r.popB}마리 · 소수 무리 (창시자 효과)</p>
+      </div>
+    </div>
+    <button class="btn-continue" onclick="continueWith('${r.idA}')">${r.nameA}(으)로 계속 진화시키기</button>
+    <button class="btn-continue" style="background:var(--surface-alt);color:var(--ink);margin-top:8px;" onclick="continueWith('${r.idB}')">${r.nameB}(으)로 계속 진화시키기</button>
+  `);
+}
+function continueWith(id){ state.focusId = id; closeOverlay(); render(); }
+
+/* ============================= REASONING REPORT (PDF via print) ============================= */
+function collectReasoningEntries(){
+  const entries = [];
+  Object.values(state.nodes).forEach(n=>(n.selections||[]).forEach(s=>entries.push(s)));
+  entries.sort((a,b)=> (a.generation||0) - (b.generation||0));
+  return entries;
+}
+
+function collectReasoningByBranch(){
+  const bySeq = {};
+  state.isolationEvents.forEach(ev=>{ bySeq[ev.seq] = {seq:ev.seq, parentName:ev.parentName, entries:[]}; });
+  const unbranched = [];
+  Object.values(state.nodes).forEach(n=>{
+    (n.selections||[]).forEach(s=>{
+      if(n.branchSeq && bySeq[n.branchSeq]) bySeq[n.branchSeq].entries.push(s);
+      else unbranched.push(s);
+    });
+  });
+  const seqGroups = state.isolationEvents.map(ev=>bySeq[ev.seq]).filter(Boolean);
+  seqGroups.forEach(g=> g.entries.sort((a,b)=>(a.generation||0)-(b.generation||0)));
+  unbranched.sort((a,b)=>(a.generation||0)-(b.generation||0));
+  return {seqGroups, unbranched};
+}
+
+function judgmentRowsHtml(entry){
+  const rs = entry.results||[];
+  if(rs.length===0) return `<p style="color:#999;font-size:12.5px;margin:6px 0 0;">무리에 변이 형질이 없었습니다.</p>`;
+  return `<ul style="margin:6px 0 0;padding-left:18px;">` + rs.map(r=>{
+    const mark = r.correct===null ? '' : (r.correct ? ' ✅' : ' ❌');
+    return `<li style="margin-bottom:3px;">${escapeHtml(r.label)} — 예측: ${r.judgment?EFFECT_WORD[r.judgment]:'판단 안 함'} / 실제: ${EFFECT_WORD[r.actual]}${mark} (비율 ${pct(r.ratioBefore)}% → ${pct(r.ratioAfter)}%)</li>`;
+  }).join('') + `</ul>`;
+}
+
+function reasoningEntryCardHtml(e){
+  return `
+    <div style="border:1px solid #ccc;border-radius:10px;padding:16px 18px;margin-bottom:14px;break-inside:avoid;page-break-inside:avoid;">
+      <div style="font-size:11.5px;color:#888;margin-bottom:4px;">단계 ${e.generation||'-'} · ${escapeHtml(e.speciesName||'')}</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:6px;">${e.icon||''} ${escapeHtml(e.label||'')}</div>
+      <div style="font-size:13px;color:#444;margin-bottom:10px;">${escapeHtml(e.desc||'')}</div>
+      <div style="font-size:12.5px;font-weight:700;margin-bottom:2px;">🧑‍🎓 학생의 예측과 실제 결과</div>
+      ${judgmentRowsHtml(e)}
+      <div style="font-size:12.5px;font-weight:700;margin:10px 0 2px;">📝 서술형 답변 (예측 이유)</div>
+      <div style="font-size:13.5px;line-height:1.7;background:#f7f5ee;border-radius:8px;padding:10px 12px;white-space:pre-wrap;">${e.reason && e.reason.trim() ? escapeHtml(e.reason.trim()) : '<span style="color:#aaa;">(작성하지 않음)</span>'}</div>
+      ${e.why?`<div style="font-size:12px;color:#666;margin-top:8px;">🔎 실제 인과관계: ${escapeHtml(e.why)}</div>`:''}
+      <div style="font-size:11.5px;color:#888;margin-top:8px;">개체수 변화: ${e.popBefore}마리 → ${e.popAfter}마리</div>
+    </div>`;
+}
+
+function buildReportTreeSvg(){
+  const {positions, width, height} = computeLayout();
+  const boxW = 118, boxH = 34;
+  let edges = '';
+  Object.values(state.nodes).forEach(n=>{
+    n.children.forEach(cid=>{
+      const p = positions[n.id], c = positions[cid];
+      if(!p||!c) return;
+      const unconfirmed = state.nodes[cid].confirmedSpecies===false;
+      const midX = (p.x+c.x)/2;
+      edges += `<path d="M ${p.x+boxW-8} ${p.y} C ${midX} ${p.y}, ${midX} ${c.y}, ${c.x-4} ${c.y}"
+        stroke="#999" stroke-width="2" fill="none" ${unconfirmed?'stroke-dasharray="5 5" opacity="0.5"':''}/>`;
+    });
+  });
+  let nodesHtml = '';
+  Object.values(state.nodes).forEach(n=>{
+    const pos = positions[n.id];
+    if(!pos) return;
+    const unconfirmed = n.confirmedSpecies===false;
+    nodesHtml += `
+      <rect x="${pos.x-8}" y="${pos.y-boxH/2}" width="${boxW}" height="${boxH}" rx="8"
+        fill="#fdfbf3" stroke="${unconfirmed?'#bbb':'#888'}" stroke-width="1.5" ${unconfirmed?'stroke-dasharray="4 3"':''}/>
+      <text x="${pos.x-8+boxW/2}" y="${pos.y-2}" text-anchor="middle" font-size="11" font-weight="700" fill="#222" font-family="sans-serif">${escapeHtml(n.name)}</text>
+      <text x="${pos.x-8+boxW/2}" y="${pos.y+13}" text-anchor="middle" font-size="9" fill="#888" font-family="sans-serif">${n.population}마리</text>`;
+  });
+  let badges = '';
+  Object.values(state.nodes).forEach(n=>{
+    if(n.branchSeq){
+      const p = positions[n.id];
+      if(!p) return;
+      const bx = p.x+boxW-8, by = p.y;
+      badges += `<circle cx="${bx}" cy="${by}" r="12" fill="#e8a33d" stroke="#fff" stroke-width="2"/>
+        <text x="${bx}" y="${by+4}" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="sans-serif">${n.branchSeq}</text>`;
+    }
+  });
+  return `<svg viewBox="0 0 ${width} ${height}" width="100%" style="max-width:100%;height:auto;display:block;">
+    <g>${edges}${nodesHtml}${badges}</g>
+  </svg>`;
+}
+
+function buildReportHtml(){
+  const {seqGroups, unbranched} = collectReasoningByBranch();
+  const allEntries = collectReasoningEntries();
+  const written = allEntries.filter(e=>e.reason && e.reason.trim());
+  const {judged, correct} = predictionStats();
+  const speciesTypeName = state.baseType==='animal' ? '몽글이 (동물)' : '새싹이 (식물)';
+  const confirmedCount = Object.values(state.nodes).filter(n=>n.confirmedSpecies===true && n.status!=='branched').length;   // 이미 갈라져 사라진 조상 무리는 세지 않음
+  const totalSpecies = Object.keys(state.nodes).length;
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
+  const val = id => { const el=document.getElementById(id); return el ? el.value.trim() : ''; };
+  const studentId = val('studentIdInput'), studentName = val('studentNameInput');
+  const reflectionText = val('reflectionInput'), feedbackText = val('feedbackInput');
+
+  const treeSvg = buildReportTreeSvg();
+
+  let branchSections;
+  if(seqGroups.length===0 && unbranched.length===0){
+    branchSections = `<p style="color:#999;">아직 자연선택을 적용한 기록이 없습니다. 게임을 더 진행한 뒤 다시 시도해보세요.</p>`;
+  } else {
+    branchSections = seqGroups.map(g=>{
+      const inner = g.entries.length
+        ? g.entries.map(reasoningEntryCardHtml).join('')
+        : `<p style="color:#999;font-size:13px;">이 무리에서 작성된 기록이 없습니다.</p>`;
+      return `
+        <h2><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#e8a33d;color:#fff;font-size:12px;margin-right:6px;">${g.seq}</span>${g.seq}번 분화 지점 — '${escapeHtml(g.parentName)}' 무리의 기록</h2>
+        ${inner}`;
+    }).join('');
+    if(unbranched.length>0){
+      branchSections += `
+        <h2 style="border-left-color:#999;">아직 분화되지 않은 무리의 기록</h2>
+        ${unbranched.map(reasoningEntryCardHtml).join('')}`;
+    }
+  }
+
+  return `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
+<title>종분화 시뮬레이션 관찰 보고서</title>
+<style>
+  body{font-family:'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#222;max-width:760px;margin:36px auto;padding:0 20px;}
+  h1{font-size:22px;margin-bottom:4px;}
+  h2{font-size:15px;border-left:4px solid #6fcf97;padding-left:10px;margin-top:28px;display:flex;align-items:center;}
+  .meta-row{display:flex;gap:24px;flex-wrap:wrap;font-size:13px;color:#555;margin-bottom:20px;border-bottom:2px solid #222;padding-bottom:14px;}
+  .stat-box{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap;}
+  .stat-box div{flex:1;min-width:110px;border:1px solid #ddd;border-radius:8px;padding:10px 14px;text-align:center;}
+  .stat-box b{display:block;font-size:20px;}
+  .stat-box span{font-size:11px;color:#777;}
+  .tree-box{border:1px solid #ddd;border-radius:10px;padding:14px;margin-bottom:8px;overflow-x:auto;}
+  .qa-box{border:1px solid #ccc;border-radius:10px;padding:14px 16px;margin-bottom:14px;}
+  .qa-box .q{font-size:13.5px;font-weight:700;margin-bottom:6px;}
+  .qa-box .a{font-size:13.5px;line-height:1.7;white-space:pre-wrap;background:#f7f5ee;border-radius:8px;padding:10px 12px;}
+  @media print{ body{margin:0;padding:16px;} }
+</style></head><body>
+  <h1>🧬 종분화 시뮬레이션 관찰 보고서</h1>
+  <div class="meta-row">
+    <div>학번: ${studentId?escapeHtml(studentId):'________________'}</div>
+    <div>이름: ${studentName?escapeHtml(studentName):'________________'}</div>
+    <div>관찰 종: ${speciesTypeName}</div>
+    <div>작성일: ${dateStr}</div>
+  </div>
+  <div class="qa-box">
+    <div class="q">1. 활동을 통해 배우고 느낀 점을 서술하세요. <span style="color:#e8a33d;">(필수)</span></div>
+    <div class="a">${reflectionText ? escapeHtml(reflectionText) : '<span style="color:#aaa;">(작성하지 않음)</span>'}</div>
+  </div>
+  <div class="qa-box">
+    <div class="q">2. 이 게임의 과학적 오류 또는 개선의견이 있으면 써주세요. <span style="color:#999;">(선택)</span></div>
+    <div class="a">${feedbackText ? escapeHtml(feedbackText) : '<span style="color:#aaa;">(작성하지 않음)</span>'}</div>
+  </div>
+  <div class="stat-box">
+    <div><b>${totalSpecies}</b><span>관찰된 무리 수</span></div>
+    <div><b>${confirmedCount}</b><span>확정된 종</span></div>
+    <div><b>${allEntries.length}</b><span>자연선택 적용 횟수</span></div>
+    <div><b>${judged?`${correct}/${judged}`:'-'}</b><span>예측 정답 수</span></div>
+    <div><b>${written.length}</b><span>서술형 답변 작성 수</span></div>
+  </div>
+  <h2 style="margin-top:8px;">🌳 계통수 (원 안의 숫자 = 분화가 일어난 순서, 점선 = 종분화 진행 중)</h2>
+  <div class="tree-box">${treeSvg}</div>
+  ${branchSections}
+</body></html>`;
+}
+
+function openReasoningReport(){
+  const reflectionEl = document.getElementById('reflectionInput');
+  if(reflectionEl && !reflectionEl.value.trim()){
+    alert('1번 질문 "활동을 통해 배우고 느낀 점을 서술하세요"는 필수 항목이에요. 작성 후 다시 눌러주세요.');
+    reflectionEl.focus();
+    return;
+  }
+  const html = buildReportHtml();
+  const win = window.open('', '_blank');
+  if(!win){ alert('팝업이 차단되어 보고서를 열 수 없어요. 브라우저의 팝업 차단을 해제한 뒤 다시 시도해주세요.'); return; }
+  win.document.open();
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(()=>{ win.print(); }, 350);
+}
+
+/* ============================= INIT ============================= */
+document.getElementById('animalPreview').innerHTML = creatureSVG({hue:205,size:1,earShape:'round',legLength:1}, 'animal', 76);
+document.getElementById('plantPreview').innerHTML = creatureSVG({hue:330,stemHeight:1,leafSize:1,thorns:false}, 'plant', 76);
+
+// ESC로 닫기 버튼이 있는 창만 닫기 (결과 확인 창은 버튼으로 진행)
+document.addEventListener('keydown', e=>{
+  if(helpIsOpen()){ if(e.key==='ArrowRight'){ helpGo(1); return; } if(e.key==='ArrowLeft'){ helpGo(-1); return; } }
+  if(e.key==='Escape' && document.getElementById('overlay').style.display==='flex'
+     && document.querySelector('#modalBody .close-x')) closeOverlay();
+});
+// 작성 중인 답변이 있을 때 실수로 창을 닫는 것 방지
+window.addEventListener('beforeunload', e=>{
+  if(document.body.classList.contains('vlab-embed')) return;   // V-Lab 뷰어 안에서는 다른 실험으로 옮길 때 확인창이 뜨지 않게
+  if(state.baseType){ e.preventDefault(); e.returnValue=''; }
+});
+</script>
+</body>
+</html>

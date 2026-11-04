@@ -571,6 +571,78 @@
   .iso-progress{font-size:12.5px;}
   .score-pill{font-size:12.5px;}
   .modal .btn-continue[style*="--surface-alt"]{border:1px solid #E6E8EC;}
+
+  /* ===== 서식지 화면 + 한 화면 배치 (V-Lab 추가) ===== */
+  #app{max-width:none;padding:14px 18px 24px;}
+  body.main-on{overflow:hidden;}
+  body.main-on #app{height:100vh;box-sizing:border-box;display:flex;flex-direction:column;padding-bottom:14px;}
+  body.main-on .topbar{flex:none;margin-bottom:12px;padding-bottom:12px;}
+  body.main-on #main{flex:1;min-height:0;}
+  #main{grid-template-columns:minmax(300px,340px) minmax(0,1fr) minmax(280px,340px);gap:16px;align-items:stretch;}
+  #main > .col{min-width:0;min-height:0;display:flex;flex-direction:column;gap:16px;overflow-y:auto;overflow-x:hidden;position:static;max-height:none;padding-right:0;}
+  #main > .col::-webkit-scrollbar{width:6px;} #main > .col::-webkit-scrollbar-thumb{background:#D9DDE3;border-radius:3px;}
+  #main > .col-center{overflow:hidden;}
+  .panel + .panel{margin-top:0;}
+  .hab-panel{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;}
+  .hab-panel .panel-title{margin-bottom:8px;} .hab-panel .panel-sub{margin:0 0 10px;}
+  #geoWrap{max-height:none;overflow:visible;flex:1 1 auto;min-height:0;display:flex;flex-direction:column;}
+  .tree-panel{flex:0 0 auto;padding:14px 20px;} .tree-panel .panel-title{margin-bottom:8px;} .tree-panel #treeWrap{max-height:min(24vh,240px);}
+  .log-panel{flex:1 1 auto;min-height:220px;display:flex;flex-direction:column;} .log-panel .log-list{flex:1;max-height:none;min-height:0;}
+  @media(max-width:1279px){
+    body.main-on{overflow:auto;} body.main-on #app{height:auto;display:block;}
+    #main{grid-template-columns:minmax(280px,320px) minmax(0,1fr);grid-template-areas:"left center" "left right";align-items:start;}
+    #main > .col{overflow:visible;}
+    .col-left{grid-area:left;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow-y:auto;}
+    .col-center{grid-area:center;} .col-right{grid-area:right;}
+    .hab-field{aspect-ratio:16/10;flex:none;}
+  }
+  @media(max-width:899px){
+    #main{grid-template-columns:1fr;grid-template-areas:"left" "center" "right";}
+    .col-left{position:static;max-height:none;overflow:visible;}
+  }
+  .hab-field{position:relative;flex:1 1 auto;min-height:220px;width:100%;border-radius:10px;overflow:hidden;border:1px solid #E6E8EC;touch-action:none;user-select:none;-webkit-user-select:none;cursor:pointer;
+    background:#EEF5E8 radial-gradient(circle at 18% 28%,rgba(255,255,255,.55) 0 14px,transparent 15px),radial-gradient(circle at 72% 64%,rgba(255,255,255,.45) 0 18px,transparent 19px),radial-gradient(circle at 40% 80%,rgba(120,170,110,.12) 0 24px,transparent 25px);}
+  .hab-field.fence-mode{cursor:crosshair;}
+  .hab-layer{position:absolute;inset:0;pointer-events:none;}
+  .hab-region{position:absolute;box-sizing:border-box;border-radius:6px;transition:outline-color .2s;}
+  .hab-region.focus{outline:2px solid #111;outline-offset:-2px;}
+  .hab-region.pending{background-image:repeating-linear-gradient(45deg,rgba(0,0,0,.02) 0 8px,transparent 8px 16px);}
+  .hab-ind{position:absolute;left:0;top:0;will-change:transform;transition:opacity .8s,filter .5s;}
+  .hab-ind svg{width:100%;height:100%;display:block;}
+  .hab-ind.plant svg{animation:habSway 3s ease-in-out infinite alternate;transform-origin:50% 100%;}
+  .hab-ind.hab-die{opacity:0;filter:grayscale(1) blur(1px);}
+  .hab-ind.hab-born svg{animation:habBorn .6s ease-out;}
+  .hab-ind.hab-mut svg{animation:habSparkle 1.2s ease-out;}
+  .hab-ind.hab-shift svg{animation:habShift .7s ease;}
+  @keyframes habBorn{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}
+  @keyframes habSparkle{0%{filter:none}30%{filter:brightness(1.9) drop-shadow(0 0 7px #F0B860)}100%{filter:none}}
+  @keyframes habShift{0%{transform:scale(1)}50%{transform:scale(1.25)}100%{transform:scale(1)}}
+  @keyframes habSway{from{transform:rotate(-4deg)}to{transform:rotate(4deg)}}
+  .hab-label{position:absolute;transform:translate(6px,6px);background:rgba(255,255,255,.92);border:1px solid #E6E8EC;border-radius:99px;padding:2px 9px;font-size:12.5px;font-weight:600;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box;}
+  .hab-label.focus{background:#111;color:#fff;border-color:#111;}
+  .hab-env{position:absolute;overflow:hidden;animation:habEnvIn .4s ease-out;transition:opacity .5s;}
+  .hab-env.out{opacity:0;}
+  .hab-env span{position:absolute;font-size:22px;animation:habFloat 2.4s ease-in-out forwards;}
+  @keyframes habEnvIn{from{opacity:0}to{opacity:1}}
+  @keyframes habFloat{0%{transform:translateY(16px);opacity:0}25%{opacity:1}100%{transform:translateY(-36px);opacity:0}}
+  .hab-fence{position:absolute;pointer-events:none;display:flex;align-items:center;justify-content:center;}
+  .hab-fence.mountain{background:repeating-linear-gradient(135deg,#8E959E 0 5px,#B9BFC7 5px 10px);box-shadow:0 0 0 1px #7F868F inset;}
+  .hab-fence.river{background:#8CC3EC;box-shadow:inset 0 0 0 2px #BFDFF6;}
+  .hab-fence.island{background:#79B8E8;box-shadow:inset 0 0 0 3px #BFDFF6;}
+  .hab-fence.confirmed{outline:2px dashed #111;outline-offset:3px;opacity:.85;}
+  .hab-fence-tag{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#111;color:#fff;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:99px;white-space:nowrap;}
+  .hab-fence.confirmed .hab-fence-tag{background:#7C3AED;}
+  .hab-ghost{position:absolute;pointer-events:none;background:repeating-linear-gradient(0deg,#111 0 6px,transparent 6px 10px);z-index:3;}
+  .hab-ghost-cnt{position:absolute;left:50%;top:8px;transform:translateX(-50%);background:#111;color:#fff;font-size:12.5px;font-weight:600;padding:3px 9px;border-radius:99px;white-space:nowrap;}
+  .hab-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;background:#111;color:#fff;border-radius:8px;padding:8px 12px;margin-bottom:8px;font-size:13.5px;line-height:1.5;}
+  .hab-toolbar[hidden]{display:none;}
+  .hab-toolbar b{color:#9EC5FF;}
+  .hab-tool-btns{margin-left:auto;display:flex;gap:6px;}
+  .hab-btn{font:inherit;font-size:13px;font-weight:600;padding:5px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.5);background:transparent;color:#fff;cursor:pointer;}
+  .hab-btn.primary{background:#fff;color:#111;border-color:#fff;}
+  .hab-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .hab-toast{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);background:rgba(17,17,17,.86);color:#fff;font-size:13.5px;padding:6px 13px;border-radius:99px;pointer-events:none;white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis;z-index:4;}
+  @media(prefers-reduced-motion:reduce){.hab-ind.plant svg,.hab-env span{animation:none;}}
 </style>
 </head>
 <body>
@@ -629,9 +701,22 @@
 
   <!-- MAIN -->
   <div id="main">
-    <div>
+    <div class="col col-left">
       <div class="panel" id="speciesPanel"></div>
-      <div class="panel">
+    </div>
+    <div class="col col-center">
+      <div class="panel hab-panel">
+        <div class="panel-title"><h3>🗺️ 서식지</h3><span class="hint" id="geoHint"></span></div>
+        <p class="panel-sub">개체들이 자기 영역에서 살아가요. 영역을 누르면 그 무리를 고르고, 돌연변이·자연선택이 일어나는 모습이 여기서 보여요. 지리적 격리를 고르면 <b>울타리를 직접 그어</b> 무리를 나눕니다.</p>
+        <div id="geoWrap"></div>
+      </div>
+      <div class="panel tree-panel">
+        <div class="panel-title"><h3>🌳 계통수</h3><span class="hint">점선 = 종분화 진행 중 · 실선 = 확정된 종</span></div>
+        <div id="treeWrap"><svg id="treeSvg" xmlns="http://www.w3.org/2000/svg"></svg></div>
+      </div>
+    </div>
+    <div class="col col-right">
+      <div class="panel log-panel">
         <div class="panel-title"><h3>📖 관찰 기록</h3><span class="hint">선택한 무리의 기록 · 최근 순</span></div>
         <div class="log-list" id="logList"></div>
       </div>
@@ -647,17 +732,6 @@
         <label class="reason-label">2. 이 게임의 과학적 오류 또는 개선의견이 있으면 써주세요. <span style="color:var(--ink-dim);">(선택)</span></label>
         <textarea id="feedbackInput" class="reason-input" placeholder="게임을 하면서 발견한 오류나, 실제 종분화와 다른 점, 더 좋아졌으면 하는 점을 적어보세요."></textarea>
         <button class="btn-continue" style="margin-top:0;" onclick="openReasoningReport()">📄 보고서 PDF로 저장</button>
-      </div>
-    </div>
-    <div>
-      <div class="panel">
-        <div class="panel-title"><h3>🗺️ 지리적 분포</h3><span class="hint" id="geoHint"></span></div>
-        <p class="panel-sub">지리적으로 격리된 무리는 장벽을 사이에 두고 서로 다른 공간에 놓여요. 격리 직후에는 아직 서로 다른 종이 아니에요. 카드를 누르면 그 무리로 이동해 진화시킬 수 있어요.</p>
-        <div id="geoWrap"><div id="geoMap"></div></div>
-      </div>
-      <div class="panel">
-        <div class="panel-title"><h3>🌳 계통수</h3><span class="hint">점선 = 종분화 진행 중 · 실선 = 확정된 종</span></div>
-        <div id="treeWrap"><svg id="treeSvg" xmlns="http://www.w3.org/2000/svg"></svg></div>
       </div>
     </div>
   </div>
@@ -894,7 +968,9 @@ function startGame(baseType){
   document.getElementById('main').style.display='grid';
   document.getElementById('topStats').style.display='flex';
   document.getElementById('btnReset').style.display='inline-block';
+  document.body.classList.add('main-on');
   window.scrollTo(0,0);
+  habReset();
   render();
 }
 
@@ -905,6 +981,8 @@ function resetGame(){
   document.getElementById('btnReset').style.display='none';
   document.getElementById('intro').style.display='flex';
   state = {baseType:null,nodes:{},rootId:null,focusId:null,generation:0,isolationEvents:[]};
+  document.body.classList.remove('main-on');
+  habClear();
   window.scrollTo(0,0);
 }
 
@@ -955,6 +1033,7 @@ function resolveMutation(node, def){
   const value = mutateValue(def.id, node.baseTraits);
   const label = mutationLabel(def.id, value, baseValue);
   node.mutations.push({traitId:def.id, label, value, baseValue, ratio:INITIAL_RATIO});
+  habOnMutation(node, node.mutations[node.mutations.length-1]);
   pushLog(node, `🧬 <b>돌연변이</b> — <b>${label}</b>. 무리의 약 ${pct(INITIAL_RATIO)}%에서 이 형질이 나타났습니다. 돌연변이는 환경과 상관없이 무작위로 일어나요.`, 'mutation');
   state.generation++;
   markIsolationProgress(node);
@@ -1045,6 +1124,7 @@ function markIsolationProgress(node){
   [a,b].forEach(n=>{ n.isolationProgress = ev.progress; });
   const sib = siblingOf(node);
   if(ev.progress >= ev.target){
+    habOnConfirmed(ev);
     [a,b].forEach(n=>{
       n.confirmedSpecies = true;
       const s = n===a ? b : a;
@@ -1055,14 +1135,18 @@ function markIsolationProgress(node){
   }
 }
 
-function resolveIsolation(node, def){
+function resolveIsolation(node, def, split){
   pushLog(node, `🏔️ <b>지리적 격리 시작</b> — ${def.label}. ${def.desc} 두 무리는 이제 서로 오갈 수 없어 유전자 흐름이 끊겼지만, 아직 서로 다른 종은 아닙니다.`, 'isolation');
 
   const total = node.population;
-  const splitRatio = 0.68+Math.random()*0.14; // 큰 무리 68~82%, 작은 무리 18~32%
-  // 두 무리의 합이 격리 전 개체수와 같아야 함 (예전엔 최소 8·6으로 올려서 10마리 → 14마리로 늘어나 보였음)
-  const popA = Math.min(total-2, Math.max(2, Math.round(total*splitRatio)));
-  const popB = total-popA;
+  let popA, popB;
+  if(split && split.popA>=2 && split.popB>=2 && split.popA+split.popB===total){ popA=split.popA; popB=split.popB; }   // 학생이 그은 울타리 기준
+  else {
+    const splitRatio = 0.68+Math.random()*0.14; // 큰 무리 68~82%, 작은 무리 18~32%
+    // 두 무리의 합이 격리 전 개체수와 같아야 함 (예전엔 최소 8·6으로 올려서 10마리 → 14마리로 늘어나 보였음)
+    popA = Math.min(total-2, Math.max(2, Math.round(total*splitRatio)));
+    popB = total-popA;
+  }
 
   // A: 큰 무리 — 형질이 무리 안 비율에 따른 확률로 고정됨
   const traitsA = {...node.baseTraits};
@@ -1209,7 +1293,7 @@ function renderSpeciesPanel(){
   `;
 
   if(node.status==='branched'){
-    html += `<div class="branched-note">이 무리는 이미 지리적으로 갈라져 두 무리가 되었습니다.<br>오른쪽 <b>🗺️ 지리적 분포</b>나 <b>🌳 계통수</b>에서 갈라진 무리를 눌러 계속 진화시켜 보세요.</div>`;
+    html += `<div class="branched-note">이 무리는 이미 지리적으로 갈라져 두 무리가 되었습니다.<br><b>🗺️ 서식지</b>의 영역이나 <b>🌳 계통수</b>에서 갈라진 무리를 눌러 계속 진화시켜 보세요.</div>`;
   } else {
     const noMoreMutations = availableMutationDefs(node).length===0;
     const tooSmall = node.population < 4;   // 2마리씩도 안 나뉘는 무리는 격리 불가 (자연선택을 거치면 수가 회복됨)
@@ -1239,49 +1323,9 @@ function renderLog(){
 }
 
 /* ============================= RENDER: GEO MAP ============================= */
-function renderGeoMap(){
-  const el = document.getElementById('geoMap');
-  const hint = document.getElementById('geoHint');
-  const leaves = Object.values(state.nodes).filter(n=>n.status==='active');
-  if(hint) hint.textContent = `${leaves.length}개 무리 관찰 중`;
-  if(leaves.length===0){ el.innerHTML = '<div class="empty-hint">아직 관찰 중인 무리가 없습니다.</div>'; return; }
+function renderGeoMap(){ habSync(); }   // 옛 '지리적 분포' 카드는 서식지 화면(habSync)으로 대체
 
-  const groups = {}, order = [];
-  leaves.forEach(n=>{
-    const key = n.parentId || 'root';
-    if(!groups[key]){ groups[key]=[]; order.push(key); }
-    groups[key].push(n);
-  });
-
-  let html = '<div class="geo-groups">';
-  order.forEach(key=>{
-    const members = groups[key];
-    const parent = key!=='root' ? state.nodes[key] : null;
-    const isoDef = parent ? parent.isolationInfo : null;
-    html += `<div class="geo-cluster">`;
-    members.forEach((n,i)=>{
-      const isFocus = n.id===state.focusId;
-      let statusTag;
-      if(n.id===state.rootId) statusTag = `<div class="geo-status">🌱 시작 종</div>`;
-      else if(n.confirmedSpecies===false) statusTag = `<div class="geo-status">⏳ 진행중</div>`;
-      else statusTag = `<div class="geo-status geo-status-ok">🔒 확정</div>`;
-      html += `<div class="geo-card ${n.confirmedSpecies===false?'geo-unconfirmed':''} ${isFocus?'geo-focus':''}" onclick="setFocus('${n.id}')">
-        <div class="geo-icon">${creatureSVG(n.baseTraits, state.baseType, 38)}</div>
-        <div class="geo-name">${n.name}</div>
-        <div class="geo-pop">${n.population}마리</div>
-        ${statusTag}
-      </div>`;
-      if(i<members.length-1 && isoDef){
-        html += `<div class="geo-barrier" title="${isoDef.label}">${isoDef.icon}</div>`;
-      }
-    });
-    html += `</div>`;
-  });
-  html += '</div>';
-  el.innerHTML = html;
-}
-
-function setFocus(id){ state.focusId = id; render(); }
+function setFocus(id){ if(HAB.fenceMode && HAB.fenceMode.nodeId!==id) habCancelFence(); state.focusId = id; render(); }
 
 /* ============================= RENDER: TREE ============================= */
 function computeLayout(){
@@ -1365,7 +1409,7 @@ function render(){
   document.getElementById('statScore').textContent = judged ? `${Math.round(correct/judged*100)}%` : '-';
   renderSpeciesPanel();
   renderLog();
-  renderGeoMap();
+  habSync();
   renderTree();
 }
 
@@ -1451,7 +1495,7 @@ function helpSlides(){
             <div class="ls-box"><b>📄 보고서</b>느낀 점 → PDF 저장</div>
           </div>
           <div class="ls-col">
-            <div class="ls-box tall"><b>🗺️ 지리적 분포</b>카드를 눌러 다른 무리로 이동</div>
+            <div class="ls-box tall"><b>🗺️ 서식지</b>개체들이 사는 영역 · 영역을 눌러 다른 무리로 이동 · 격리 때 울타리 긋기</div>
             <div class="ls-box tall"><b>🌳 계통수</b>점선 = 진행 중<br>실선 = 확정된 종</div>
           </div>
         </div>`,
@@ -1492,6 +1536,7 @@ function helpJump(i){ helpIndex = i; renderHelp(); }
 function helpIsOpen(){ return document.getElementById('overlay').style.display==='flex' && !!document.querySelector('#modalBody .help-modal'); }
 
 function openMutationModal(){
+  if(HAB.fenceMode) habCancelFence();
   const node = state.nodes[state.focusId];
   const avail = availableMutationDefs(node);
   if(avail.length===0){
@@ -1539,6 +1584,7 @@ let pendingJudgments = {};
 let pendingReasonText = '';
 
 function openSelectionModal(){
+  if(HAB.fenceMode) habCancelFence();
   pendingSelectionId = null; pendingJudgments = {}; pendingReasonText = '';
   const node = state.nodes[state.focusId];
   const defs = SELECTION_DEFS[state.baseType];
@@ -1601,8 +1647,10 @@ function confirmSelection(){
   const def = SELECTION_DEFS[state.baseType].find(d=>d.id===pendingSelectionId);
   const entry = resolveSelection(node, def, {...pendingJudgments}, reason);
   pendingSelectionId=null; pendingJudgments={}; pendingReasonText='';
+  closeOverlay();
+  const wait = habOnSelection(node, def, entry);   // 서식지에서 환경 변화·도태·번식 장면을 먼저 보여 준 뒤 결과 창
   render();
-  showSelectionResult(entry);
+  setTimeout(()=>showSelectionResult(entry), wait);
 }
 function showSelectionResult(e){
   const judged = e.results.filter(r=>r.judgment);
@@ -1638,6 +1686,7 @@ function openIsolationModal(){
     <button class="close-x" onclick="closeOverlay()">✕</button>
     <div class="m-kicker" style="color:var(--accent-isolation);">지리적 격리</div>
     <h3>무리를 갈라놓을 사건을 선택하세요</h3>
+    <p class="m-sub" style="margin-bottom:10px;">사건을 고르면 <b style="color:var(--ink);">서식지에 울타리를 직접 그어</b> 어느 개체들이 갈라질지 정합니다.</p>
     <p class="m-sub">지리적으로 갈라지면 두 무리는 서로 오가며 교배할 수 없게 되고, 각자 다른 환경에서 진화하기 시작합니다. 다만 <b style="color:var(--ink);">격리가 시작된다고 바로 다른 종이 되는 건 아니에요.</b> 두 무리에 차이가 충분히 쌓여 생식적으로 격리되어야 서로 다른 종이 됩니다.</p>
     ${node.mutations.length===0?`<div class="m-warn">⚠️ 이 무리에는 아직 변이가 없어서, 갈라진 두 무리가 똑같은 모습으로 출발해요. 돌연변이를 먼저 만들면 두 무리의 차이를 더 잘 관찰할 수 있어요.</div>`:''}
     <div class="option-list">${options}</div>
@@ -1646,11 +1695,9 @@ function openIsolationModal(){
 function chooseIsolation(id){
   const def = ISOLATION_DEFS.find(d=>d.id===id);
   const node = state.nodes[state.focusId];
-  if(node.population < 4){ closeOverlay(); return; }
-  const result = resolveIsolation(node, def);
   closeOverlay();
-  render();
-  showIsolationResult(result);
+  if(node.population < 4) return;
+  habStartFence(node, def);   // 서식지에서 울타리를 직접 긋고 나면 habConfirmFence() 가 resolveIsolation 을 부름
 }
 
 function showIsolationResult(r){
@@ -1675,6 +1722,346 @@ function showIsolationResult(r){
   `);
 }
 function continueWith(id){ state.focusId = id; closeOverlay(); render(); }
+
+
+/* ============================= HABITAT: 서식지 화면 (V-Lab 추가, 2026-11) =============================
+   개체들이 자기 영역에서 돌아다니고, 돌연변이(반짝임)·자연선택(환경 변화 → 도태·번식)·지리적 격리(학생이
+   직접 긋는 울타리)·생식적 격리 확정(✕ 교배 안 됨)을 눈에 보이게 연출한다.
+   비율·개체수·확정 조건 같은 규칙은 기존 함수가 정하고, 여기서는 그 결과를 '보여 주기'만 한다. */
+const HAB = { MAX_SHOWN: 30, regions:{}, pops:{}, fences:[], sizes:{}, fenceMode:null, raf:0, lastT:0, busyUntil:0, syncT:0,
+  w:1, h:1, built:false, reduced: !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) };
+const ENV_TINT = { cold:'rgba(190,220,255,.5)', predator:'rgba(60,60,80,.3)', food:'rgba(200,150,80,.32)', humid:'rgba(90,180,90,.32)',
+  drought:'rgba(230,190,90,.38)', herbivore:'rgba(150,190,90,.28)', shade:'rgba(40,60,40,.42)', wind:'rgba(200,220,235,.4)' };
+
+function habBuild(){
+  if(HAB.built) return;
+  const wrap = document.getElementById('geoWrap'); if(!wrap) return;
+  wrap.innerHTML = `
+    <div class="hab-toolbar" id="habToolbar" hidden>
+      <span id="habToolText"></span>
+      <span class="hab-tool-btns"><button type="button" class="hab-btn primary" id="habFenceOk" onclick="habConfirmFence()" disabled>여기에 울타리 세우기</button><button type="button" class="hab-btn" onclick="habCancelFence()">취소</button></span>
+    </div>
+    <div class="hab-field" id="habField">
+      <div class="hab-layer" id="habRegions"></div>
+      <div class="hab-layer" id="habEnv"></div>
+      <div class="hab-layer" id="habFences"></div>
+      <div class="hab-layer" id="habInds"></div>
+      <div class="hab-layer" id="habLabels"></div>
+      <div class="hab-ghost" id="habGhost" hidden><span class="hab-ghost-cnt" id="habGhostCnt"></span></div>
+      <div class="hab-toast" id="habToast" hidden></div>
+    </div>`;
+  const field = document.getElementById('habField');
+  const measure = ()=>{ const r = field.getBoundingClientRect(); if(r.width<2) return; HAB.w = r.width; HAB.h = r.height; habUpdateSizes(); habPlaceRegions(); };
+  if('ResizeObserver' in window) new ResizeObserver(measure).observe(field); else window.addEventListener('resize', measure);
+  measure();
+  field.addEventListener('pointermove', habPointerMove);
+  field.addEventListener('pointerdown', habPointerDown);
+  HAB.built = true;
+}
+function habClear(){
+  cancelAnimationFrame(HAB.raf); HAB.raf = 0;
+  HAB.regions = {}; HAB.pops = {}; HAB.fences = []; HAB.sizes = {}; HAB.fenceMode = null; HAB.busyUntil = 0;
+  ['habRegions','habEnv','habFences','habInds','habLabels'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=''; });
+  const tb=document.getElementById('habToolbar'); if(tb) tb.hidden=true;
+  const g=document.getElementById('habGhost'); if(g) g.hidden=true;
+  const f=document.getElementById('habField'); if(f) f.classList.remove('fence-mode');
+}
+function habReset(){
+  habBuild(); habClear();
+  HAB.regions[state.rootId] = {x:0,y:0,w:1,h:1};
+  HAB.pops[state.rootId] = [];
+  habReconcile(state.nodes[state.rootId]);
+  habPlaceRegions(); habUpdateSizes(); habUpdateLabels();
+  if(!HAB.raf){ HAB.lastT = performance.now(); HAB.raf = requestAnimationFrame(habLoop); }
+}
+function habBusy(ms){ HAB.busyUntil = Math.max(HAB.busyUntil, Date.now()+ms); }
+function habToast(text, ms){
+  const t=document.getElementById('habToast'); if(!t) return;
+  t.textContent=text; t.hidden=false; clearTimeout(t._t); t._t=setTimeout(()=>{ t.hidden=true; }, ms||2400);
+}
+function habNudgeIntoView(){
+  if(window.innerWidth < 900){ const f=document.getElementById('habField'); if(f) f.scrollIntoView({behavior:'smooth', block:'center'}); }
+}
+
+/* ---- 개체 ---- */
+function habTraitsFromNode(node){
+  const t = {...node.baseTraits};
+  node.mutations.forEach(m=>{ if(Math.random()<m.ratio) t[m.traitId]=m.value; });
+  return t;
+}
+function habSame(a,b){ return Object.keys(a).every(k=>String(a[k])===String(b[k])); }
+function habMakeInd(nodeId, traits, x, y, born){
+  const layer = document.getElementById('habInds');
+  const el = document.createElement('div');
+  el.className = 'hab-ind' + (state.baseType==='plant' ? ' plant' : '') + (born ? ' hab-born' : '');
+  el.innerHTML = creatureSVG(traits, state.baseType, 40);
+  if(state.baseType==='plant') el.style.animationDelay = (-Math.random()*3).toFixed(2)+'s';
+  layer.appendChild(el);
+  const p = {nodeId, traits:{...traits}, x, y, vx:0, vy:0, turn:Math.random()*1.5, el, dying:false};
+  const s = HAB.sizes[nodeId]||28;
+  el.style.width = el.style.height = s+'px';
+  el.style.transform = `translate(${(x*HAB.w-s/2).toFixed(1)}px, ${(y*HAB.h-s/2).toFixed(1)}px)`;
+  if(born) setTimeout(()=>el.classList.remove('hab-born'), 700);
+  return p;
+}
+function habSetTraits(p, traits, anim){
+  p.traits = {...traits};
+  p.el.innerHTML = creatureSVG(p.traits, state.baseType, 40);
+  if(anim){ p.el.classList.add('hab-'+anim); setTimeout(()=>p.el.classList.remove('hab-'+anim), 1200); }
+}
+function habRandPos(reg){ return {x: reg.x + reg.w*(0.1+Math.random()*0.8), y: reg.y + reg.h*(0.12+Math.random()*0.76)}; }
+function habBirth(node, list, near){
+  const reg = HAB.regions[node.id]; if(!reg) return null;
+  let pos = habRandPos(reg);
+  if(near && list.length){ const q = list[Math.floor(Math.random()*list.length)]; pos = {x: clamp(q.x+(Math.random()-0.5)*0.16, reg.x+0.03, reg.x+reg.w-0.03), y: clamp(q.y+(Math.random()-0.5)*0.16, reg.y+0.03, reg.y+reg.h-0.03)}; }
+  const p = habMakeInd(node.id, habTraitsFromNode(node), pos.x, pos.y, true);
+  list.push(p); return p;
+}
+function habKill(list, p){
+  const i = list.indexOf(p); if(i>=0) list.splice(i,1);
+  p.dying = true; p.el.classList.add('hab-die');
+  setTimeout(()=>p.el.remove(), 900);
+}
+// 자연선택 때 먼저 사라질 개체: 불리한 형질을 가진 개체, 유리한 형질이 없는 개체
+function habPickVictim(node, list, results){
+  if(!list.length) return null;
+  let best=null, bestS=-Infinity;
+  list.forEach(p=>{
+    let sc = Math.random()*0.6;
+    (results||[]).forEach(r=>{
+      const m = node.mutations.find(x=>x.traitId===r.traitId); if(!m) return;
+      const carries = String(p.traits[m.traitId])===String(m.value);
+      if(r.actual==='dis' && carries) sc += 2;
+      if(r.actual==='adv' && !carries) sc += 2;
+    });
+    if(sc>bestS){ bestS=sc; best=p; }
+  });
+  return best;
+}
+function habReconcile(node, results){
+  const list = HAB.pops[node.id] || (HAB.pops[node.id] = []);
+  const target = Math.min(HAB.MAX_SHOWN, node.population);
+  while(list.length > target){ const p = habPickVictim(node, list, results); if(!p) break; habKill(list, p); }
+  while(list.length < target){ if(!habBirth(node, list, false)) break; }
+  node.mutations.forEach(m=>{
+    const want = Math.round(m.ratio*list.length);
+    const carriers = list.filter(p=>String(p.traits[m.traitId])===String(m.value));
+    const non = list.filter(p=>String(p.traits[m.traitId])!==String(m.value));
+    let d = want - carriers.length;
+    while(d>0 && non.length){ const p = non.splice(Math.floor(Math.random()*non.length),1)[0]; habSetTraits(p, {...p.traits, [m.traitId]:m.value}, 'shift'); d--; }
+    while(d<0 && carriers.length){ const p = carriers.splice(Math.floor(Math.random()*carriers.length),1)[0]; habSetTraits(p, {...p.traits, [m.traitId]:m.baseValue}, 'shift'); d++; }
+  });
+  if(node.mutations.length===0) list.forEach(p=>{ if(!habSame(p.traits, node.baseTraits)) habSetTraits(p, node.baseTraits, 'shift'); });
+}
+
+/* ---- 영역·라벨·크기 ---- */
+function habPlaceRegions(){
+  const layer = document.getElementById('habRegions'); if(!layer) return;
+  layer.innerHTML = '';
+  Object.keys(HAB.regions).forEach(id=>{
+    const r = HAB.regions[id], n = state.nodes[id]; if(!n) return;
+    const d = document.createElement('div');
+    d.className = 'hab-region' + (id===state.focusId ? ' focus' : '') + (n.confirmedSpecies===false ? ' pending' : '');
+    d.style.left = (r.x*100)+'%'; d.style.top = (r.y*100)+'%'; d.style.width = (r.w*100)+'%'; d.style.height = (r.h*100)+'%';
+    d.style.background = `hsl(${(hashStr(id)%360)} 45% 95%)`;
+    layer.appendChild(d);
+  });
+}
+function habUpdateLabels(){
+  const layer = document.getElementById('habLabels'); if(!layer) return;
+  layer.innerHTML = '';
+  Object.keys(HAB.regions).forEach(id=>{
+    const r = HAB.regions[id], n = state.nodes[id]; if(!n) return;
+    const d = document.createElement('div');
+    d.className = 'hab-label' + (id===state.focusId ? ' focus' : '');
+    const st = n.id===state.rootId && n.status==='active' ? '🌱' : (n.confirmedSpecies===false ? '⏳' : '🔒');
+    d.textContent = `${st} ${n.name} · ${n.population}마리`;
+    d.style.left = (r.x*100)+'%'; d.style.top = (r.y*100)+'%'; d.style.maxWidth = `calc(${r.w*100}% - 12px)`;
+    layer.appendChild(d);
+  });
+  const hint = document.getElementById('geoHint');
+  if(hint){ const live = Object.keys(HAB.regions).length; hint.textContent = `${live}개 무리 관찰 중${state.nodes[state.focusId]?' · 선택: '+state.nodes[state.focusId].name:''}`; }
+}
+function habUpdateSizes(){
+  Object.keys(HAB.regions).forEach(id=>{
+    const r = HAB.regions[id], list = HAB.pops[id]||[];
+    const area = r.w*HAB.w * r.h*HAB.h;
+    const s = Math.round(clamp(Math.sqrt(area/Math.max(1,list.length)/3.4), 16, 44));
+    HAB.sizes[id] = s;
+    list.forEach(p=>{ p.el.style.width = p.el.style.height = s+'px'; });
+  });
+}
+function habRegionAt(nx, ny){
+  return Object.keys(HAB.regions).find(id=>{ const r=HAB.regions[id]; return nx>=r.x && nx<=r.x+r.w && ny>=r.y && ny<=r.y+r.h; }) || null;
+}
+
+/* ---- 동기화 (render 마다) ---- */
+function habSync(){
+  if(!state.baseType) return;
+  habBuild();
+  if(Date.now() < HAB.busyUntil){ clearTimeout(HAB.syncT); HAB.syncT = setTimeout(habSync, HAB.busyUntil-Date.now()+60); habUpdateLabels(); habPlaceRegions(); return; }
+  const active = Object.values(state.nodes).filter(n=>n.status==='active');
+  // 영역이 없는 무리(울타리 없이 갈라진 경우의 안전장치): 부모 영역을 반으로 나눠 줌
+  active.forEach(n=>{
+    if(HAB.regions[n.id]) return;
+    const parent = n.parentId && HAB.regions[n.parentId];
+    if(parent){ const sib = state.nodes[n.parentId].children; const k = sib.indexOf(n.id); const vert = parent.w*HAB.w >= parent.h*HAB.h;
+      HAB.regions[n.id] = vert ? {x:parent.x+(k?parent.w/2:0), y:parent.y, w:parent.w/2, h:parent.h} : {x:parent.x, y:parent.y+(k?parent.h/2:0), w:parent.w, h:parent.h/2};
+      if(sib.every(c=>HAB.regions[c])) delete HAB.regions[n.parentId];
+    } else HAB.regions[n.id] = {x:0,y:0,w:1,h:1};
+  });
+  Object.keys(HAB.regions).forEach(id=>{ const n=state.nodes[id]; if(!n || n.status!=='active'){ delete HAB.regions[id]; } });
+  Object.keys(HAB.pops).forEach(id=>{ if(!HAB.regions[id]){ HAB.pops[id].forEach(p=>p.el.remove()); delete HAB.pops[id]; } });
+  active.forEach(n=>habReconcile(n));
+  habPlaceRegions(); habUpdateSizes(); habUpdateLabels();
+  if(!HAB.raf){ HAB.lastT = performance.now(); HAB.raf = requestAnimationFrame(habLoop); }
+}
+
+/* ---- 움직임 ---- */
+function habLoop(t){
+  HAB.raf = requestAnimationFrame(habLoop);
+  const dt = Math.min(0.05, Math.max(0,(t-HAB.lastT)/1000)); HAB.lastT = t;
+  if(document.hidden) return;
+  const moving = state.baseType==='animal' && !HAB.reduced;
+  for(const id in HAB.pops){
+    const reg = HAB.regions[id]; if(!reg) continue;
+    const s = HAB.sizes[id]||28, ix = s/2/HAB.w, iy = s/2/HAB.h;
+    let x0=reg.x+ix, x1=reg.x+reg.w-ix, y0=reg.y+iy, y1=reg.y+reg.h-iy;
+    if(x1<x0){ x0=x1=reg.x+reg.w/2; } if(y1<y0){ y0=y1=reg.y+reg.h/2; }
+    HAB.pops[id].forEach(p=>{
+      if(moving){
+        p.turn -= dt;
+        if(p.turn<=0){ p.turn = 0.8+Math.random()*2.6; if(Math.random()<0.35){ p.vx=0; p.vy=0; } else { const a=Math.random()*Math.PI*2, sp=0.012+Math.random()*0.03; p.vx=Math.cos(a)*sp; p.vy=Math.sin(a)*sp*0.75; } }
+        p.x += p.vx*dt; p.y += p.vy*dt;
+      }
+      if(p.x<x0){ p.x=x0; p.vx=Math.abs(p.vx); } if(p.x>x1){ p.x=x1; p.vx=-Math.abs(p.vx); }
+      if(p.y<y0){ p.y=y0; p.vy=Math.abs(p.vy); } if(p.y>y1){ p.y=y1; p.vy=-Math.abs(p.vy); }
+      p.el.style.transform = `translate(${(p.x*HAB.w-s/2).toFixed(1)}px, ${(p.y*HAB.h-s/2).toFixed(1)}px)`;
+    });
+  }
+}
+
+/* ---- 사건 연출 ---- */
+function habOnMutation(node, m){
+  const list = HAB.pops[node.id]; if(!list || !list.length) return;
+  const want = Math.max(1, Math.round(m.ratio*list.length));
+  const non = list.filter(p=>String(p.traits[m.traitId])!==String(m.value));
+  const picked = [];
+  while(picked.length<want && non.length) picked.push(non.splice(Math.floor(Math.random()*non.length),1)[0]);
+  picked.forEach(p=>p.el.classList.add('hab-mut'));
+  setTimeout(()=>{ picked.forEach(p=>habSetTraits(p, {...p.traits, [m.traitId]:m.value})); }, 450);
+  setTimeout(()=>{ picked.forEach(p=>p.el.classList.remove('hab-mut')); }, 1300);
+  habBusy(1300); habToast('🧬 돌연변이 — 일부 개체의 모습이 달라져요'); habNudgeIntoView();
+}
+function habEnvOverlay(nodeId, def, ms){
+  const reg = HAB.regions[nodeId], layer = document.getElementById('habEnv'); if(!reg || !layer) return;
+  const d = document.createElement('div'); d.className = 'hab-env';
+  d.style.left=(reg.x*100)+'%'; d.style.top=(reg.y*100)+'%'; d.style.width=(reg.w*100)+'%'; d.style.height=(reg.h*100)+'%';
+  d.style.background = ENV_TINT[def.id] || 'rgba(0,0,0,.2)';
+  for(let i=0;i<7;i++){ const sp=document.createElement('span'); sp.textContent=def.icon; sp.style.left=(8+Math.random()*84)+'%'; sp.style.top=(15+Math.random()*70)+'%'; sp.style.animationDelay=(Math.random()*1.2)+'s'; d.appendChild(sp); }
+  layer.appendChild(d);
+  setTimeout(()=>{ d.classList.add('out'); setTimeout(()=>d.remove(), 500); }, ms||3000);
+}
+function habOnSelection(node, def, entry){
+  const list = HAB.pops[node.id]; if(!list) return 0;
+  const shownBefore = list.length, shownAfter = Math.min(HAB.MAX_SHOWN, entry.popAfter);
+  const strong = entry.results.some(r=>r.actual!=='neu');
+  let deaths = Math.round(shownBefore * (strong ? 0.4 : 0.2)); deaths = Math.min(deaths, Math.max(0, shownBefore-2));
+  habBusy(3300); habEnvOverlay(node.id, def, 3000); habNudgeIntoView();
+  habToast(`${def.icon} ${def.label} — 환경이 바뀌었어요`, 1400);
+  setTimeout(()=>{ habToast('불리한 개체부터 사라져요', 1200); for(let i=0;i<deaths;i++){ const p=habPickVictim(node, list, entry.results); if(p) habKill(list, p); } }, 900);
+  setTimeout(()=>{ habToast('살아남은 개체가 번식해요', 1300); while(list.length < shownAfter){ if(!habBirth(node, list, true)) break; } habReconcile(node, entry.results); habUpdateSizes(); habUpdateLabels(); }, 2000);
+  return 3000;
+}
+function habOnConfirmed(ev){
+  const f = HAB.fences.find(x=>x.seq===ev.seq); if(!f) return;
+  f.confirmed = true;
+  if(f.el){ f.el.classList.add('confirmed'); const tag=f.el.querySelector('.hab-fence-tag'); if(tag) tag.textContent='✕ 서로 다른 종 · 교배 안 됨'; }
+  habToast('🔒 생식적 격리 — 다시 만나도 교배할 수 없는 다른 종이 되었어요', 3200);
+}
+
+/* ---- 울타리 긋기 ---- */
+function habStartFence(node, def){
+  habBuild();
+  const reg = HAB.regions[node.id]; if(!reg){ habSync(); if(!HAB.regions[node.id]) return; }
+  const r = HAB.regions[node.id];
+  HAB.fenceMode = { nodeId:node.id, def, pos:0.5, vertical: r.w*HAB.w >= r.h*HAB.h };
+  const tb = document.getElementById('habToolbar'); tb.hidden = false;
+  document.getElementById('habToolText').innerHTML = `${def.icon} <b>${node.name}</b> 영역 위에서 마우스를 움직이거나 손가락으로 눌러 ${def.id==='island'?'바닷물이 차오를':'울타리를 세울'} 자리를 정하세요. 양쪽에 2마리 이상 있어야 해요.`;
+  document.getElementById('habField').classList.add('fence-mode');
+  habUpdateGhost();
+  const f=document.getElementById('habField'); if(f) f.scrollIntoView({behavior:'smooth', block:'center'});
+}
+function habCancelFence(){
+  HAB.fenceMode = null;
+  document.getElementById('habToolbar').hidden = true;
+  document.getElementById('habGhost').hidden = true;
+  document.getElementById('habField').classList.remove('fence-mode');
+}
+function habFieldPoint(e){ const r = document.getElementById('habField').getBoundingClientRect(); return {nx:(e.clientX-r.left)/r.width, ny:(e.clientY-r.top)/r.height}; }
+function habPointerMove(e){
+  if(!HAB.fenceMode) return;
+  const {nx,ny} = habFieldPoint(e); const r = HAB.regions[HAB.fenceMode.nodeId]; if(!r) return;
+  if(nx<r.x || nx>r.x+r.w || ny<r.y || ny>r.y+r.h) return;
+  HAB.fenceMode.pos = clamp(HAB.fenceMode.vertical ? (nx-r.x)/r.w : (ny-r.y)/r.h, 0.1, 0.9);
+  habUpdateGhost();
+}
+function habPointerDown(e){
+  const {nx,ny} = habFieldPoint(e);
+  if(HAB.fenceMode){ habPointerMove(e); return; }
+  const id = habRegionAt(nx, ny);
+  if(id && id!==state.focusId) setFocus(id);
+}
+function habSplitCounts(){
+  const fm = HAB.fenceMode, r = HAB.regions[fm.nodeId], node = state.nodes[fm.nodeId], list = HAB.pops[fm.nodeId]||[];
+  const cut = fm.vertical ? r.x + r.w*fm.pos : r.y + r.h*fm.pos;
+  const first = list.filter(p=> (fm.vertical ? p.x : p.y) < cut), second = list.filter(p=> !first.includes(p));
+  const total = node.population, shown = list.length || 1;
+  let pop1 = Math.round(total * first.length/shown); pop1 = clamp(pop1, 0, total); let pop2 = total - pop1;
+  return {first, second, pop1, pop2, cut};
+}
+function habUpdateGhost(){
+  const fm = HAB.fenceMode, g = document.getElementById('habGhost'); if(!fm || !g) return;
+  const r = HAB.regions[fm.nodeId]; const c = habSplitCounts();
+  if(fm.vertical){ g.style.left = (c.cut*100)+'%'; g.style.top = (r.y*100)+'%'; g.style.width = '3px'; g.style.height = (r.h*100)+'%'; }
+  else { g.style.left = (r.x*100)+'%'; g.style.top = (c.cut*100)+'%'; g.style.width = (r.w*100)+'%'; g.style.height = '3px'; }
+  g.hidden = false;
+  const ok = c.pop1>=2 && c.pop2>=2;
+  document.getElementById('habGhostCnt').textContent = fm.vertical ? `왼쪽 ${c.pop1}마리 · 오른쪽 ${c.pop2}마리` : `위 ${c.pop1}마리 · 아래 ${c.pop2}마리`;
+  document.getElementById('habFenceOk').disabled = !ok;
+}
+function habConfirmFence(){
+  const fm = HAB.fenceMode; if(!fm) return;
+  const node = state.nodes[fm.nodeId], r = HAB.regions[fm.nodeId];
+  const c = habSplitCounts(); if(!(c.pop1>=2 && c.pop2>=2)) return;
+  const firstIsA = c.pop1 >= c.pop2;
+  const split = firstIsA ? {popA:c.pop1, popB:c.pop2} : {popA:c.pop2, popB:c.pop1};
+  const result = resolveIsolation(node, fm.def, split);
+  // 영역 나누기
+  const th = fm.vertical ? 0.022 : 0.034;
+  let reg1, reg2, fence;
+  if(fm.vertical){ const cx = c.cut; reg1 = {x:r.x, y:r.y, w:Math.max(0.02, cx-th/2-r.x), h:r.h}; reg2 = {x:cx+th/2, y:r.y, w:Math.max(0.02, r.x+r.w-(cx+th/2)), h:r.h}; fence = {x:cx-th/2, y:r.y, w:th, h:r.h}; }
+  else { const cy = c.cut; reg1 = {x:r.x, y:r.y, w:r.w, h:Math.max(0.02, cy-th/2-r.y)}; reg2 = {x:r.x, y:cy+th/2, w:r.w, h:Math.max(0.02, r.y+r.h-(cy+th/2))}; fence = {x:r.x, y:cy-th/2, w:r.w, h:th}; }
+  const idFirst = firstIsA ? result.idA : result.idB, idSecond = firstIsA ? result.idB : result.idA;
+  delete HAB.regions[node.id];
+  HAB.regions[idFirst] = reg1; HAB.regions[idSecond] = reg2;
+  const list = HAB.pops[node.id]||[]; delete HAB.pops[node.id];
+  HAB.pops[idFirst] = c.first; HAB.pops[idSecond] = c.second;
+  c.first.forEach(p=>{ p.nodeId = idFirst; }); c.second.forEach(p=>{ p.nodeId = idSecond; });
+  const seq = state.isolationEvents.length;
+  const fel = document.createElement('div'); fel.className = 'hab-fence '+fm.def.id + (fm.vertical?' v':' h');
+  fel.style.left=(fence.x*100)+'%'; fel.style.top=(fence.y*100)+'%'; fel.style.width=(fence.w*100)+'%'; fel.style.height=(fence.h*100)+'%';
+  fel.innerHTML = `<span class="hab-fence-tag">${fm.def.icon} ${fm.def.id==='mountain'?'산맥':fm.def.id==='river'?'강':'바다'}</span>`;
+  document.getElementById('habFences').appendChild(fel);
+  HAB.fences.push({seq, type:fm.def.id, rect:fence, el:fel, confirmed:false});
+  habCancelFence();
+  habBusy(1500);
+  // 갈라진 뒤 세대가 지나며 각 무리의 형질이 굳어지는 모습
+  setTimeout(()=>{ [idFirst, idSecond].forEach(id=>{ const n=state.nodes[id]; (HAB.pops[id]||[]).forEach(p=>{ if(!habSame(p.traits, n.baseTraits)) habSetTraits(p, n.baseTraits, 'shift'); }); habReconcile(n); }); habUpdateSizes(); habUpdateLabels(); }, 700);
+  habToast(`${fm.def.icon} ${fm.def.label} — 두 무리가 서로 오갈 수 없게 되었어요`, 2600);
+  render();
+  setTimeout(()=>showIsolationResult(result), 1500);
+}
 
 /* ============================= REASONING REPORT (PDF via print) ============================= */
 function collectReasoningEntries(){

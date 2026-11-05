@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>세포호흡 한눈에 보기 · V-Lab</title>
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<style>
+/* V-Lab 공용 글꼴·색 토큰만 가져옴 (공용 클래스는 이 파일의 클래스 이름과 겹치므로 lab-theme.css 전체는 쓰지 않음) */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+:root{--font: 'IBM Plex Sans KR', 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; --bg: #ffffff; --panel: #ffffff; --panel-2: #F7F8FA; --line: #E6E8EC; --line-2: #F0F1F3; --text: #111111; --text-2: #3F4652; --muted: #6B7280; --accent: #3182F6; --accent-soft: #EAF2FF; --ok: #12A66B; --warn: #F5A623; --err: #E5484D; --radius: 12px; --radius-sm: 8px;}
+</style>
+<style>
+/* Layout: 세포 한 장면(왼쪽 큰 그림) + 선택한 단계 설명(오른쪽), 아래에 ATP 막대와 4단계 비교표 */
+:root{
+  --bg:#eef3f1; --surface:#ffffff; --ink:#1d2b2f; --muted:#5b6d72; --line:#d3dfdc;
+  --accent:#167a86; --accent-ink:#ffffff; --soft:#e2f0ee;
+  --easy:#fff6dc; --easy-ink:#5a4300; --easy-line:#f1d27a;
+  --plate:#ffffff; --plate-line:#cfdcda;
+  --st0:#167a86; --st1:#2f8fa3; --st2:#d9762b; --st3:#b04f86; --st4:#3b74c0; --st5:#6a7f3a;
+  --display:"Jua","Noto Sans KR",system-ui,sans-serif;
+  --body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--body);font-size:17px;line-height:1.65;padding-inline:clamp(16px,2.5vw,36px);padding-block:18px 32px}
+.wrap{max-width:1500px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px}
+.eyebrow{font-size:13px;letter-spacing:.06em;color:var(--muted);font-weight:700}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,3.2vw,40px);line-height:1.15;margin:2px 0 0;text-wrap:balance}
+.eq{font-size:15px;color:var(--muted);margin:4px 0 0}
+.eq b{color:var(--ink)}
+.tabs{display:flex;flex-wrap:wrap;gap:8px}
+.tabs button{font:inherit;font-weight:700;font-size:15px;border-radius:999px;border:2px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 14px;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--c);border-color:var(--c);color:#fff}
+.tabs button:focus-visible,.play:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.play{font:inherit;font-weight:700;border-radius:999px;border:2px solid var(--accent);background:var(--accent);color:var(--accent-ink);padding:7px 16px;cursor:pointer}
+main{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(300px,1fr);gap:18px;align-items:start}
+@media (max-width:980px){main{grid-template-columns:minmax(0,1fr)}}
+.fig{display:flex;flex-direction:column;gap:10px;min-width:0}
+.plate{position:relative;background:var(--plate);border:1px solid var(--plate-line);border-radius:18px;overflow:hidden;aspect-ratio:1000/620;max-width:100%}
+.plate svg{width:100%;height:100%;display:block}
+.plate .hit{cursor:pointer}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px 22px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--soft);color:var(--ink)}
+.chip.stage{background:var(--c);color:#fff}
+h2{font-family:var(--display);font-weight:400;font-size:clamp(24px,2.3vw,30px);line-height:1.25;margin:0;text-wrap:balance}
+.easy{background:var(--easy);border:1px solid var(--easy-line);border-radius:14px;padding:12px 16px}
+.easy p{margin:0;color:var(--easy-ink);font-size:18px;line-height:1.7}
+.lbl{display:block;font-size:12px;font-weight:900;letter-spacing:.08em;color:var(--muted);margin-bottom:4px}
+.easy .lbl{color:var(--easy-ink);opacity:.8}
+.book p{margin:0;font-size:15.5px}
+.io{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.io div{background:var(--soft);border-radius:12px;padding:8px 12px;min-width:0}
+.io ul{margin:0;padding-left:18px;font-size:15px}
+.bar{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px 20px;display:flex;flex-direction:column;gap:10px}
+.bar h3,.tbl h3{font-family:var(--display);font-weight:400;font-size:22px;margin:0}
+.stack{display:flex;height:46px;border-radius:12px;overflow:hidden;font-weight:900;color:#fff;font-size:15px}
+.stack div{display:flex;align-items:center;justify-content:center;white-space:nowrap;min-width:0;overflow:hidden;padding-inline:6px}
+@media (max-width:640px){.stack .wide{display:none}}
+.legend{font-size:13.5px;color:var(--muted);margin:0}
+.tbl{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px 20px;display:flex;flex-direction:column;gap:10px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:15px}
+th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+thead th{font-size:15px;color:#fff}
+tbody th{color:var(--muted);font-size:13.5px;white-space:nowrap}
+td.sel,th.sel{background:color-mix(in srgb,var(--c) 14%,transparent)}
+.num{font-variant-numeric:tabular-nums}
+svg text{font-family:var(--body)}
+.dim{opacity:.18;transition:opacity .4s}
+.lit{opacity:1;transition:opacity .4s}
+
+/* ===== V-Lab 공용 테마에 맞춘 덮어쓰기 ===== */
+:root{--bg:#ffffff;--surface:#ffffff;--ink:#111111;--muted:#6B7280;--line:#E6E8EC;--accent:#111111;--accent-ink:#ffffff;--soft:#F7F8FA;
+  --easy:#FFF8E6;--easy-ink:#5A4300;--easy-line:#F1D27A;--plate:#ffffff;--plate-line:#E6E8EC;--display:var(--font);--body:var(--font)}
+html,body{background:#ffffff;color:#111111}
+body{font-family:var(--font);font-size:16px;padding-block:16px 32px}
+h1,h2,.bar h3,.tbl h3,.zhead h3{font-family:var(--font);font-weight:700;letter-spacing:-.01em}
+h1{font-size:26px;line-height:1.25} h2{font-size:22px} .bar h3,.tbl h3,.zhead h3{font-size:18px}
+.eyebrow{font-size:12.5px;letter-spacing:.08em}
+.panel,.bar,.tbl,.plate,.zbox,.zplate{border-radius:12px;box-shadow:none}
+.easy,.io div,.cell,.ledger .row>div{border-radius:8px}
+.chip{border-radius:8px;font-size:13.5px}
+.tabs button,.ctl button,.zbox button,.play{border-radius:8px;border:1px solid #E6E8EC;font-size:14.5px;font-weight:600}
+.tabs button:hover,.ctl button:hover:not(:disabled),.zbox button:hover:not(:disabled){border-color:#111}
+.play,.ctl button.primary,.zbox button.primary{background:#111;border-color:#111;color:#fff}
+.play#motion{background:#fff;color:#111;border-color:#E6E8EC}
+.route button{border-radius:8px;border:1px solid #E6E8EC}
+.route button .n{font-family:var(--font);font-weight:700}
+.cell .v{font-family:var(--font);font-weight:700}
+.navbtn{box-shadow:none;border:1px solid #E6E8EC;background:#fff}
+.dot{border-radius:50%}
+table{font-size:14.5px} thead th{font-weight:700} tbody th{font-size:13.5px}
+.easy p{font-size:16.5px} .book p{font-size:15px} .io ul{font-size:14.5px} .legend,.hint,.ledger .note{font-size:13.5px}
+/* 뷰어 안: 파일 자체 제목 숨김, 그림은 창 높이를 넘지 않게 */
+body.vlab-embed header.top > div:first-child{display:none}
+body.vlab-embed{padding-block:12px 28px}
+.plate{max-height:calc(100vh - 150px)}
+.zplate{max-height:calc(100vh - 260px)}
+</style>
+</head>
+<body>
+<script>if(/embed/.test(location.hash))document.body.classList.add("vlab-embed");</script>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Ⅲ. 세포호흡과 광합성 · 02 세포호흡</div>
+      <h1>세포호흡 한눈에 보기</h1>
+      <p class="eq"><b>포도당 + 산소</b> → <b>이산화 탄소 + 물 + 에너지(ATP)</b></p>
+    </div>
+    <div class="tabs" id="tabs"></div>
+  </header>
+  <main>
+    <section class="fig">
+      <div class="plate" id="plate"></div>
+    </section>
+    <aside class="panel" id="panel">
+      <div class="chips"><span class="chip stage" id="chip"></span><span class="chip" id="place"></span></div>
+      <h2 id="title"></h2>
+      <div class="easy"><span class="lbl">쉽게 말하면</span><p id="easy"></p></div>
+      <div class="io" id="io"></div>
+      <div class="book"><span class="lbl">교과서 설명</span><p id="book"></p></div>
+      <button class="play" id="play">▶ 처음부터 차례로 보기</button>
+      <button class="play" id="motion" aria-pressed="false" style="background:transparent;color:var(--ink);border-color:var(--line)">움직임 끄기</button>
+    </aside>
+  </main>
+  <section class="bar">
+    <h3>포도당 1분자로 만드는 ATP는 최대 32개</h3>
+    <div class="stack" id="stack" role="img" aria-label="해당 과정 2, TCA 회로 2, 산화적 인산화 최대 28, 합계 최대 32 ATP">
+      <div style="flex:2;background:var(--st1)">2</div>
+      <div style="flex:2;background:var(--st3)">2</div>
+      <div style="flex:28;background:var(--st4)">최대 28<span class="wide">&nbsp;· 산화적 인산화 (NADH 10 × 2.5 + FADH₂ 2 × 1.5)</span></div>
+    </div>
+    <p class="legend">해당 과정 2 + TCA 회로 2 (기질수준인산화) + 산화적 인산화 최대 28 = 최대 32. 피루브산의 산화에서는 ATP가 직접 만들어지지 않아요.</p>
+  </section>
+  <section class="tbl">
+    <h3>네 단계 비교표 (포도당 1분자 기준)</h3>
+    <div class="scroll"><table id="table"></table></div>
+  </section>
+</div>
+
+<script>
+(()=>{
+/* 수업 화면에서는 항상 움직이도록 기본값을 켬 (기기의 '애니메이션 줄이기' 설정과 무관). 필요하면 '움직임 끄기' 버튼으로 끔 */
+let RM = false; try{ RM = localStorage.getItem('still')==='1'; }catch(e){}
+const sec = s => RM ? 0.001 : s;
+
+/* ---------- 그림 도구 ---------- */
+const SUB = {'NAD+':'NAD⁺','FADH2':'FADH₂','CO2':'CO₂','H2O':'H₂O','O2':'O₂','NADP+':'NADP⁺'};
+const KIND = {
+  'NADH':{f:'#e8589a',t:'#fff',s:'#c43d7d'}, 'NAD+':{f:'#fde3ee',t:'#a8275f',s:'#e8589a'},
+  'FADH2':{f:'#4a9f57',t:'#fff',s:'#357a40'}, 'FAD':{f:'#e0f2db',t:'#2f7a3a',s:'#4a9f57'},
+  'ATP':{f:'#f28c28',t:'#fff',s:'#c96a10'}, 'ADP':{f:'#ffecd2',t:'#a85a0d',s:'#f28c28'},
+  'CoA':{f:'#8a6fd1',t:'#fff',s:'#6a51b0'}, 'CO2':{f:'#8f9ba7',t:'#fff',s:'#6f7b87'},
+  'O2':{f:'#e5534b',t:'#fff',s:'#b83a33'}, 'H2O':{f:'#5fb4e6',t:'#fff',s:'#3a8fc2'},
+  'plain':{f:'#ffffff',t:'#2b3a40',s:'#9fb2b6'},
+  'nutr':{f:'#eef4dc',t:'#3f5a17',s:'#9db36a'}
+};
+const tw = s => 18 + [...s].reduce((a,c)=>a+(/[가-힣]/.test(c)?16:/[A-Z0-9]/.test(c)?11:8),0);
+/* 그림 글자 크기: 작은 글자일수록 더 크게 키움 */
+const fz = s => s<=18 ? s+5 : s<=24 ? s+4 : s+2;
+const twb = s => Math.round(tw(s)*1.25);
+function tag(x,y,label,kind,big){
+  const k = KIND[kind||label]||KIND.plain, txt = SUB[label]||label, h = big?44:38, w = twb(txt)+(big?10:0);
+  return `<g><rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="${h/2}" fill="${k.f}" stroke="${k.s}" stroke-width="1.6"/><text x="${x}" y="${y+7}" text-anchor="middle" font-size="${big?22:19}" font-weight="700" fill="${k.t}">${txt}</text></g>`;
+}
+const C = (x,y,r=14)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="url(#gC)" stroke="#2a5aa8" stroke-width="1.2"/>`;
+const bond = (x1,y1,x2,y2,c='#2a5aa8')=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="5" stroke-linecap="round"/>`;
+function row(n,x,y,gap=34,r=14){let s='';for(let i=0;i<n-1;i++)s+=bond(x+i*gap,y,x+(i+1)*gap,y);for(let i=0;i<n;i++)s+=C(x+i*gap,y,r);return s;}
+const P = (x,y)=>`<g><circle cx="${x}" cy="${y}" r="14" fill="#ffd75e" stroke="#c99a12" stroke-width="1.5"/><text x="${x}" y="${y+6}" text-anchor="middle" font-size="17" font-weight="900" fill="#7a5a00">P</text></g>`;
+const Hp = (x,y)=>`<g><circle cx="${x}" cy="${y}" r="14" fill="#3aa0d8" stroke="#1f7fb5" stroke-width="1.2"/><text x="${x}" y="${y+5}" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">H⁺</text></g>`;
+const E = (x,y)=>`<g><circle cx="${x}" cy="${y}" r="18" fill="url(#gE)"/><circle cx="${x}" cy="${y}" r="11" fill="#ffd23f" stroke="#e0a800" stroke-width="1.2"/><text x="${x}" y="${y+5}" text-anchor="middle" font-size="13" font-weight="900" fill="#7a5500">e⁻</text></g>`;
+const co2m = (x,y)=>`<g><circle cx="${x-17}" cy="${y}" r="8" fill="#e5534b"/><circle cx="${x+17}" cy="${y}" r="8" fill="#e5534b"/>${C(x,y,12)}</g>`;
+const T = (x,y,s,size=16,w=700,fill='#2b3a40',anchor='middle')=>`<text x="${x}" y="${y}" text-anchor="${anchor}" font-size="${fz(size)}" font-weight="${w}" fill="${fill}">${s}</text>`;
+const halo = (x,y,s,size=16,w=700,fill='#2b3a40',anchor='middle')=>`<text x="${x}" y="${y}" text-anchor="${anchor}" font-size="${fz(size)}" font-weight="${w}" fill="${fill}" stroke="#fff" stroke-width="6" paint-order="stroke" stroke-linejoin="round">${s}</text>`;
+const arrow = (d,c='#55707a',w=3,dash='')=>`<path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" ${dash?`stroke-dasharray="${dash}"`:''} marker-end="url(#ah)" style="color:${c}"/>`;
+const place = (x,y,s,c='#2b3a40')=>`<g><rect x="${x}" y="${y-22}" width="${twb(s)+12}" height="36" rx="9" fill="#ffffffcc" stroke="${c}" stroke-width="1.2"/>${T(x+(twb(s)+12)/2,y+3,s,14,700,c)}</g>`;
+
+/* 애니메이션 */
+const ease = `calcMode="spline" keyTimes="0;1" keySplines=".45 0 .2 1"`;
+function mv(inner,x1,y1,x2,y2,dur=1,begin=0){
+  if(RM) return `<g transform="translate(${x2} ${y2})">${inner}</g>`;
+  return `<g transform="translate(${x1} ${y1})">${inner}<animateTransform attributeName="transform" type="translate" from="${x1} ${y1}" to="${x2} ${y2}" dur="${dur}s" begin="${begin}s" fill="freeze" ${ease}/></g>`;
+}
+function fin(inner,begin=0,dur=.5){ if(RM) return inner; return `<g opacity="0">${inner}<animate attributeName="opacity" from="0" to="1" dur="${dur}s" begin="${begin}s" fill="freeze"/></g>`; }
+function fout(inner,begin=0,dur=.4){ if(RM) return ''; return `<g>${inner}<animate attributeName="opacity" from="1" to="0" dur="${dur}s" begin="${begin}s" fill="freeze"/></g>`; }
+function mvGone(inner,x1,y1,x2,y2,dur=1,begin=0){ if(RM) return ''; return `<g>${mv(inner,x1,y1,x2,y2,dur,begin)}<animate attributeName="opacity" from="1" to="0" begin="${begin+dur}s" dur=".3s" fill="freeze"/></g>`; }
+/* 경로 따라 한 번 이동 후 사라짐 */
+function trip(inner,d,dur=1,begin=0,stay=false){
+  if(RM) return '';
+  return `<g opacity="0">${inner}<animateMotion path="${d}" dur="${dur}s" begin="${begin}s" fill="freeze"/><animate attributeName="opacity" values="0;1;1;${stay?1:0}" keyTimes="0;.08;.85;1" dur="${dur}s" begin="${begin}s" fill="freeze"/></g>`;
+}
+/* 무한 반복 경로 */
+function loop(inner,d,dur=2,offset=0){
+  if(RM) return '';
+  return `<g opacity="0">${inner}<animateMotion path="${d}" dur="${dur}s" begin="${-offset}s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.1;.85;1" dur="${dur}s" begin="${-offset}s" repeatCount="indefinite"/></g>`;
+}
+function spin(cx,cy,inner,dur=2){ if(RM) return inner; return `<g>${inner}<animateTransform attributeName="transform" type="rotate" from="0 ${cx} ${cy}" to="360 ${cx} ${cy}" dur="${dur}s" repeatCount="indefinite"/></g>`; }
+
+function bilayerH(y1,y2,x1,x2,gap=15){
+  let s=`<rect x="${x1}" y="${y1}" width="${x2-x1}" height="${y2-y1}" fill="#fbe9b8"/>`;
+  const L=(y2-y1)/2-9;
+  for(let x=x1+gap/2;x<x2;x+=gap){
+    s+=`<path d="M${x-2.5},${y1+7}v${L}M${x+2.5},${y1+7}v${L}M${x-2.5},${y2-7}v${-L}M${x+2.5},${y2-7}v${-L}" stroke="#ddb24e" stroke-width="1.6" fill="none"/>`;
+    s+=`<circle cx="${x}" cy="${y1}" r="7" fill="#f7c948" stroke="#d39a1c" stroke-width="1"/><circle cx="${x}" cy="${y2}" r="7" fill="#f7c948" stroke="#d39a1c" stroke-width="1"/>`;
+  }
+  return s;
+}
+function bilayerV(x1,x2,y1,y2,gap=15){
+  let s=`<rect x="${x1}" y="${y1}" width="${x2-x1}" height="${y2-y1}" fill="#fbe9b8"/>`;
+  const L=(x2-x1)/2-9;
+  for(let y=y1+gap/2;y<y2;y+=gap){
+    s+=`<path d="M${x1+7},${y-2.5}h${L}M${x1+7},${y+2.5}h${L}M${x2-7},${y-2.5}h${-L}M${x2-7},${y+2.5}h${-L}" stroke="#ddb24e" stroke-width="1.6" fill="none"/>`;
+    s+=`<circle cx="${x1}" cy="${y}" r="7" fill="#f7c948" stroke="#d39a1c" stroke-width="1"/><circle cx="${x2}" cy="${y}" r="7" fill="#f7c948" stroke="#d39a1c" stroke-width="1"/>`;
+  }
+  return s;
+}
+/* 탄소 고리 모양 묶음 */
+function cluster(n,cx,cy,r=13){
+  const R = n<=2?16:n===3?20:n===4?22:n===5?25:28;
+  const pts=[];
+  for(let i=0;i<n;i++){const a=(n===2?0:-Math.PI/2)+i*2*Math.PI/n; pts.push([cx+R*Math.cos(a),cy+R*Math.sin(a)]);}
+  let s='';
+  for(let i=0;i<n;i++){ if(n===2&&i===1)break; const a=pts[i],b=pts[(i+1)%n]; s+=bond(a[0],a[1],b[0],b[1]); }
+  pts.forEach(p=>s+=C(p[0],p[1],r));
+  return s;
+}
+function card(x,y,w,h,title){return `<g filter="url(#sh)"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="14" fill="#fff" stroke="#c9d6d4"/></g>${title?T(x+16,y+28,title,16,900,'#2b3a40','start'):''}`;}
+
+const DEFS = `<defs>
+<radialGradient id="gC" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#cfe1ff"/><stop offset=".5" stop-color="#5a8fdc"/><stop offset="1" stop-color="#2a5aa8"/></radialGradient>
+<radialGradient id="gE"><stop offset="0" stop-color="#fff3a0" stop-opacity=".9"/><stop offset="1" stop-color="#ffd23f" stop-opacity="0"/></radialGradient>
+<radialGradient id="gMat" cx="50%" cy="50%" r="70%"><stop offset="0" stop-color="#fde9d6"/><stop offset="1" stop-color="#f8d3b4"/></radialGradient>
+<radialGradient id="gCyto" cx="40%" cy="40%" r="80%"><stop offset="0" stop-color="#f1fafb"/><stop offset="1" stop-color="#d9eef2"/></radialGradient>
+<linearGradient id="gProt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b5d8f2"/><stop offset="1" stop-color="#6fa7d6"/></linearGradient>
+<linearGradient id="gSyn" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c7b8ef"/><stop offset="1" stop-color="#8a73cf"/></linearGradient>
+<marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="currentColor"/></marker>
+<filter id="sh" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1d3a40" flood-opacity=".18"/></filter>
+</defs>`;
+
+
+
+
+
+const STG = [
+ {k:'전체', name:'세포호흡 전체', place:'세포질 + 마이토콘드리아', c:'--st0',
+  t:'포도당이 ATP가 되기까지',
+  e:'세포호흡은 포도당을 산소와 함께 천천히 태워서 ATP라는 "에너지 동전"을 만드는 일이에요. 세포질에서 ①번이 일어나고, 마이토콘드리아 안에서 ②, ③, ④번이 차례로 일어나요. 그림에서 단계를 눌러 보세요.',
+  b:'세포호흡은 유기물을 분해하여 얻은 호흡기질을 산화시켜 에너지를 얻는 과정이다. 세포질에서 일어나는 해당 과정, 마이토콘드리아에서 일어나는 피루브산의 산화와 TCA 회로, 산화적 인산화의 세 과정으로 진행된다.',
+  i:['포도당 1분자','산소(O₂) 6분자'], o:['이산화 탄소(CO₂) 6분자','물(H₂O)','ATP 최대 32분자']},
+ {k:'①', name:'해당 과정', place:'세포질', c:'--st1',
+  t:'① 해당 과정: 포도당을 반으로',
+  e:'탄소 6개짜리 포도당을 탄소 3개짜리 피루브산 2개로 쪼개요. ATP 2개를 먼저 쓰고 4개를 벌어서 ATP 2개가 남고, 에너지 쿠폰 NADH 2개도 생겨요. 산소가 없어도 일어나요.',
+  b:'세포질로 들어온 포도당 1분자가 피루브산 2분자로 되는 과정으로, 기질수준인산화로 ATP를 합성한다. 포도당 1분자당 피루브산 2분자, ATP 2분자, NADH 2분자가 생성된다.',
+  i:['포도당 (C₆) 1','ATP 2 (투자)'], o:['피루브산 (C₃) 2','ATP 4 (순 2)','NADH 2']},
+ {k:'②', name:'피루브산의 산화', place:'마이토콘드리아 기질', c:'--st2',
+  t:'② 피루브산의 산화: 손잡이 달기',
+  e:'피루브산이 마이토콘드리아로 들어가 탄소 1개를 CO₂로 내보내고, 조효소 A라는 손잡이를 달아 아세틸조효소 A가 돼요. 이때 NADH도 생겨요.',
+  b:'피루브산은 마이토콘드리아 기질에서 이산화 탄소, 수소 이온과 전자를 잃고 조효소 A와 결합하여 아세틸조효소 A가 된다. 방출된 수소 이온과 전자는 NAD⁺에 전달되어 NADH를 생성한다.',
+  i:['피루브산 (C₃) 2','조효소 A 2'], o:['아세틸조효소 A (C₂) 2','CO₂ 2','NADH 2']},
+ {k:'③', name:'TCA 회로', place:'마이토콘드리아 기질', c:'--st3',
+  t:'③ TCA 회로: 빙글빙글 회전목마',
+  e:'아세틸조효소 A가 옥살아세트산과 합쳐져 시트르산이 되고, 회로를 한 바퀴 돌며 탄소를 모두 CO₂로 내보내요. 에너지 쿠폰(NADH, FADH₂)을 잔뜩 만들고 ATP도 조금 만들어요. 포도당 1개면 두 바퀴!',
+  b:'아세틸조효소 A가 옥살아세트산과 결합하여 시트르산을 형성하고, 시트르산은 2분자의 이산화 탄소를 방출하고 다시 옥살아세트산으로 전환된다. 이 과정에서 NADH와 FADH₂가 생성되고 기질수준인산화로 ATP가 합성된다.',
+  i:['아세틸조효소 A (C₂) 2'], o:['CO₂ 4','NADH 6','FADH₂ 2','ATP 2']},
+ {k:'④', name:'산화적 인산화', place:'마이토콘드리아 내막', c:'--st4',
+  t:'④ 산화적 인산화: 쿠폰을 ATP로',
+  e:'모아 둔 에너지 쿠폰(NADH, FADH₂)의 전자가 내막의 단백질을 따라 내려가며 H⁺를 퍼 올려요. 모인 H⁺가 ATP 합성효소를 돌리며 흘러 내려와 ATP를 대량으로 만들어요. 마지막 전자는 산소가 받아 물이 돼요.',
+  b:'전자전달계와 화학삼투를 거쳐 ATP가 합성되는 과정을 산화적 인산화라고 한다. 전자는 최종적으로 산소로 전달되어 물이 생성된다. NADH와 FADH₂ 1분자당 ATP가 각각 약 2.5분자, 약 1.5분자 생성된다.',
+  i:['NADH 10','FADH₂ 2','O₂ 6'], o:['ATP 최대 28','H₂O','NAD⁺, FAD (재사용)']},
+ {k:'+', name:'다른 영양소는?', place:'호흡기질', c:'--st5',
+  t:'지방과 단백질도 쓸 수 있어요',
+  e:'밥(탄수화물)만이 아니라 고기(단백질)와 기름(지방)도 세포호흡의 재료가 돼요. 다만 잘게 나뉜 뒤 중간에서 들어가요. 지방산은 아세틸조효소 A로, 글리세롤은 해당 과정으로, 아미노산은 암모니아를 떼어 낸 뒤 여러 곳으로 들어가요. 그림에서 단백질, 탄수화물, 지방을 하나씩 눌러 어디로 들어가는지 확인해 보세요.',
+  b:'지방산은 분해되어 아세틸조효소 A로 전환된 뒤 TCA 회로로 들어가고, 글리세롤은 해당 과정의 중간 산물로 들어가 산화된다. 아미노산은 아미노기(-NH₂)가 제거된 뒤 피루브산, 아세틸조효소 A, TCA 회로의 중간 산물로 전환되어 세포호흡에 이용된다.',
+  i:['단백질 → 아미노산','탄수화물 → 포도당','지방 → 글리세롤 + 지방산'], o:['아미노기 → 암모니아','나머지는 세포호흡 경로로']}
+];
+
+/* 그림 좌표 */
+const MX=665, MY=320, MRX=315, MRY=272;
+const TC=[590,330];
+function scene(){
+  let o = `<rect width="1000" height="620" fill="url(#gCyto)"/>`;
+  o += bilayerV(0,26,0,620);
+  o += halo(40,600,'세포막',13,700,'#8a6a10','start');
+  // 마이토콘드리아
+  o += `<ellipse cx="${MX}" cy="${MY}" rx="${MRX}" ry="${MRY}" fill="#fdeedd" stroke="#f7c948" stroke-width="16"/>
+        <ellipse cx="${MX}" cy="${MY}" rx="${MRX}" ry="${MRY}" fill="none" stroke="#d39a1c" stroke-width="2" stroke-dasharray="2 5"/>`;
+  // 내막 + 크리스타
+  const fingers=[[470,'b',58],[560,'b',48],[650,'b',52],[500,'t',52],[620,'t',46]];
+  let f='';
+  fingers.forEach(([x,side,len])=>{
+    const t = (x-MX)/(MRX-30), yy = (MRY-30)*Math.sqrt(Math.max(0,1-t*t));
+    const y0 = side==='b'? MY+yy : MY-yy, y1 = side==='b'? y0-len : y0+len;
+    f += `<path d="M${x},${y0+(side==='b'?10:-10)} L${x},${y1}" stroke="#f7c948" stroke-width="30" stroke-linecap="round"/>`;
+    f += `<path d="M${x},${y0+(side==='b'?14:-14)} L${x},${y1}" stroke="#fdeedd" stroke-width="12" stroke-linecap="round"/>`;
+  });
+  o += `<ellipse cx="${MX}" cy="${MY}" rx="${MRX-30}" ry="${MRY-30}" fill="url(#gMat)" stroke="#f7c948" stroke-width="14"/>${f}
+        <ellipse cx="${MX}" cy="${MY}" rx="${MRX-30}" ry="${MRY-30}" fill="none" stroke="#d39a1c" stroke-width="1.6" stroke-dasharray="2 5"/>`;
+  o += halo(870,72,'마이토콘드리아',17,900,'#b4581c');
+  o += halo(963,190,'외막',13,700,'#8a6a10','end') + halo(800,142,'내막',13,700,'#8a6a10');
+  o += cur===5 ? halo(120,560,'세포질',16,900,'#2f7f90') : halo(160,30,'세포질',16,900,'#2f7f90');
+
+  // ① 해당 과정
+  let g1 = `<rect x="58" y="172" width="250" height="290" rx="22" fill="#ffffffb0" stroke="#2f8fa3" stroke-width="2.5" stroke-dasharray="7 6"/>
+    ${T(183,205,'① 해당 과정',20,900,'#2f7f90')}
+    ${row(6,118,252,26,10)}${T(183,282,'포도당 (C₆)',14,700)}
+    ${arrow('M183,292 V340','#2f7f90',3)}
+    ${row(3,92,368,24,10)}${row(3,202,368,24,10)}${T(183,398,'피루브산 (C₃) × 2',14,700)}
+    ${tag(122,432,'ATP 2','ATP')}${tag(236,432,'NADH 2','NADH')}`;
+  // ② 피루브산의 산화
+  let g2 = `<rect x="374" y="272" width="150" height="130" rx="18" fill="#ffffff90" stroke="#d9762b" stroke-width="2.5" stroke-dasharray="7 6"/>
+    ${T(450,262,'② 피루브산의 산화',15,900,'#b4581c')}
+    ${row(2,396,314,24,10)}<line x1="418" y1="314" x2="434" y2="314" stroke="#6a51b0" stroke-width="4"/>${tag(468,314,'CoA')}
+    ${T(450,348,'아세틸조효소 A',13,700,'#6a51b0')}
+    ${tag(450,378,'NADH 2','NADH')}
+    `;
+  // ③ TCA 회로
+  let g3 = `<circle cx="${TC[0]}" cy="${TC[1]}" r="62" fill="none" stroke="#f3c79f" stroke-width="18"/>
+    <circle cx="${TC[0]}" cy="${TC[1]}" r="62" fill="none" stroke="#b04f86" stroke-width="3" stroke-dasharray="3 9"/>
+    ${T(TC[0],TC[1]-4,'③ TCA',19,900,'#8f3a6b')}${T(TC[0],TC[1]+20,'회로',16,900,'#8f3a6b')}
+    ${tag(540,425,'NADH 6','NADH')}${tag(640,425,'FADH₂ 2','FADH2')}${tag(675,265,'ATP 2','ATP')}`;
+  const spinner = `<g><circle cx="${TC[0]+62}" cy="${TC[1]}" r="9" fill="#b04f86"/></g>`;
+  g3 += spin(TC[0],TC[1],spinner,5);
+  // ④ 산화적 인산화 (확대 원)
+  const CX=852, CY=340, CR=96;
+  let g4 = `<defs><clipPath id="zc"><circle cx="${CX}" cy="${CY}" r="${CR}"/></clipPath></defs>
+    <path d="M${CX-CR+8},${CY+40} L700,${MY+170}" stroke="#3b74c0" stroke-width="2" stroke-dasharray="4 4"/>
+    <circle cx="${CX}" cy="${CY}" r="${CR+5}" fill="#fff" stroke="#3b74c0" stroke-width="3"/>
+    <g clip-path="url(#zc)"><rect x="${CX-CR}" y="${CY-CR}" width="${2*CR}" height="${CR+5}" fill="#fdf0e2"/><rect x="${CX-CR}" y="${CY+20}" width="${2*CR}" height="${CR}" fill="#fbdcc4"/>
+      ${bilayerH(CY-12,CY+20,CX-CR,CX+CR,11)}
+      <ellipse cx="${CX-62}" cy="${CY+4}" rx="16" ry="30" fill="url(#gProt)" stroke="#4d86b8"/>
+      <ellipse cx="${CX-22}" cy="${CY+4}" rx="16" ry="30" fill="url(#gProt)" stroke="#4d86b8"/>
+      <ellipse cx="${CX+16}" cy="${CY+4}" rx="16" ry="30" fill="url(#gProt)" stroke="#4d86b8"/>
+      <rect x="${CX+42}" y="${CY-16}" width="30" height="40" rx="8" fill="url(#gSyn)" stroke="#6a51b0"/><rect x="${CX+52}" y="${CY+24}" width="10" height="16" fill="#9b86da"/>
+      <circle cx="${CX+57}" cy="${CY+56}" r="20" fill="url(#gSyn)" stroke="#6a51b0"/>
+      ${[0,1,2,3,4].map(i=>`<circle cx="${CX-70+i*28}" cy="${CY-50-(i%2)*18}" r="7" fill="#3aa0d8"/>`).join('')}
+      ${T(CX-60,CY-60,'H⁺',11,900,'#1f7fb5')}
+    </g>
+    ${T(CX,CY-CR-14,'④ 산화적 인산화',17,900,'#2c5a9c')}
+    ${tag(CX-34,CY+66,'O₂→H₂O','O2')}${tag(CX+40,CY+CR+26,'ATP 최대 28','ATP',true)}`;
+  g4 += spin(CX+57,CY+56,`<path d="M${CX+57},${CY+42} V${CY+70} M${CX+43},${CY+56} H${CX+71}" stroke="#f3eefe" stroke-width="4" stroke-linecap="round"/>`,1.4);
+
+  // 흐름 (계속 반복)
+  // 단계별 흐름: F[1]~F[4], 전체 보기에서는 모두 함께
+  const F={1:'',2:'',3:'',4:''};
+  let flow='';
+  flow += loop(`<g>${row(6,-60,0,20,7)}</g>`,'M40,252 L60,252',1.6,0);
+  flow += arrow('M24,252 H96','#2f7f90',3);
+  F[1]+=flow; flow='';
+  // 피루브산 → 마이토콘드리아
+  flow += `<path d="M262,368 C330,368 340,318 398,318" fill="none" stroke="#d9762b" stroke-width="3" stroke-dasharray="6 6" marker-end="url(#ah)" style="color:#d9762b"/>`;
+  flow += loop(row(3,-24,0,24,8),'M262,368 C330,368 340,318 384,318',2.4,0)+loop(row(3,-24,0,24,8),'M262,368 C330,368 340,318 384,318',2.4,1.2);
+  F[1]+=flow; F[2]+=flow; flow='';
+  // 아세틸CoA → TCA
+  const acArrow = `<path d="M500,330 L522,330" stroke="#b04f86" stroke-width="3" marker-end="url(#ah)" style="color:#b04f86"/>`;
+  F[2]+=acArrow; F[3]+=acArrow;
+  // CO2 밖으로 (②에서 2개, ③에서 4개)
+  const co2a = `<path d="M440,218 C440,150 470,90 470,30" fill="none" stroke="#8f9ba7" stroke-width="3" stroke-dasharray="5 6" marker-end="url(#ah)" style="color:#8f9ba7"/>`+loop(co2m(0,0),'M440,218 C440,150 470,90 470,20',3,0);
+  const co2b = `<path d="M560,272 C540,200 520,120 500,30" fill="none" stroke="#8f9ba7" stroke-width="3" stroke-dasharray="5 6" marker-end="url(#ah)" style="color:#8f9ba7"/>`+loop(co2m(0,0),'M560,272 C540,200 520,120 500,20',3,1.5);
+  F[2]+=co2a+tag(560,22,'CO₂ 2 → 몸 밖으로 (날숨)','CO2');
+  F[3]+=co2b+tag(560,22,'CO₂ 4 → 몸 밖으로 (날숨)','CO2');
+  const ALL0 = F[1] + acArrow+co2a+co2b+tag(560,22,'CO₂ 6 → 몸 밖으로 (날숨)','CO2');
+  // 에너지 쿠폰 → ④
+  const toETC=['M236,450 C330,600 700,600 800,410','M480,378 C560,520 720,520 800,410','M560,440 C620,500 720,480 800,410','M650,440 C700,480 760,460 820,420'];
+  toETC.forEach((d,i)=>{ flow += `<path d="${d}" fill="none" stroke="${i===3?'#4a9f57':'#e8589a'}" stroke-width="2.5" stroke-dasharray="4 7" opacity=".8"/>`;
+    flow += loop(tag(0,0,i===3?'FADH2':'NADH'),d,3.4,i*.8); });
+  // 산소
+  flow += `<path d="M995,600 C960,560 930,480 880,430" fill="none" stroke="#e5534b" stroke-width="3" stroke-dasharray="5 6" marker-end="url(#ah)" style="color:#e5534b"/>`;
+  flow += tag(950,598,'O₂ 6','O2');
+  flow += loop(`<g><circle cx="-8" r="7" fill="#e5534b"/><circle cx="8" r="7" fill="#e5534b"/></g>`,'M995,600 C960,560 930,480 880,430',2.6,0);
+  const o2flow = flow.slice(flow.indexOf('<path d="M995,600'));
+  F[2]+=o2flow; F[3]+=o2flow;
+  F[4]=flow+halo(300,440,'①②③에서 온 NADH · FADH₂',15,900,'#a8275f'); flow = ALL0 + flow;
+
+  // 다른 영양소
+  const dash = d => `<path d="${d}" stroke="#6a7f3a" stroke-width="3" fill="none" stroke-dasharray="6 5" marker-end="url(#ah)" style="color:#6a7f3a"/>`;
+  /* 영양소를 누르면 그 영양소의 선만 나타남 (NUT: null | 'p' | 'c' | 'f') */
+  const on = k => NUT===k;
+  const stw = t => Math.round(twb(t)*.92);
+  const st = (x,y,t)=>{ const w=stw(t); return `<g><rect x="${x-w/2}" y="${y-17}" width="${w}" height="34" rx="17" fill="#eef4dc" stroke="#9db36a" stroke-width="1.6"/><text x="${x}" y="${y+6}" text-anchor="middle" font-size="18" font-weight="700" fill="#3f5a17">${t}</text></g>`; };
+  const ring = (x,y,w)=>`<rect x="${x-w/2-5}" y="${y-21}" width="${w+10}" height="42" rx="21" fill="none" stroke="#6a7f3a" stroke-width="3.5"/>`;
+  const nut = (k,inner)=>`<g class="nut" data-n="${k}" style="cursor:pointer" opacity="${NUT&&!on(k)?.35:1}">${inner}</g>`;
+  const lines = (k,ds)=> on(k) ? fin(`<g>${ds.map(dash).join('')}</g>`,0,.5) : '';
+  let g5 = `<g>
+    ${nut('p',`${on('p')?ring(84,48,stw('단백질')):''}${st(84,48,'단백질')}${st(84,98,'아미노산')}${arrow('M84,64 V80','#6a7f3a',2)}
+      <path d="M84,114 V138" stroke="#2b3a40" stroke-width="2"/><circle cx="84" cy="138" r="3.5" fill="#2b3a40"/>${arrow('M88,138 H110','#6a7f3a',2)}${st(142,138,'NH₃')}${T(170,144,'암모니아',13,700,'#6a7f3a','start')}`)}
+    ${nut('c',`${on('c')?ring(206,48,stw('탄수화물')):''}${st(206,48,'탄수화물')}${st(206,98,'포도당')}${arrow('M206,64 V80','#6a7f3a',2)}`)}
+    ${nut('f',`${on('f')?ring(346,48,stw('지방')):''}${st(346,48,'지방')}${st(300,98,'글리세롤')}${st(404,98,'지방산')}${arrow('M334,64 L314,80','#6a7f3a',2)}${arrow('M358,64 L388,80','#6a7f3a',2)}`)}
+    ${lines('c',['M206,114 V238'])}
+    ${lines('f',['M292,114 C284,250 236,300 210,330','M406,114 C410,190 408,240 404,296'])}
+    ${lines('p',['M80,142 C40,220 40,330 84,358','M86,142 C120,182 330,176 392,296','M88,140 C190,170 480,140 548,270'])}
+    ${NUT?'':halo(300,606,'👆 왼쪽 위의 영양소를 눌러 보세요',17,900,'#4f6a1f')}
+  </g>`;
+  return {o, g1, g2, g3, g4, g5, flow, F};
+}
+
+let cur=0, timer=null, NUT=null;
+const $=id=>document.getElementById(id);
+function draw(){
+  const S=STG[cur], sc=scene();
+  const cls = n => cur===0||cur===5 ? 'lit' : (cur===n?'lit':'dim');
+  const svg = `<svg viewBox="0 0 1000 620" xmlns="http://www.w3.org/2000/svg">${DEFS}${sc.o}
+    <g class="${cur===5?'dim':'lit'}">${cur>=1&&cur<=4? sc.F[cur] : sc.flow}</g>
+    ${[1,2,3,4].map(n=>`<g class="hit ${cls(n)}" data-s="${n}">${sc['g'+n]}</g>`).join('')}
+    ${cur===5? fin(sc.g5,0,.6):''}
+  </svg>`;
+  $('plate').innerHTML=svg;
+  $('plate').setAttribute('aria-label',`${S.name} 그림`);
+  $('plate').querySelectorAll('.nut').forEach(g=>g.addEventListener('click',e=>{e.stopPropagation();stop();const k=g.dataset.n;NUT=NUT===k?null:k;draw();}));
+  $('plate').querySelectorAll('.hit').forEach(g=>g.addEventListener('click',()=>{stop();sel(+g.dataset.s);}));
+  document.documentElement.style.setProperty('--c',`var(${S.c})`);
+  $('chip').textContent = S.k==='전체'?'전체 보기':S.k==='+'?'더 알아보기':`${S.k} ${S.name}`;
+  $('place').textContent=`장소: ${S.place}`;
+  $('title').textContent=S.t; $('easy').textContent=S.e; $('book').textContent=S.b;
+  $('io').innerHTML=`<div><span class="lbl">들어가는 것</span><ul>${S.i.map(x=>`<li>${x}</li>`).join('')}</ul></div><div><span class="lbl">나오는 것</span><ul>${S.o.map(x=>`<li>${x}</li>`).join('')}</ul></div>`;
+  [...$('tabs').children].forEach((b,i)=>b.setAttribute('aria-pressed',i===cur));
+  $('table').querySelectorAll('[data-col]').forEach(td=>td.classList.toggle('sel',+td.dataset.col===cur));
+}
+function sel(i){cur=i;NUT=null;draw();}
+function stop(){ if(timer){clearInterval(timer);timer=null;$('play').textContent='▶ 처음부터 차례로 보기';} }
+STG.forEach((S,i)=>{const b=document.createElement('button');b.textContent=i===0?'전체':i===5?'다른 영양소는?':`${S.k} ${S.name}`;b.style.setProperty('--c',`var(${S.c})`);b.onclick=()=>{stop();sel(i);};$('tabs').appendChild(b);});
+function motionLabel(){ const b=document.getElementById('motion'); if(b){ b.textContent = RM ? '움직임 켜기' : '움직임 끄기'; b.setAttribute('aria-pressed', RM); } }
+document.getElementById('motion').onclick=()=>{ RM=!RM; try{localStorage.setItem('still',RM?'1':'0');}catch(e){} motionLabel(); draw(); };
+motionLabel();
+$('play').onclick=()=>{
+  if(timer){stop();return;}
+  let n=1; sel(1); $('play').textContent='■ 멈추기';
+  timer=setInterval(()=>{ n++; if(n>4){ stop(); sel(0); return;} sel(n); },6000);
+};
+/* 비교표 */
+const ROWS=[
+ ['장소','세포질','마이토콘드리아 기질','마이토콘드리아 기질','마이토콘드리아 내막'],
+ ['출발 물질','포도당 1','피루브산 2','아세틸조효소 A 2','NADH 10, FADH₂ 2, O₂'],
+ ['탄소 수 변화','C₆ → C₃ × 2','C₃ → C₂ (+ CO₂)','C₂ + C₄ → C₆ → C₅ → C₄','탄소 없음'],
+ ['생성물','피루브산 2, NADH 2','아세틸조효소 A 2, NADH 2, CO₂ 2','NADH 6, FADH₂ 2, CO₂ 4','H₂O, NAD⁺, FAD'],
+ ['ATP','2 (순생성)','0','2','최대 28'],
+ ['ATP 만드는 방법','기질수준인산화','–','기질수준인산화','산화적 인산화 (전자전달계 + 화학삼투)'],
+ ['산소 필요','필요 없음','필요 (산소가 충분할 때 진행)','필요 (산소가 충분할 때 진행)','필요 (최종 전자 수용체)']
+];
+let th=`<thead><tr><th style="background:var(--st0)"></th>${[1,2,3,4].map(i=>`<th data-col="${i}" style="background:var(${STG[i].c})">${STG[i].k} ${STG[i].name}</th>`).join('')}</tr></thead><tbody>`;
+ROWS.forEach(r=>{th+=`<tr><th>${r[0]}</th>${r.slice(1).map((c,i)=>`<td data-col="${i+1}" class="num">${c}</td>`).join('')}</tr>`;});
+$('table').innerHTML=th+'</tbody>';
+draw();
+})();
+</script>
+
+</body></html>

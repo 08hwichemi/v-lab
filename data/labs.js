@@ -212,6 +212,32 @@ window.VLAB = {
       added: "2026-11-04"
     },
     {
+      id: "cell-respiration-overview",
+      subject: "biology",
+      title: "세포호흡 한눈에 보기",
+      summary: "세포질과 마이토콘드리아를 한 장면에 그려 세포호흡 네 단계(해당 과정 → 피루브산의 산화 → TCA 회로 → 산화적 인산화)가 어디서 일어나고 무엇이 오가는지 봅니다. 단계를 누르면 그 부분만 밝아지며 '쉽게 말하면'·교과서 설명·들어가는 것/나오는 것이 나오고, ATP 32개 막대와 네 단계 비교표, 지방·단백질이 어디로 들어가는지도 확인합니다.",
+      file: "labs/biology/cell-respiration-overview.html",
+      author: "송다혜",
+      grade: ["고2", "고3"],
+      unit: "세포와 물질대사 · 세포호흡과 광합성",
+      tags: ["세포호흡", "해당 과정", "TCA 회로", "산화적 인산화", "ATP", "마이토콘드리아"],
+      thumbnail: "assets/img/thumbs/cell-respiration-overview/0.png",
+      added: "2026-11-05"
+    },
+    {
+      id: "cell-respiration-steps",
+      subject: "biology",
+      title: "세포호흡 단계별 탐험",
+      summary: "해당 과정부터 산화적 인산화까지 세부 단계를 하나씩 넘기며 분자가 변하는 과정을 애니메이션으로 따라갑니다. 지금까지 모은 ATP·NADH·FADH₂·CO₂가 포도당 1분자 기준으로 쌓이고, 탈수소효소의 작용과 기질수준인산화는 확대 화면으로, 산소가 없을 때 어떻게 되는지도 눌러 봅니다.",
+      file: "labs/biology/cell-respiration-steps.html",
+      author: "송다혜",
+      grade: ["고2", "고3"],
+      unit: "세포와 물질대사 · 세포호흡과 광합성",
+      tags: ["세포호흡", "해당 과정", "TCA 회로", "전자전달계", "화학삼투", "기질수준인산화", "ATP"],
+      thumbnail: "assets/img/thumbs/cell-respiration-steps/0.png",
+      added: "2026-11-05"
+    },
+    {
       id: "constellation",
       subject: "earth",
       title: "별자리 탐험",

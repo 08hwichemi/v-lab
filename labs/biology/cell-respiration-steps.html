@@ -123,8 +123,15 @@ table{font-size:14.5px} thead th{font-weight:700} tbody th{font-size:13.5px}
 /* 뷰어 안: 파일 자체 제목 숨김, 그림은 창 높이를 넘지 않게 */
 body.vlab-embed header.top > div:first-child{display:none}
 body.vlab-embed{padding-block:12px 28px}
-.plate{max-height:calc(100vh - 150px)}
-.zplate{max-height:calc(100vh - 260px)}
+.plate{width:min(100%, calc((100vh - 150px) * 1000 / 600));margin-inline:auto}
+@media (max-width:640px){
+  .plate{aspect-ratio:auto;height:440px;width:100%}
+  #svgwrap{overflow-x:auto;-webkit-overflow-scrolling:touch} #svgwrap svg{width:720px;height:432px}
+  .plate::after{content:'그림을 옆으로 밀어 보세요';position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-size:12px;color:#6B7280;background:rgba(255,255,255,.85);padding:2px 9px;border-radius:99px;pointer-events:none}
+  .zplate{aspect-ratio:auto;height:380px;overflow-x:auto;-webkit-overflow-scrolling:touch} .zplate svg{width:630px;height:378px}
+  .ctl #next{margin-left:auto}
+}
+@media (hover:none){.hint{display:none}}
 </style>
 </head>
 <body>
@@ -196,6 +203,7 @@ body.vlab-embed{padding-block:12px 28px}
 let RM = false; try{ RM = localStorage.getItem('still')==='1'; }catch(e){}
 const sec = s => RM ? 0.001 : s;
 let noO2 = false;
+const EMB = /embed/.test(location.hash);   // V-Lab 뷰어 안: 주소를 바꿀 때 embed 표시를 지키기
 
 /* ---------- 그림 도구 ---------- */
 const SUB = {'NAD+':'NAD⁺','FADH2':'FADH₂','CO2':'CO₂','H2O':'H₂O','O2':'O₂','NADP+':'NADP⁺'};
@@ -245,8 +253,8 @@ function trip(inner,d,dur=1,begin=0,stay=false){
   return `<g opacity="0" pointer-events="none">${inner}<animateMotion path="${d}" dur="${dur}s" begin="${bt(begin)}" fill="freeze"/><animate attributeName="opacity" values="0;1;1;${stay?1:0}" keyTimes="0;.08;.85;1" dur="${dur}s" begin="${bt(begin)}" fill="freeze"/></g>`;
 }
 /* 무한 반복 경로 */
-function loop(inner,d,dur=2,offset=0){
-  if(RM) return '';
+function loop(inner,d,dur=2,offset=0,still){
+  if(RM) return still ? `<g transform="translate(${still[0]} ${still[1]})">${inner}</g>` : '';   // 움직임 끄기: 정지 위치가 있으면 그 자리에 보여 줌
   return `<g opacity="0">${inner}<animateMotion path="${d}" dur="${dur}s" begin="${-offset}s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.1;.85;1" dur="${dur}s" begin="${-offset}s" repeatCount="indefinite"/></g>`;
 }
 function spin(cx,cy,inner,dur=2){ if(RM) return inner; return `<g>${inner}<animateTransform attributeName="transform" type="rotate" from="0 ${cx} ${cy}" to="360 ${cx} ${cy}" dur="${dur}s" repeatCount="indefinite"/></g>`; }
@@ -342,8 +350,8 @@ function S1base(s){
       o += row(3,566,y);
       o += i===0 ? `${L(546,552,y)}${P(532,y)}` : `${L(648,654,y)}${P(668,y)}`;
       o += T(600, i? y+50 : y-40, '3탄소 화합물 (C₃)',16,700);
-      o += `<g class="zhit" data-zoom="dh" role="button" aria-label="탈수소효소 자세히 보기"><ellipse cx="370" cy="${y}" rx="84" ry="50" fill="#cde8c4" stroke="#6fae63" stroke-width="2.5" stroke-dasharray="7 5"/>${T(370,y+2,'탈수소효소',15,900,'#3f6f37')}${T(370,y+28,'누르면 자세히 ▸',11,700,'#4f7f47')}</g>`;
-      o += `<g id="${i?'nadB':'nadA'}" style="cursor:pointer">${fout(tag(165,y,'NAD+',null,true),2.3)}</g>` + fin(tag(165,y,'NADH',null,true),2.3);
+      o += `<g class="zhit" data-zoom="dh" role="button" tabindex="0" aria-label="탈수소효소 자세히 보기"><ellipse cx="370" cy="${y}" rx="84" ry="50" fill="#cde8c4" stroke="#6fae63" stroke-width="2.5" stroke-dasharray="7 5"/>${T(370,y+2,'탈수소효소',15,900,'#3f6f37')}${T(370,y+28,'누르면 자세히 ▸',11,700,'#4f7f47')}</g>`;
+      o += `<g id="${i?'nadB':'nadA'}" style="cursor:pointer">${fout(tag(165,y,'NAD+',null,true),2.3)}${RM?'':`<set attributeName="pointer-events" to="none" begin="${bt(.3)}" fill="freeze"/>`}</g>` + fin(tag(165,y,'NADH',null,true),2.3);
       const d=`M590,${y} L370,${y} L200,${y}`;
       o += trip(E(0,0),d,1.6,.3) + trip(E(0,0),d,1.6,.6) + trip(Hp(0,0),d,1.6,.9);
       o += trip(Hp(0,0),`M600,${y} L370,${y} L330,${y+(i?82:-82)}`,1.4,1.2,true);
@@ -355,7 +363,7 @@ function S1base(s){
     o += fin(halo(820,58,'세포질의 인산(Pi)',14,700,'#7a5a00')+halo(780,590,'세포질의 인산(Pi)',14,700,'#7a5a00'),2.6);
     o += fin(halo(500,300,'NAD⁺ + 2H → NADH + H⁺',20,900,'#a8275f'),2.4);
     o += fin(halo(500,342,'반대쪽 끝에도 인산이 붙어 양쪽에 인산 2개!',16,900,'#8a5a00'),3.9);
-    o += `<g id="go3" style="cursor:pointer">${fout(`<g><rect x="360" y="272" width="280" height="54" rx="27" fill="#167a86" stroke="#0f5a63" stroke-width="2"/>${T(500,307,'▶ 눌러서 반응 보기',17,900,'#ffffff')}</g>`,0,.3)}</g>`;
+    o += `<g id="go3" style="cursor:pointer">${fout(`<g><rect x="360" y="272" width="280" height="54" rx="27" fill="#167a86" stroke="#0f5a63" stroke-width="2"/>${T(500,307,'▶ 눌러서 반응 보기',17,900,'#ffffff')}</g>`,0,.3)}${RM?'':`<set attributeName="pointer-events" to="none" begin="${bt(.3)}" fill="freeze"/>`}</g>`;
     TRIG=null;
   }
   if(s===4){
@@ -373,7 +381,7 @@ function S1base(s){
     });
     o += fin(halo(500,300,'인산이 모두 떨어진 3탄소 화합물 = 피루브산',17,900,'#2a5aa8'),4);
     o += fin(halo(500,580,'ATP 4개 생성!',22,900,'#c96a10'),2.6);
-    o += `<g class="zhit" data-zoom="sl" role="button" aria-label="기질수준인산화 자세히 보기"><rect x="40" y="520" width="300" height="56" rx="28" fill="#fff6dc" stroke="#d39a1c" stroke-width="2.5" stroke-dasharray="7 5"/>${T(190,544,'기질수준인산화',15,900,'#8a5a00')}${T(190,566,'누르면 자세히 ▸',11,700,'#8a5a00')}</g>`;
+    o += `<g class="zhit" data-zoom="sl" role="button" tabindex="0" aria-label="기질수준인산화 자세히 보기"><rect x="40" y="520" width="300" height="56" rx="28" fill="#fff6dc" stroke="#d39a1c" stroke-width="2.5" stroke-dasharray="7 5"/>${T(190,544,'기질수준인산화',15,900,'#8a5a00')}${T(190,566,'누르면 자세히 ▸',11,700,'#8a5a00')}</g>`;
   }
   if(s===5){
     o += T(500,62,'포도당 1분자의 해당 과정 결과',22,900,'#1f4f58');
@@ -687,26 +695,29 @@ function S4(s){
     return o;
   }
   // NADH / FADH2 표시
-  o += (s===1? fout(tag(140,460,'NADH',null,true),.6)+fin(tag(110,500,'NAD+',null,true),.6) : tag(110,500,'NAD+',null,true));
-  o += (s===1? fout(tag(300,470,'FADH2',null,true),.9)+fin(tag(270,520,'FAD',null,true),.9) : tag(270,520,'FAD',null,true));
+  o += (s===1? fout(tag(140,460,'NADH',null,true),.6)+fin(tag(110,500,'NAD+',null,true),.6) : (running ? tag(110,500,'NAD+',null,true) : tag(110,500,'NADH',null,true)));
+  o += (s===1? fout(tag(300,470,'FADH2',null,true),.9)+fin(tag(270,520,'FAD',null,true),.9) : (running ? tag(270,520,'FAD',null,true) : tag(270,520,'FADH2',null,true)));
+  if(!running) o += halo(190,556,'NADH·FADH₂가 산화되지 못하고 쌓여요',14,900,'#a8275f');
+  let late = '';   // 다른 요소 위에 그려야 하는 안내 카드
   if(s===1){
     o += fin(Hp(170,540),.6);
   }
   // 전자 흐름
   if(running){
-    for(let i=0;i<4;i++) o += loop(E(0,0),EPATH,4,i*1);
-    for(let i=0;i<2;i++) o += loop(E(0,0),FPATH,2,i*1);
+    const ES=[[190,360],[360,330],[530,262],[650,440]], FS=[[312,380],[360,330]];
+    for(let i=0;i<4;i++) o += loop(E(0,0),EPATH,4,i*1,ES[i]);
+    for(let i=0;i<2;i++) o += loop(E(0,0),FPATH,2,i*1,FS[i]);
   } else {
-    o += E(360,330)+E(450,322)+E(530,262)+E(610,322)+E(440,330)+E(380,326);
+    o += E(360,330)+E(430,300)+E(530,262)+E(610,322)+E(470,300)+E(380,326);
     o += `<g stroke="#d0453c" stroke-width="7" stroke-linecap="round"><path d="M585,290 l50,60 M635,290 l-50,60"/></g>`;
-    o += `<g>${card(560,40,420,96)}${T(770,78,'산소가 없어요!',20,900,'#d0453c')}${T(770,110,'전자가 갈 곳이 없어 줄줄이 멈췄어요',16,700,'#2b3a40')}</g>`;
+    late += `<g>${card(560,40,420,118)}${T(770,76,'산소가 없어요!',20,900,'#d0453c')}${T(770,104,'전자가 갈 곳이 없어 줄줄이 멈췄어요',16,700,'#2b3a40')}${T(770,132,'NADH가 NAD⁺로 못 돌아가요 → 해당 과정도 멈춤 (발효 필요)',13,700,'#5b6d72')}</g>`;
   }
   // 에너지 계단 미니 그림 (그림 Ⅲ-10)
   if(s===1){
     const st = 'M700,70 h50 v32 h50 v26 h50 v30 h50 v34';
     o += fin(`<g>${card(670,22,318,232,'')}${T(690,214,'전자의 에너지 계단',15,900,'#1f4f7a','start')}
       <path d="${st}" fill="none" stroke="#4d86b8" stroke-width="4"/>
-      ${T(712,64,'NADH',12,700,'#c43d7d')}${T(775,96,'Ⅰ',13,900,'#1f4f7a')}${T(825,122,'Ⅲ',13,900,'#1f4f7a')}${T(875,152,'Ⅳ',13,900,'#1f4f7a')}${T(950,186,'O₂',13,900,'#b83a33')}
+      ${T(725,88,'NADH',12,700,'#c43d7d')}${T(775,118,'Ⅰ',13,900,'#1f4f7a')}${T(825,146,'Ⅲ',13,900,'#1f4f7a')}${T(875,176,'Ⅳ',13,900,'#1f4f7a')}${T(950,186,'O₂',13,900,'#b83a33')}
       <path d="M684,70 V200" stroke="#9fb2b6" stroke-width="2" marker-end="url(#ah)" style="color:#9fb2b6"/>
       ${T(690,240,'내려갈 때마다 에너지 방출',13,700,'#5b6d72','start')}
       </g>`,.2);
@@ -715,11 +726,11 @@ function S4(s){
   // H⁺ 펌프
   if(s>=2){
     const n = s===2 ? 10 : HTOP.length;
-    HTOP.slice(0,n).forEach(([x,y],i)=> o += (s===2? fin(Hp(x,y),.6+i*.25) : Hp(x,y)));
+    HTOP.slice(0,n).forEach(([x,y],i)=>{ if(!running && x>=540 && x<=1000 && y<=160) return; o += (s===2? fin(Hp(x,y),.6+i*.25) : Hp(x,y)); });
     HBOT.forEach(([x,y])=>o+=Hp(x,y));
     if(running){
       [[190,1],[452,2],[610,3]].forEach(([x,k])=>{
-        for(let j=0;j<2;j++) o += loop(Hp(0,0),`M${x},470 L${x},300 L${x+(k%2?-20:20)},200`,2.4,j*1.2+k*.3);
+        for(let j=0;j<2;j++) o += loop(Hp(0,0),`M${x},470 L${x},300 L${x+(k%2?-20:20)},200`,2.4,j*1.2+k*.3, j===0?[x,236]:null);
       });
     }
     if(s===2) o += fin(`<g>${T(980,70,'H⁺ 많음',18,900,'#1f7fb5','end')}${T(980,470,'H⁺ 적음',18,900,'#1f7fb5','end')}</g>`,1);
@@ -742,7 +753,7 @@ function S4(s){
       } else {
         o += tag(668,452,'½O₂ + 2H⁺','O2') + tag(700,500,'H2O',null,true);
       }
-      if(s===3) o += fin(halo(622,506,'최종 전자 수용체',15,900,'#b83a33','end'),.4);
+      if(s===3) o += fin(halo(606,528,'최종 전자 수용체 O₂ → H₂O',15,900,'#b83a33','end'),.4);
     } else {
       o += `<g opacity=".35">${tag(668,452,'O₂ 없음','plain')}</g>`;
     }
@@ -750,8 +761,9 @@ function S4(s){
   // 화학삼투 + ATP 합성
   if(s>=4){
     if(running){
-      for(let j=0;j<4;j++) o += loop(Hp(0,0),'M800,170 Q830,230 830,300 L830,410 Q830,460 760,500',2.4,j*.6);
-      for(let j=0;j<2;j++) o += loop(`<g>${tag(0,0,'ATP')}</g>`,'M900,470 L960,530',2.2,j*1.1);
+      const HS=[[830,300],[830,410],null,null];
+      for(let j=0;j<4;j++) o += loop(Hp(0,0),'M800,170 Q830,230 830,300 L830,410 Q830,460 760,500',2.4,j*.6,HS[j]);
+      for(let j=0;j<2;j++) o += loop(`<g>${tag(0,0,'ATP')}</g>`,'M900,470 L960,530',2.2,j*1.1, j===0?[930,500]:null);
       o += tag(946,428,'ADP+Pi','ADP');
       o += halo(830,206,'H⁺ 통로',15,900,'#5a3fa8');
     } else {
@@ -764,7 +776,7 @@ function S4(s){
       ${tag(640,92,'NADH')}${T(690,98,'1개 →',16,700,'#2b3a40','start')}${tag(800,92,'ATP')}${T(840,98,'약 2.5개',17,900,'#c96a10','start')}
       ${tag(640,134,'FADH2')}${T(690,140,'1개 →',16,700,'#2b3a40','start')}${tag(800,134,'ATP')}${T(840,140,'약 1.5개',17,900,'#c96a10','start')}</g>`,.2);
   }
-  return o;
+  return o + late;
 }
 
 /* ---------- 내용 ---------- */
@@ -864,7 +876,7 @@ const STAGES = [
    k:['① FAD → FADH₂','② NADH 생성','옥살아세트산 재생']},
   {t:'TCA 회로 정리',
    e:'회전목마가 한 바퀴 돌면 CO₂ 2개, NADH 3개, FADH₂ 1개, ATP 1개가 나와요. 포도당 1개에서 아세틸조효소 A가 2개 생기니까 회전목마는 두 바퀴 돌아요.',
-   b:'피루브산 1분자가 마이토콘드리아로 들어가 아세틸조효소 A로 산화된 뒤 TCA 회로를 거치면 이산화 탄소 3분자로 분해되며, 이 과정에서 NADH 4분자, FADH₂ 1분자, ATP 1분자가 생성된다.',
+   b:'TCA 회로 1바퀴(아세틸조효소 A 1분자)에서 이산화 탄소 2분자, NADH 3분자, FADH₂ 1분자, ATP 1분자가 생성된다. 피루브산의 산화까지 합하면 피루브산 1분자당 이산화 탄소 3분자, NADH 4분자, FADH₂ 1분자, ATP 1분자이다.',
    k:['1바퀴 = 아세틸조효소 A 1개','포도당 1분자 = 2바퀴']}
  ]},
  {name:'산화적 인산화', place:'마이토콘드리아 내막', c:'--st4', draw:S4, steps:[
@@ -881,7 +893,7 @@ const STAGES = [
    b:'전자전달계에서 전자가 이동할 때 전자전달효소 복합체는 마이토콘드리아 기질에서 막사이공간으로 수소 이온을 능동수송한다. 그 결과 막사이공간의 수소 이온 농도는 증가하고 기질의 수소 이온 농도는 감소하여 내막을 경계로 농도 기울기가 형성된다.',
    k:['능동수송','H⁺ 농도 기울기']},
   {t:'마지막 전자는 산소가 받아요',
-   e:'계단 끝까지 내려온 전자는 산소(O₂)가 받아요. 산소는 전자와 수소 이온을 받아 물(H₂O)이 돼요. 산소가 없으면 전자가 갈 곳이 없어 줄줄이 막히고 ATP도 만들 수 없어요. 아래 버튼으로 직접 확인해 보세요.',
+   e:'계단 끝까지 내려온 전자는 산소(O₂)가 받아요. 산소는 전자와 수소 이온을 받아 물(H₂O)이 돼요. 산소가 없으면 전자가 갈 곳이 없어 줄줄이 막혀 산화적 인산화로는 ATP를 만들 수 없어요. NADH도 NAD⁺로 돌아가지 못해 해당 과정까지 멈추는데, 이때 세포는 발효로 NAD⁺를 되돌려 해당 과정의 ATP 2개만 얻어요. 아래 버튼으로 직접 확인해 보세요.',
    b:'고에너지 전자는 최종적으로 산소로 전달된다. 하나의 산소 분자는 4개의 수소 이온과 4개의 전자를 받아 2개의 물 분자를 형성한다. 산소가 없으면 전자전달계에서 전자의 흐름이 정지되어 ATP가 합성되지 못한다.',
    k:['최종 전자 수용체 = O₂','H₂O 생성'], o2:true},
   {t:'H⁺가 흘러 내려오며 ATP를 만들어요',
@@ -941,7 +953,7 @@ function render(){
   $('stagechip').textContent=`${si+1}단계 · ${S.name}`;
   $('placechip').textContent=`장소: ${S.place}`;
   $('stepno').textContent=`세부 단계 ${st+1} / ${S.steps.length}`+(step.z?' · 확대해서 보기':'');
-  $('title').textContent=step.t; $('easy').textContent=step.e; $('book').textContent=step.b;
+  $('title').textContent=step.t; $('easy').textContent = RM ? step.e.replace('그림의 ▶ 버튼이나 NAD⁺를 누르면 반응이 시작되고, ','') : step.e; $('book').textContent=step.b;
   $('keys').innerHTML=step.k.map(k=> k==='탈수소효소' ? `<button class="chip" data-zoom="dh">탈수소효소 자세히 ▸</button>` : k==='기질수준인산화' ? `<button class="chip" data-zoom="sl">기질수준인산화 자세히 ▸</button>` : `<span class="chip">${k}</span>`).join('');
   const o2=$('o2'); o2.hidden=!step.o2; o2.setAttribute('aria-pressed',noO2);
   o2.textContent = noO2 ? '산소 다시 넣기' : '산소 없애 보기';
@@ -949,21 +961,27 @@ function render(){
   S.steps.forEach((_,i)=>{const d=document.createElement('button');d.className='dot'+(i===st?' on':i<st?' done':'');d.textContent=i+1;d.setAttribute('aria-label',`세부 단계 ${i+1}`);d.onclick=()=>go(si,i);dots.appendChild(d);});
   const first = si===0&&st===0, last = si===STAGES.length-1&&st===S.steps.length-1;
   $('prev').disabled=$('bprev').disabled=first; $('next').disabled=$('bnext').disabled=last;
-  $('next').textContent = st===S.steps.length-1 && !last ? `다음: ${STAGES[si+1].name} ▶` : '다음 ▶';
-  const L=ledgerAt(si,st);
+  $('next').textContent = '다음 ▶';
+  $('next').title = st===S.steps.length-1 && !last ? `다음 단계: ${STAGES[si+1].name}` : '';
+  document.querySelector('.hint').textContent = st===S.steps.length-1 && !last ? `다음을 누르면 ${si+2}단계 '${STAGES[si+1].name}'(으)로 넘어가요` : '키보드 ← → 로도 넘길 수 있어요';
   const off = noO2 && si===3 && st>=3;
+  const L = off ? ledgerAt(3,2) : ledgerAt(si,st);   // 산소가 없으면 산화적 인산화의 ATP 28은 생기지 않음 (모은 것은 4단계 들어올 때 그대로)
   const shown = {atp: (si===3&&st===5&&!off)?'최대 32':L.atp, nadh:(si===3&&st===5&&!off)?0:L.nadh, fadh2:(si===3&&st===5&&!off)?0:L.fadh2, co2:L.co2};
   ['atp','nadh','fadh2','co2'].forEach(k=>{
     const cell=$('L-'+k); cell.querySelector('.v').textContent=shown[k];
     if(prevLedger && prevLedger[k]!==shown[k]){cell.classList.remove('pulse');void cell.offsetWidth;cell.classList.add('pulse');}
   });
   prevLedger=shown;
-  $('lnote').textContent = (si===3&&st===5&&!off) ? 'NADH·FADH₂가 모두 ATP로 바뀌었어요. NADH 10 × 2.5 + FADH₂ 2 × 1.5 + 기질수준인산화 4 = 최대 32 (교과서: 포도당 1분자당 최대 32ATP)' : (NOTES[si]||'');
-  try{ history.replaceState(null,'',`#s${si+1}`);}catch(e){}
+  const note0 = st<=1 ? 'ATP를 먼저 2개 써요(투자).' : st<4 ? '투자한 ATP 2개가 아직 빚으로 남아 있어요.' : NOTES[0];
+  $('lnote').textContent = off ? '산소가 없어 전자전달계가 멈춰 NADH·FADH₂를 ATP로 바꾸지 못해요. 이미 모은 ATP 4개만 남아요. NADH도 NAD⁺로 돌아가지 못해 해당 과정까지 멈추므로, 세포는 발효로 NAD⁺를 되돌려 해당 과정의 ATP 2개만 계속 얻어요.'
+    : (si===3&&st===5) ? 'NADH·FADH₂가 모두 ATP로 바뀌었어요. NADH 10 × 2.5 + FADH₂ 2 × 1.5 + 기질수준인산화 4 = 최대 32 (교과서: 포도당 1분자당 최대 32ATP)' : (si===0 ? note0 : (NOTES[si]||''));
+  $('bnext').textContent = (st===S.steps.length-1 && !last) ? '»' : '›';
+  $('bnext').title = $('bnext').ariaLabel = $('next').textContent;
+  try{ history.replaceState(null,'',`#s${si+1}${EMB?'&embed':''}`);}catch(e){}
 }
-function go(a,b){ si=a; st=b; render(); }
-function next(){ const S=STAGES[si]; if(st<S.steps.length-1) st++; else if(si<STAGES.length-1){si++;st=0;} render(); }
-function prev(){ if(st>0) st--; else if(si>0){si--;st=STAGES[si].steps.length-1;} render(); }
+function go(a,b){ if(a!==si) noO2=false; si=a; st=b; render(); }   // 단계가 바뀌면 '산소 없음' 상태는 풀어 줌
+function next(){ const S=STAGES[si]; if(st<S.steps.length-1) st++; else if(si<STAGES.length-1){si++;st=0;noO2=false;} render(); }
+function prev(){ if(st>0) st--; else if(si>0){si--;st=STAGES[si].steps.length-1;noO2=false;} render(); }
 $('next').onclick=$('bnext').onclick=next; $('prev').onclick=$('bprev').onclick=prev;
 function motionLabel(){ const b=document.getElementById('motion'); if(b){ b.textContent = RM ? '움직임 켜기' : '움직임 끄기'; b.setAttribute('aria-pressed', RM); } }
 document.getElementById('motion').onclick=()=>{ RM=!RM; try{localStorage.setItem('still',RM?'1':'0');}catch(e){} motionLabel(); render(); };
@@ -982,8 +1000,8 @@ function zrender(){
   $('zeasy').textContent=st.e; $('zbook').textContent=st.b;
   $('zprev').disabled=zi===0; $('znext').disabled=zi===2;
 }
-function openZ(k){ zk=k; zi=0; zback=document.activeElement; $('zoom').hidden=false; zrender(); $('zclose').focus(); }
-function closeZ(){ $('zoom').hidden=true; $('zsvg').innerHTML=''; if(zback&&zback.focus) zback.focus(); }
+function openZ(k){ zk=k; zi=0; zback=document.activeElement; $('zoom').hidden=false; document.body.style.overflow='hidden'; zrender(); $('zclose').focus(); }
+function closeZ(){ $('zoom').hidden=true; $('zsvg').innerHTML=''; document.body.style.overflow=''; if(zback&&zback.focus) zback.focus(); }
 $('zclose').onclick=closeZ;
 $('zprev').onclick=()=>{ if(zi>0){zi--;zrender();} };
 $('znext').onclick=()=>{ if(zi<2){zi++;zrender();} };
@@ -992,11 +1010,13 @@ $('zoom').addEventListener('click',e=>{ if(e.target.id==='zoom') closeZ(); });
 document.addEventListener('click',e=>{ const t=e.target.closest&&e.target.closest('[data-zoom]'); if(t && !zopen()) openZ(t.dataset.zoom); });
 document.addEventListener('keydown',e=>{
   if(!zopen()) return;
+  if(e.key==='Tab'){ const f=[...$('zoom').querySelectorAll('button:not([disabled])')]; const i=f.indexOf(document.activeElement);
+    if(e.shiftKey && i<=0){ f[f.length-1].focus(); e.preventDefault(); } else if(!e.shiftKey && i===f.length-1){ f[0].focus(); e.preventDefault(); } return; }
   if(e.key==='Escape') closeZ(); else if(e.key==='ArrowRight') $('znext').click(); else if(e.key==='ArrowLeft') $('zprev').click(); else return;
   e.preventDefault(); e.stopImmediatePropagation();
 },true);
-document.addEventListener('keydown',e=>{ if(e.target.closest('button')&&(e.key===' '||e.key==='Enter'))return; if(e.key==='ArrowRight'){next();e.preventDefault();} if(e.key==='ArrowLeft'){prev();e.preventDefault();} });
-const h=location.hash.match(/^#s([1-4])$/); if(h) si=+h[1]-1;
+document.addEventListener('keydown',e=>{ const z=e.target.closest&&e.target.closest('.zhit[data-zoom]'); if(z&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); if(!zopen()) openZ(z.dataset.zoom); return; } if(e.target.closest('button')&&(e.key===' '||e.key==='Enter'))return; if(e.key==='ArrowRight'){next();e.preventDefault();} if(e.key==='ArrowLeft'){prev();e.preventDefault();} });
+const h=location.hash.match(/s([1-4])/); if(h) si=+h[1]-1;
 render();
 })();
 </script>

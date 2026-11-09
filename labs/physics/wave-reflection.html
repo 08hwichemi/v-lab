@@ -97,9 +97,18 @@ input[type=range]{accent-color:#111}
 @media (min-width:1200px){
   .wrap{max-width:1400px}
   #tab-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+  #tab-compare.hide{display:none}
   #tab-compare .card{margin-bottom:0}
   #tab-custom .card{max-width:1040px;margin-inline:auto}
 }
+@media (max-width:640px){
+  .controls{gap:8px 10px;padding:10px 12px}
+  .btn{padding:8px 11px;font-size:14.5px}
+  .group,label.chk{font-size:14px}
+  .seg button{padding:6px 10px;font-size:14px}
+  .scrub{flex-basis:100%}
+}
+.presets .btn.on{background:#111;color:#fff;border-color:#111}
 /* 뷰어 안(iframe): 파일 자체 제목 숨김 */
 body.vlab-embed header{display:none}
 body.vlab-embed .wrap{padding-top:12px}
@@ -110,7 +119,7 @@ body.vlab-embed .wrap{padding-top:12px}
 <div class="wrap">
   <header>
     <h1>고정단 반사와 자유단 반사 시뮬레이션</h1>
-    <p class="lead">속력이 다른 두 줄을 이어 붙이고 파동을 보내, 경계면에서 생기는 반사파와 투과파의 모양을 관찰</p>
+    <p class="lead">속력이 다른 두 줄을 이어 붙이고 파동을 보내, 경계면에서 생기는 반사파와 투과파의 모양을 관찰 — 매질의 경계에서 생기는 반사를 줄 끝의 고정단·자유단 반사와 견주어 보기</p>
   </header>
 
   <div class="tabs">
@@ -154,7 +163,7 @@ body.vlab-embed .wrap{padding-top:12px}
         <button class="btn ghost" data-p="4,1.5">빠른 줄 → 느린 줄</button>
         <button class="btn ghost" data-p="2.5,2.5">같은 속력</button>
         <button class="btn ghost" data-p="1.5,4">느린 줄 → 빠른 줄</button>
-        <button class="btn ghost" data-p="5,1">속력 차이 아주 크게</button>
+        <button class="btn ghost" data-p="5,1">속력 비 아주 크게 (5배)</button>
       </div>
       <div class="sliders">
         <label>왼쪽 줄(파동이 출발하는 줄)의 속력: <span class="val" id="v1Val"></span>
@@ -180,7 +189,7 @@ body.vlab-embed .wrap{padding-top:12px}
 
     <h2>정리</h2>
     <table>
-      <tr><th>구분</th><th>고정단 반사</th><th>자유단 반사</th></tr>
+      <tr><th>구분</th><th>고정단 반사와 같은 경우</th><th>자유단 반사와 같은 경우</th></tr>
       <tr><td>파동의 진행</td><td>속력이 빠른 줄 → 느린 줄</td><td>속력이 느린 줄 → 빠른 줄</td></tr>
       <tr><td>반사파</td><td>위상이 180° 변함 (마루가 골로 뒤집혀 되돌아옴)</td><td>위상이 바뀌지 않음 (마루가 마루 그대로 되돌아옴)</td></tr>
       <tr><td>투과파</td><td>뒤집히지 않음 (마루는 마루)</td><td>뒤집히지 않음 (마루는 마루)</td></tr>
@@ -189,7 +198,10 @@ body.vlab-embed .wrap{padding-top:12px}
     <h2>관찰하면서 알 수 있는 것</h2>
     <ul>
       <li>두 줄의 속력이 같으면 경계면이 없는 것과 같아 반사파가 생기지 않고 모두 투과</li>
-      <li>두 줄의 속력 차이가 클수록 반사파가 커짐</li>
+      <li>두 줄의 속력 비가 1에서 멀수록(한쪽이 다른 쪽의 몇 배인지가 클수록) 반사파의 진폭이 커짐 — 속력의 차이가 아니라 비로 정해짐</li>
+      <li>줄 끝이 벽에 고정된 고정단 반사는 오른쪽 줄의 속력이 0에 가까운 극한, 끝이 자유로운 자유단 반사는 오른쪽 줄의 속력이 매우 큰 극한에 해당 → 매질의 경계에서는 '고정단 반사와 같이' 위상이 180° 바뀌거나 '자유단 반사와 같이' 그대로 반사됨</li>
+      <li>같은 장력일 때 굵고 무거운 줄에서 파동이 느리고, 가늘고 가벼운 줄에서 빠름 (v = √(T/μ)) → 그림에서 줄의 굵기가 이를 나타냄</li>
+      <li>느린 줄 → 빠른 줄일 때 투과파가 입사파보다 높아 보이지만, 가벼운(빠른) 줄은 같은 진폭이라도 운반하는 에너지가 작아 반사파와 투과파의 에너지를 합하면 입사파와 같음</li>
       <li>투과파는 속력이 느린 줄로 넘어가면 폭이 좁아지고, 빠른 줄로 넘어가면 폭이 넓어짐 → 같은 시간 동안 이동하는 거리가 줄마다 다르기 때문</li>
       <li>리본은 위아래로 진동할 뿐 파동을 따라 옆으로 이동하지 않음 → 전달되는 것은 매질이 아니라 진동</li>
     </ul>
@@ -248,7 +260,7 @@ body.vlab-embed .wrap{padding-top:12px}
     ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
   }
   function pill(ctx, text, x, y, align){
-    ctx.font = "600 13px 'IBM Plex Sans KR', Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
+    ctx.font = "600 14px 'IBM Plex Sans KR', Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
     var tw = ctx.measureText(text).width, w = tw + 18, h = 24;
     var left = align === "right" ? x - w : x;
     roundRect(ctx, left, y, w, h, 12);
@@ -257,7 +269,7 @@ body.vlab-embed .wrap{padding-top:12px}
     ctx.fillText(text, left + 9, y + h/2 + 0.5);
   }
   function arrowLabel(ctx, text, x, y, dir){
-    ctx.font = "600 14px 'IBM Plex Sans KR', Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
+    ctx.font = "600 15px 'IBM Plex Sans KR', Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
     ctx.fillStyle = "#1f2a3d"; ctx.fillText(text, x, y);
     var ay = y + 13, half = 16;
@@ -295,7 +307,7 @@ body.vlab-embed .wrap{padding-top:12px}
     var bx = this.px(0);
     ctx.strokeStyle = "#e0393e"; ctx.lineWidth = 1.6; ctx.setLineDash([5,4]);
     ctx.beginPath(); ctx.moveTo(bx, 8); ctx.lineTo(bx, H - 22); ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle = "#1f2a3d"; ctx.font = "13px 'IBM Plex Sans KR', Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
+    ctx.fillStyle = "#1f2a3d"; ctx.font = "14px 'IBM Plex Sans KR', Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
     ctx.textAlign = "center"; ctx.textBaseline = "alphabetic"; ctx.fillText("경계면", bx, H - 7);
     // 줄 이름
     pill(ctx, this.labels(this, -1), 10, 10, "left");
@@ -304,7 +316,9 @@ body.vlab-embed .wrap{padding-top:12px}
     // 지나간 모습
     if (state.trail && state.sent){
       // 경계면에 닿기 전 모습(입사파)과 반사가 끝난 뒤 모습, 두 장면만 흐리게 남김
-      var snaps = [-4.5, 4.5];
+      // 두 번째 장면은 반사파가 다 나오고 투과파도 화면 안에 있는 시점(느린 줄→빠른 줄은 투과파가 멀리 가므로 앞당김)
+      var s2 = Math.min(4.5, Math.max(W + 0.3, (X_MAX - 1)*this.v1/this.v2 - W*0.9));
+      var snaps = [-4.5, s2];
       for (var q = 0; q < snaps.length; q++){
         var tk = (snaps[q] - X0)/this.v1;
         if (tk < t - 0.05){ this.strokeRope(tk, -1, true); this.strokeRope(tk, 1, true); }
@@ -329,8 +343,9 @@ body.vlab-embed .wrap{padding-top:12px}
       var s = this.s(t), up = function(a){ return a >= 0; };
       var place = (function(self){ return function(text, x, amp, dir){
         if (x < X_MIN + 1 || x > X_MAX - 1) return;
-        var X = self.px(x), Y = up(amp) ? self.py(amp) - 34 : self.py(amp) + 14;
-        if (Y < 40) Y = 40; if (Y > H - 44) Y = H - 44;
+        var X = self.px(x), Y;
+        if (up(amp)){ Y = self.py(amp) - 34; if (Y < 40) Y = self.py(0) + 14; }   // 천장에 닿으면 기준선 아래
+        else { Y = self.py(amp) + 14; if (Y > H - 44) Y = self.py(0) - 34; }       // 바닥에 닿으면 기준선 위
         arrowLabel(ctx, text, X, Y, dir);
       }; })(this);
       if (s < -W*0.5) place("입사파", s, sign, 1);
@@ -345,16 +360,17 @@ body.vlab-embed .wrap{padding-top:12px}
   Sim.prototype.updateText = function(){
     var el = this.res, t = state.t, sign = state.sign;
     var sent = sign > 0 ? "마루" : "골", flip = sign > 0 ? "골" : "마루";
-    if (!state.sent){ el.innerHTML = "「파동 보내기」를 눌러 " + sent + "를 보내 보기"; return; }
+    if (!state.sent){ el.innerHTML = "「파동 보내기」를 눌러 " + sent + (sign > 0 ? "를" : "을") + " 보내 보기"; return; }
     var s = this.s(t);
     if (s < W*0.6){ el.innerHTML = "입사파(" + sent + ")가 경계면으로 다가가는 중"; return; }
     if (Math.abs(this.r) < 0.01){
-      el.innerHTML = "두 줄의 속력이 같아 <b class='same'>반사파가 생기지 않고</b> 모두 투과 · 투과파: " + sent; return;
+      el.innerHTML = "두 줄의 속력이 같아 <b class='same'>반사파가 생기지 않고</b> 모두 투과 · 투과파: " + sent + (t >= this.tEnd - 1e-6 ? " · 끝" : ""); return;
     }
+    var done = t >= this.tEnd - 1e-6 ? " · 끝 (「다시 보내기」를 눌러 다시 보기)" : "";
     if (this.r < 0){
-      el.innerHTML = "반사파: <b class='inv'>" + flip + "로 뒤집혀 되돌아옴</b> (위상 180° 변함 → 고정단 반사) · 투과파: " + sent + " 그대로";
+      el.innerHTML = "반사파: <b class='inv'>" + flip + "로 뒤집혀 되돌아옴</b> (위상 180° 변함 → 고정단 반사와 같음) · 투과파: " + sent + " 그대로" + done;
     } else {
-      el.innerHTML = "반사파: <b class='same'>" + sent + " 그대로 되돌아옴</b> (위상 변하지 않음 → 자유단 반사) · 투과파: " + sent + " 그대로";
+      el.innerHTML = "반사파: <b class='same'>" + sent + " 그대로 되돌아옴</b> (위상 변하지 않음 → 자유단 반사와 같음) · 투과파: " + sent + " 그대로" + done;
     }
   };
 
@@ -384,8 +400,10 @@ body.vlab-embed .wrap{padding-top:12px}
     var m = tMax();
     scrub.max = m.toFixed(2); scrub.value = Math.min(state.t, m).toFixed(2);
     btnPause.disabled = !state.sent || state.t >= m - 1e-6;
-    btnPause.textContent = state.running ? "일시정지" : "계속";
-    btnStep.disabled = state.running || state.t >= m - 1e-6;
+    var ended = state.sent && state.t >= m - 1e-6;
+    btnPause.textContent = (state.running || !state.sent) ? "일시정지" : "계속";
+    btnSend.textContent = ended ? "▶ 다시 보내기" : "▶ 파동 보내기";
+    btnStep.disabled = state.running || ended;
   }
   function drawAll(){ active().forEach(function(s){ s.draw(); }); syncUI(); }
 
@@ -409,8 +427,10 @@ body.vlab-embed .wrap{padding-top:12px}
     });
   }
   seg("shapeSeg", "sign"); seg("rateSeg", "rate");
-  document.getElementById("trail").onchange = function(e){ state.trail = e.target.checked; drawAll(); };
-  document.getElementById("ribbon").onchange = function(e){ state.ribbon = e.target.checked; drawAll(); };
+  var trailEl = document.getElementById("trail"), ribbonEl = document.getElementById("ribbon");
+  trailEl.onchange = function(e){ state.trail = e.target.checked; drawAll(); };
+  ribbonEl.onchange = function(e){ state.ribbon = e.target.checked; drawAll(); };
+  state.trail = trailEl.checked; state.ribbon = ribbonEl.checked;   // 새로고침 때 브라우저가 체크 상태를 복원해도 어긋나지 않게
 
   // 탭
   document.querySelectorAll(".tab").forEach(function(b){
@@ -432,21 +452,34 @@ body.vlab-embed .wrap{padding-top:12px}
     document.getElementById("v1Val").textContent = fmt(v1);
     document.getElementById("v2Val").textContent = fmt(v2);
     var c = document.getElementById("cond");
-    if (v1 > v2) c.textContent = "왼쪽 줄이 더 빠름 → 예상: 반사파가 뒤집힘 (고정단 반사)";
-    else if (v1 < v2) c.textContent = "왼쪽 줄이 더 느림 → 예상: 반사파가 그대로 (자유단 반사)";
-    else c.textContent = "두 줄의 속력이 같음 → 예상: 반사파 없음";
+    if (v1 > v2) c.textContent = "왼쪽 줄이 더 빠름 — 반사파가 뒤집힐까, 그대로일까? 파동을 보내 확인해 보기";
+    else if (v1 < v2) c.textContent = "왼쪽 줄이 더 느림 — 반사파가 뒤집힐까, 그대로일까? 파동을 보내 확인해 보기";
+    else c.textContent = "두 줄의 속력이 같음 — 반사파가 생길까? 파동을 보내 확인해 보기";
+    markPreset();
     state.t = 0; state.running = false; state.sent = false; drawAll();
   }
+  var presetBtns = document.querySelectorAll(".presets button");
+  function markPreset(){
+    presetBtns.forEach(function(b){ b.classList.toggle("on", b.dataset.p === v1In.value + "," + v2In.value); });
+  }
   v1In.oninput = updateCustom; v2In.oninput = updateCustom;
-  document.querySelectorAll(".presets button").forEach(function(b){
+  presetBtns.forEach(function(b){
     b.onclick = function(){ var p = b.dataset.p.split(","); v1In.value = p[0]; v2In.value = p[1]; updateCustom(); };
   });
 
   function resizeAll(){ [simA, simB, simC].forEach(function(s){ if (s.cv.offsetParent !== null) s.resize(); }); }
   window.addEventListener("resize", function(){ resizeAll(); drawAll(); });
+  // 스페이스: 보내기/일시정지/계속 (끝난 뒤에는 다시 보내기). 포커스된 다른 버튼·입력란은 제 동작에 맡김
+  var transport = [btnSend, btnPause, btnStep, btnReset];
+  function isTransport(el){ return transport.indexOf(el) !== -1; }
   document.addEventListener("keydown", function(e){
-    if (e.code === "Space" && e.target.tagName !== "INPUT"){ e.preventDefault(); if (state.sent) btnPause.onclick(); else btnSend.onclick(); }
+    if (e.code !== "Space" || e.repeat) return;
+    var tag = e.target.tagName;
+    if ((tag === "BUTTON" && !isTransport(e.target)) || tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
+    e.preventDefault();
+    if (state.sent && state.t < tMax() - 1e-6) btnPause.onclick(); else btnSend.onclick();
   });
+  document.addEventListener("keyup", function(e){ if (e.code === "Space" && isTransport(e.target)) e.preventDefault(); });
 
   var last = null;
   function loop(now){
@@ -462,6 +495,7 @@ body.vlab-embed .wrap{padding-top:12px}
   }
 
   resizeAll(); updateCustom(); drawAll();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ resizeAll(); drawAll(); });
   requestAnimationFrame(loop);
 })();
 </script>

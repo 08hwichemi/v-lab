@@ -250,7 +250,7 @@ th{font-size:13px}
           <h3>탐구 과제</h3>
           <ol>
             <li>속력과 높이를 고정하고 발사각 15°, 30°, 45°, 60°, 75°에서 수평 도달 거리 기록</li>
-            <li>수평 도달 거리가 가장 긴 발사각 찾기, 합이 90°인 두 각도(30°와 60°)의 결과 비교</li>
+            <li>수평 도달 거리가 가장 긴 발사각 찾기, 발사 높이 0 m에서 합이 90°인 두 각도(30°와 60°)의 결과 비교</li>
             <li>0.1초 간격 점의 가로·세로 간격을 보고 수평 방향과 연직 방향 운동의 특징 정리</li>
             <li>발사 높이를 20 m로 올렸을 때 가장 멀리 가는 각도가 어떻게 달라지는지 확인</li>
             <li>중력 가속도를 달로 바꾸기 전에 결과를 먼저 예측하고 실험으로 확인</li>
@@ -271,12 +271,12 @@ th{font-size:13px}
       <header class="lab-head">
         <div class="eyebrow">실험 02 · 탄성파와 소리</div>
         <h2>단진자</h2>
-        <p>실 길이·추의 질량·진폭을 바꾸며 주기를 측정하고, 역학적 에너지 변화 관찰</p>
+        <p>실 길이·추의 질량·진폭을 바꾸며 주기를 측정하고, 운동 에너지와 위치 에너지의 전환(역학적 에너지 보존) 관찰</p>
       </header>
       <div class="bench">
         <div class="stage">
           <div class="cvbox"><canvas class="sim" aria-label="단진자 시뮬레이션 화면"></canvas></div>
-          <p class="cap">배경 눈금 1칸 = 25 cm · 공기 저항 무시</p>
+          <p class="cap">배경 눈금 1칸 = 25 cm · 추는 점, 실의 질량과 늘어남은 무시 · 공기 저항 무시</p>
           <div class="readout"></div>
         </div>
         <div class="panel"><h3>실험 조건</h3><div class="ctls"></div></div>
@@ -291,7 +291,7 @@ th{font-size:13px}
           <ol>
             <li>길이와 진폭을 고정하고 추의 질량만 바꾸며 주기 측정, 주기와 질량의 관계 정리</li>
             <li>실 길이를 0.2 m부터 2.0 m까지 바꾸며 주기 측정</li>
-            <li>T²–L 그래프를 그리고 추세선 기울기로 중력 가속도 g 구하기 (T² = 4π²L / g 이므로 g = 4π² ÷ 기울기)</li>
+            <li>T²–L 그래프를 그리고 추세선 기울기로 중력 가속도 g 구하기 (T² = 4π²L / g 이므로 g = 4π² ÷ 기울기 · 진폭은 10° 이하로)</li>
             <li>에너지 막대에서 운동 에너지와 위치 에너지가 바뀌어도 합이 일정한지 확인</li>
             <li>g를 달로 바꾸기 전에 주기가 몇 배가 될지 예측하고 확인</li>
           </ol>
@@ -299,7 +299,7 @@ th{font-size:13px}
         <details class="more">
           <summary>이것까지 알면 좋아요</summary>
           <ul>
-            <li>T = 2π√(L/g)는 진폭이 작을 때 성립하는 식. 이 실험실은 근사 없이 계산하므로 진폭을 40° 이상으로 키우면 주기가 조금 길어짐</li>
+            <li>T = 2π√(L/g)는 진폭이 작을 때 성립하는 근사식. 이 실험실은 근사 없이 계산하므로 진폭이 클수록 주기가 길어짐 (10°에서 약 0.2 %, 20°에서 약 0.8 %, 40°에서 약 3 %, 60°에서 약 7 %). g를 구할 때는 진폭을 10° 이하로 두어야 9.8에 가깝게 나옴</li>
             <li>실제 실험에서 10번 왕복 시간을 재서 나누는 까닭: 초시계를 누를 때 생기는 반응 시간 오차를 줄이기 위함</li>
           </ul>
         </details>
@@ -316,7 +316,7 @@ th{font-size:13px}
       <div class="bench">
         <div class="stage">
           <div class="cvbox"><canvas class="sim" aria-label="행성 공전 시뮬레이션 화면"></canvas></div>
-          <p class="cap">거리 단위 AU(천문단위), 시간 단위 년 · 화살표 길이는 속력에 비례</p>
+          <p class="cap">거리 단위 AU(천문단위), 시간 단위 년 · 속력은 km/s로 환산 (1 AU/년 ≈ 4.74 km/s) · 화살표 길이는 속력에 비례</p>
           <div class="readout"></div>
           <div class="sectors"></div>
         </div>
@@ -343,6 +343,7 @@ th{font-size:13px}
             <li>1 AU는 지구와 태양 사이 평균 거리, 약 1억 5천만 km</li>
             <li>AU와 년 단위를 쓰면 태양계 행성의 T²/a³ 값은 모두 1에 가까움. 이 값은 중심 천체의 질량으로 정해지므로, 목성 둘레를 도는 위성들은 서로는 같지만 태양 둘레를 도는 행성과는 다른 값이 나옴</li>
             <li>구간 넓이는 화면의 부채꼴 모양을 잘게 나눠 계산한 값</li>
+            <li>행성의 질량은 태양의 1/1000보다 작아 무시함 (엄밀히는 T²/a³이 태양과 행성의 질량 합에 반비례)</li>
           </ul>
         </details>
       </div>
@@ -370,7 +371,7 @@ th{font-size:13px}
         <div>
           <h3>탐구 과제</h3>
           <ol>
-            <li>발사 속력을 1 km/s씩 키우며 결과 기록 (떨어짐 → 원 궤도 → 타원 궤도 → 탈출)</li>
+            <li>발사 속력을 1 km/s씩 키우며 결과 기록 (떨어짐 → 타원 궤도 → 원 궤도 → 타원 궤도 → 탈출)</li>
             <li>원 궤도에 가장 가까워지는 속력 찾기, 만유인력이 구심력 역할을 한다는 식으로 계산한 값과 비교</li>
             <li>발사 높이를 바꾸며 원 궤도 속력과 공전 주기 변화 비교</li>
             <li>[기준 속력 보기]는 예측과 측정을 마친 뒤에 켜서 확인</li>
@@ -379,9 +380,9 @@ th{font-size:13px}
         <details class="more">
           <summary>이것까지 알면 좋아요</summary>
           <ul>
-            <li>지표면 근처 원 궤도 속력 약 7.9 km/s, 지구 중력을 벗어나는 탈출 속력 약 11.2 km/s</li>
+            <li>지표면 근처 원 궤도 속력 약 7.9 km/s, 지구로 되돌아오지 않는 탈출 속력 약 11.2 km/s. 높이가 높을수록 두 값 모두 작아짐 (400 km에서는 7.67 km/s·10.85 km/s)</li>
             <li>탈출 속력 = 원 궤도 속력 × √2 (역학적 에너지 보존으로 구함)</li>
-            <li>국제우주정거장은 약 400 km 높이에서 약 90분마다 지구를 한 바퀴 돎</li>
+            <li>국제우주정거장은 약 400 km 높이에서 약 92분(1시간 30분 남짓)마다 지구를 한 바퀴 돎</li>
           </ul>
         </details>
       </div>
@@ -397,7 +398,7 @@ th{font-size:13px}
       <div class="bench">
         <div class="stage">
           <div class="cvbox"><canvas class="sim" aria-label="도플러 효과 시뮬레이션 화면"></canvas></div>
-          <p class="cap">위에서 내려다본 모습 · 소리의 속력 340 m/s · 실제보다 150배 느리게 재생</p>
+          <p class="cap">위에서 내려다본 모습 · 소리의 속력 340 m/s (약 15 °C 공기) · 실제보다 150배 느리게 재생</p>
           <div class="readout"></div>
         </div>
         <div class="panel"><h3>실험 조건</h3><div class="ctls"></div></div>
@@ -419,9 +420,9 @@ th{font-size:13px}
         <details class="more">
           <summary>이것까지 알면 좋아요</summary>
           <ul>
-            <li>음원 속력이 소리 속력 이상이면 파면이 겹쳐 원뿔 모양 충격파가 생김 (소닉 붐)</li>
+            <li>음원 속력이 소리 속력보다 빠르면 파면이 겹쳐 원뿔 모양(위에서 보면 V자) 충격파가 생김 (소닉 붐). 원뿔의 반각 θ는 sin θ = v/vs</li>
             <li>관찰자가 정지한 음원 쪽으로 vo로 다가가면 f′ = f·(v + vo)/v</li>
-            <li>빛에서도 같은 현상이 일어남. 멀어지는 별과 은하의 빛은 파장이 길어짐(적색 편이)</li>
+            <li>빛에서도 비슷한 현상이 일어남. 멀어지는 별과 은하의 빛은 파장이 길어짐(적색 편이)</li>
           </ul>
         </details>
       </div>
@@ -464,8 +465,9 @@ th{font-size:13px}
         <details class="more">
           <summary>이것까지 알면 좋아요</summary>
           <ul>
-            <li>그물망(고무막) 그림은 비유. 실제로는 3차원 공간과 시간이 함께 휘어지고, 고무막처럼 '아래쪽'이 있는 것은 아님</li>
-            <li>빛이 휘는 정도는 보기 쉽게 크게 과장함. 태양 가장자리를 스치는 별빛은 약 1.75″(각초)만 휘어지며, 1919년 일식 관측으로 처음 확인됨</li>
+            <li>그물망은 질량 주위의 휘어진 공간(일반 상대성 이론의 슈바르츠실트 해)의 한 단면을 2차원 곡면으로 나타낸 것(깊이는 보기 쉽게 키움). 실제로는 3차원 공간과 시간이 함께 휘어지고, 고무막처럼 '아래쪽'이 있는 것은 아님</li>
+            <li>빛과 공의 경로는 이 휘어진 시공간에서 가장 곧은 길(측지선)을 계산한 것. 그래서 같은 질량·같은 거리면 천체 종류와 관계없이 똑같이 휘고, 공은 빛보다 느려서 더 많이 휨</li>
+            <li>실제 별은 질량에 비해 매우 커서(태양 반지름은 슈바르츠실트 반지름의 약 23만 배) 빛이 거의 휘지 않음. 여기서는 천체를 지평선 반지름의 몇 배 크기로 아주 작고 무겁게 잡아 휘는 정도를 과장함. 태양 가장자리를 스치는 별빛은 약 1.75″(각초)만 휘어지며, 1919년 일식 관측으로 처음 확인됨</li>
             <li>시간 지연 계산식: t<sub>B</sub> = t<sub>A</sub> × √(1 − 2GM/rc²). 2GM/c²을 슈바르츠실트 반지름이라 하고, 블랙홀은 이 반지름(사건의 지평선) 안쪽에서 빛도 빠져나오지 못함</li>
             <li>GPS 위성의 시계는 중력이 약한 높은 곳에 있어 지상보다 하루에 약 45 μs 빨리 감. 빠르게 움직여서 느려지는 효과(약 7 μs)를 합치면 하루 약 38 μs 차이 → 보정하지 않으면 위치 오차가 하루에 10 km 넘게 쌓임. 이 실험실에서 지구를 고르고 시계 B를 1.0과 4.2 × 반지름에 두어 '하루에 늦어지는 시간'의 차이를 구하면 비슷한 값이 나옴 (1.0에서 읽는 60 μs는 아주 먼 곳과 비교한 값)</li>
           </ul>
@@ -578,8 +580,10 @@ function scatter(cv,o){
   text(ctx,o.xLabel,pl+pw/2,h-4,{size:12,align:'center',base:'bottom'});
   ctx.save();ctx.translate(13,pt+ph/2);ctx.rotate(-Math.PI/2);text(ctx,o.yLabel,0,0,{size:12,align:'center',base:'middle'});ctx.restore();
   if(!pts.length){text(ctx,'기록을 추가하면 점이 찍혀요',pl+pw/2,pt+ph/2,{size:13,align:'center',base:'middle'});return;}
-  if(o.fit&&pts.length>=2){let sxy=0,sxx=0;pts.forEach(p=>{sxy+=p.x*p.y;sxx+=p.x*p.x;});if(sxx>0){const k=sxy/sxx;ctx.strokeStyle=hexA(C.accent,0.75);ctx.lineWidth=1.5;ctx.setLineDash([5,4]);const xe=Math.min(xm,ym/k);line(ctx,X(0),Y(0),X(xe),Y(k*xe));ctx.setLineDash([]);text(ctx,'원점을 지나는 추세선 기울기 ≈ '+k.toPrecision(4),pl+8,6,{size:12,color:C.accent,base:'top',weight:600});}}
-  pts.forEach(p=>{ctx.fillStyle=C.trace;ctx.beginPath();ctx.arc(X(p.x),Y(p.y),4.5,0,TAU);ctx.fill();ctx.strokeStyle=C.panel;ctx.lineWidth=1.5;ctx.stroke();});
+  if(o.note)text(ctx,o.note,pl+pw,pt-8,{size:11,align:'right',base:'bottom',color:C.muted});
+  const fp=pts.filter(p=>!p.dim);
+  if(o.fit&&fp.length>=2){let sxy=0,sxx=0;fp.forEach(p=>{sxy+=p.x*p.y;sxx+=p.x*p.x;});if(sxx>0){const k=sxy/sxx;ctx.strokeStyle=hexA(C.accent,0.75);ctx.lineWidth=1.5;ctx.setLineDash([5,4]);const xe=Math.min(xm,ym/k);line(ctx,X(0),Y(0),X(xe),Y(k*xe));ctx.setLineDash([]);text(ctx,'원점을 지나는 추세선 기울기 ≈ '+k.toPrecision(4),pl+8,6,{size:12,color:C.accent,base:'top',weight:600});}}
+  pts.forEach(p=>{ctx.fillStyle=p.dim?hexA(C.muted,0.45):C.trace;ctx.beginPath();ctx.arc(X(p.x),Y(p.y),4.5,0,TAU);ctx.fill();ctx.strokeStyle=C.panel;ctx.lineWidth=1.5;ctx.stroke();});
 }
 
 const LABS={};
@@ -592,10 +596,10 @@ const G_OPTS=[{v:9.8,t:'지구 9.8'},{v:3.7,t:'화성 3.7'},{v:1.6,t:'달 1.6'}]
 mkLab('projectile',L=>{
   const st={v0:15,ang:45,h:0,g:9.8,rate:1,vec:true,strobe:true,run:false,t:0,fl:null,done:null,trails:[],ci:0};
   const D=()=>{if(!st.run&&st.done){st.done=null;recB.disabled=true;res.textContent='조건이 바뀌었어요. 다시 발사하면 결과가 나와요.';}L.dirty=true;};
-  slider(L.ctl,{id:'p-v',label:'발사 속력',min:1,max:30,step:0.5,value:15,unit:'m/s',digits:1,onInput:v=>{st.v0=v;D();}});
+  slider(L.ctl,{id:'p-v',label:'발사 속력',min:1,max:30,step:0.5,value:15,unit:'m/s',digits:1,onInput:v=>{st.v0=v;D();L.drawChart();}});
   slider(L.ctl,{id:'p-a',label:'발사 각도',min:0,max:90,step:1,value:45,unit:'°',digits:0,onInput:v=>{st.ang=v;D();}});
-  slider(L.ctl,{id:'p-h',label:'발사 높이',min:0,max:30,step:1,value:0,unit:'m',digits:0,onInput:v=>{st.h=v;D();}});
-  seg(L.ctl,{label:'중력 가속도 g (m/s²)',options:G_OPTS,value:9.8,onChange:v=>{st.g=v;D();}});
+  slider(L.ctl,{id:'p-h',label:'발사 높이',min:0,max:30,step:1,value:0,unit:'m',digits:0,onInput:v=>{st.h=v;D();L.drawChart();}});
+  seg(L.ctl,{label:'중력 가속도 g (m/s²)',options:G_OPTS,value:9.8,onChange:v=>{st.g=v;D();L.drawChart();}});
   seg(L.ctl,{label:'재생 속도',options:[{v:1,t:'실제 속도'},{v:0.25,t:'4배 느리게'}],value:1,onChange:v=>{st.rate=v;}});
   check(L.ctl,{id:'p-vec',label:'속도 벡터 보기 (v, vx, vy)',value:true,onChange:v=>{st.vec=v;D();}});
   check(L.ctl,{id:'p-str',label:'0.1초마다 위치 점 찍기',value:true,onChange:v=>{st.strobe=v;D();}});
@@ -606,7 +610,7 @@ mkLab('projectile',L=>{
   const R=readout(L.ro,[['t','시간','s'],['x','x','m'],['y','y','m'],['vx','vx','m/s'],['vy','vy','m/s']]);
   const res=L.sec.querySelector('.result');
   const rec=recorder(L.rec,'projectile',[{k:'ang',l:'발사각 (°)',d:0},{k:'v0',l:'속력 (m/s)',d:1},{k:'h',l:'높이 (m)',d:0},{k:'g',l:'g (m/s²)',d:1},{k:'T',l:'비행 시간 (s)',d:2},{k:'R',l:'도달 거리 (m)',d:2},{k:'H',l:'최고 높이 (m)',d:2}]);
-  L.drawChart=()=>scatter(L.chartCv,{points:rec.rows.map(r=>({x:r.ang,y:r.R})),xMax:90,xStep:15,xLabel:'발사각 (°)',yLabel:'수평 도달 거리 (m)'});
+  L.drawChart=()=>{const pts=rec.rows.map(r=>({x:r.ang,y:r.R,dim:!(Math.abs(r.v0-st.v0)<1e-9&&Math.abs(r.h-st.h)<1e-9&&Math.abs(r.g-st.g)<1e-9)}));scatter(L.chartCv,{points:pts,xMax:90,xStep:15,xLabel:'발사각 (°)',yLabel:'수평 도달 거리 (m)',note:pts.some(q=>q.dim)?'회색: 지금과 속력·높이·g가 다른 기록':''});};
   rec.onChange(()=>L.drawChart());
 
   function plan(){const th=st.ang*DEG,vx=st.v0*Math.cos(th),vy=st.v0*Math.sin(th),g=st.g,h=st.h;const T=(vy+Math.sqrt(vy*vy+2*g*h))/g;return{v0:st.v0,ang:st.ang,h,g,vx,vy,T,R:vx*T,H:h+(vy>0?vy*vy/(2*g):0)};}
@@ -660,12 +664,12 @@ mkLab('projectile',L=>{
    02 단진자
    ========================================================= */
 mkLab('pendulum',L=>{
-  const st={L:1,m:200,th0:15,g:9.8,rate:1,run:false,th:15*DEG,om:0,t:0,n:0,tn:0,t10:null};
+  const st={L:1,m:200,th0:10,g:9.8,rate:1,run:false,th:10*DEG,om:0,t:0,n:0,tn:0,t10:null};
   function reset(){st.run=false;st.th=st.th0*DEG;st.om=0;st.t=0;st.n=0;st.tn=0;st.t10=null;runB.textContent='추 놓기';recB.disabled=true;L.dirty=true;}
   slider(L.ctl,{id:'q-l',label:'실 길이 L',min:0.2,max:2,step:0.05,value:1,unit:'m',digits:2,onInput:v=>{st.L=v;reset();}});
   slider(L.ctl,{id:'q-m',label:'추의 질량',min:50,max:500,step:10,value:200,unit:'g',digits:0,onInput:v=>{st.m=v;reset();}});
-  slider(L.ctl,{id:'q-a',label:'처음 각도 (진폭)',min:2,max:60,step:1,value:15,unit:'°',digits:0,onInput:v=>{st.th0=v;reset();}});
-  seg(L.ctl,{label:'중력 가속도 g (m/s²)',options:G_OPTS,value:9.8,onChange:v=>{st.g=v;reset();}});
+  slider(L.ctl,{id:'q-a',label:'처음 각도 (진폭)',min:2,max:60,step:1,value:10,unit:'°',digits:0,onInput:v=>{st.th0=v;reset();}});
+  seg(L.ctl,{label:'중력 가속도 g (m/s²)',options:G_OPTS,value:9.8,onChange:v=>{st.g=v;reset();L.drawChart();}});
   seg(L.ctl,{label:'재생 속도',options:[{v:1,t:'1배'},{v:2,t:'2배'},{v:4,t:'4배'}],value:1,onChange:v=>{st.rate=v;}});
   const bw=el('div','btns');L.ctl.appendChild(bw);
   const runB=btn(bw,'추 놓기','primary',()=>{if(st.run){reset();}else{reset();st.run=true;runB.textContent='멈추고 처음으로';}});
@@ -675,7 +679,7 @@ mkLab('pendulum',L=>{
   const rec=recorder(L.rec,'pendulum',[{k:'L',l:'길이 L (m)',d:2},{k:'m',l:'질량 (g)',d:0},{k:'a',l:'진폭 (°)',d:0},{k:'g',l:'g (m/s²)',d:1},{k:'n',l:'왕복 횟수',d:0},{k:'tn',l:'걸린 시간 (s)',d:2},{k:'T',l:'주기 T (s)',d:3},{k:'T2',l:'T² (s²)',d:3}]);
   let cm='T2';
   seg(L.sec.querySelector('.chart-ctl'),{options:[{v:'T',t:'T–L'},{v:'T2',t:'T²–L'}],value:'T2',onChange:v=>{cm=v;L.drawChart();}});
-  L.drawChart=()=>scatter(L.chartCv,{points:rec.rows.map(r=>({x:r.L,y:cm==='T2'?r.T2:r.T})),xMax:2,xStep:0.5,xLabel:'실 길이 L (m)',yLabel:cm==='T2'?'T² (s²)':'주기 T (s)',fit:cm==='T2'});
+  L.drawChart=()=>{const pts=rec.rows.map(r=>({x:r.L,y:cm==='T2'?r.T2:r.T,dim:Math.abs(r.g-st.g)>1e-9}));scatter(L.chartCv,{points:pts,xMax:2,xStep:0.5,xLabel:'실 길이 L (m)',yLabel:cm==='T2'?'T² (s²)':'주기 T (s)',fit:cm==='T2',note:pts.some(q=>q.dim)?'회색: 지금과 g가 다른 기록 (추세선에서 제외)':''});};
   rec.onChange(()=>L.drawChart());
 
   const acc=th=>-(st.g/st.L)*Math.sin(th);
@@ -707,8 +711,8 @@ mkLab('pendulum',L=>{
     text(ctx,'역학적 에너지',ex,ey,{size:11.5,weight:600});
     const tot=Math.max(E,1e-12),kw=ew*clamp(KE/tot,0,1);
     ctx.fillStyle=C.accent;ctx.fillRect(ex,ey+6,kw,10);ctx.fillStyle=C.teal;ctx.fillRect(ex+kw,ey+6,Math.max(0,ew*clamp(PE/tot,0,1)),10);ctx.strokeStyle=C.rule;ctx.lineWidth=1;ctx.strokeRect(ex+0.5,ey+6.5,ew-1,9);
-    ctx.fillStyle=C.accent;ctx.fillRect(ex,ey+25,8,8);text(ctx,'운동 '+KE.toFixed(3)+' J',ex+13,ey+29,{mono:1,size:11,base:'middle',color:C.ink});
-    ctx.fillStyle=C.teal;ctx.fillRect(ex,ey+40,8,8);text(ctx,'위치 '+PE.toFixed(3)+' J',ex+13,ey+44,{mono:1,size:11,base:'middle',color:C.ink});
+    ctx.fillStyle=C.accent;ctx.fillRect(ex,ey+25,8,8);text(ctx,'운동 '+(KE*1000).toFixed(1)+' mJ',ex+13,ey+29,{mono:1,size:11,base:'middle',color:C.ink});
+    ctx.fillStyle=C.teal;ctx.fillRect(ex,ey+40,8,8);text(ctx,'위치 '+(PE*1000).toFixed(1)+' mJ',ex+13,ey+44,{mono:1,size:11,base:'middle',color:C.ink});
     R('t',fx(st.t,2));R('n',String(st.n));R('t10',st.t10!=null?fx(st.t10,2):'—');R('T',st.n?fx(st.tn/st.n,3):'—');
   };
 });
@@ -800,7 +804,7 @@ mkLab('satellite',L=>{
 
   function predictView(h,v){const r0=RE+h*1000,v0=v*1000;const eps=v0*v0/2-GM/r0;if(eps>=0)return RE*5;const a=-GM/(2*eps),H=r0*v0;const ec=Math.sqrt(Math.max(0,1+2*eps*H*H/(GM*GM)));const ra=a*(1+ec),rp=a*(1-ec);if(rp<RE)return Math.max(r0*1.3,RE*1.3);return Math.min(Math.max(ra,r0)*1.15,RE*12);}
   function launch(){if(st.cur){st.trails.push(st.cur);if(st.trails.length>5)st.trails.shift();}const r0=RE+st.h*1000;st.cur={x:0,y:r0,vx:st.v*1000,vy:0,t:0,swept:0,pa:Math.PI/2,pts:[[0,r0]],status:'fly',maxR:r0,minR:r0,period:null,h:st.h,v:st.v,c:st.ci%4,view:predictView(st.h,st.v)};st.ci++;st.run=true;recB.disabled=true;L.dirty=true;}
-  function stText(c){if(!c)return'발사 전';switch(c.status){case'fly':return'비행 중';case'crash':return'지표면에 떨어짐';case'escape':return'지구 중력을 벗어남 (탈출)';case'far':return'아주 큰 타원 궤도 (화면 밖)';case'orbit':{const e=(c.maxR-c.minR)/(c.maxR+c.minR);return e<0.02?'원 궤도에 가까움':'타원 궤도';}}return'';}
+  function stText(c){if(!c)return'발사 전';switch(c.status){case'fly':return'비행 중';case'crash':return'지표면에 떨어짐';case'escape':return'지구로 되돌아오지 않음 (탈출)';case'far':return'아주 큰 타원 궤도 (화면 밖)';case'orbit':{const e=(c.maxR-c.minR)/(c.maxR+c.minR);return e<0.02?'원 궤도에 가까움':'타원 궤도';}}return'';}
   function record(){const c=st.cur;if(!c||c.status==='fly')return;const far=c.status==='escape'||c.status==='far';rec.add({h:c.h,v:c.v,res:stText(c),hi:far?'—':(c.maxR-RE)/1000,lo:(c.minR-RE)/1000,P:c.period?c.period/60:'—'});recB.disabled=true;}
   function accel(x,y){const r2=x*x+y*y,r=Math.sqrt(r2),k=-GM/(r2*r);return[k*x,k*y];}
   function rk(c,h){const x=c.x,y=c.y,vx=c.vx,vy=c.vy;const a1=accel(x,y);const x2=x+0.5*h*vx,y2=y+0.5*h*vy,vx2=vx+0.5*h*a1[0],vy2=vy+0.5*h*a1[1];const a2=accel(x2,y2);const x3=x+0.5*h*vx2,y3=y+0.5*h*vy2,vx3=vx+0.5*h*a2[0],vy3=vy+0.5*h*a2[1];const a3=accel(x3,y3);const x4=x+h*vx3,y4=y+h*vy3,vx4=vx+h*a3[0],vy4=vy+h*a3[1];const a4=accel(x4,y4);c.x=x+h/6*(vx+2*vx2+2*vx3+vx4);c.y=y+h/6*(vy+2*vy2+2*vy3+vy4);c.vx=vx+h/6*(a1[0]+2*a2[0]+2*a3[0]+a4[0]);c.vy=vy+h/6*(a1[1]+2*a2[1]+2*a3[1]+a4[1]);}
@@ -923,11 +927,17 @@ mkLab('doppler',L=>{
 mkLab('relativity',L=>{
   const G=6.674e-11,CL=2.998e8;
   const BODIES={earth:{n:'지구',M:5.972e24,R:6.371e6},sun:{n:'태양',M:1.989e30,R:6.957e8},wd:{n:'백색 왜성',M:1.19e30,R:7.0e6},ns:{n:'중성자별',M:2.78e30,R:1.2e4},bh:{n:'블랙홀',M:1.989e31,R:0}};
-  const KIND={star:{eps:0.14,Rs:0.09},ns:{eps:0.06,Rs:0.035},bh:{eps:0.03,Rs:0}};
+  /* [시공간의 휘어짐] 단위: c = G = 1. 질량(상대값) m 에 대해 M = m·MU, 슈바르츠실트 반지름 rs = 2M.
+     천체 반지름은 rs 에 비례해 잡는다(보통 별 4 rs, 중성자별 2.5 rs, 블랙홀 = rs 사건의 지평선).
+     실제 별은 rs 의 수십만 배라 빛이 거의 휘지 않으므로, 보이게 하려고 천체를 아주 작고 무겁게 잡은 것이다.
+     빛과 공의 경로는 슈바르츠실트 시공간의 측지선 방정식(적도면)을 그대로 적분한다:
+       r'' = -κM/r² + L²/r³ - 3ML²/r⁴,  φ' = L/r²,  t' = E/(1 - rs/r)   (κ: 빛 0, 공 1, ' 은 아핀 매개변수 미분)
+     그물망은 같은 시공간의 공간 단면을 매립한 플람 포물면 z = 2√(rs(r - rs)) (별 안쪽은 균일 밀도 해의 구면 캡), 깊이만 KZ 배 키운다. */
+  const MU=0.005,KZ=2.2,RAD={star:4,ns:2.5,bh:1};
   const KN={star:'보통 별',ns:'중성자별',bh:'블랙홀'};
   const RES={out:'휘어져 지나감',hit:'천체 표면에 부딪힘',capture:'블랙홀에 빨려 들어감',orbit:'천체 주위를 맴돎'};
-  const CAPW='그물망은 휘어진 공간을 2차원으로 나타낸 비유 · 빛이 휘는 정도는 보기 쉽게 크게 과장함 · 화면을 끌거나 방향키를 누르면 보는 방향이 바뀜';
-  const CAPT='시계 A는 천체에서 아주 먼 곳, 시계 B는 천체 가까이 · 화면 1초 동안 시계 A는 10분 흐름 · 왼쪽 그림의 깊이는 비율을 줄여 그림';
+  const CAPW='그물망은 질량 주위의 휘어진 공간을 2차원 곡면으로 나타낸 것(깊이는 보기 쉽게 키움) · 빛과 공은 이 시공간에서 가장 곧은 길(측지선)을 따라감 · 화면을 끌거나 방향키를 누르면 보는 방향이 바뀜';
+  const CAPT='시계 A는 천체에서 아주 먼 곳(그림에서는 자리를 당겨 그림), 시계 B는 천체 가까이 · 화면 1초 동안 시계 A는 10분 흐름 · 왼쪽 그림의 깊이는 비율을 줄여 그림';
   const st={mode:'warp',mass:4,kind:'star',b:0.35,yaw:-0.5,tilt:0.95,paths:[],last:null,body:'ns',rx:2,trun:true,far:0};
   const D=()=>{L.dirty=true;};
   const cap=L.sec.querySelector('.cap');cap.textContent=CAPW;
@@ -946,7 +956,7 @@ mkLab('relativity',L=>{
   btn(bw,'공 굴리기','',()=>shoot('ball'));
   const recWB=btn(bw,'이번 결과 기록','',()=>{const p=st.last;if(!p||!p.done)return;recw.add({what:p.kind==='light'?'빛':'공',kind:KN[p.k],m:p.m,b:p.b,res:RES[p.end],def:p.end==='out'?p.def:'—'});recWB.disabled=true;});recWB.disabled=true;
   btn(bw,'경로 지우기','',()=>{st.paths=[];st.last=null;recWB.disabled=true;D();});
-  gw.appendChild(el('p','hint','빛과 공은 왼쪽에서 출발해 오른쪽으로 가요. 점선은 천체가 없을 때 지나갔을 직선 경로예요. 블랙홀의 검은 원은 빛이 붙잡히는 경계를 과장해 그린 것이에요.'));
+  gw.appendChild(el('p','hint','빛과 공은 왼쪽에서 출발해 오른쪽으로 가요. 점선은 천체가 없을 때(평평한 시공간) 지나갔을 직선 경로예요. 질량을 키우면 천체도 비례해 커져요. 블랙홀의 검은 원은 사건의 지평선, 그 둘레의 점선 원은 빛이 붙잡히는 한계(비켜 가는 거리 약 2.6 × 지평선 반지름)예요.'));
   // 시간 지연
   seg(gt,{label:'천체',options:Object.keys(BODIES).map(k=>({v:k,t:BODIES[k].n})),value:'ns',onChange:v=>{st.body=v;rxS.unit.textContent=v==='bh'?'× 지평선 반지름':'× 천체 반지름';const mn=v==='bh'?1.05:1;rxS.wrap.querySelectorAll('input').forEach(i=>{i.min=String(mn);});if(st.rx<mn){st.rx=mn;rxS.set(mn,false);}D();}});
   const rxS=slider(gt,{id:'t-r',label:'시계 B 위치 (중심에서 거리)',min:1,max:10,step:0.01,value:2,unit:'× 천체 반지름',digits:2,onInput:v=>{if(st.body==='bh'&&v<1.05){v=1.05;rxS.set(v,false);}st.rx=v;D();}});
@@ -958,20 +968,30 @@ mkLab('relativity',L=>{
   const recw=recorder(recW,'rel-warp',[{k:'what',l:'보낸 것'},{k:'kind',l:'천체'},{k:'m',l:'질량',d:1},{k:'b',l:'비켜 가는 거리',d:2},{k:'res',l:'결과'},{k:'def',l:'꺾인 각도 (°)',d:1}]);
   const rect=recorder(recT,'rel-time',[{k:'body',l:'천체'},{k:'rx',l:'거리 (× 반지름)',d:2},{k:'k',l:'B의 빠르기'},{k:'day',l:'하루 차이'},{k:'yr',l:'1년 차이'}]);
 
-  function prm(){const k=KIND[st.kind],GM=st.mass*0.006;return{eps:k.eps,Rs:k.Rs,GM,rh:st.kind==='bh'?3*GM:0};}
+  function prm(){const M=st.mass*MU,rs=2*M;return{M,rs,R:RAD[st.kind]*rs,bc:3*Math.sqrt(3)*M};}
   function shoot(kind){
-    const p=prm(),sp=kind==='light'?1.0:0.42;let x=-1.25,y=st.b,vx=sp,vy=0;const pts=[[x,y]];let end='orbit';const dt=0.002;
-    for(let i=0;i<15000;i++){
-      const r2=x*x+y*y,d=Math.pow(r2+p.eps*p.eps,1.5);let ax=-p.GM*x/d,ay=-p.GM*y/d;
-      if(kind==='light'){const ux=vx/sp,uy=vy/sp,dp=ax*ux+ay*uy;ax=2*(ax-dp*ux);ay=2*(ay-dp*uy);}
-      vx+=ax*dt;vy+=ay*dt;if(kind==='light'){const n=Math.hypot(vx,vy);vx*=sp/n;vy*=sp/n;}
-      x+=vx*dt;y+=vy*dt;if(i%3===2)pts.push([x,y]);
-      const r=Math.hypot(x,y);
-      if(p.rh&&r<p.rh){end='capture';pts.push([x,y]);break;}
-      if(p.Rs&&r<p.Rs){end='hit';pts.push([x,y]);break;}
-      if(Math.abs(x)>1.3||Math.abs(y)>1.3){end='out';pts.push([x,y]);break;}
+    const p=prm(),M=p.M,rs=p.rs,kap=kind==='light'?0:1,sp=kind==='light'?1:0.42;
+    const x0=-1.25,y0=st.b,r0=Math.hypot(x0,y0),f0=1-rs/r0;
+    const vr=sp*x0/r0,vp=-sp*y0/r0;                    // +x 방향으로 출발할 때의 지름·접선 방향 좌표 속도
+    const tdot=kap?1/Math.sqrt(f0-vr*vr/f0-vp*vp):Math.sqrt((vr*vr/f0+vp*vp)/f0);   // dt/dλ (공: λ = 고유 시간, 빛: 아핀 매개변수)
+    const sc=kap?tdot:1,Lz=r0*vp*sc,E=f0*tdot;
+    const acc=r=>-kap*M/(r*r)+Lz*Lz/(r*r*r)-3*M*Lz*Lz/(r*r*r*r);
+    const deriv=y=>[y[1],acc(y[0]),Lz/(y[0]*y[0]),E/(1-rs/y[0])];
+    let y=[r0,vr*sc,Math.atan2(y0,x0),0];
+    const bh=st.kind==='bh',stop=bh?rs*1.02:p.R;
+    const pts=[[x0,y0]];let end='orbit',tLast=0,head=0,turn=0,x=x0,yy=y0;
+    for(let i=0;i<60000;i++){
+      const dl=Math.min(0.003,0.06*y[0]);
+      const k1=deriv(y),y2=y.map((v,j)=>v+0.5*dl*k1[j]),k2=deriv(y2),y3=y.map((v,j)=>v+0.5*dl*k2[j]),k3=deriv(y3),y4=y.map((v,j)=>v+dl*k3[j]),k4=deriv(y4);
+      y=y.map((v,j)=>v+dl*(k1[j]+2*k2[j]+2*k3[j]+k4[j])/6);
+      const r=y[0],ph=y[2],cs=Math.cos(ph),sn=Math.sin(ph);x=r*cs;yy=r*sn;
+      const vt=r*Lz/(r*r),vx=y[1]*cs-vt*sn,vy=y[1]*sn+vt*cs,hd=Math.atan2(vy,vx);
+      if(i){let d=hd-head;if(d>Math.PI)d-=TAU;if(d<-Math.PI)d+=TAU;turn+=d;}head=hd;
+      if(y[3]-tLast>=0.006){pts.push([x,yy]);tLast=y[3];}
+      if(r<=stop){end=bh?'capture':'hit';pts.push([x,yy]);break;}
+      if(Math.abs(x)>1.3||Math.abs(yy)>1.3){end='out';pts.push([x,yy]);break;}
     }
-    const path={pts,kind,shown:1,done:false,end,def:Math.abs(Math.atan2(vy,vx))/DEG,b:st.b,m:st.mass,k:st.kind,rate:kind==='light'?260:190};
+    const path={pts,kind,shown:1,done:false,end,def:Math.abs(turn)/DEG,b:st.b,m:st.mass,k:st.kind,rate:kind==='light'?260:190};
     st.paths.push(path);if(st.paths.length>8)st.paths.shift();st.last=path;recWB.disabled=true;D();
   }
   function tc(){const B=BODIES[st.body],rs=2*G*B.M/(CL*CL),R=B.R||rs,rx=st.body==='bh'?Math.max(st.rx,1.05):st.rx,x=rs/(rx*R),k=Math.sqrt(1-x),lag=x/(1+k);return{B,rs,R,rx,k,lag};}
@@ -992,20 +1012,26 @@ mkLab('relativity',L=>{
   };
 
   function drawWarp(ctx,w,h){
-    const p=prm(),K=1.6,ref=1/Math.sqrt(1.75*1.75+p.eps*p.eps);
-    const zf=r=>Math.max(-1.15,-K*p.GM*(1/Math.sqrt(r*r+p.eps*p.eps)-ref));
+    const p=prm(),rs=p.rs,R=p.R,E=1.2,bh=st.kind==='bh';
+    const flamm=r=>2*Math.sqrt(rs*Math.max(r-rs,0));                       // 플람 포물면(바깥 해)
+    const cap2=R*R*R/rs,zR=flamm(R),zEdge=flamm(E);                         // 별 안쪽: 균일 밀도 해 → 구면 캡(반지름² = R³/rs)
+    const zf=r=>{const z=(bh||r>=R)?flamm(r):zR-(Math.sqrt(cap2-r*r)-Math.sqrt(Math.max(cap2-R*R,0)));return -KZ*(zEdge-z);};
     const S=Math.min(w/2.9,h/2.55),cx=w/2,cy=h*0.47;
     const ct=Math.cos(st.tilt),stl=Math.sin(st.tilt),cyw=Math.cos(st.yaw),syw=Math.sin(st.yaw);
     const P=(x,y,z)=>{const X=x*cyw-y*syw,Y=x*syw+y*cyw;const up=Y*stl+z*ct,dep=-Y*ct+z*stl;const k=3.4/(3.4-dep);return[cx+X*S*k,cy-up*S*k];};
-    const N=24,M=80,E=1.2;ctx.lineWidth=1;
-    for(let dir=0;dir<2;dir++){for(let i=0;i<=N;i++){const u=-E+2*E*i/N;ctx.strokeStyle=hexA(C.accent,0.32);ctx.beginPath();let pen=false;for(let j=0;j<=M;j++){const v=-E+2*E*j/M;const x=dir?u:v,y=dir?v:u,r=Math.hypot(x,y);if(r>1.28){pen=false;continue;}const q=P(x,y,zf(r));if(pen)ctx.lineTo(q[0],q[1]);else{ctx.moveTo(q[0],q[1]);pen=true;}}ctx.stroke();}}
-    if(st.kind==='bh'){ctx.fillStyle=C.ink;ctx.beginPath();for(let j=0;j<=48;j++){const a=TAU*j/48;const q=P(p.rh*Math.cos(a),p.rh*Math.sin(a),zf(p.rh));if(j)ctx.lineTo(q[0],q[1]);else ctx.moveTo(q[0],q[1]);}ctx.closePath();ctx.fill();ctx.strokeStyle=C.trace;ctx.lineWidth=1.5;ctx.stroke();}
-    else{const q0=P(0,0,zf(0));const rr=Math.max(4,p.Rs*S);ctx.fillStyle=st.kind==='star'?C.trace:C.teal;ctx.beginPath();ctx.arc(q0[0],q0[1],rr,0,TAU);ctx.fill();ctx.strokeStyle=C.ink;ctx.lineWidth=1;ctx.stroke();}
-    if(st.last){const y=st.last.b;ctx.setLineDash([4,5]);ctx.strokeStyle=hexA(C.muted,0.9);ctx.lineWidth=1.2;ctx.beginPath();for(let j=0;j<=70;j++){const x=-1.25+2.55*j/70;const q=P(x,y,zf(Math.hypot(x,y))+0.004);if(j)ctx.lineTo(q[0],q[1]);else ctx.moveTo(q[0],q[1]);}ctx.stroke();ctx.setLineDash([]);}
-    st.paths.forEach(pa=>{const n=Math.min(pa.pts.length,Math.floor(pa.shown));if(n<2)return;const col=pa.kind==='light'?C.trace:C.rose,latest=pa===st.last;ctx.strokeStyle=latest?col:hexA(col,0.45);ctx.lineWidth=latest?2.4:1.5;ctx.beginPath();for(let i=0;i<n;i++){const x=pa.pts[i][0],y=pa.pts[i][1];const q=P(x,y,zf(Math.hypot(x,y))+0.004);if(i)ctx.lineTo(q[0],q[1]);else ctx.moveTo(q[0],q[1]);}ctx.stroke();
-      if(!pa.done){const x=pa.pts[n-1][0],y=pa.pts[n-1][1];const q=P(x,y,zf(Math.hypot(x,y)));ctx.fillStyle=col;ctx.beginPath();ctx.arc(q[0],q[1],pa.kind==='light'?4:6,0,TAU);ctx.fill();}});
+    const onSheet=(x,y,lift)=>P(x,y,zf(Math.hypot(x,y))+(lift||0));
+    const rmin=bh?rs:0,N=24,M=140;ctx.lineWidth=1;
+    for(let dir=0;dir<2;dir++){for(let i=0;i<=N;i++){const u=-E+2*E*i/N;ctx.strokeStyle=hexA(C.accent,0.32);ctx.beginPath();let pen=false;for(let j=0;j<=M;j++){const v=-E+2*E*j/M;const x=dir?u:v,y=dir?v:u,r=Math.hypot(x,y);if(r>1.28||r<rmin){pen=false;continue;}const q=P(x,y,zf(r));if(pen)ctx.lineTo(q[0],q[1]);else{ctx.moveTo(q[0],q[1]);pen=true;}}ctx.stroke();}}
+    const ring=(rr,lift)=>{ctx.beginPath();for(let j=0;j<=72;j++){const a=TAU*j/72;const q=onSheet(rr*Math.cos(a),rr*Math.sin(a),lift);if(j)ctx.lineTo(q[0],q[1]);else ctx.moveTo(q[0],q[1]);}ctx.closePath();};
+    if(bh){
+      ring(p.bc,0.004);ctx.setLineDash([3,4]);ctx.strokeStyle=hexA(C.rose,0.8);ctx.lineWidth=1.2;ctx.stroke();ctx.setLineDash([]);   // 빛이 붙잡히는 한계
+      ring(rs*1.001,0);ctx.fillStyle=C.ink;ctx.fill();ctx.strokeStyle=C.trace;ctx.lineWidth=1.5;ctx.stroke();                          // 사건의 지평선
+    } else {ring(R,0.002);ctx.fillStyle=st.kind==='star'?C.trace:C.teal;ctx.fill();ctx.strokeStyle=C.ink;ctx.lineWidth=1;ctx.stroke();}
+    if(st.last){const y=st.last.b;ctx.setLineDash([4,5]);ctx.strokeStyle=hexA(C.muted,0.9);ctx.lineWidth=1.2;ctx.beginPath();for(let j=0;j<=40;j++){const x=-1.25+2.55*j/40;const q=P(x,y,0.004);if(j)ctx.lineTo(q[0],q[1]);else ctx.moveTo(q[0],q[1]);}ctx.stroke();ctx.setLineDash([]);}
+    st.paths.forEach(pa=>{const n=Math.min(pa.pts.length,Math.floor(pa.shown));if(n<2)return;const col=pa.kind==='light'?C.trace:C.rose,latest=pa===st.last;ctx.strokeStyle=latest?col:hexA(col,0.45);ctx.lineWidth=latest?2.4:1.5;ctx.beginPath();for(let i=0;i<n;i++){const q=onSheet(pa.pts[i][0],pa.pts[i][1],0.004);if(i)ctx.lineTo(q[0],q[1]);else ctx.moveTo(q[0],q[1]);}ctx.stroke();
+      if(!pa.done){const q=onSheet(pa.pts[n-1][0],pa.pts[n-1][1],0.004);ctx.fillStyle=col;ctx.beginPath();ctx.arc(q[0],q[1],pa.kind==='light'?4:6,0,TAU);ctx.fill();}});
     const a1=P(-1.42,st.b,0),a2=P(-1.27,st.b,0);arrow(ctx,a1[0],a1[1],a2[0],a2[1],C.muted,1.6,7);
-    let lx=12;[[C.trace,'빛',0],[C.rose,'공',0],[C.muted,'천체가 없을 때의 경로',1]].forEach(it=>{ctx.strokeStyle=it[0];ctx.lineWidth=2;if(it[2])ctx.setLineDash([4,4]);line(ctx,lx,16,lx+18,16);ctx.setLineDash([]);text(ctx,it[1],lx+23,16,{size:11.5,base:'middle',color:C.ink});lx+=23+ctx.measureText(it[1]).width+16;});
+    let lx=12;[[C.trace,'빛',0],[C.rose,'공',0],[C.muted,'천체가 없을 때(평평한 시공간)의 경로',1]].forEach(it=>{ctx.strokeStyle=it[0];ctx.lineWidth=2;if(it[2])ctx.setLineDash([4,4]);line(ctx,lx,16,lx+18,16);ctx.setLineDash([]);text(ctx,it[1],lx+23,16,{size:11.5,base:'middle',color:C.ink});lx+=23+ctx.measureText(it[1]).width+16;});
     const pl=st.last;RW('what',pl?(pl.kind==='light'?'빛':'공'):'—');RW('res',pl?(pl.done?RES[pl.end]:'진행 중…'):'—');RW('def',pl&&pl.done&&pl.end==='out'?pl.def.toFixed(1)+'°':'—');
   }
   function drawClock(ctx,x,y,r,sec,label,col){
@@ -1029,10 +1055,13 @@ mkLab('relativity',L=>{
     const br=Math.max(5,ux);ctx.fillStyle=st.body==='bh'?C.ink:C.trace;ctx.beginPath();ctx.arc(cx,y0+Dp,br,0,TAU);ctx.fill();if(st.body==='bh'){ctx.strokeStyle=C.trace;ctx.lineWidth=1.5;ctx.stroke();}
     text(ctx,q.B.n,cx,y0+Dp+br+16,{size:12,weight:600,align:'center',color:C.ink});
     const bx=cx+q.rx*ux,by=Yc(q.rx);ctx.fillStyle=C.panel;ctx.strokeStyle=C.teal;ctx.lineWidth=2;ctx.beginPath();ctx.arc(bx,by,8,0,TAU);ctx.fill();ctx.stroke();text(ctx,'B',bx,by-14,{size:12,weight:600,color:C.teal,align:'center'});
-    const ax2=cx+(XR-0.7)*ux,ay2=Yc(XR-0.7);ctx.fillStyle=C.panel;ctx.strokeStyle=C.muted;ctx.lineWidth=2;ctx.beginPath();ctx.arc(ax2,ay2,8,0,TAU);ctx.fill();ctx.stroke();text(ctx,'A',ax2,ay2-14,{size:12,weight:600,color:C.muted,align:'center'});
+    // 시계 A: 아주 먼 곳(무한히 먼 곳 기준). 그림에서는 자리를 당겨 그리고 끊김 표시(//)를 둔다
+    const ax2=cx+(XR-0.7)*ux,ay2=Yc(XR-0.7),gx=cx+(XR-1.7)*ux,gy=Yc(XR-1.7);
+    ctx.strokeStyle=C.panel;ctx.lineWidth=6;line(ctx,gx-3,gy+7,gx+5,gy-7);ctx.strokeStyle=C.muted;ctx.lineWidth=1.5;line(ctx,gx-5,gy+7,gx+3,gy-7);line(ctx,gx-1,gy+7,gx+7,gy-7);
+    ctx.fillStyle=C.panel;ctx.strokeStyle=C.muted;ctx.lineWidth=2;ctx.beginPath();ctx.arc(ax2,ay2,8,0,TAU);ctx.fill();ctx.stroke();text(ctx,'A (∞)',ax2,ay2-14,{size:12,weight:600,color:C.muted,align:'center'});
     text(ctx,'중력이 강할수록 깊게 그림',dA.x+14,dA.y+16,{size:11.5,base:'middle'});
     const rr=Math.max(26,Math.min(cA.w/5.2,cA.h*0.27,70));const ccy=cA.y+cA.h*0.5;
-    drawClock(ctx,cA.x+cA.w*0.27,ccy,rr,st.far,'A · 먼 곳',C.muted);
+    drawClock(ctx,cA.x+cA.w*0.27,ccy,rr,st.far,'A · 아주 먼 곳',C.muted);
     drawClock(ctx,cA.x+cA.w*0.73,ccy,rr,st.far*q.k,'B · 천체 근처',C.teal);
     RT('body',q.B.n);RT('r',q.rx.toFixed(2)+(st.body==='bh'?' × 지평선 반지름':' × 천체 반지름'));RT('k',kText(q));RT('day',dur(86400*q.lag));
   }

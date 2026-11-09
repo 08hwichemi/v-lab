@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>고정단 반사와 자유단 반사 · V-Lab</title>
+<style>
+/* V-Lab 공용 글꼴·색 토큰만 가져옴 (공용 클래스는 이 파일의 클래스 이름과 겹치므로 lab-theme.css 전체는 쓰지 않음) */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+:root{--font: 'IBM Plex Sans KR', 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; --bg: #ffffff; --panel: #ffffff; --panel-2: #F7F8FA; --line: #E6E8EC; --line-2: #F0F1F3; --text: #111111; --text-2: #3F4652; --muted: #6B7280; --accent: #3182F6; --accent-soft: #EAF2FF; --ok: #12A66B; --warn: #F5A623; --err: #E5484D; --radius: 12px; --radius-sm: 8px;}
+</style>
+<style>
+  :root{
+    --ink:#1f2a3d; --sub:#5a6680; --line:#d9deea; --panel:#e9edf7;
+    --blue:#2f7fd6; --red:#e0393e; --purple:#8a63b8; --accent:#2d5bd7;
+    --bg:#f7f8fc; --card:#ffffff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;line-height:1.55}
+  .wrap{max-width:980px;margin:0 auto;padding:20px 16px 48px}
+  .unit{font-size:13px;color:var(--sub)}
+  h1{font-size:24px;margin:4px 0 6px}
+  .lead{margin:0 0 16px;color:var(--sub);font-size:15px}
+  .tabs{display:flex;gap:6px;margin-bottom:12px}
+  .tab{border:1px solid var(--line);background:var(--card);padding:9px 16px;border-radius:999px;
+    font-size:15px;cursor:pointer;color:var(--ink);font-family:inherit}
+  .tab.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  .controls{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;
+    display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-bottom:12px}
+  .btn{border:none;background:var(--accent);color:#fff;font-size:15px;font-weight:600;padding:9px 16px;
+    border-radius:10px;cursor:pointer;font-family:inherit}
+  .btn.ghost{background:#eef1fa;color:var(--ink);font-weight:500}
+  .btn:disabled{opacity:.45;cursor:default}
+  .group{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--sub)}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{border:none;background:#fff;padding:7px 12px;font-size:14px;cursor:pointer;font-family:inherit;color:var(--ink)}
+  .seg button.on{background:#dfe6fb;font-weight:600;color:var(--accent)}
+  label.chk{display:flex;align-items:center;gap:5px;font-size:14px;color:var(--ink);cursor:pointer}
+  .scrub{display:flex;align-items:center;gap:8px;flex:1 1 260px;font-size:13px;color:var(--sub)}
+  .scrub input{flex:1}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px 14px;margin-bottom:12px}
+  .card h2{font-size:16px;margin:0 0 8px}
+  .card h2 small{font-weight:400;color:var(--sub);font-size:14px}
+  canvas{width:100%;display:block;border-radius:10px}
+  .result{margin-top:8px;font-size:14.5px;padding:8px 10px;border-radius:8px;background:#f3f5fb;min-height:38px}
+  .result b.inv{color:var(--red)} .result b.same{color:var(--blue)}
+  .sliders{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;margin-bottom:10px}
+  .sliders label{font-size:14px;display:block}
+  .sliders input{width:100%}
+  .val{font-weight:700;color:var(--accent)}
+  .presets{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  .chip{display:inline-block;font-size:14px;padding:6px 10px;border-radius:8px;background:#fff4e5;color:#8a4b00;margin-bottom:10px}
+  .guide h2{font-size:17px}
+  .guide ol,.guide ul{margin:6px 0 10px;padding-left:22px}
+  .guide li{margin:3px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;margin:6px 0 10px}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:#f1f4fb}
+  .hide{display:none}
+  @media (max-width:640px){ .sliders{grid-template-columns:1fr} h1{font-size:20px} }
+
+/* ===== V-Lab 공용 테마에 맞춘 덮어쓰기 ===== */
+:root{--ink:#111111;--sub:#6B7280;--line:#E6E8EC;--panel:#F7F8FA;--accent:#111111;--bg:#ffffff;--card:#ffffff;--blue:#3182F6;--red:#E5484D}
+body{font-family:var(--font);font-size:16px;line-height:1.55}
+.wrap{max-width:1040px;padding:20px 20px 48px}
+header h1{font-size:26px;letter-spacing:-.01em;margin:0 0 6px}
+header .lead{font-size:16px;margin:0 0 18px}
+.tabs{gap:8px;margin-bottom:14px}
+.tab{border-radius:8px;padding:9px 18px;font-size:16px;font-weight:600;color:#3F4652}
+.tab:hover{border-color:#111}
+.tab.on{background:#111;border-color:#111;color:#fff}
+.controls,.card{border-radius:12px;box-shadow:none;padding:14px 16px}
+.btn{border-radius:8px;font-size:15.5px;background:#111;color:#fff;padding:9px 16px}
+.btn:hover:not(:disabled){background:#333}
+.btn.ghost{background:#fff;color:#111;border:1px solid var(--line);font-weight:600}
+.btn.ghost:hover:not(:disabled){background:#fff;border-color:#111}
+.btn:disabled{opacity:.4}
+.group,.scrub{font-size:15px}
+.seg{border-radius:8px}
+.seg button{font-size:15px;padding:7px 13px}
+.seg button.on{background:#111;color:#fff;font-weight:600}
+label.chk{font-size:15px}
+.card h2{font-size:18px;margin-bottom:10px}
+.card h2 small{font-size:15px}
+.result{font-size:16px;border-radius:8px;background:#F7F8FA;padding:9px 12px;min-height:40px}
+.result b.inv{color:var(--red)} .result b.same{color:var(--blue)}
+.sliders label{font-size:15.5px}
+.val{color:#3182F6}
+.presets .btn{padding:7px 13px;font-size:14.5px}
+.chip{border-radius:8px;background:var(--accent-soft);color:#111;font-size:15px;padding:7px 12px}
+.guide h2{font-size:18px}
+.guide ol,.guide ul{font-size:16px} .guide li{margin:5px 0;line-height:1.6}
+table{font-size:15.5px} th,td{padding:8px 10px} th{background:#F7F8FA;font-weight:700}
+input[type=range]{accent-color:#111}
+/* 넓은 화면: (가)(나) 두 경우를 나란히 놓아 스크롤 없이 비교 */
+@media (min-width:1200px){
+  .wrap{max-width:1400px}
+  #tab-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+  #tab-compare .card{margin-bottom:0}
+  #tab-custom .card{max-width:1040px;margin-inline:auto}
+}
+/* 뷰어 안(iframe): 파일 자체 제목 숨김 */
+body.vlab-embed header{display:none}
+body.vlab-embed .wrap{padding-top:12px}
+</style>
+</head>
+<body>
+<script>if(/embed/.test(location.hash))document.body.classList.add("vlab-embed");</script>
+<div class="wrap">
+  <header>
+    <h1>고정단 반사와 자유단 반사 시뮬레이션</h1>
+    <p class="lead">속력이 다른 두 줄을 이어 붙이고 파동을 보내, 경계면에서 생기는 반사파와 투과파의 모양을 관찰</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab on" data-tab="compare">두 경우 비교</button>
+    <button class="tab" data-tab="custom">직접 조절하기</button>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="send">▶ 파동 보내기</button>
+    <button class="btn ghost" id="pause" disabled>일시정지</button>
+    <button class="btn ghost" id="step" title="멈춘 상태에서 조금씩 앞으로">한 칸씩 ▸</button>
+    <button class="btn ghost" id="reset">처음으로</button>
+    <div class="group">보내는 파동
+      <span class="seg" id="shapeSeg"><button data-v="1" class="on">마루</button><button data-v="-1">골</button></span>
+    </div>
+    <div class="group">재생 빠르기
+      <span class="seg" id="rateSeg"><button data-v="0.5">느리게</button><button data-v="1.4" class="on">보통</button></span>
+    </div>
+    <label class="chk"><input type="checkbox" id="trail"> 지나간 모습 남기기</label>
+    <label class="chk"><input type="checkbox" id="ribbon" checked> 리본(매질의 한 점) 표시</label>
+    <div class="scrub">시간 <input type="range" id="scrub" min="0" max="10" step="0.01" value="0"></div>
+  </div>
+
+  <div id="tab-compare">
+    <div class="card">
+      <h2>(가) 고정단 반사 <small>— 속력이 빠른 줄 → 속력이 느린 줄</small></h2>
+      <canvas id="cvA"></canvas>
+      <div class="result" id="resA"></div>
+    </div>
+    <div class="card">
+      <h2>(나) 자유단 반사 <small>— 속력이 느린 줄 → 속력이 빠른 줄</small></h2>
+      <canvas id="cvB"></canvas>
+      <div class="result" id="resB"></div>
+    </div>
+  </div>
+
+  <div id="tab-custom" class="hide">
+    <div class="card">
+      <h2>두 줄의 속력을 직접 바꾸기</h2>
+      <div class="presets">
+        <button class="btn ghost" data-p="4,1.5">빠른 줄 → 느린 줄</button>
+        <button class="btn ghost" data-p="2.5,2.5">같은 속력</button>
+        <button class="btn ghost" data-p="1.5,4">느린 줄 → 빠른 줄</button>
+        <button class="btn ghost" data-p="5,1">속력 차이 아주 크게</button>
+      </div>
+      <div class="sliders">
+        <label>왼쪽 줄(파동이 출발하는 줄)의 속력: <span class="val" id="v1Val"></span>
+          <input type="range" id="v1" min="1" max="5" step="0.5" value="4"></label>
+        <label>오른쪽 줄의 속력: <span class="val" id="v2Val"></span>
+          <input type="range" id="v2" min="1" max="5" step="0.5" value="1.5"></label>
+      </div>
+      <div class="chip" id="cond"></div>
+      <canvas id="cvC"></canvas>
+      <div class="result" id="resC"></div>
+    </div>
+  </div>
+
+  <div class="card guide">
+    <h2>활동 순서</h2>
+    <ol>
+      <li>「두 경우 비교」에서 마루를 보내고, 경계면을 지난 뒤 (가)와 (나)의 반사파 모양을 비교</li>
+      <li>보내는 파동을 「골」로 바꾸어 다시 보내고, 반사파가 어떻게 되돌아오는지 확인</li>
+      <li>「지나간 모습 남기기」를 켜고, 경계면에 닿기 전(입사파)과 닿은 뒤(반사파·투과파)의 모양을 한 화면에서 비교</li>
+      <li>「직접 조절하기」에서 두 줄의 속력을 바꾸며 반사파가 뒤집히는 조건 찾기</li>
+      <li>리본(빨간 점)의 움직임을 보고, 매질이 파동을 따라 이동하는지 확인</li>
+    </ol>
+
+    <h2>정리</h2>
+    <table>
+      <tr><th>구분</th><th>고정단 반사</th><th>자유단 반사</th></tr>
+      <tr><td>파동의 진행</td><td>속력이 빠른 줄 → 느린 줄</td><td>속력이 느린 줄 → 빠른 줄</td></tr>
+      <tr><td>반사파</td><td>위상이 180° 변함 (마루가 골로 뒤집혀 되돌아옴)</td><td>위상이 바뀌지 않음 (마루가 마루 그대로 되돌아옴)</td></tr>
+      <tr><td>투과파</td><td>뒤집히지 않음 (마루는 마루)</td><td>뒤집히지 않음 (마루는 마루)</td></tr>
+    </table>
+
+    <h2>관찰하면서 알 수 있는 것</h2>
+    <ul>
+      <li>두 줄의 속력이 같으면 경계면이 없는 것과 같아 반사파가 생기지 않고 모두 투과</li>
+      <li>두 줄의 속력 차이가 클수록 반사파가 커짐</li>
+      <li>투과파는 속력이 느린 줄로 넘어가면 폭이 좁아지고, 빠른 줄로 넘어가면 폭이 넓어짐 → 같은 시간 동안 이동하는 거리가 줄마다 다르기 때문</li>
+      <li>리본은 위아래로 진동할 뿐 파동을 따라 옆으로 이동하지 않음 → 전달되는 것은 매질이 아니라 진동</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var X_MIN = -10.5, X_MAX = 10.5;   // 화면에 보이는 범위(경계면 x = 0)
+  var X0 = -8;                       // 펄스 출발 위치
+  var W = 1.3;                       // 펄스 반폭
+
+  var state = { t:0, running:false, sent:false, sign:1, rate:1.4, trail:false, ribbon:true, tab:"compare" };
+
+  function pulse(u){ // 컴팩트한 매끄러운 펄스
+    if (u <= -W || u >= W) return 0;
+    var c = Math.cos(Math.PI*u/(2*W));
+    return c*c;
+  }
+
+  function Sim(canvas, resEl, v1, v2, labels){
+    this.cv = canvas; this.ctx = canvas.getContext("2d"); this.res = resEl;
+    this.labels = labels; this.set(v1, v2);
+  }
+  Sim.prototype.set = function(v1, v2){
+    this.v1 = v1; this.v2 = v2;
+    this.r = (v2 - v1)/(v1 + v2);      // 반사파 비율
+    this.tr = 2*v2/(v1 + v2);          // 투과파 비율
+    var sEnd = Math.max(-X_MIN + W, X_MAX*v1/v2 + W);
+    this.tEnd = (sEnd - X0)/v1;
+  };
+  Sim.prototype.s = function(t){ return X0 + this.v1*t; };
+  Sim.prototype.y = function(x, t, sign){
+    if (!state.sent) return 0;
+    var s = this.s(t);
+    if (x <= 0) return sign*(pulse(x - s) + this.r*pulse(-x - s));
+    return sign*this.tr*pulse(x*this.v1/this.v2 - s);
+  };
+  Sim.prototype.resize = function(){
+    var dpr = window.devicePixelRatio || 1;
+    var w = this.cv.clientWidth || 600;
+    var h = Math.max(200, Math.min(270, w*0.34));
+    this.cv.style.height = h + "px";
+    this.cv.width = Math.round(w*dpr); this.cv.height = Math.round(h*dpr);
+    this.ctx.setTransform(dpr,0,0,dpr,0,0);
+    this.W = w; this.H = h;
+  };
+  Sim.prototype.px = function(x){ var pad = 16; return pad + (x - X_MIN)/(X_MAX - X_MIN)*(this.W - 2*pad); };
+  Sim.prototype.py = function(y){ return this.H*0.56 - y*this.H*0.23; };
+
+  function ropeWidth(v){ return 3 + 10*((1/v) - 0.2)/0.8; } // 느린 줄일수록 굵게
+
+  function roundRect(ctx, x, y, w, h, r){
+    ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+  }
+  function pill(ctx, text, x, y, align){
+    ctx.font = "600 13px 'IBM Plex Sans KR', Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
+    var tw = ctx.measureText(text).width, w = tw + 18, h = 24;
+    var left = align === "right" ? x - w : x;
+    roundRect(ctx, left, y, w, h, 12);
+    ctx.fillStyle = "#fff"; ctx.fill(); ctx.strokeStyle = "#8a63b8"; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.fillStyle = "#3b2a5c"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    ctx.fillText(text, left + 9, y + h/2 + 0.5);
+  }
+  function arrowLabel(ctx, text, x, y, dir){
+    ctx.font = "600 14px 'IBM Plex Sans KR', Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillStyle = "#1f2a3d"; ctx.fillText(text, x, y);
+    var ay = y + 13, half = 16;
+    ctx.strokeStyle = "#2f7fd6"; ctx.fillStyle = "#2f7fd6"; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(x - half, ay); ctx.lineTo(x + half, ay); ctx.stroke();
+    var tip = dir > 0 ? x + half + 4 : x - half - 4, back = dir > 0 ? x + half - 4 : x - half + 4;
+    ctx.beginPath(); ctx.moveTo(tip, ay); ctx.lineTo(back, ay - 5); ctx.lineTo(back, ay + 5); ctx.closePath(); ctx.fill();
+  }
+
+  Sim.prototype.strokeRope = function(t, side, ghost){
+    var ctx = this.ctx, v = side < 0 ? this.v1 : this.v2;
+    var a = side < 0 ? X_MIN : 0, b = side < 0 ? 0 : X_MAX, n = 260;
+    ctx.beginPath();
+    for (var i = 0; i <= n; i++){
+      var x = a + (b - a)*i/n, X = this.px(x), Y = this.py(this.y(x, t, state.sign));
+      if (i === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+    }
+    if (ghost){ ctx.strokeStyle = "rgba(90,102,128,0.35)"; ctx.lineWidth = 1.5; ctx.setLineDash([]); ctx.stroke(); return; }
+    var lw = ropeWidth(v);
+    ctx.lineJoin = "round"; ctx.lineCap = "butt"; ctx.setLineDash([]);
+    ctx.strokeStyle = "#8a6a3e"; ctx.lineWidth = lw + 2; ctx.stroke();
+    ctx.strokeStyle = side < 0 ? "#d8b47c" : "#c99e62"; ctx.lineWidth = lw; ctx.stroke();
+    ctx.strokeStyle = "rgba(120,86,40,0.55)"; ctx.lineWidth = Math.max(1, lw*0.45);
+    ctx.setLineDash([2.5, 3.5]); ctx.stroke(); ctx.setLineDash([]);
+  };
+
+  Sim.prototype.draw = function(){
+    var ctx = this.ctx, Wd = this.W, H = this.H, t = state.t, sign = state.sign;
+    ctx.clearRect(0,0,Wd,H);
+    ctx.fillStyle = "#e9edf7"; roundRect(ctx, 0, 0, Wd, H, 10); ctx.fill();
+    // 기준선
+    ctx.strokeStyle = "rgba(90,102,128,0.35)"; ctx.lineWidth = 1; ctx.setLineDash([4,5]);
+    ctx.beginPath(); ctx.moveTo(this.px(X_MIN), this.py(0)); ctx.lineTo(this.px(X_MAX), this.py(0)); ctx.stroke();
+    // 경계면
+    var bx = this.px(0);
+    ctx.strokeStyle = "#e0393e"; ctx.lineWidth = 1.6; ctx.setLineDash([5,4]);
+    ctx.beginPath(); ctx.moveTo(bx, 8); ctx.lineTo(bx, H - 22); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = "#1f2a3d"; ctx.font = "13px 'IBM Plex Sans KR', Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
+    ctx.textAlign = "center"; ctx.textBaseline = "alphabetic"; ctx.fillText("경계면", bx, H - 7);
+    // 줄 이름
+    pill(ctx, this.labels(this, -1), 10, 10, "left");
+    pill(ctx, this.labels(this, 1), Wd - 10, 10, "right");
+
+    // 지나간 모습
+    if (state.trail && state.sent){
+      // 경계면에 닿기 전 모습(입사파)과 반사가 끝난 뒤 모습, 두 장면만 흐리게 남김
+      var snaps = [-4.5, 4.5];
+      for (var q = 0; q < snaps.length; q++){
+        var tk = (snaps[q] - X0)/this.v1;
+        if (tk < t - 0.05){ this.strokeRope(tk, -1, true); this.strokeRope(tk, 1, true); }
+      }
+    }
+    this.strokeRope(t, -1, false); this.strokeRope(t, 1, false);
+
+    // 리본(매질의 한 점)
+    if (state.ribbon){
+      var pts = [-4.5, 4.5];
+      for (var k = 0; k < 2; k++){
+        var x = pts[k], X = this.px(x), Y = this.py(this.y(x, t, sign));
+        ctx.strokeStyle = "rgba(224,57,62,0.25)"; ctx.lineWidth = 1; ctx.setLineDash([2,3]);
+        ctx.beginPath(); ctx.moveTo(X, this.py(1.9)); ctx.lineTo(X, this.py(-1.9)); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = "#e0393e"; ctx.beginPath(); ctx.arc(X, Y, 5.5, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5; ctx.stroke();
+      }
+    }
+
+    // 입사파·반사파·투과파 이름표
+    if (state.sent){
+      var s = this.s(t), up = function(a){ return a >= 0; };
+      var place = (function(self){ return function(text, x, amp, dir){
+        if (x < X_MIN + 1 || x > X_MAX - 1) return;
+        var X = self.px(x), Y = up(amp) ? self.py(amp) - 34 : self.py(amp) + 14;
+        if (Y < 40) Y = 40; if (Y > H - 44) Y = H - 44;
+        arrowLabel(ctx, text, X, Y, dir);
+      }; })(this);
+      if (s < -W*0.5) place("입사파", s, sign, 1);
+      if (s > W*0.6){
+        if (Math.abs(this.r) > 0.03) place("반사파", -s, sign*this.r, -1);
+        place("투과파", s*this.v2/this.v1, sign*this.tr, 1);
+      }
+    }
+    this.updateText();
+  };
+
+  Sim.prototype.updateText = function(){
+    var el = this.res, t = state.t, sign = state.sign;
+    var sent = sign > 0 ? "마루" : "골", flip = sign > 0 ? "골" : "마루";
+    if (!state.sent){ el.innerHTML = "「파동 보내기」를 눌러 " + sent + "를 보내 보기"; return; }
+    var s = this.s(t);
+    if (s < W*0.6){ el.innerHTML = "입사파(" + sent + ")가 경계면으로 다가가는 중"; return; }
+    if (Math.abs(this.r) < 0.01){
+      el.innerHTML = "두 줄의 속력이 같아 <b class='same'>반사파가 생기지 않고</b> 모두 투과 · 투과파: " + sent; return;
+    }
+    if (this.r < 0){
+      el.innerHTML = "반사파: <b class='inv'>" + flip + "로 뒤집혀 되돌아옴</b> (위상 180° 변함 → 고정단 반사) · 투과파: " + sent + " 그대로";
+    } else {
+      el.innerHTML = "반사파: <b class='same'>" + sent + " 그대로 되돌아옴</b> (위상 변하지 않음 → 자유단 반사) · 투과파: " + sent + " 그대로";
+    }
+  };
+
+  function fmt(v){ return (Math.round(v*10)/10).toFixed(1); }
+  var compareLabel = function(sim, side){
+    var v = side < 0 ? sim.v1 : sim.v2, o = side < 0 ? sim.v2 : sim.v1;
+    return v > o ? "속력이 빠른 줄" : "속력이 느린 줄";
+  };
+  var customLabel = function(sim, side){
+    var v = side < 0 ? sim.v1 : sim.v2, o = side < 0 ? sim.v2 : sim.v1;
+    var word = v > o ? "빠른 줄" : (v < o ? "느린 줄" : "같은 속력");
+    return word + " (속력 " + fmt(v) + ")";
+  };
+
+  var simA = new Sim(document.getElementById("cvA"), document.getElementById("resA"), 3.6, 1.5, compareLabel);
+  var simB = new Sim(document.getElementById("cvB"), document.getElementById("resB"), 1.5, 3.6, compareLabel);
+  var simC = new Sim(document.getElementById("cvC"), document.getElementById("resC"), 4, 1.5, customLabel);
+
+  function active(){ return state.tab === "compare" ? [simA, simB] : [simC]; }
+  function tMax(){ return Math.max.apply(null, active().map(function(s){ return s.tEnd; })); }
+
+  var btnSend = document.getElementById("send"), btnPause = document.getElementById("pause"),
+      btnStep = document.getElementById("step"), btnReset = document.getElementById("reset"),
+      scrub = document.getElementById("scrub");
+
+  function syncUI(){
+    var m = tMax();
+    scrub.max = m.toFixed(2); scrub.value = Math.min(state.t, m).toFixed(2);
+    btnPause.disabled = !state.sent || state.t >= m - 1e-6;
+    btnPause.textContent = state.running ? "일시정지" : "계속";
+    btnStep.disabled = state.running || state.t >= m - 1e-6;
+  }
+  function drawAll(){ active().forEach(function(s){ s.draw(); }); syncUI(); }
+
+  btnSend.onclick = function(){ state.t = 0; state.sent = true; state.running = true; drawAll(); };
+  btnPause.onclick = function(){ if (!state.sent) return; state.running = !state.running; syncUI(); };
+  btnStep.onclick = function(){
+    if (!state.sent){ state.sent = true; state.t = 0; }
+    state.running = false; state.t = Math.min(tMax(), state.t + 0.12); drawAll();
+  };
+  btnReset.onclick = function(){ state.t = 0; state.running = false; state.sent = false; drawAll(); };
+  scrub.oninput = function(){ state.sent = true; state.running = false; state.t = parseFloat(scrub.value); drawAll(); };
+
+  function seg(id, key){
+    var box = document.getElementById(id);
+    box.addEventListener("click", function(e){
+      var b = e.target.closest("button"); if (!b) return;
+      [].forEach.call(box.children, function(c){ c.classList.toggle("on", c === b); });
+      state[key] = parseFloat(b.dataset.v);
+      if (key === "sign"){ state.t = 0; state.running = false; state.sent = false; }
+      drawAll();
+    });
+  }
+  seg("shapeSeg", "sign"); seg("rateSeg", "rate");
+  document.getElementById("trail").onchange = function(e){ state.trail = e.target.checked; drawAll(); };
+  document.getElementById("ribbon").onchange = function(e){ state.ribbon = e.target.checked; drawAll(); };
+
+  // 탭
+  document.querySelectorAll(".tab").forEach(function(b){
+    b.onclick = function(){
+      document.querySelectorAll(".tab").forEach(function(x){ x.classList.toggle("on", x === b); });
+      state.tab = b.dataset.tab;
+      document.getElementById("tab-compare").classList.toggle("hide", state.tab !== "compare");
+      document.getElementById("tab-custom").classList.toggle("hide", state.tab !== "custom");
+      state.t = 0; state.running = false; state.sent = false;
+      resizeAll(); drawAll();
+    };
+  });
+
+  // 직접 조절하기
+  var v1In = document.getElementById("v1"), v2In = document.getElementById("v2");
+  function updateCustom(){
+    var v1 = parseFloat(v1In.value), v2 = parseFloat(v2In.value);
+    simC.set(v1, v2);
+    document.getElementById("v1Val").textContent = fmt(v1);
+    document.getElementById("v2Val").textContent = fmt(v2);
+    var c = document.getElementById("cond");
+    if (v1 > v2) c.textContent = "왼쪽 줄이 더 빠름 → 예상: 반사파가 뒤집힘 (고정단 반사)";
+    else if (v1 < v2) c.textContent = "왼쪽 줄이 더 느림 → 예상: 반사파가 그대로 (자유단 반사)";
+    else c.textContent = "두 줄의 속력이 같음 → 예상: 반사파 없음";
+    state.t = 0; state.running = false; state.sent = false; drawAll();
+  }
+  v1In.oninput = updateCustom; v2In.oninput = updateCustom;
+  document.querySelectorAll(".presets button").forEach(function(b){
+    b.onclick = function(){ var p = b.dataset.p.split(","); v1In.value = p[0]; v2In.value = p[1]; updateCustom(); };
+  });
+
+  function resizeAll(){ [simA, simB, simC].forEach(function(s){ if (s.cv.offsetParent !== null) s.resize(); }); }
+  window.addEventListener("resize", function(){ resizeAll(); drawAll(); });
+  document.addEventListener("keydown", function(e){
+    if (e.code === "Space" && e.target.tagName !== "INPUT"){ e.preventDefault(); if (state.sent) btnPause.onclick(); else btnSend.onclick(); }
+  });
+
+  var last = null;
+  function loop(now){
+    if (last === null) last = now;
+    var dt = Math.min(0.05, (now - last)/1000); last = now;
+    if (state.running && state.sent){
+      state.t += dt*state.rate;
+      var m = tMax();
+      if (state.t >= m){ state.t = m; state.running = false; }
+      drawAll();
+    }
+    requestAnimationFrame(loop);
+  }
+
+  resizeAll(); updateCustom(); drawAll();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

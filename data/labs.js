@@ -83,6 +83,19 @@ window.VLAB = {
       added: "2026-11-04"
     },
     {
+      id: "wave-reflection",
+      subject: "physics",
+      title: "고정단 반사와 자유단 반사",
+      summary: "속력이 다른 두 줄을 이어 붙이고 마루(또는 골) 펄스를 보내, 경계면에서 생기는 반사파와 투과파의 모양을 관찰합니다. 빠른 줄→느린 줄(고정단 반사, 위상 180° 변함)과 느린 줄→빠른 줄(자유단 반사)을 나란히 비교하고, 두 줄의 속력을 직접 바꾸며 반사파가 뒤집히는 조건을 찾습니다. 일시정지·한 칸씩 보기·시간 슬라이더, 지나간 모습 남기기, 매질의 한 점(리본) 표시 기능이 있습니다.",
+      file: "labs/physics/wave-reflection.html",
+      author: "하영우",
+      grade: ["고2", "고3"],
+      unit: "역학과 에너지 · 탄성파와 소리",
+      tags: ["파동의 반사", "고정단 반사", "자유단 반사", "투과파", "위상 변화", "경계면", "펄스"],
+      thumbnail: "assets/img/thumbs/wave-reflection/0.png",
+      added: "2026-11-09"
+    },
+    {
       id: "chem-smart-lab",
       subject: "chemistry",
       title: "화학 스마트 실험실",

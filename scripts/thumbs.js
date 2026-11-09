@@ -18,6 +18,10 @@ const PREP = {
     await p.waitForTimeout(2200);
     await p.evaluate(() => { document.querySelector('.lab:not([hidden]) .stage').scrollIntoView({ block: 'start' }); window.scrollBy(0, -14); });
   },
+  'physics/wave-reflection': async p => {   // 파동을 보내 반사파·투과파가 보이는 순간에 멈추고 (가) 그림이 맨 위에 오도록
+    await p.click('#send'); await p.waitForTimeout(2500); await p.click('#pause');
+    await p.evaluate(() => { document.getElementById('cvA').closest('.card').scrollIntoView({ block: 'start' }); window.scrollBy(0, -12); });
+  },
   'earth/constellation': async p => { await p.click('#goBtn'); await p.waitForTimeout(1200); await p.evaluate(() => { document.querySelectorAll('.overlay').forEach(o => o.classList.remove('show')); }); },
 };
 

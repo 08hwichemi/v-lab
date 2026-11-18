@@ -251,6 +251,32 @@ window.VLAB = {
       added: "2026-11-05"
     },
     {
+      id: "photosynthesis-overview",
+      subject: "biology",
+      title: "광합성 한눈에 보기",
+      summary: "엽록체 한 장면 그림에서 ① 광계 → ② 명반응(타이라코이드 막) → ③ 탄소 고정 반응(스트로마, 캘빈회로)으로 이어지는 광합성 전체 흐름을 봅니다. 단계 탭을 누르면 해당 부분만 밝아지고, 물·CO₂가 들어오고 O₂·포도당이 나가는 흐름과 ATP·NADPH가 명반응과 캘빈회로 사이를 오가는 모습이 움직임으로 표시됩니다. 포도당 1분자당 에너지 흐름 띠, 세 단계 비교표, 세포호흡과의 비교표가 들어 있습니다.",
+      file: "labs/biology/photosynthesis-overview.html",
+      author: "송다혜",
+      grade: ["고2", "고3"],
+      unit: "세포와 물질대사 · 세포호흡과 광합성",
+      tags: ["광합성", "광계", "명반응", "탄소 고정 반응", "캘빈회로", "엽록체", "NADPH"],
+      thumbnail: "assets/img/thumbs/photosynthesis-overview/0.png",
+      added: "2026-11-18"
+    },
+    {
+      id: "photosynthesis-steps",
+      subject: "biology",
+      title: "광합성 단계별 탐험",
+      summary: "광계 → 명반응 → 탄소 고정 반응의 세부 단계를 하나씩 넘기며 분자가 움직이는 과정을 애니메이션으로 따라갑니다. 빛 흡수와 고에너지 전자 방출, 물의 광분해, 전자전달계와 H⁺ 이동, 광인산화, 캘빈회로의 탄소 고정·환원·RuBP 재생을 그림으로 보고, 각 단계마다 '쉽게 말하면'과 교과서 설명을 함께 읽습니다. 키보드 ← → 로도 넘길 수 있습니다.",
+      file: "labs/biology/photosynthesis-steps.html",
+      author: "송다혜",
+      grade: ["고2", "고3"],
+      unit: "세포와 물질대사 · 세포호흡과 광합성",
+      tags: ["광합성", "명반응", "물의 광분해", "전자전달계", "광인산화", "캘빈회로", "루비스코"],
+      thumbnail: "assets/img/thumbs/photosynthesis-steps/0.png",
+      added: "2026-11-18"
+    },
+    {
       id: "constellation",
       subject: "earth",
       title: "별자리 탐험",

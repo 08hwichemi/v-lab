@@ -102,8 +102,17 @@ table{font-size:14.5px} thead th{font-weight:700} tbody th{font-size:13.5px}
 .easy p{font-size:16.5px} .book p{font-size:15px} .io ul{font-size:14.5px} .legend,.hint,.ledger .note{font-size:13.5px}
 .box,.pill{border-radius:8px}
 .box{font-size:15px} .pill{font-size:14.5px}
+/* 선택 열 배경: color-mix 를 모르는 옛 브라우저용 기본값 */
+td.sel,th.sel{background:#F3F4F6}
+@supports (background:color-mix(in srgb,red 10%,white)){td.sel,th.sel{background:color-mix(in srgb,var(--c) 14%,transparent)}}
+/* 명반응 주황은 흰 글자가 읽히도록 조금 어둡게 */
+:root{--st2:#B87400}
+.fighint{margin:0;text-align:center}
+@media (max-width:640px){.fighint{display:none}}
+@media (max-width:760px){.scroll::after{content:'표를 옆으로 밀어 보세요';display:block;font-size:13px;color:#6B7280;text-align:center;margin-top:4px}}
 /* 뷰어 안: 파일 자체 제목 숨김, 그림은 창 높이를 넘지 않게 */
-body.vlab-embed header.top > div:first-child{display:none}
+body.vlab-embed header.top .eyebrow,body.vlab-embed header.top h1{display:none}
+body.vlab-embed header.top .eq{margin:0;font-size:15.5px;align-self:center}
 body.vlab-embed{padding-block:12px 28px}
 .plate{width:min(100%, calc((100vh - 150px) * 1000 / 620));margin-inline:auto}
 @media (min-width:981px){main{grid-template-columns:minmax(0,2.1fr) minmax(280px,1fr)}}
@@ -132,6 +141,7 @@ thead th.sel{box-shadow:inset 0 -4px 0 #111}
   <main>
     <section class="fig">
       <div class="plate" id="plate"></div>
+      <p class="legend fighint">그림의 ① ② ③ 부분을 누르면 설명이 바뀌어요</p>
     </section>
     <aside class="panel" id="panel">
       <div class="chips"><span class="chip stage" id="chip"></span><span class="chip" id="place"></span></div>
@@ -140,7 +150,7 @@ thead th.sel{box-shadow:inset 0 -4px 0 #111}
       <div class="io" id="io"></div>
       <div class="book"><span class="lbl">교과서 설명</span><p id="book"></p></div>
       <button class="play" id="play">▶ 처음부터 차례로 보기</button>
-      <button class="play" id="motion" aria-pressed="false" style="background:transparent;color:var(--ink);border-color:var(--line)">움직임 끄기</button>
+      <button class="play" id="motion" style="background:transparent;color:var(--ink);border-color:var(--line)">움직임 끄기</button>
     </aside>
   </main>
   <section class="bar">
@@ -154,7 +164,7 @@ thead th.sel{box-shadow:inset 0 -4px 0 #111}
     <p class="legend">탄소 고정 반응이 쓰고 남은 ADP, NADP⁺는 다시 명반응으로 돌아가 재사용돼요. 그래서 빛이 계속 있어야 탄소 고정도 계속돼요.</p>
   </section>
   <section class="tbl">
-    <h3>세 단계 비교표</h3>
+    <h3>광계 · 명반응 · 탄소 고정 반응 비교표</h3>
     <div class="scroll"><table id="table"></table></div>
   </section>
   <section class="tbl">
@@ -214,8 +224,8 @@ function trip(inner,d,dur=1,begin=0,stay=false){
   return `<g opacity="0">${inner}<animateMotion path="${d}" dur="${dur}s" begin="${begin}s" fill="freeze"/><animate attributeName="opacity" values="0;1;1;${stay?1:0}" keyTimes="0;.08;.85;1" dur="${dur}s" begin="${begin}s" fill="freeze"/></g>`;
 }
 /* 무한 반복 경로 */
-function loop(inner,d,dur=2,offset=0){
-  if(RM) return '';
+function loop(inner,d,dur=2,offset=0,still){
+  if(RM) return still||'';   // 움직임 끄기: 멈춘 자리의 그림(없으면 생략)
   return `<g opacity="0">${inner}<animateMotion path="${d}" dur="${dur}s" begin="${-offset}s" repeatCount="indefinite"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.1;.85;1" dur="${dur}s" begin="${-offset}s" repeatCount="indefinite"/></g>`;
 }
 function spin(cx,cy,inner,dur=2){ if(RM) return inner; return `<g>${inner}<animateTransform attributeName="transform" type="rotate" from="0 ${cx} ${cy}" to="360 ${cx} ${cy}" dur="${dur}s" repeatCount="indefinite"/></g>`; }
@@ -282,20 +292,20 @@ function PS(cx,cy,sc=1){
 
 const STG=[
  {k:'전체', name:'광합성 전체', place:'엽록체', c:'--st0', t:'햇빛으로 포도당 만들기',
-  e:'식물은 햇빛 에너지를 이용해 물과 이산화 탄소로 포도당을 만들어요. ①광계가 빛을 모으고, ②명반응이 빛에너지를 ATP·NADPH로 바꾸고, ③탄소 고정 반응이 그 에너지로 CO₂를 붙여 포도당을 만들어요. 산소는 덤으로 나와요.',
+  e:'식물은 햇빛 에너지를 이용해 물과 이산화 탄소로 포도당을 만들어요. ①광계(명반응의 첫 부분)가 빛을 모으고, ②명반응이 빛에너지를 ATP·NADPH로 바꾸고, ③탄소 고정 반응이 그 에너지로 CO₂를 붙여 포도당을 만들어요. 산소는 덤으로 나와요.',
   b:'광합성은 빛에너지를 이용하여 이산화 탄소와 물로 포도당을 합성하는 동화작용이며, 부산물로 산소가 발생한다. 광합성은 크게 빛에너지를 흡수하여 화학 에너지로 전환하는 명반응과 화학 에너지를 이용하여 탄소를 고정하는 탄소 고정 반응으로 구분된다.',
   i:['빛에너지','이산화 탄소(CO₂) 6분자','물(H₂O) 12분자'], o:['포도당 1분자','산소(O₂) 6분자','물(H₂O) 6분자']},
- {k:'①', name:'광계', place:'타이라코이드 막', c:'--st1', t:'① 광계: 빛을 모으는 안테나',
+ {k:'①', name:'광계', place:'타이라코이드 막', c:'--st1', t:'① 광계: 빛을 모으는 안테나 (명반응의 시작)',
   e:'타이라코이드 막의 광계에서 엽록소가 청자색광과 적색광을 흡수해요. 모인 빛에너지가 반응 중심 색소(P680, P700)에 전달되면 고에너지 전자가 튀어나와요.',
   b:'광계는 반응 중심 색소와 전자수용체로 구성된 반응 중심 복합체, 그리고 이를 둘러싸고 있는 집광 복합체로 구성된다. 빛에너지를 받은 반응 중심 색소는 고에너지 전자를 방출한다.',
   i:['빛 (청자색광·적색광)'], o:['고에너지 전자 (e⁻)']},
  {k:'②', name:'명반응', place:'타이라코이드 막', c:'--st2', t:'② 명반응: 빛을 에너지 쿠폰으로',
-  e:'고에너지 전자가 전자전달계를 지나며 H⁺를 퍼 넣고, 마지막에 NADP⁺에 실려 NADPH가 돼요. 모인 H⁺가 ATP 합성효소로 흘러 나가며 ATP를 만들어요(광인산화). 전자 빈자리는 물을 쪼개 채우고, 이때 산소가 나와요.',
+  e:'고에너지 전자가 전자전달계를 지나며 H⁺를 타이라코이드 안쪽으로 퍼 넣고, 마지막에 NADP⁺에 실려 NADPH가 돼요. 안쪽에 모인 H⁺가 ATP 합성효소를 지나 스트로마로 흘러 나가며 ATP를 만들어요(광인산화). 전자 빈자리는 물을 쪼개 채우고, 이때 산소가 나와요.',
   b:'명반응은 타이라코이드 막에서 빛에너지가 화학 에너지로 전환되어 ATP와 NADPH에 저장되는 반응으로, 이 과정에서 물이 분해되어 산소가 발생한다.',
   i:['빛','물(H₂O)','ADP + Pi','NADP⁺'], o:['산소(O₂)','ATP','NADPH']},
  {k:'③', name:'탄소 고정 반응', place:'스트로마', c:'--st3', t:'③ 탄소 고정 반응: 포도당 조립',
   e:'스트로마의 캘빈회로가 ATP와 NADPH를 써서 공기 속 CO₂를 붙여 포도당 재료(PGAL)를 만들어요. 빛을 직접 쓰지 않지만, 명반응이 멈추면 재료가 떨어져 곧 멈춰요.',
-  b:'탄소 고정 반응은 스트로마에 있는 여러 효소가 명반응에서 생성된 물질을 이용해 이산화 탄소를 고정하여 포도당으로 합성하는 반응이다. 캘빈회로 또는 암반응이라고도 한다.',
+  b:'탄소 고정 반응은 스트로마에 있는 여러 효소가 명반응에서 생성된 물질을 이용해 이산화 탄소를 고정하여 포도당으로 합성하는 반응이다. 캘빈 회로라고도 한다. (예전에는 암반응이라고 불렀지만, 어두울 때 일어나는 반응이라는 뜻은 아니다.)',
   i:['이산화 탄소(CO₂)','ATP','NADPH'], o:['포도당 (PGAL 2개 → 포도당 1개)','ADP + Pi','NADP⁺']},
  {k:'+', name:'세포호흡과 비교', place:'엽록체 ↔ 마이토콘드리아', c:'--st5', t:'광합성과 세포호흡은 거울 사이',
   e:'광합성은 빛으로 포도당을 "만들고"(동화작용), 세포호흡은 포도당을 "분해해서" ATP를 얻어요(이화작용). 광합성의 결과물(포도당, 산소)이 세포호흡의 재료가 되고, 세포호흡의 결과물(CO₂, 물)이 다시 광합성의 재료가 돼요.',
@@ -310,13 +320,13 @@ function scene(){
   o += `<circle cx="64" cy="64" r="44" fill="#ffd84d"/><circle cx="64" cy="64" r="58" fill="none" stroke="#ffd84d" stroke-width="3" stroke-dasharray="4 8"/>${T(64,136,'빛에너지',14,900,'#a86a00')}`;
   o += `<ellipse cx="${CH[0]}" cy="${CH[1]}" rx="${CHR[0]}" ry="${CHR[1]}" fill="#e2f3d6" stroke="#7cbf5e" stroke-width="10"/>
         <ellipse cx="${CH[0]}" cy="${CH[1]}" rx="${CHR[0]-15}" ry="${CHR[1]-15}" fill="#ecf8e3" stroke="#9fd17f" stroke-width="5"/>`;
-  o += halo(870,108,'엽록체',18,900,'#2f6d27');
-  o += halo(820,560,'스트로마',16,900,'#4f7a2a');
+  o += halo(958,136,'엽록체',18,900,'#2f6d27','end');
+  o += halo(600,540,'스트로마',16,900,'#4f7a2a');
   // ② 명반응 (그라나)
   let g2 = `<rect x="232" y="196" width="250" height="278" rx="22" fill="#ffffff80" stroke="#cf8a12" stroke-width="2.5" stroke-dasharray="7 6"/>`;
   [[300,300,7],[410,360,6],[300,420,4]].forEach(([x,y,n])=>{for(let i=0;i<n;i++) g2+=`<rect x="${x-44}" y="${y-n*8+i*16}" width="88" height="13" rx="6.5" fill="${i%2?'#5aa84a':'#4c9a3e'}" stroke="#2f6d27" stroke-width="1"/>`;});
   g2 += `<path d="M344,300 C370,300 360,360 366,360" stroke="#4c9a3e" stroke-width="5" fill="none"/>`;
-  g2 += T(357,224,'② 명반응',19,900,'#a86a00') + T(357,462,'타이라코이드 막',13,700,'#7a5a00');
+  g2 += T(357,224,'② 명반응',19,900,'#a86a00') + T(357,468,'타이라코이드 막',13,700,'#7a5a00');
   // (고정 ATP·NADPH 이름표는 없앰: 움직이는 흐름으로만 보여 줌)
   // ① 광계 확대
   const Z=[580,150], ZR=84;
@@ -327,38 +337,38 @@ function scene(){
     ${halo(Z[0]+ZR+12,Z[1]-30,'① 광계',17,900,'#2f6d27','start')}`;
   if(!RM) g1 += `<circle cx="${Z[0]}" cy="${Z[1]+9}" r="14" fill="none" stroke="#ff8a3d" stroke-width="3"><animate attributeName="r" values="10;24;10" dur="1.2s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;.2;1" dur="1.2s" repeatCount="indefinite"/></circle>`;
   // ③ 캘빈회로
-  let g3 = `<circle cx="${CAL[0]}" cy="${CAL[1]}" r="92" fill="none" stroke="#bfe0b0" stroke-width="22"/>
+  let g3 = `<circle cx="${CAL[0]}" cy="${CAL[1]}" r="92" fill="#fff" fill-opacity="0.01"/><circle cx="${CAL[0]}" cy="${CAL[1]}" r="92" fill="none" stroke="#bfe0b0" stroke-width="22"/>
     <circle cx="${CAL[0]}" cy="${CAL[1]}" r="92" fill="none" stroke="#1f8a86" stroke-width="3" stroke-dasharray="3 9"/>
     ${T(CAL[0],CAL[1]-6,'③ 탄소 고정',18,900,'#16706c')}${T(CAL[0],CAL[1]+18,'(캘빈회로)',14,700,'#16706c')}
     ${halo(CAL[0]-92,CAL[1]+5,'RuBP',13,900,'#2f6d35')}${halo(CAL[0]+60,CAL[1]-82,'3PG',13,900,'#1f5f8a')}${halo(CAL[0]+64,CAL[1]+92,'PGAL',13,900,'#8a5a00')}`;
   g3 += spin(CAL[0],CAL[1],`<circle cx="${CAL[0]+92}" cy="${CAL[1]}" r="9" fill="#1f8a86"/>`,6);
   // 흐름
-  let f='';
-  f += strokeLight(100,105,250,300) + strokeLight(118,92,280,250) + strokeLight(125,62,495,150);
+  let fl='',fw='',fc='';
+  fl += strokeLight(100,105,250,300) + strokeLight(118,92,280,250) + strokeLight(125,62,495,150);
   // 물 들어옴, 산소 나감
-  f += `<path d="M150,600 C200,560 250,520 290,470" fill="none" stroke="#3a8fc2" stroke-width="3" stroke-dasharray="6 6" marker-end="url(#ah)" style="color:#3a8fc2"/>`;
-  f += tag(110,598,'H₂O 12 (뿌리에서)','H2O');
-  f += loop(`<g><circle r="9" fill="#5fb4e6"/><circle cx="-8" cy="-6" r="5" fill="#fff"/><circle cx="8" cy="-6" r="5" fill="#fff"/></g>`,'M150,600 C200,560 250,520 290,470',2.6,0);
-  f += `<path d="M240,440 C160,430 90,380 40,300" fill="none" stroke="#e5534b" stroke-width="3" stroke-dasharray="6 6" marker-end="url(#ah)" style="color:#e5534b"/>`;
-  f += tag(100,268,'O₂ 6 (기공으로)','O2');
-  f += loop(`<g><circle cx="-7" r="7" fill="#e5534b"/><circle cx="7" r="7" fill="#e5534b"/></g>`,'M240,440 C160,430 90,380 40,300',2.6,1);
+  fw += `<path d="M150,600 C200,560 250,520 290,470" fill="none" stroke="#3a8fc2" stroke-width="3" stroke-dasharray="6 6" marker-end="url(#ah)" style="color:#3a8fc2"/>`;
+  fw += tag(110,598,'H₂O 12 (뿌리에서)','H2O');
+  fw += loop(`<g><circle r="9" fill="#5fb4e6"/><circle cx="-8" cy="-6" r="5" fill="#fff"/><circle cx="8" cy="-6" r="5" fill="#fff"/></g>`,'M150,600 C200,560 250,520 290,470',2.6,0);
+  fw += `<path d="M240,440 C160,430 90,380 40,300" fill="none" stroke="#e5534b" stroke-width="3" stroke-dasharray="6 6" marker-end="url(#ah)" style="color:#e5534b"/>`;
+  fw += tag(100,268,'O₂ 6 (기공으로)','O2');
+  fw += loop(`<g><circle cx="-7" r="7" fill="#e5534b"/><circle cx="7" r="7" fill="#e5534b"/></g>`,'M240,440 C160,430 90,380 40,300',2.6,1);
   // CO2 들어옴
-  f += `<path d="M900,30 C860,90 810,170 770,238" fill="none" stroke="#8f9ba7" stroke-width="3" stroke-dasharray="6 6" marker-end="url(#ah)" style="color:#8f9ba7"/>`;
-  f += tag(880,28,'CO₂ 6 (공기에서)','CO2');
-  f += loop(co2m(0,0),'M900,30 C860,90 810,170 770,238',2.8,0);
+  fc += `<path d="M900,30 C860,95 790,175 742,236" fill="none" stroke="#8f9ba7" stroke-width="3" stroke-dasharray="6 6" marker-end="url(#ah)" style="color:#8f9ba7"/>`;
+  fc += tag(880,28,'CO₂ 6 (공기에서)','CO2');
+  fc += loop(co2m(0,0),'M900,30 C860,95 790,175 742,236',2.8,0);
   // 포도당 나감
-  f += `<path d="M790,415 C820,480 860,530 900,575" fill="none" stroke="#2a5aa8" stroke-width="3" stroke-dasharray="6 6" marker-end="url(#ah)" style="color:#2a5aa8"/>`;
-  f += `<g>${row(6,800,598,16,7)}</g>`;
-  f += halo(905,560,'포도당',15,900,'#2a5aa8','start');
+  fc += `<path d="M790,415 C820,480 860,530 900,575" fill="none" stroke="#2a5aa8" stroke-width="3" stroke-dasharray="6 6" marker-end="url(#ah)" style="color:#2a5aa8"/>`;
+  fc += `<g>${row(6,800,598,16,7)}</g>`;
+  fc += halo(905,560,'포도당',15,900,'#2a5aa8','start');
   // ATP, NADPH → 캘빈 / ADP, NADP+ ←
-  const go='M484,292 C540,284 600,290 644,316', back='M640,370 C580,420 540,420 482,400';
+  const go='M484,292 C540,280 585,282 618,298', back='M640,370 C580,420 540,420 482,400', back2='M640,384 C580,434 540,434 482,414';
   let fa='';
   fa += `<path d="${go}" fill="none" stroke="#f28c28" stroke-width="3" marker-end="url(#ah)" style="color:#f28c28"/>`;
   fa += `<path d="${back}" fill="none" stroke="#9aa6b2" stroke-width="3" stroke-dasharray="5 6" marker-end="url(#ah)" style="color:#9aa6b2"/>`;
-  fa += loop(tag(0,0,'ATP'),go,2.4,0) + loop(tag(0,0,'NADPH'),go,2.4,1.2);
-  fa += loop(tag(0,0,'ADP'),back,2.4,.6) + loop(tag(0,0,'NADP+'),back,2.4,1.8);
+  fa += loop(tag(0,0,'ATP'),go,2.4,0,tag(515,268,'ATP')) + loop(tag(0,0,'NADPH'),go,2.4,1.2,tag(600,268,'NADPH'));
+  fa += loop(tag(0,0,'ADP'),back,2.4,.6,tag(612,395,'ADP')) + loop(tag(0,0,'NADP+'),back2,2.4,1.8,tag(528,416,'NADP+'));
   fa += halo(498,464,'ADP, NADP⁺ 되돌아감',14,700,'#5b6d72','start');
-  return {o,g1,g2,g3,f,fa};
+  return {o,g1,g2,g3,fl,fw,fc,fa};
 }
 
 let cur=0, timer=null;
@@ -366,23 +376,25 @@ const $=id=>document.getElementById(id);
 function draw(){
   const S=STG[cur], sc=scene();
   const cls=n=> cur===4 ? 'dim' : cur===0 ? 'lit' : (cur===n?'lit':'dim');
-  let svg=`<svg viewBox="0 0 1000 620" xmlns="http://www.w3.org/2000/svg">${DEFS}${sc.o}
-    <g class="${cur===4?'dim':'lit'}">${sc.f}</g>
+  let svg=`<svg viewBox="0 0 1000 620" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${DEFS}${sc.o}
+    <g class="${cur===4?'dim':'lit'}">${sc.fl}</g>
+    <g class="${cur===4||cur===1||cur===3?'dim':'lit'}">${sc.fw}</g>
+    <g class="${cur===4||cur===1||cur===2?'dim':'lit'}">${sc.fc}</g>
     <g class="${cur===4||cur===1?'dim':'lit'}">${sc.fa}</g>
     <g class="hit ${cls(2)}" data-s="2">${sc.g2}</g>
     <g class="hit ${cls(3)}" data-s="3">${sc.g3}</g>
     <g class="hit ${cls(1)}" data-s="1">${sc.g1}</g>`;
   if(cur===4) svg += fin(`<g>${card(150,150,700,330)}
-    ${T(330,196,'광합성 (엽록체)',20,900,'#2f7d3a')}${T(670,196,'세포호흡 (마이토콘드리아)',20,900,'#b4581c')}
+    ${T(330,196,'광합성 (엽록체)',20,900,'#2f7d3a')}${T(670,196,'세포호흡 (세포질·마이토콘드리아)',20,900,'#b4581c')}
     ${tag(330,250,'CO₂ + H₂O','CO2',true)}${arrow('M330,272 V312','#2f7d3a',3)}${T(345,298,'빛에너지',13,900,'#a86a00','start')}${tag(330,340,'포도당 + O₂','glu',true)}
     ${tag(670,250,'포도당 + O₂','glu',true)}${arrow('M670,272 V312','#b4581c',3)}${T(685,298,'ATP',13,900,'#c96a10','start')}${tag(670,340,'CO₂ + H₂O','CO2',true)}
     ${arrow('M410,340 C470,340 520,260 586,252','#2a5aa8',2.5)}${arrow('M590,345 C530,350 480,262 412,252','#8f9ba7',2.5)}
     ${T(500,400,'한쪽의 결과물이 다른 쪽의 재료!',18,900,'#2b3a40')}${T(500,432,'동화작용(합성) ↔ 이화작용(분해)',15,700,'#5b6d72')}</g>`,0,.6);
   $('plate').innerHTML=svg+'</svg>';
-  $('plate').setAttribute('aria-label',`${S.name} 그림`);
+  $('plate').setAttribute('role','img');$('plate').setAttribute('aria-label',`${S.name} 그림`);
   $('plate').querySelectorAll('.hit').forEach(g=>g.addEventListener('click',()=>{stop();sel(+g.dataset.s);}));
   document.documentElement.style.setProperty('--c',`var(${S.c})`);
-  $('chip').textContent = S.k==='전체'?'전체 보기':S.k==='+'?'더 알아보기':`${S.k} ${S.name}`;
+  $('chip').textContent = S.k==='전체'?'전체 보기':S.k==='+'?'세포호흡과 비교':`${S.k} ${S.name}`;
   $('place').textContent=`장소: ${S.place}`;
   $('title').textContent=S.t; $('easy').textContent=S.e; $('book').textContent=S.b;
   const L = cur===4?['공통점','차이점']:['들어가는 것','나오는 것'];
@@ -393,16 +405,16 @@ function draw(){
 function sel(i){cur=i;draw();}
 function stop(){ if(timer){clearInterval(timer);timer=null;$('play').textContent='▶ 처음부터 차례로 보기';} }
 STG.forEach((S,i)=>{const b=document.createElement('button');b.textContent=i===0?'전체':i===4?'세포호흡과 비교':`${S.k} ${S.name}`;b.style.setProperty('--c',`var(${S.c})`);b.onclick=()=>{stop();sel(i);};$('tabs').appendChild(b);});
-function motionLabel(){ const b=document.getElementById('motion'); if(b){ b.textContent = RM ? '움직임 켜기' : '움직임 끄기'; b.setAttribute('aria-pressed', RM); } }
+function motionLabel(){ const b=document.getElementById('motion'); if(b){ b.textContent = RM ? '움직임 켜기' : '움직임 끄기'; b.removeAttribute('aria-pressed'); } }
 document.getElementById('motion').onclick=()=>{ RM=!RM; try{localStorage.setItem('still',RM?'1':'0');}catch(e){} motionLabel(); draw(); };
 motionLabel();
-$('play').onclick=()=>{ if(timer){stop();return;} let n=1; sel(1); $('play').textContent='■ 멈추기'; timer=setInterval(()=>{n++; if(n>3){stop();sel(0);return;} sel(n);},6000); };
+$('play').onclick=()=>{ if(timer){stop();return;} let n=1; sel(1); $('play').textContent='■ 멈추기'; timer=setInterval(()=>{n++; if(n>3){stop();sel(0);return;} sel(n);},10000); };
 const ROWS=[
  ['장소','타이라코이드 막','타이라코이드 막','스트로마'],
  ['빛','필요 (직접 흡수)','필요','직접 필요 없음 (명반응 산물이 필요)'],
  ['재료','빛에너지','빛, H₂O, ADP + Pi, NADP⁺','CO₂, ATP, NADPH'],
  ['결과','고에너지 전자','O₂, ATP, NADPH','포도당(PGAL), ADP + Pi, NADP⁺'],
- ['핵심 단어','집광 복합체, 반응 중심 색소, P680·P700','물의 광분해, 비순환·순환적 전자흐름, 광인산화','루비스코, RuBP·3PG·PGAL, 캘빈회로']
+ ['핵심 단어','집광 복합체, 반응 중심 색소, P680·P700','물의 광분해, 비순환적 전자 흐름·순환적 전자 흐름, 광인산화','루비스코, RuBP·3PG·PGAL, 캘빈회로']
 ];
 let h=`<thead><tr><th style="background:var(--st0)"></th>${[1,2,3].map(i=>`<th data-col="${i}" style="background:var(${STG[i].c})">${STG[i].k} ${STG[i].name}</th>`).join('')}</tr></thead><tbody>`;
 ROWS.forEach(r=>{h+=`<tr><th>${r[0]}</th>${r.slice(1).map((c,i)=>`<td data-col="${i+1}">${c}</td>`).join('')}</tr>`;});
@@ -412,11 +424,11 @@ const CMP=[
  ['ATP 합성 방법','전자전달계, ATP 합성효소를 거쳐 ATP가 합성된다. (공통)',null],
  ['일어나는 장소','세포질, 마이토콘드리아','엽록체'],
  ['물질대사 종류','이화작용','동화작용'],
- ['에너지전환','유기물의 화학 에너지 → ATP의 화학 에너지','빛에너지 → 화학 에너지'],
+ ['에너지 전환','유기물의 화학 에너지 → ATP의 화학 에너지','빛에너지 → 화학 에너지'],
  ['ATP의 이용','다양한 생명활동','주로 탄소 고정 반응에 이용'],
  ['고에너지 전자가 결합하는 조효소','NAD⁺, FAD','NADP⁺']
 ];
-let c=`<thead><tr><th style="background:var(--st0)">구분</th><th style="background:#d9762b">세포호흡</th><th style="background:var(--st1)">광합성</th></tr></thead><tbody>`;
+let c=`<thead><tr><th style="background:var(--st0)">구분</th><th style="background:#b4581c">세포호흡</th><th style="background:var(--st0)">광합성</th></tr></thead><tbody>`;
 CMP.forEach(r=>{c+= r[2]===null ? `<tr><th>${r[0]}</th><td colspan="2">${r[1]}</td></tr>` : `<tr><th>${r[0]}</th><td>${r[1]}</td><td>${r[2]}</td></tr>`;});
 $('cmp').innerHTML=c+'</tbody>';
 draw();

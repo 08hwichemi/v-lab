@@ -13,7 +13,7 @@ window.VLAB = {
   site: {
     name: "V-Lab",
     fullName: "V-Lab 가상 실험실",
-    tagline: "물리·화학·생명·지구과학 가상 실험을 설치 없이 브라우저에서.",
+    tagline: "물리·화학·생명·지구과학·환경 가상 실험을 설치 없이 브라우저에서.",
     school: "",            // 예: "○○고등학교" (비우면 '가상 실험실'로 표시)
     manager: "휘쌤",       // 운영자
     contact: ""            // 예: 이메일 (비우면 표시 안 함)
@@ -21,13 +21,14 @@ window.VLAB = {
 
   /* 과목 -------------------------------------------------------------
    * id 는 labs[].subject 와 폴더명(labs/<id>/)에 쓰입니다.
-   * color 는 assets/css/site.css 의 --phys/--chem/--bio/--earth 와 맞춰 둡니다.
+   * color 는 assets/css/site.css 의 --phys/--chem/--bio/--earth/--env 와 맞춰 둡니다.
    */
   subjects: [
     { id: "physics",   name: "물리학",   short: "물리", color: "#2F6BFF", desc: "힘과 운동, 파동, 전자기, 에너지." },
     { id: "chemistry", name: "화학",     short: "화학", color: "#F0640A", desc: "물질의 구조와 변화, 용액, 평형, 산·염기 반응." },
     { id: "biology",   name: "생명과학", short: "생명", color: "#12A66B", desc: "세포와 유전, 물질대사, 생태계." },
-    { id: "earth",     name: "지구과학", short: "지구", color: "#7A5AF8", desc: "지구 내부, 대기와 해양, 천체의 운동." }
+    { id: "earth",     name: "지구과학", short: "지구", color: "#7A5AF8", desc: "지구 내부, 대기와 해양, 천체의 운동." },
+    { id: "environment", name: "환경",   short: "환경", color: "#0E9AA7", desc: "기후변화와 탄소중립, 자원 순환, 생태와 환경." }
   ],
 
   /* 실험 -------------------------------------------------------------
@@ -353,6 +354,19 @@ window.VLAB = {
       tags: ["별의 진화", "H-R도", "주계열성", "적색 거성", "백색 왜성", "초신성", "중성자별", "블랙홀"],
       thumbnail: "assets/img/thumbs/star-evolution/0.png",
       added: "2026-11-03"
+    },
+    {
+      id: "green-lunch-challenge",
+      subject: "environment",
+      title: "녹색 급식 챌린지",
+      summary: "급식실 앞 현장 참여용 화면입니다. 미니게임 3개 — 식판 위의 탄소(음식별 탄소 배출 비교 퀴즈와 저탄소 식판 짜기), 잔반의 일생(밥알이의 운명을 고르는 이야기, 엔딩 3개), 이건 어디에 버릴까?(헷갈리는 쓰레기 12개 분리배출) — 를 하고 스탬프를 모읍니다. 2개 이상 완료하면 학번·이름을 적고 참여 완료 화면을 감독 학생에게 보여 추첨권을 받습니다. 기록은 어디에도 저장되지 않고, '다음 사람'을 누르면 처음부터 시작합니다.",
+      file: "labs/environment/green-lunch-challenge.html",
+      author: "송다혜",
+      grade: ["고1", "고2", "고3"],
+      unit: "기후변화와 환경생태 · 기후위기에 대응하는 우리의 활동",
+      tags: ["탄소중립", "저탄소 식단", "음식물 쓰레기", "잔반", "분리배출", "자원 순환", "녹색생활실천학교"],
+      thumbnail: "assets/img/thumbs/green-lunch-challenge/0.png",
+      added: "2026-11-23"
     }
   ]
 };

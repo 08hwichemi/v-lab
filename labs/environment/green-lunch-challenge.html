@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>녹색 급식 챌린지 · V-Lab</title>
+<style>*,*::before,*::after{box-sizing:border-box}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>
+/* V-Lab 공용 글꼴·색 토큰만 가져옴 (공용 클래스는 이 파일의 클래스 이름과 겹치므로 lab-theme.css 전체는 쓰지 않음) */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+:root{--font: 'IBM Plex Sans KR', 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; --bg: #ffffff; --panel: #ffffff; --panel-2: #F7F8FA; --line: #E6E8EC; --line-2: #F0F1F3; --text: #111111; --text-2: #3F4652; --muted: #6B7280; --accent: #3182F6; --accent-soft: #EAF2FF; --ok: #12A66B; --warn: #F5A623; --err: #E5484D; --radius: 12px; --radius-sm: 8px;}
+</style>
+<style>
+/* Layout: a paper stamp card (three round stamps) on top, game tickets below, submission slip at the end; each game opens in place under a sticky return bar */
+:root{
+  --h-bg:#e8efe6; --h-card:#ffffff; --h-ink:#1f2a22; --h-muted:#5c6a5f; --h-line:#cfdacd;
+  --h-accent:#2c7a50; --h-accent-ink:#ffffff; --h-stamp:#c2412d; --h-soft:#dcecdf; --h-warn:#9a5b00;
+  --h-display:"Black Han Sans","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --h-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --h-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+
+body{background:var(--h-bg);color:var(--h-ink);font-family:var(--h-body);font-size:16px;line-height:1.6;margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 40px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--h-bg)}
+#hub{max-width:540px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+#hub h1,#hub h2{font-family:var(--h-display);font-weight:400;margin:0;line-height:1.15;text-wrap:balance}
+#hub h1{font-size:2.6rem} #hub h2{font-size:1.45rem}
+#hub p{margin:0}
+.h-eyebrow{font-size:.78rem;letter-spacing:.1em;color:var(--h-muted);font-weight:700}
+.h-panel{background:var(--h-card);border:1px solid var(--h-line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px}
+
+/* stamp card */
+.h-card{background:var(--h-card);border:2px solid var(--h-ink);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:14px;position:relative}
+.h-card::before,.h-card::after{content:"";position:absolute;top:50%;width:18px;height:18px;border-radius:50%;background:var(--h-bg);border:2px solid var(--h-ink);transform:translateY(-50%)}
+.h-card::before{left:-11px;clip-path:inset(0 0 0 50%)} .h-card::after{right:-11px;clip-path:inset(0 50% 0 0)}
+.h-stamps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.h-stamp{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;min-width:0}
+.h-ring{width:min(88px,100%);aspect-ratio:1;max-width:100%;border-radius:50%;border:2px dashed var(--h-line);display:grid;place-items:center;position:relative}
+.h-ring svg{width:62%;height:auto;opacity:.35}
+.h-stamp.on .h-ring{border:3px solid var(--h-stamp);transform:rotate(-8deg)}
+.h-stamp.on .h-ring svg{opacity:1}
+.h-stamp.on .h-ring::after{content:"완료";position:absolute;bottom:-6px;right:-6px;background:var(--h-stamp);color:#fff;font-family:var(--h-display);font-size:.8rem;padding:1px 7px;border-radius:999px}
+.h-stamp span{font-size:.82rem;font-weight:700;word-break:keep-all}
+.h-progress{display:flex;justify-content:space-between;align-items:baseline;gap:8px;border-top:2px dashed var(--h-line);padding-top:12px}
+.h-progress b{font-family:var(--h-display);font-weight:400;font-size:1.3rem}
+.h-tickets{font-family:var(--h-display);font-size:1.3rem;color:var(--h-accent)}
+
+/* reward table */
+.h-rule{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.h-rule div{border:1px solid var(--h-line);border-radius:12px;padding:10px 6px;text-align:center;display:flex;flex-direction:column;gap:2px}
+.h-rule div.now{border:2px solid var(--h-accent);background:var(--h-soft)}
+.h-rule small{color:var(--h-muted);font-size:.78rem}
+.h-rule b{font-family:var(--h-display);font-weight:400;font-size:1.15rem}
+
+/* game tickets */
+.h-games{display:flex;flex-direction:column;gap:10px}
+.h-game{display:grid;grid-template-columns:76px 1fr auto;gap:12px;align-items:center;background:var(--h-card);border:1px solid var(--h-line);border-radius:16px;padding:10px 14px 10px 10px;color:inherit;text-decoration:none;transition:transform .12s,border-color .12s}
+.h-game:hover{transform:translateY(-2px);border-color:var(--h-accent)}
+.h-game:focus-visible{outline:3px solid var(--h-accent);outline-offset:2px}
+.h-game .h-thumb{width:76px;height:76px;border-radius:12px;display:grid;place-items:center;background:var(--h-soft)}
+.h-game .h-thumb svg{width:58px;height:auto}
+.h-game .h-txt{min-width:0;display:flex;flex-direction:column;gap:1px}
+.h-game .h-txt b{font-family:var(--h-display);font-weight:400;font-size:1.2rem}
+.h-game .h-txt small{color:var(--h-muted);font-size:.84rem;line-height:1.4}
+.h-chip{font-size:.78rem;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap;border:1.5px solid var(--h-line);color:var(--h-muted)}
+.h-chip.on{background:var(--h-stamp);border-color:var(--h-stamp);color:#fff}
+
+/* submit */
+.h-field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.h-field input{width:100%;box-sizing:border-box}
+[hidden]{display:none!important}
+.h-field label{font-size:.85rem;font-weight:700}
+.h-field input{font:inherit;font-size:1.05rem;padding:12px;border-radius:12px;border:1.5px solid var(--h-line);background:var(--h-bg);color:var(--h-ink);min-width:0}
+.h-field input:focus-visible{outline:3px solid var(--h-accent);outline-offset:1px}
+.h-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.h-row.one{grid-template-columns:1fr}
+.h-check{display:flex;align-items:center;gap:10px;font-weight:700;font-size:.95rem;padding:10px 12px;border:1.5px solid var(--h-line);border-radius:12px;cursor:pointer}
+.h-check input{width:22px;height:22px;accent-color:var(--h-accent)}
+.h-dates{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.92rem;font-weight:700;color:var(--h-accent)}
+.h-code{font-family:var(--h-mono);font-weight:600;font-size:1.25rem;letter-spacing:.06em;background:var(--h-bg);border-radius:10px;padding:8px 12px;text-align:center}
+.h-btn{display:block;text-align:center;text-decoration:none;background:var(--h-accent);color:var(--h-accent-ink);border:0;border-radius:14px;padding:15px 18px;font-family:var(--h-display);font-size:1.25rem;cursor:pointer}
+.h-btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
+.h-btn:focus-visible{outline:3px solid var(--h-ink);outline-offset:2px}
+.h-msg{font-size:.88rem;color:var(--h-muted)}
+.h-msg.warn{color:var(--h-warn);font-weight:700}
+.h-steps{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px;font-size:.92rem}
+.h-foot{font-size:.78rem;color:var(--h-muted);text-align:center}
+
+/* submit sheet */
+.h-sheet{position:fixed;inset:0;z-index:30;background:rgba(10,20,14,.55);display:flex;align-items:flex-end;justify-content:center;
+  padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+.h-sheet-box{background:var(--h-card);color:var(--h-ink);border-radius:22px;padding:20px 18px;width:100%;max-width:520px;display:flex;flex-direction:column;gap:14px;max-height:calc(100% - 24px);overflow:auto}
+.h-sheet-box h2{font-family:var(--h-display);font-weight:400;font-size:1.5rem;margin:0}
+.h-sum{background:var(--h-soft);border-radius:12px;padding:10px 12px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.h-sum b{font-family:var(--h-display);font-weight:400;font-size:1.15rem;color:var(--h-accent)}
+.h-ghost{background:transparent;border:1.5px solid var(--h-line);color:var(--h-ink);border-radius:14px;padding:12px;font:inherit;font-weight:700;cursor:pointer}
+.h-ghost:focus-visible{outline:3px solid var(--h-accent);outline-offset:2px}
+.h-done{border:2px solid var(--h-accent);background:var(--h-soft);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.h-done b{font-family:var(--h-display);font-weight:400;font-size:1.2rem}
+.h-lock{border:1.5px dashed var(--h-line);border-radius:14px;padding:14px;text-align:center;color:var(--h-muted);font-weight:700}
+
+/* in-game bar */
+.h-bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;max-width:540px;margin:0 auto 12px;display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--h-card);border:1px solid var(--h-line);border-radius:14px;padding:8px 10px}
+.h-back{font-family:var(--h-display);font-size:1.05rem;color:var(--h-ink);text-decoration:none;padding:6px 10px;border-radius:10px;background:var(--h-soft)}
+.h-back:focus-visible{outline:3px solid var(--h-accent)}
+.h-mini{display:flex;gap:6px;align-items:center;font-size:.82rem;font-weight:700;color:var(--h-muted)}
+.h-mini i{width:14px;height:14px;border-radius:50%;border:2px dashed var(--h-line);display:inline-block}
+.h-mini i.on{background:var(--h-stamp);border:2px solid var(--h-stamp)}
+.game{max-width:540px;margin:0 auto;border-radius:20px}
+.h-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.h-reset{font:inherit;font-weight:700;font-size:.9rem;padding:9px 14px;border-radius:999px;border:1.5px solid var(--h-line);background:var(--h-card);color:var(--h-ink);cursor:pointer;white-space:nowrap}
+.h-reset.arm{background:var(--h-stamp);border-color:var(--h-stamp);color:#fff}
+.h-reset:focus-visible{outline:3px solid var(--h-accent);outline-offset:2px}
+.h-fin{position:fixed;inset:0;z-index:40;background:var(--h-bg);overflow:auto;display:flex;justify-content:center;padding:20px 16px}
+.h-fin-box{width:100%;max-width:520px;display:flex;flex-direction:column;gap:14px;text-align:center}
+.h-fin-ok{width:84px;height:84px;border-radius:50%;background:var(--h-accent);color:var(--h-accent-ink);display:grid;place-items:center;margin:8px auto 0}
+.h-fin-ok svg{width:46px;height:46px}
+.h-fin-box p{margin:0}
+.h-fin-box h2{font-family:var(--h-display);font-weight:400;font-size:2.4rem;margin:0}
+.h-fin-card{background:var(--h-card);border:2px solid var(--h-ink);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px;text-align:left}
+.h-fin-row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed var(--h-line);padding-bottom:8px;font-size:1.05rem}
+.h-fin-row:last-child{border-bottom:0;padding-bottom:0}
+.h-fin-row span{color:var(--h-muted);font-weight:700;white-space:nowrap}
+.h-fin-row b{text-align:right;min-width:0}
+.h-fin-tix{font-family:var(--h-display);font-size:3.2rem;line-height:1;color:var(--h-stamp)}
+.h-fin-note{font-weight:700;background:var(--h-soft);border-radius:12px;padding:12px}
+.h-toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,120px);background:var(--h-stamp);color:#fff;font-family:var(--h-display);font-size:1.15rem;padding:12px 20px;border-radius:999px;transition:transform .35s;z-index:20;white-space:nowrap}
+.h-toast.show{transform:translate(-50%,0)}
+@media (prefers-reduced-motion: reduce){.h-toast,.h-game{transition:none}}
+
+/* ---- games (scoped) ---- */
+#g-tray{
+  --bg:#eef1f0; --surface:#ffffff; --steel:#d9dfde; --steel-2:#c3cbca; --ink:#1d2624; --muted:#5d6b68;
+  --accent:#1f6b4a; --accent-ink:#ffffff; --low:#2f8a5c; --mid:#c98a14; --high:#c2412d;
+  --good-bg:#e3f2e9; --bad-bg:#fbe7e3;
+  --f-display:"Do Hyeon","IBM Plex Sans KR",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+#g-tray{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 32px}
+#g-tray .wrap{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+#g-tray h1,#g-tray h2{font-family:var(--f-display);font-weight:400;text-wrap:balance;margin:0;letter-spacing:.01em}
+#g-tray h1{font-size:2.6rem;line-height:1.1}
+#g-tray h2{font-size:1.7rem;line-height:1.2}
+#g-tray p{margin:0}
+#g-tray .eyebrow{font-size:.78rem;letter-spacing:.12em;color:var(--muted);font-weight:700}
+#g-tray .num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+#g-tray .muted{color:var(--muted)}
+#g-tray button{font:inherit;color:inherit;cursor:pointer}
+#g-tray button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#g-tray .btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:14px;padding:16px 20px;font-family:var(--f-display);font-size:1.35rem;width:100%}
+#g-tray .btn:disabled{opacity:.4;cursor:not-allowed}
+#g-tray .btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--steel-2)}
+#g-tray .hero{display:flex;flex-direction:column;gap:12px}
+#g-tray .unit{display:inline-block;background:var(--steel);border-radius:8px;padding:2px 8px;font-size:.85rem}
+#g-tray .stages{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#g-tray .stage{background:var(--surface);border:1px solid var(--steel);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+#g-tray .stage b{font-family:var(--f-display);font-weight:400;font-size:1.25rem}
+#g-tray .stage span{font-size:.88rem;color:var(--muted)}
+#g-tray .scale{background:var(--surface);border:1px solid var(--steel);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}
+#g-tray .scale-row{display:grid;grid-template-columns:5.5em 1fr 3.8em;gap:8px;align-items:center;font-size:.9rem}
+#g-tray .scale-row .num{text-align:right}
+#g-tray .track{height:10px;background:var(--steel);border-radius:6px;overflow:hidden}
+#g-tray .fill{height:100%;border-radius:6px}
+#g-tray .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px}
+#g-tray .dots{display:flex;gap:5px}
+#g-tray .dot{width:10px;height:10px;border-radius:50%;background:var(--steel-2)}
+#g-tray .dot.ok{background:var(--low)}
+#g-tray .dot.no{background:var(--high)}
+#g-tray .dot.now{background:var(--ink)}
+#g-tray .choices{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#g-tray .choice{background:var(--surface);border:2px solid var(--steel);border-radius:18px;padding:22px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;min-height:150px;justify-content:center;transition:transform .12s,border-color .12s}
+#g-tray .choice:hover:not(:disabled){border-color:var(--accent);transform:translateY(-2px)}
+#g-tray .choice .name{font-family:var(--f-display);font-size:1.6rem;line-height:1.15;word-break:keep-all}
+#g-tray .choice .amt{font-size:.85rem;color:var(--muted)}
+#g-tray .choice .val{font-family:var(--f-num);font-weight:600;font-size:1.1rem;min-height:1.6em}
+#g-tray .choice.correct{border-color:var(--low);background:var(--good-bg)}
+#g-tray .choice.wrong{border-color:var(--high);background:var(--bad-bg)}
+#g-tray .choice:disabled{cursor:default}
+#g-tray .feedback{border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px}
+#g-tray .feedback.good{background:var(--good-bg)}
+#g-tray .feedback.bad{background:var(--bad-bg)}
+#g-tray .feedback strong{font-family:var(--f-display);font-weight:400;font-size:1.35rem}
+#g-tray .science{font-size:.95rem}
+#g-tray .science em{font-style:normal;font-weight:700}
+#g-tray .meter{background:var(--surface);border:1px solid var(--steel);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;position:sticky;top:env(safe-area-inset-top,0px);z-index:2}
+#g-tray .meter-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+#g-tray .meter-total{font-family:var(--f-num);font-weight:600;font-size:1.6rem}
+#g-tray .meter-track{position:relative;height:14px;background:var(--steel);border-radius:8px;overflow:hidden}
+#g-tray .meter-fill{height:100%;width:0;border-radius:8px;transition:width .35s ease,background-color .35s}
+#g-tray .meter-marks{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted)}
+#g-tray .tray{background:linear-gradient(145deg,var(--steel-2),var(--steel));border-radius:26px;padding:12px;display:grid;grid-template-columns:repeat(6,1fr);gap:10px;box-shadow:inset 0 2px 0 rgba(255,255,255,.35)}
+#g-tray .slot{background:var(--surface);border:2px solid transparent;border-radius:16px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;min-height:92px;min-width:0;box-shadow:inset 0 3px 6px rgba(0,0,0,.08)}
+#g-tray .slot.small{grid-column:span 2}
+#g-tray .slot.big{grid-column:span 3;min-height:120px}
+#g-tray .slot.active{border-color:var(--accent)}
+#g-tray .slot .lbl{font-size:.75rem;letter-spacing:.08em;color:var(--muted);font-weight:700}
+#g-tray .slot .pick{font-family:var(--f-display);font-size:1.15rem;line-height:1.15;word-break:keep-all}
+#g-tray .slot .pick.empty{color:var(--muted);font-family:var(--f-body);font-size:.85rem}
+#g-tray .slot .kg{font-family:var(--f-num);font-size:.8rem}
+#g-tray .options{display:flex;flex-direction:column;gap:8px}
+#g-tray .opt{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--surface);border:2px solid var(--steel);border-radius:12px;padding:12px 14px;text-align:left}
+#g-tray .opt.on{border-color:var(--accent);background:var(--good-bg)}
+#g-tray .opt .o-name{font-weight:700}
+#g-tray .opt .o-amt{font-size:.82rem;color:var(--muted)}
+#g-tray .tag{font-family:var(--f-num);font-size:.9rem;padding:3px 8px;border-radius:8px;white-space:nowrap}
+#g-tray .cert{background:var(--surface);border:2px dashed var(--accent);border-radius:20px;padding:22px 18px;display:flex;flex-direction:column;gap:14px;text-align:center}
+#g-tray .stars{font-size:2.4rem;letter-spacing:.15em;color:var(--mid);line-height:1}
+#g-tray .stars .off{color:var(--steel-2)}
+#g-tray .res-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#g-tray .res{background:var(--bg);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:2px}
+#g-tray .res .big{font-family:var(--f-num);font-weight:600;font-size:1.4rem}
+#g-tray .code{font-family:var(--f-num);font-weight:600;font-size:1.5rem;letter-spacing:.08em;background:var(--steel);border-radius:10px;padding:8px}
+#g-tray .foot{font-size:.8rem;color:var(--muted)}
+#g-tray .foot a{color:inherit}
+@media (prefers-reduced-motion: reduce){#g-tray *{transition:none!important}}
+#g-life{
+  --bg:#f6f0e4; --page:#fffaf0; --ink:#2f2a22; --muted:#6f6656; --line:#e3d8c3;
+  --accent:#2f7a55; --accent-ink:#ffffff; --note:#eaf3e6; --note-ink:#24533a; --warn:#b5462f; --gold:#c98f12;
+  --f-display:"Jua","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+}
+#g-life{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.7;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 32px}
+#g-life .book{max-width:540px;margin:0 auto;background:var(--page);border:1px solid var(--line);border-radius:22px;padding:14px 14px 22px;display:flex;flex-direction:column;gap:14px;box-shadow:0 10px 30px -18px rgba(60,40,10,.35)}
+#g-life .plate{border-radius:16px;overflow:hidden;border:3px solid var(--ink);line-height:0;max-width:100%}
+#g-life .plate svg{width:100%;height:auto;display:block}
+#g-life .text{padding:0 6px;display:flex;flex-direction:column;gap:12px}
+#g-life .chap{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.85rem;color:var(--muted);letter-spacing:.06em}
+#g-life .ending-tag{font-family:var(--f-display);font-size:.95rem;padding:2px 10px;border-radius:999px;border:2px solid currentColor;letter-spacing:0}
+#g-life .ending-tag.best{color:var(--accent)}
+#g-life .ending-tag.bad{color:var(--warn)}
+#g-life .ending-tag.mid{color:var(--gold)}
+#g-life h1,#g-life h2{font-family:var(--f-display);font-weight:400;margin:0;text-wrap:balance;line-height:1.2}
+#g-life h1{font-size:2.5rem}
+#g-life h2{font-size:1.75rem}
+#g-life p{margin:0}
+#g-life .note{background:var(--note);color:var(--note-ink);border-radius:14px;padding:12px 14px;font-size:.95rem;line-height:1.6}
+#g-life .note b{font-family:var(--f-display);font-weight:400;display:block;font-size:1.05rem;margin-bottom:2px}
+#g-life .choices{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+#g-life button{font:inherit;color:inherit;cursor:pointer}
+#g-life .choice{background:var(--accent);color:var(--accent-ink);border:0;border-radius:14px;padding:14px 16px;font-family:var(--f-display);font-size:1.2rem;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:10px;transition:transform .12s}
+#g-life .choice::after{content:"→";flex:none}
+#g-life .choice.alt{background:transparent;color:var(--ink);border:2px solid var(--line)}
+#g-life .choice:hover{transform:translateX(3px)}
+#g-life .choice:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+#g-life .dex{display:flex;flex-direction:column;gap:8px;border-top:2px dashed var(--line);padding-top:12px}
+#g-life .dex-row{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+#g-life .dex-item{border:2px solid var(--line);border-radius:10px;padding:6px 2px;text-align:center;font-size:.72rem;line-height:1.3;color:var(--muted);min-width:0;word-break:keep-all}
+#g-life .dex-item.got{border-color:var(--accent);color:var(--ink);background:var(--note)}
+#g-life .dex-item .n{font-family:var(--f-display);font-size:1rem;display:block}
+#g-life .foot{font-size:.78rem;color:var(--muted);text-align:center;max-width:540px;margin:14px auto 0}
+#g-life .fade{animation:l-fade .45s ease both}
+@keyframes l-fade{from{opacity:.25;transform:translateY(6px)}to{opacity:1;transform:none}}
+#g-life .bob{animation:l-bob 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes l-bob{50%{transform:translateY(-4px)}}
+#g-life .rise{animation:l-rise 3s ease-in infinite}
+@keyframes l-rise{from{transform:translateY(0);opacity:1}to{transform:translateY(-40px);opacity:0}}
+#g-life .flick{animation:l-flick .6s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:bottom center}
+@keyframes l-flick{to{transform:scaleY(1.12)}}
+@media (prefers-reduced-motion: reduce){#g-life .fade,#g-life .bob,#g-life .rise,#g-life .flick{animation:none}}
+#g-sort{
+  --bg:#e9ece6; --panel:#ffffff; --ink:#22281f; --muted:#5f6a5a; --line:#d2d8cc;
+  --food:#2f7a55; --food-ink:#ffffff; --trash:#d9cfb6; --trash-ink:#3a3324;
+  --good:#2f8a5c; --good-bg:#e1f2e7; --bad:#c2412d; --bad-bg:#fbe5df; --belt:#4b524d;
+  --f-display:"Black Han Sans","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+}
+#g-sort{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 32px}
+#g-sort .wrap{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+#g-sort h1,#g-sort h2,#g-sort h3{font-family:var(--f-display);font-weight:400;margin:0;text-wrap:balance;line-height:1.2}
+#g-sort h1{font-size:2.4rem}
+#g-sort h2{font-size:1.8rem}
+#g-sort h3{font-size:1.25rem}
+#g-sort p{margin:0}
+#g-sort .eyebrow{font-size:.8rem;letter-spacing:.1em;color:var(--muted);font-weight:700}
+#g-sort .muted{color:var(--muted)}
+#g-sort .num{font-variant-numeric:tabular-nums}
+#g-sort button{font:inherit;color:inherit;cursor:pointer}
+#g-sort button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+#g-sort .btn{background:var(--ink);color:var(--bg);border:0;border-radius:14px;padding:15px 18px;font-family:var(--f-display);font-size:1.3rem;width:100%}
+#g-sort .btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
+#g-sort .preview{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+#g-sort .preview div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px;min-width:0}
+#g-sort .preview svg{width:100%;height:auto;display:block}
+#g-sort .rule{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:center}
+#g-sort .rule svg{width:64px;height:auto}
+#g-sort .hud{display:flex;justify-content:space-between;align-items:center;gap:10px}
+#g-sort .bar{flex:1;height:8px;background:var(--line);border-radius:6px;overflow:hidden}
+#g-sort .bar i{display:block;height:100%;background:var(--ink);border-radius:6px;transition:width .3s}
+#g-sort .streak{font-family:var(--f-display);font-size:1rem;padding:2px 10px;border-radius:999px;background:var(--panel);border:1px solid var(--line);white-space:nowrap}
+#g-sort .stage{background:var(--panel);border:1px solid var(--line);border-radius:22px;overflow:hidden}
+#g-sort .item-area{padding:18px 18px 0;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+#g-sort .item-art{width:min(70%,260px);transition:transform .45s cubic-bezier(.5,-0.3,.6,1),opacity .45s}
+#g-sort .item-art svg{width:100%;height:auto;display:block}
+#g-sort .item-art.to-food{transform:translate(-60%,90%) scale(.3);opacity:0}
+#g-sort .item-art.to-trash{transform:translate(60%,90%) scale(.3);opacity:0}
+#g-sort .item-name{font-family:var(--f-display);font-size:1.8rem}
+#g-sort .belt{height:26px;margin-top:10px;background:repeating-linear-gradient(90deg,var(--belt) 0 22px,color-mix(in srgb,var(--belt) 75%,#fff) 22px 26px)}
+#g-sort .bins{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#g-sort .bin{border:0;border-radius:18px;padding:12px 8px 14px;display:flex;flex-direction:column;align-items:center;gap:4px;transition:transform .12s}
+#g-sort .bin svg{width:92px;height:auto}
+#g-sort .bin span{font-family:var(--f-display);font-size:1.3rem}
+#g-sort .bin small{font-size:.8rem;opacity:.85}
+#g-sort .bin.food{background:var(--food);color:var(--food-ink)}
+#g-sort .bin.trash{background:var(--trash);color:var(--trash-ink)}
+#g-sort .bin:hover:not(:disabled){transform:translateY(-3px)}
+#g-sort .bin:disabled{opacity:.45;cursor:default}
+#g-sort .feedback{border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+#g-sort .feedback.good{background:var(--good-bg)}
+#g-sort .feedback.bad{background:var(--bad-bg)}
+#g-sort .feedback h3{color:var(--good)}
+#g-sort .feedback.bad h3{color:var(--bad)}
+#g-sort .score{background:var(--panel);border:2px dashed var(--ink);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;text-align:center}
+#g-sort .big{font-family:var(--f-display);font-size:3.2rem;line-height:1}
+#g-sort .code{font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:1.4rem;letter-spacing:.08em;background:var(--bg);border-radius:10px;padding:8px}
+#g-sort .review{display:flex;flex-direction:column;gap:8px}
+#g-sort .rv{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px 12px;display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:center}
+#g-sort .rv svg{width:64px;height:auto}
+#g-sort .rv b{font-family:var(--f-display);font-weight:400;font-size:1.1rem}
+#g-sort .tag{display:inline-block;font-size:.78rem;padding:1px 8px;border-radius:999px;margin-left:4px;vertical-align:middle}
+#g-sort .tag.f{background:var(--food);color:var(--food-ink)}
+#g-sort .tag.t{background:var(--trash);color:var(--trash-ink)}
+#g-sort .foot{font-size:.78rem;color:var(--muted)}
+#g-sort .fade{animation:s-fade .35s ease both}
+@keyframes s-fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){#g-sort .fade{animation:none}
+#g-sort .item-art{transition:none}}
+#g-tray,#g-life,#g-sort{padding:14px 12px 24px!important;margin:0 auto!important}
+#g-tray .meter{top:calc(env(safe-area-inset-top,0px) + 66px)}
+
+/* ===== V-Lab 공용 테마에 맞춘 덮어쓰기 ===== */
+:root{--h-bg:#ffffff;--h-card:#ffffff;--h-ink:#111111;--h-muted:#6B7280;--h-line:#E6E8EC;--h-accent:#111111;--h-accent-ink:#ffffff;--h-soft:#F7F8FA;
+  --h-display:var(--font);--h-body:var(--font);--h-mono:var(--mono)}
+#g-tray,#g-life,#g-sort{--f-display:var(--font);--f-body:var(--font);--f-num:var(--mono);--bg:#ffffff;--ink:#111111;--muted:#6B7280;--line:#E6E8EC}
+#g-tray{--surface:#F7F8FA;--steel:#E6E8EC;--steel-2:#D1D5DB}
+#g-life{--page:#FFFBF2}
+#g-sort{--panel:#F7F8FA}
+html,body{background:#ffffff;color:#111111}
+body{font-family:var(--font);font-size:16px}
+#hub h1,#hub h2,.h-sheet-box h2,.h-fin-box h2,.h-btn,.h-back,.h-game .h-txt b,.h-rule b,.h-progress b,.h-tickets,.h-sum b,.h-done b,.h-stamp.on .h-ring::after,
+#g-tray h1,#g-tray h2,#g-life h1,#g-life h2,#g-sort h1,#g-sort h2,#g-tray .btn,#g-life .choice,#g-sort .btn,#g-life .ending-tag{font-family:var(--font);font-weight:700;letter-spacing:-.01em}
+#hub h1{font-size:30px} #hub h2{font-size:20px} .h-sheet-box h2,.h-fin-box h2{font-size:22px}
+#g-tray h1,#g-life h1,#g-sort h1{font-size:28px;line-height:1.2}
+.h-panel,.h-card,.h-game,.h-sheet-box,.h-fin-card,.h-bar,#g-life .book,#g-sort .stage,#g-tray .stage,#g-tray .choice,#g-life .plate{border-radius:12px;box-shadow:none}
+.h-btn,.h-ghost,.h-field input,.h-check,.h-lock,.h-done,.h-rule div,.h-game .h-thumb,.h-code,.h-sum,.h-back,.h-reset,#g-tray .btn,#g-tray .opt,#g-life .choice,#g-sort .btn{border-radius:8px}
+.h-btn,#g-tray .btn,#g-life .choice,#g-sort .btn{background:#111;color:#fff;font-size:17px}
+.h-btn:hover,#g-tray .btn:hover,#g-life .choice:hover,#g-sort .btn:hover{background:#333}
+.h-game:hover{transform:none;border-color:#111}
+.h-field input{background:#fff}
+.h-chip{border-radius:8px}
+/* 넓은 화면에서는 조금 더 넓게 (휴대폰 설계 540px → 680px) */
+#hub,.game,.h-bar{max-width:680px}
+#g-tray .wrap,#g-life .book{max-width:100%}
+/* 뷰어 안(iframe): 파일 자체 제목 숨김 (안내 문장과 '다음 사람' 버튼은 남김) */
+body.vlab-embed #hub > header .h-top .h-eyebrow,body.vlab-embed #hub > header h1{display:none}
+body.vlab-embed{padding-block:12px 32px}
+</style>
+</head>
+<body>
+<script>if(/embed/.test(location.hash))document.body.classList.add("vlab-embed");</script>
+
+<nav class="h-bar" id="h-bar" hidden>
+  <a class="h-back" href="#">← 스탬프 카드</a>
+  <span class="h-mini" id="h-mini"></span>
+</nav>
+
+<main id="hub">
+  <header style="display:flex;flex-direction:column;gap:8px">
+    <div class="h-top"><p class="h-eyebrow">녹색생활실천학교 · 현장 참여</p><button class="h-reset" id="h-reset" type="button">다음 사람 (처음부터)</button></div>
+    <h1>녹색 급식 챌린지</h1>
+    <p>미니게임 3개를 하고 스탬프를 모으세요. 게임을 2개 이상 완료하면 <b>친환경 상품 추첨권</b>을 받을 수 있어요. 선생님들도 참여할 수 있어요!</p>
+    
+  </header>
+
+  <section class="h-card" aria-label="내 스탬프 카드">
+    <p class="h-eyebrow">내 스탬프 카드</p>
+    <div class="h-stamps" id="h-stamps"></div>
+    <div class="h-progress"><b id="h-count">0 / 3 완료</b><span class="h-tickets" id="h-tix">추첨권 0장</span></div>
+  </section>
+
+  <section class="h-panel" aria-label="상품 추첨권 기준">
+    <h2>상품 추첨권 기준</h2>
+    <div class="h-rule" id="h-rule"></div>
+    <p class="h-msg">이미 휴대폰으로 참여한 학생은 명단과 겹치지 않는지 감독 학생이 확인해요.</p>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:10px" aria-label="미니게임">
+    <h2>미니게임</h2>
+    <div class="h-games" id="h-games"></div>
+  </section>
+
+  <section class="h-panel" aria-label="참여 완료">
+    <h2>참여 완료</h2>
+    <ol class="h-steps">
+      <li>게임을 2개 이상 완료하면 <b>참여 완료</b> 버튼이 나타나요.</li>
+      <li>버튼을 누르고 학번과 이름을 쓴 뒤 <b>제출하기</b>를 눌러요.</li>
+      <li>완료 화면을 <b>감독 학생</b>에게 보여주고 추첨권을 받아요.</li>
+      <li>감독 학생이 <b>다음 사람</b>을 누르면 처음부터 다시 시작돼요.</li>
+    </ol>
+    <div id="h-status"></div>
+    <p class="h-lock" id="h-lock">게임을 2개 더 완료하면 참여 완료 버튼이 나타나요.</p>
+    <button class="h-btn" id="h-open" type="button" hidden>참여 완료</button>
+  </section>
+
+  <p class="h-foot">현장 참여용 화면이에요. 참여 기록은 어디에도 저장되지 않아요. 한 사람이 끝나면 ‘다음 사람’을 눌러 주세요.</p>
+</main>
+
+<section class="game" id="g-tray" data-game="tray" hidden>
+<div class="wrap" id="app"></div>
+</section>
+<section class="game" id="g-life" data-game="life" hidden>
+<div class="book" id="book"></div>
+<p class="foot">그림과 이야기는 교육용으로 단순화했어요. 탄소중립 급식 캠페인 · 녹색환경도우미</p>
+</section>
+<section class="game" id="g-sort" data-game="sort" hidden>
+<div class="wrap" id="app"></div>
+</section>
+
+<div class="h-sheet" id="h-sheet" hidden role="dialog" aria-modal="true" aria-labelledby="h-sheet-title">
+  <div class="h-sheet-box">
+    <h2 id="h-sheet-title">참여 완료 제출</h2>
+    <div class="h-sum"><span id="h-sum-games">완료한 게임 0개</span><b id="h-sum-tix">추첨권 0장</b></div>
+    <label class="h-check" for="h-teacher"><input type="checkbox" id="h-teacher"> 선생님이에요 (학번 없이 이름만 써요)</label>
+    <div class="h-row" id="h-idrow">
+      <div class="h-field" id="h-sid-wrap"><label for="h-sid">학번 (예: 10305)</label><input id="h-sid" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="10305"></div>
+      <div class="h-field"><label for="h-name">이름</label><input id="h-name" autocomplete="off" maxlength="10" placeholder="홍길동"></div>
+    </div>
+    <p class="h-msg" id="h-msg"></p>
+    <button class="h-btn" id="h-submit" type="button" aria-disabled="true">제출하기</button>
+    <button class="h-ghost" id="h-cancel" type="button">취소</button>
+    <p class="h-msg">제출하면 완료 화면이 나와요. 감독 학생에게 보여주세요.</p>
+  </div>
+</div>
+
+<div class="h-fin" id="h-fin" hidden role="dialog" aria-modal="true" aria-labelledby="h-fin-title">
+  <div class="h-fin-box">
+    <div class="h-fin-ok" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+    <h2 id="h-fin-title">참여 완료!</h2>
+    <div class="h-fin-card">
+      <div class="h-fin-row"><span id="h-fin-idlabel">학번</span><b id="h-fin-sid"></b></div>
+      <div class="h-fin-row"><span>이름</span><b id="h-fin-name"></b></div>
+      <div class="h-fin-row"><span>완료한 게임</span><b id="h-fin-games"></b></div>
+      <div class="h-fin-row"><span>시각 · 확인 코드</span><b id="h-fin-at"></b></div>
+    </div>
+    <p class="h-eyebrow">받을 상품 추첨권</p>
+    <p class="h-fin-tix" id="h-fin-tix">1장</p>
+    <p class="h-fin-note">감독 학생에게 이 화면을 보여주고 추첨권을 받으세요.</p>
+    <button class="h-btn" id="h-next" type="button">확인 완료 · 다음 사람 시작</button>
+    <button class="h-ghost" id="h-back" type="button">학번·이름 고치기</button>
+  </div>
+</div>
+
+<div class="h-toast" id="h-toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===== 설정 (현장용: 구글폼 연결 없음, 저장 없음) ===== */
+// 완료한 게임 수 → 상품 추첨권 수
+const RULE={0:0,1:0,2:1,3:2};
+const MIN_GAMES=2;
+
+const ICON={
+ tray:`<svg viewBox="0 0 60 60" aria-hidden="true"><rect x="4" y="12" width="52" height="38" rx="9" fill="#c9d1d0" stroke="#33302a" stroke-width="2.5"/><rect x="9" y="17" width="13" height="12" rx="3" fill="#2f8a5c"/><rect x="24" y="17" width="13" height="12" rx="3" fill="#c98a14"/><rect x="39" y="17" width="12" height="12" rx="3" fill="#c2412d"/><rect x="9" y="32" width="20" height="13" rx="4" fill="#fffdf4"/><rect x="31" y="32" width="20" height="13" rx="4" fill="#e6c27a"/></svg>`,
+ life:`<svg viewBox="0 0 60 60" aria-hidden="true"><ellipse cx="30" cy="31" rx="17" ry="22" fill="#fffdf4" stroke="#33302a" stroke-width="2.5"/><circle cx="24" cy="27" r="2.4" fill="#33302a"/><circle cx="36" cy="27" r="2.4" fill="#33302a"/><path d="M24 36 q6 6 12 0" stroke="#33302a" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="19" cy="34" r="3" fill="#f7b3a6"/><circle cx="41" cy="34" r="3" fill="#f7b3a6"/></svg>`,
+ sort:`<svg viewBox="0 0 60 60" aria-hidden="true"><path d="M12 20 h36 l-4 32 h-28z" fill="#2f7a55" stroke="#33302a" stroke-width="2.5"/><rect x="8" y="13" width="44" height="8" rx="3" fill="#24603f" stroke="#33302a" stroke-width="2.5"/><path d="M30 4 q-8 4 -6 10 q6 -1 6 -10z M30 4 q8 4 6 10 q-6 -1 -6 -10z" fill="#fbf6ec" stroke="#33302a" stroke-width="2"/></svg>`
+};
+const GAMES=[
+ {k:"tray",n:"식판 위의 탄소",d:"탄소 비교 퀴즈 + 저탄소 식판 짜기 · 3분",how:"퀴즈 6개 이상 + 식판 별 2개 이상이면 완료"},
+ {k:"life",n:"잔반의 일생",d:"밥알이의 운명을 고르는 스토리 · 엔딩 3개 모으기",how:"엔딩 3개 모으면 완료"},
+ {k:"sort",n:"이건 어디에 버릴까?",d:"헷갈리는 쓰레기 12개 분리배출 · 2분",how:"12개 중 9개 이상 맞히면 완료"}
+];
+
+/* ===== 스탬프 상태 ===== */
+let done=new Set();
+const persist=()=>{};
+const $=id=>document.getElementById(id);
+
+window.GREEN={done(k){
+  if(done.has(k))return;
+  done.add(k);persist();renderHub();
+  toast(`스탬프 획득! ${done.size} / 3`);
+}};
+let tt;function toast(t){const el=$("h-toast");el.textContent=t;el.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>el.classList.remove("show"),2600)}
+
+function hash(str){let h=2166136261;for(const c of str){h^=c.codePointAt(0);h=Math.imul(h,16777619)>>>0}
+  const A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let o="";for(let i=0;i<4;i++){o+=A[h%32];h=Math.floor(h/32)}return o}
+const order=()=>GAMES.filter(g=>done.has(g.k));
+
+function renderHub(){
+  const n=done.size,tix=RULE[n];
+  $("h-stamps").innerHTML=GAMES.map(g=>`<div class="h-stamp ${done.has(g.k)?"on":""}"><div class="h-ring">${ICON[g.k]}</div><span>${g.n}</span></div>`).join("");
+  $("h-count").textContent=`${n} / 3 완료`;
+  $("h-tix").textContent=`추첨권 ${tix}장`;
+  $("h-rule").innerHTML=[1,2,3].map(c=>`<div class="${n===c?"now":""}"><small>게임 ${c}개</small><b>${RULE[c]?`추첨권 ${RULE[c]}장`:"스탬프만"}</b></div>`).join("");
+  $("h-games").innerHTML=GAMES.map(g=>`<a class="h-game" href="#${g.k}"><span class="h-thumb">${ICON[g.k]}</span>
+    <span class="h-txt"><b>${g.n}</b><small>${g.d}</small><small>${g.how}</small></span>
+    <span class="h-chip ${done.has(g.k)?"on":""}">${done.has(g.k)?"완료":"도전"}</span></a>`).join("");
+  $("h-mini").innerHTML=GAMES.map(g=>`<i class="${done.has(g.k)?"on":""}" title="${g.n}"></i>`).join("")+` ${n}/3`;
+  updateSubmit();
+}
+
+/* ===== 참여 완료 ===== */
+let sub=null;
+
+function renderStatus(){
+  const n=done.size, open=$("h-open"), lock=$("h-lock");
+  const ready=n>=MIN_GAMES;
+  lock.hidden=ready; lock.textContent=`게임을 ${Math.max(0,MIN_GAMES-n)}개 더 완료하면 참여 완료 버튼이 나타나요.`;
+  open.hidden=!ready;
+}
+
+function updateSubmit(){
+  renderStatus();
+  const teacher=$("h-teacher").checked;
+  $("h-sid-wrap").hidden=teacher; $("h-idrow").classList.toggle("one",teacher);
+  const sid=$("h-sid").value.trim(), name=$("h-name").value.trim(), n=done.size, tix=RULE[n];
+  $("h-sum-games").textContent=`완료한 게임 ${n}개`; $("h-sum-tix").textContent=`상품 추첨권 ${tix}장`;
+  const btn=$("h-submit"),msg=$("h-msg");
+  let problem="";
+  if(n<MIN_GAMES) problem=`게임을 ${MIN_GAMES-n}개 더 완료해야 제출할 수 있어요.`;
+  else if(!teacher&&!/^\d{4,6}$/.test(sid)) problem="학번을 숫자로 입력하세요. 예: 1학년 3반 5번 → 10305";
+  else if(name.length<2) problem="이름을 입력하세요.";
+  if(problem){btn.setAttribute("aria-disabled","true");msg.textContent=problem;return false}
+  btn.removeAttribute("aria-disabled");
+  msg.textContent=`${teacher?"선생님":sid} ${name} · 상품 추첨권 ${tix}장`;
+  return true;
+}
+function openSheet(){ $("h-sheet").hidden=false; updateSubmit(); setTimeout(()=>($("h-teacher").checked?$("h-name"):$("h-sid")).focus(),50); }
+function closeSheet(){ $("h-sheet").hidden=true; $("h-open").focus(); }
+$("h-open").addEventListener("click",openSheet);
+$("h-cancel").addEventListener("click",closeSheet);
+$("h-sheet").addEventListener("click",e=>{if(e.target.id==="h-sheet")closeSheet()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("h-sheet").hidden)closeSheet()});
+["h-sid","h-name"].forEach(id=>$(id).addEventListener("input",updateSubmit));
+$("h-teacher").addEventListener("change",updateSubmit);
+$("h-submit").addEventListener("click",()=>{
+  if(!updateSubmit())return;
+  const d=new Date(), tch=$("h-teacher").checked, sid=$("h-sid").value.trim(), name=$("h-name").value.trim();
+  const code=`GRN${done.size}-${hash((tch?"0":sid)+"|"+name+"|"+order().map(g=>g.k).join(""))}`;
+  $("h-fin-idlabel").textContent=tch?"구분":"학번";
+  $("h-fin-sid").textContent=tch?"선생님":sid;
+  $("h-fin-name").textContent=tch?name+" 선생님":name;
+  $("h-fin-games").textContent=order().map(g=>g.n).join(", ");
+  $("h-fin-at").textContent=`${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")} · ${code}`;
+  $("h-fin-tix").textContent=`${RULE[done.size]}장`;
+  $("h-sheet").hidden=true; $("h-fin").hidden=false; $("h-next").focus();
+});
+$("h-back").addEventListener("click",()=>{ $("h-fin").hidden=true; openSheet(); });
+
+/* ===== 다음 사람: 모든 게임과 입력을 처음 상태로 ===== */
+function restart(){
+  const base=location.href.split("#")[0];
+  if(document.body.classList.contains("vlab-embed")){ history.replaceState(null,"",base+"#embed"); location.reload(); }   // V-Lab 뷰어 안: #embed 유지
+  else location.replace(base);
+}
+$("h-next").addEventListener("click",restart);
+let armT;
+$("h-reset").addEventListener("click",()=>{
+  const b=$("h-reset");
+  if(done.size===0){restart();return}
+  if(b.classList.contains("arm")){restart();return}
+  b.classList.add("arm"); b.textContent="한 번 더 누르면 초기화";
+  clearTimeout(armT); armT=setTimeout(()=>{b.classList.remove("arm");b.textContent="다음 사람 (처음부터)"},3000);
+});
+
+/* ===== 화면 전환 ===== */
+function route(){
+  const k=location.hash.slice(1);
+  const inGame=!!ICON[k];
+  $("hub").hidden=inGame;$("h-bar").hidden=!inGame;
+  document.querySelectorAll(".game").forEach(s=>s.hidden=s.dataset.game!==k);
+  window.scrollTo(0,0);
+}
+window.addEventListener("hashchange",route);
+renderHub();route();
+</script>
+<script>
+(function(){
+const ROOT=document.getElementById('g-tray');
+const $id=x=>ROOT.querySelector('#'+CSS.escape(x));
+const TRAY_QUIZ=6, TRAY_STARS=2;
+
+// 1인분 기준 대략적인 온실가스 배출량(kg CO2e). Poore & Nemecek(2018) 세계 평균값(kg당)을 1인분 무게로 환산한 추정치.
+const F = {
+  bulgogi:{n:"소불고기",a:"소고기 80g",v:8.0},
+  jeyuk:{n:"제육볶음",a:"돼지고기 80g",v:1.0},
+  dakgalbi:{n:"닭갈비",a:"닭고기 80g",v:0.8},
+  tofu:{n:"두부조림",a:"두부 100g",v:0.3},
+  shrimp:{n:"새우튀김",a:"양식 새우 80g",v:2.1},
+  egg:{n:"계란말이",a:"달걀 60g",v:0.3},
+  cheese:{n:"치즈 토핑",a:"치즈 20g",v:0.5},
+  cheesetteok:{n:"치즈떡볶이",a:"떡 + 치즈 20g",v:0.7},
+  rice:{n:"쌀밥",a:"쌀 90g",v:0.4},
+  barley:{n:"보리밥",a:"쌀 45g + 보리 45g",v:0.25},
+  potatorice:{n:"감자밥",a:"쌀 60g + 감자 80g",v:0.31},
+  potato:{n:"찐감자",a:"감자 150g",v:0.07},
+  milk:{n:"우유",a:"200mL",v:0.63},
+  soy:{n:"두유",a:"200mL",v:0.2},
+  apple:{n:"사과",a:"150g",v:0.06},
+  choco:{n:"초코바",a:"초콜릿 30g",v:1.4},
+  beefsoup:{n:"소고기무국",a:"소고기 30g",v:3.0},
+  doenjang:{n:"된장국",a:"두부·애호박",v:0.1},
+  kongnamul:{n:"콩나물국",a:"콩나물 60g",v:0.05},
+  spinach:{n:"시금치나물",a:"70g",v:0.04},
+  kimchi:{n:"배추김치",a:"50g",v:0.03}
+};
+
+const QUIZ = [
+  {a:"bulgogi",b:"jeyuk",why:"소는 <em>되새김질하는 반추동물</em>이에요. 위 속 미생물이 풀을 분해하면서 메탄을 만들고, 소가 트림으로 내보내요. 메탄은 이산화탄소보다 온실효과가 훨씬 강해요."},
+  {a:"jeyuk",b:"tofu",why:"먹이가 동물을 거칠 때마다 에너지 대부분이 호흡으로 사라져요(<em>생태 피라미드</em>). 게다가 콩은 뿌리혹박테리아가 질소를 고정해 비료도 적게 필요해요."},
+  {a:"milk",b:"soy",why:"우유를 만드는 젖소도 <em>반추동물</em>이라 메탄을 내보내요. 같은 양이면 두유가 약 3분의 1 수준이에요."},
+  {a:"shrimp",b:"dakgalbi",why:"반전 문제! 양식 새우는 <em>맹그로브 숲을 베어 양식장을 만드는</em> 경우가 많아요. 맹그로브는 탄소를 많이 저장하는 숲이라, 개간될 때 그 탄소가 한꺼번에 나와요."},
+  {a:"rice",b:"potato",why:"벼를 키우는 논은 물에 잠겨 있어 흙 속에 산소가 부족해요. 이런 환경에서 <em>메탄생성균(고세균)</em>이 메탄을 만들어요. 그래서 쌀은 다른 곡물보다 배출량이 높은 편이에요."},
+  {a:"choco",b:"apple",why:"카카오 농장을 만들기 위해 <em>열대우림을 개간</em>하는 일이 많아요. 숲에 저장돼 있던 탄소가 배출되기 때문에 초콜릿의 탄소발자국이 커요."},
+  {a:"beefsoup",b:"doenjang",why:"국 한 그릇에 든 소고기 30g만으로도 된장국 수십 그릇과 맞먹어요. 국물 맛을 내는 재료 선택만 바꿔도 차이가 커요."},
+  {a:"cheese",b:"egg",why:"치즈 1kg을 만들려면 우유가 약 10L 필요해요. 그만큼 <em>젖소의 메탄</em>이 함께 들어가서, 적은 양이라도 배출량이 달걀보다 높아요."}
+];
+
+const SLOTS = [
+  {k:"side",lbl:"반찬",cls:"small",opts:["cheesetteok","egg","spinach","kimchi"]},
+  {k:"main",lbl:"주찬",cls:"small",opts:["bulgogi","shrimp","jeyuk","dakgalbi","tofu"]},
+  {k:"dessert",lbl:"후식",cls:"small",opts:["choco","milk","soy","apple"]},
+  {k:"rice",lbl:"밥",cls:"big",opts:["rice","potatorice","barley"]},
+  {k:"soup",lbl:"국",cls:"big",opts:["beefsoup","doenjang","kongnamul"]}
+];
+const MAX_METER = 6; // kg, 계량기 눈금 끝
+
+const S = {screen:"intro", order:[], qi:0, answers:[], picked:null, tray:{}, active:"main", code:null, time:null};
+const app = $id("app");
+const fmt = v => v < 0.1 ? v.toFixed(2) : v.toFixed(1);
+const colorFor = v => v >= 2 ? "var(--high)" : v >= 0.6 ? "var(--mid)" : "var(--low)";
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function start(){
+  S.order = shuffle(QUIZ).map(q => Math.random()<.5 ? q : {...q,a:q.b,b:q.a});
+  S.qi=0;S.answers=[];S.picked=null;S.tray={};S.active="main";S.code=null;
+  S.screen="quiz";render();
+}
+
+function renderIntro(){
+  const sample=["bulgogi","jeyuk","dakgalbi","tofu"];
+  app.innerHTML=`
+  <div class="hero">
+    <p class="eyebrow">탄소중립 급식 캠페인</p>
+    <h1>식판 위의 탄소</h1>
+    <p>오늘 점심 한 끼에서 온실가스가 얼마나 나왔을까요? 퀴즈 8문제 중 <b>${TRAY_QUIZ}개 이상</b> 맞히고 식판을 <b>별 ${TRAY_STARS}개 이상</b>으로 완성하면 스탬프를 받아요. 약 3분 걸려요.</p>
+  </div>
+  <div class="stages">
+    <div class="stage"><b>1단계 · 탄소 비교</b><span>두 메뉴 중 탄소가 더 적은 쪽을 골라요. 8문제.</span></div>
+    <div class="stage"><b>2단계 · 식판 짜기</b><span>다섯 칸을 채워 저탄소 식판을 완성해요.</span></div>
+  </div>
+  <div class="scale" aria-label="1인분 주찬 탄소 미리보기">
+    <p class="eyebrow">주찬 1인분 미리보기 · <span class="unit">kg CO₂e</span></p>
+    ${sample.map(k=>`<div class="scale-row"><span>${F[k].n}</span><div class="track"><div class="fill" style="width:${Math.max(2,F[k].v/8*100)}%;background:${colorFor(F[k].v)}"></div></div><span class="num">${fmt(F[k].v)}</span></div>`).join("")}
+  </div>
+  <button class="btn" id="go">시작하기</button>
+  ${footer()}`;
+  $id("go").onclick=start;
+}
+
+function renderQuiz(){
+  const q=S.order[S.qi], A=F[q.a], B=F[q.b], lowKey=A.v<B.v?q.a:q.b, done=S.picked!==null;
+  const dots=S.order.map((_,i)=>{const r=S.answers[i];return `<span class="dot ${r===true?"ok":r===false?"no":i===S.qi?"now":""}"></span>`}).join("");
+  const card=(key,f)=>{
+    let cls="";
+    if(done){ if(key===lowKey) cls="correct"; else if(key===S.picked) cls="wrong"; }
+    return `<button class="choice ${cls}" data-k="${key}" ${done?"disabled":""}>
+      <span class="name">${f.n}</span><span class="amt">${f.a}</span>
+      <span class="val">${done?fmt(f.v)+" kg":""}</span></button>`;
+  };
+  const right = done && S.picked===lowKey;
+  const hi = Math.max(A.v,B.v), lo=Math.min(A.v,B.v);
+  app.innerHTML=`
+  <div class="topbar"><p class="eyebrow">1단계 · 탄소 비교 <span class="num">${S.qi+1}/${S.order.length}</span></p><div class="dots" aria-hidden="true">${dots}</div></div>
+  <h2>탄소가 더 적은 쪽은?</h2>
+  <div class="choices">${card(q.a,A)}${card(q.b,B)}</div>
+  ${done?`<div class="feedback ${right?"good":"bad"}" role="status">
+    <strong>${right?"정답이에요":"아쉬워요"} · 약 ${(hi/lo).toFixed(hi/lo<10?1:0)}배 차이</strong>
+    <p class="science">${q.why}</p></div>
+    <button class="btn" id="next">${S.qi+1<S.order.length?"다음 문제":"2단계로"}</button>`:`<p class="muted">1인분 기준이에요. 탭해서 고르세요.</p>`}`;
+  app.querySelectorAll(".choice").forEach(b=>b.onclick=()=>{
+    S.picked=b.dataset.k; S.answers[S.qi]=(S.picked===lowKey); render();
+  });
+  const n=$id("next");
+  if(n){n.onclick=()=>{S.qi++;S.picked=null;if(S.qi>=S.order.length){S.screen="tray"};render();window.scrollTo(0,0)};n.focus({preventScroll:true})}
+}
+
+function trayTotal(){return Object.values(S.tray).reduce((s,k)=>s+F[k].v,0)}
+
+function renderTray(){
+  const total=trayTotal(), filled=Object.keys(S.tray).length, slot=SLOTS.find(s=>s.k===S.active);
+  const pct=Math.min(100,total/MAX_METER*100);
+  app.innerHTML=`
+  <p class="eyebrow">2단계 · 식판 짜기</p>
+  <h2>탄소 1.5kg 이하로 식판을 채워 보세요</h2>
+  <div class="meter" aria-live="polite">
+    <div class="meter-head"><span class="eyebrow">탄소 계량기</span><span class="meter-total">${total.toFixed(2)} <small class="muted" style="font-size:.8rem">kg CO₂e</small></span></div>
+    <div class="meter-track"><div class="meter-fill" style="width:${pct}%;background:${total<=1.5?"var(--low)":total<=3?"var(--mid)":"var(--high)"}"></div></div>
+    <div class="meter-marks num"><span>0</span><span>1.5 목표</span><span>3</span><span>6+</span></div>
+  </div>
+  <div class="tray" role="group" aria-label="식판">
+    ${SLOTS.map(s=>{const k=S.tray[s.k];return `<button class="slot ${s.cls} ${S.active===s.k?"active":""}" data-s="${s.k}">
+      <span class="lbl">${s.lbl}</span>
+      ${k?`<span class="pick">${F[k].n}</span><span class="kg" style="color:${colorFor(F[k].v)}">${fmt(F[k].v)} kg</span>`:`<span class="pick empty">탭해서 고르기</span>`}
+    </button>`}).join("")}
+  </div>
+  <p class="eyebrow">${slot.lbl} 고르기</p>
+  <div class="options">
+    ${slot.opts.map(k=>`<button class="opt ${S.tray[slot.k]===k?"on":""}" data-o="${k}">
+      <span><span class="o-name">${F[k].n}</span><br><span class="o-amt">${F[k].a}</span></span>
+      <span class="tag" style="color:${colorFor(F[k].v)};border:1px solid currentColor">${fmt(F[k].v)} kg</span></button>`).join("")}
+  </div>
+  <button class="btn" id="done" ${filled<SLOTS.length?"disabled":""}>${filled<SLOTS.length?`${SLOTS.length-filled}칸 남았어요`:"식판 완성"}</button>`;
+  app.querySelectorAll(".slot").forEach(b=>b.onclick=()=>{S.active=b.dataset.s;render()});
+  app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    S.tray[S.active]=b.dataset.o;
+    const next=SLOTS.find(s=>!S.tray[s.k]); if(next) S.active=next.k;
+    render();
+  });
+  $id("done").onclick=()=>{
+    const t=new Date();
+    S.time=`${String(t.getHours()).padStart(2,"0")}:${String(t.getMinutes()).padStart(2,"0")}`;
+    const L="ABCDEFGHJKLMNPQRSTUVWXYZ";
+    S.code=`GREEN-${S.answers.filter(Boolean).length}${starsOf(trayTotal())}${L[Math.floor(Math.random()*L.length)]}${L[Math.floor(Math.random()*L.length)]}`;
+    S.screen="result";render();window.scrollTo(0,0);
+  };
+}
+
+function starsOf(t){return t<=1.5?3:t<=3?2:1}
+
+function renderResult(){
+  const PASS=S.answers.filter(Boolean).length>=TRAY_QUIZ&&starsOf(trayTotal())>=TRAY_STARS;
+  if(PASS)window.GREEN&&GREEN.done('tray');
+  const total=trayTotal(), st=starsOf(total), quiz=S.answers.filter(Boolean).length;
+  const worst=Object.values(S.tray).reduce((m,k)=>F[k].v>F[m].v?k:m,Object.values(S.tray)[0]);
+  const msg = st===3?"저탄소 식판 완성! 맛과 영양도 챙긴 똑똑한 선택이에요."
+    : st===2?`조금만 바꾸면 3별이에요. ${F[worst].n}을(를) 바꿔 보면 어떨까요?`
+    : `${F[worst].n} 한 가지가 식판 탄소의 대부분을 차지해요. 매일 끊기보다 가끔 바꾸는 것부터 시작해요.`;
+  app.innerHTML=`
+  <div class="cert">
+    <p class="eyebrow">탄소중립 급식 캠페인 완료</p>
+    <div class="stars" aria-label="별 ${st}개">${"★".repeat(st)}<span class="off">${"★".repeat(3-st)}</span></div>
+    <h2>${st===3?"지구를 지킨 식판":st===2?"거의 다 왔어요":"다시 도전해 볼까요?"}</h2>
+    <p>${msg}</p>
+    <div class="res-grid">
+      <div class="res"><span class="eyebrow">퀴즈 정답</span><span class="big">${quiz}/${S.order.length}</span></div>
+      <div class="res"><span class="eyebrow">내 식판</span><span class="big">${total.toFixed(2)}kg</span></div>
+    </div>
+    <p class="muted" style="font-size:.9rem">휘발유 승용차로 약 <b class="num">${Math.round(total/0.17)}km</b> 달릴 때 나오는 양이에요.</p>
+    <p class="eyebrow" style="color:${PASS?'var(--low)':'var(--high)'}">${PASS?'스탬프 획득! 위의 ‘스탬프 카드’로 돌아가세요':`아직 스탬프 전이에요 · 기준: 퀴즈 ${TRAY_QUIZ}개 이상 + 별 ${TRAY_STARS}개 이상`}</p>
+    <div style="display:none"><p>
+    <p class="code" style="margin-top:6px">${S.code}</p>
+    <p class="muted num" style="font-size:.85rem;margin-top:4px">완료 시각 ${S.time}</p></div>
+  </div>
+  <button class="btn ghost" id="again">처음부터 다시</button>
+  ${footer()}`;
+  $id("again").onclick=()=>{S.screen="intro";render();window.scrollTo(0,0)};
+}
+
+function footer(){
+  return `<p class="foot">수치는 1인분 무게를 가정해 세계 평균값(Poore &amp; Nemecek, 2018, <a href="https://ourworldindata.org/grapher/ghg-per-kg-poore" target="_blank" rel="noopener">Our World in Data</a>)으로 계산한 추정치예요. 생산 방식과 원산지에 따라 실제 값은 달라질 수 있어요.</p>`;
+}
+
+function render(){({intro:renderIntro,quiz:renderQuiz,tray:renderTray,result:renderResult})[S.screen]()}
+render();
+
+})();
+(function(){
+const ROOT=document.getElementById('g-life');
+const $id=x=>ROOT.querySelector('#'+CSS.escape(x));
+const GOAL=3;
+
+/* ---------- 그림 재료 ---------- */
+const INK="#3a3328";
+function bab(x,y,s=1,mood="happy"){
+  const eye = mood==="sleepy"
+    ? `<path d="M-11 -4 h6 M5 -4 h6" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/>`
+    : `<circle cx="-8" cy="-4" r="2.8" fill="${INK}"/><circle cx="8" cy="-4" r="2.8" fill="${INK}"/>`;
+  const m = {
+    happy:`<path d="M-7 6 Q0 14 7 6" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/>`,
+    sad:`<path d="M-7 11 Q0 4 7 11" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/><path d="M11 0 q3 6 0 8 q-3 -2 0 -8z" fill="#7cc4ec"/>`,
+    worried:`<path d="M-8 9 Q-4 5 0 9 Q4 13 8 9" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/>`,
+    wow:`<ellipse cx="0" cy="8" rx="4" ry="5" fill="${INK}"/>`,
+    sleepy:`<path d="M-4 8 h8" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/>`
+  }[mood];
+  return `<g transform="translate(${x} ${y}) scale(${s})"><g class="bob">
+    <ellipse rx="20" ry="27" fill="#fffdf4" stroke="${INK}" stroke-width="2.5"/>
+    <ellipse cx="-7" cy="-15" rx="5" ry="3" fill="#ffffff"/>
+    ${eye}<circle cx="-13" cy="5" r="3.5" fill="#f7b3a6"/><circle cx="13" cy="5" r="3.5" fill="#f7b3a6"/>${m}</g></g>`;
+}
+const svg=(label,body)=>`<svg viewBox="0 0 400 260" role="img" aria-label="${label}" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
+const bubble=(x,y,w,txt,tail="left")=>`<g><rect x="${x}" y="${y}" width="${w}" height="34" rx="17" fill="#ffffff" stroke="${INK}" stroke-width="2"/>
+  <path d="${tail==="left"?`M${x+22} ${y+33} l-8 12 l18 -12z`:`M${x+w-30} ${y+33} l14 12 l-4 -12z`}" fill="#ffffff" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>
+  <rect x="${x+12}" y="${y+28}" width="${w-24}" height="5" fill="#ffffff"/>
+  <text x="${x+w/2}" y="${y+23}" text-anchor="middle" font-family="Jua, sans-serif" font-size="16" fill="${INK}">${txt}</text></g>`;
+const sparkle=(x,y,s=1,c="#ffd34d")=>`<path transform="translate(${x} ${y}) scale(${s})" d="M0 -10 L3 -3 L10 0 L3 3 L0 10 L-3 3 L-10 0 L-3 -3Z" fill="${c}"/>`;
+const tray=(x,y,w,h)=>`<g><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="18" fill="#c9d1d0" stroke="${INK}" stroke-width="2.5"/>
+  <rect x="${x+10}" y="${y+10}" width="${(w-40)/3}" height="${h*.38}" rx="8" fill="#e6ebea"/>
+  <rect x="${x+20+(w-40)/3}" y="${y+10}" width="${(w-40)/3}" height="${h*.38}" rx="8" fill="#e6ebea"/>
+  <rect x="${x+30+2*(w-40)/3}" y="${y+10}" width="${(w-40)/3}" height="${h*.38}" rx="8" fill="#e6ebea"/>
+  <rect x="${x+10}" y="${y+20+h*.38}" width="${(w-30)/2}" height="${h*.62-30}" rx="10" fill="#e6ebea"/>
+  <rect x="${x+20+(w-30)/2}" y="${y+20+h*.38}" width="${(w-30)/2}" height="${h*.62-30}" rx="10" fill="#e6ebea"/></g>`;
+const ch4=(x,y,d=0)=>`<g class="rise" style="animation-delay:${d}s"><circle cx="${x}" cy="${y}" r="13" fill="#ffffff" fill-opacity=".7" stroke="#5f7d86" stroke-width="1.5"/><text x="${x}" y="${y+4}" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#2f4950">CH₄</text></g>`;
+const truck=(dirty)=>`<g>
+  <rect x="70" y="150" width="190" height="70" rx="8" fill="#3d8b5a" stroke="${INK}" stroke-width="2.5"/>
+  <text x="165" y="192" text-anchor="middle" font-family="Jua, sans-serif" font-size="20" fill="#ffffff">음식물 수거</text>
+  <path d="M260 165 h50 l28 28 v27 h-78z" fill="#e9e2cf" stroke="${INK}" stroke-width="2.5"/>
+  <rect x="272" y="173" width="32" height="20" rx="3" fill="#a9d4e6" stroke="${INK}" stroke-width="2"/>
+  <circle cx="115" cy="222" r="17" fill="#2b2b2b"/><circle cx="115" cy="222" r="7" fill="#9aa"/>
+  <circle cx="300" cy="222" r="17" fill="#2b2b2b"/><circle cx="300" cy="222" r="7" fill="#9aa"/>
+  ${bab(110,140,.7,dirty?"worried":"sleepy")}
+  ${dirty?`<path d="M140 128 q12 -14 26 -4 q10 10 22 -2 l2 20 q-14 8 -26 0 q-12 -8 -22 2z" fill="#dfeff7" fill-opacity=".85" stroke="#7ba3b8" stroke-width="2"/><line x1="200" y1="150" x2="222" y2="118" stroke="#c9a46a" stroke-width="4" stroke-linecap="round"/>`:""}</g>`;
+
+/* ---------- 장면 그림 ---------- */
+const ART={
+title:()=>svg("밥알이가 손을 흔드는 표지",`<rect width="400" height="260" fill="#fff1d6"/>
+  <circle cx="200" cy="140" r="95" fill="#ffe4a8"/>
+  ${[[60,60],[340,70],[80,200],[330,200],[120,40]].map(([x,y],i)=>sparkle(x,y,1+(i%2)*.4)).join("")}
+  <path d="M40 260 q20 -60 10 -110 M55 175 q-18 -6 -24 -22 M48 200 q18 -6 24 -22" stroke="#5a9a4a" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <ellipse cx="62" cy="150" rx="6" ry="10" fill="#e9c55b"/><ellipse cx="30" cy="150" rx="6" ry="10" fill="#e9c55b"/>
+  ${bab(200,140,2.2,"happy")}
+  <path d="M244 112 q26 -30 40 -8" stroke="${INK}" stroke-width="4" fill="none" stroke-linecap="round"/>`),
+paddy:()=>svg("물이 찬 논에서 자라는 벼와 메탄 거품",`<rect width="400" height="260" fill="#cdeaf3"/>
+  <circle cx="340" cy="50" r="26" fill="#ffd25e"/>
+  <path d="M0 135 Q100 90 200 132 T400 120 V260 H0Z" fill="#9fcf8f"/>
+  <rect y="165" width="400" height="95" fill="#7db6c4"/>
+  <path d="M0 175 q20 -5 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" stroke="#a8d3dd" stroke-width="3" fill="none"/>
+  ${Array.from({length:13},(_,i)=>{const x=14+i*31;return `<path d="M${x} 205 Q${x+2} 160 ${x+12} 138" stroke="#4f9a4a" stroke-width="3" fill="none"/><ellipse cx="${x+14}" cy="140" rx="4" ry="7" fill="#e9c55b" transform="rotate(30 ${x+14} 140)"/><ellipse cx="${x+8}" cy="147" rx="4" ry="7" fill="#e9c55b" transform="rotate(20 ${x+8} 147)"/>`}).join("")}
+  ${ch4(70,232,0)}${ch4(330,238,1.2)}${ch4(260,228,2.1)}
+  ${bab(190,200,1.3,"happy")}`),
+harvest:()=>svg("수확된 쌀이 트럭을 타고 학교로 가는 모습",`<rect width="400" height="260" fill="#f8e2b6"/>
+  <circle cx="70" cy="95" r="34" fill="#f4a53c"/>
+  <rect y="130" width="400" height="70" fill="#e8c063"/>
+  ${Array.from({length:10},(_,i)=>`<path d="M${i*42} 200 L${i*42+30} 130" stroke="#d4a845" stroke-width="3"/>`).join("")}
+  <rect y="200" width="400" height="60" fill="#8a8f8c"/><path d="M0 230 h400" stroke="#f2f2f2" stroke-width="4" stroke-dasharray="22 16"/>
+  <rect x="150" y="135" width="150" height="70" rx="6" fill="#2f6a95" stroke="${INK}" stroke-width="2.5"/>
+  <path d="M300 150 h40 l25 25 v30 h-65z" fill="#3f7fb0" stroke="${INK}" stroke-width="2.5"/>
+  <rect x="310" y="158" width="28" height="18" rx="3" fill="#cfe8f3" stroke="${INK}" stroke-width="2"/>
+  ${[[165,100],[205,100],[245,100],[185,72],[225,72]].map(([x,y])=>`<rect x="${x}" y="${y}" width="44" height="36" rx="10" fill="#efe6d2" stroke="${INK}" stroke-width="2"/><text x="${x+22}" y="${y+24}" text-anchor="middle" font-family="Jua, sans-serif" font-size="15" fill="#8a6a3a">쌀</text>`).join("")}
+  ${bab(208,62,.65,"wow")}
+  <circle cx="190" cy="208" r="16" fill="#2b2b2b"/><circle cx="190" cy="208" r="6" fill="#9aa"/>
+  <circle cx="335" cy="208" r="16" fill="#2b2b2b"/><circle cx="335" cy="208" r="6" fill="#9aa"/>`),
+kitchen:()=>svg("급식실 큰 솥에서 김이 나고 밥알이가 뛰어오르는 모습",`<rect width="400" height="260" fill="#e7f0f1"/>
+  ${Array.from({length:9},(_,i)=>`<path d="M${i*50} 0 V200" stroke="#d2dfe1" stroke-width="2"/>`).join("")}${Array.from({length:4},(_,i)=>`<path d="M0 ${i*50} H400" stroke="#d2dfe1" stroke-width="2"/>`).join("")}
+  <rect y="205" width="400" height="55" fill="#b9c4c6"/>
+  <rect x="105" y="140" width="190" height="75" rx="12" fill="#a7b1b3" stroke="${INK}" stroke-width="2.5"/>
+  <rect x="95" y="130" width="210" height="16" rx="8" fill="#c3cbcd" stroke="${INK}" stroke-width="2.5"/>
+  <rect x="80" y="160" width="25" height="12" rx="5" fill="#8d979a" stroke="${INK}" stroke-width="2"/><rect x="295" y="160" width="25" height="12" rx="5" fill="#8d979a" stroke="${INK}" stroke-width="2"/>
+  <path d="M150 125 q-15 -20 0 -40 q15 -20 0 -40" stroke="#ffffff" stroke-width="7" fill="none" stroke-linecap="round" opacity=".9"/>
+  <path d="M250 125 q15 -20 0 -40 q-15 -20 0 -40" stroke="#ffffff" stroke-width="7" fill="none" stroke-linecap="round" opacity=".9"/>
+  ${bab(200,82,1.1,"happy")}${sparkle(240,40)}${sparkle(160,50,.7)}
+  ${bubble(262,22,120,"따끈따끈!","left")}`),
+line:()=>svg("배식대 앞 식판과 두 가지 말풍선",`<rect width="400" height="260" fill="#fdf0de"/>
+  <rect y="190" width="400" height="70" fill="#d9c7ad"/>
+  ${tray(90,120,220,120)}
+  ${Array.from({length:14},(_,i)=>`<ellipse cx="${112+(i%7)*13}" cy="${200+Math.floor(i/7)*10}" rx="6" ry="8" fill="#fffdf4" stroke="#cfc6b2" stroke-width="1"/>`).join("")}
+  ${bab(150,195,.75,"worried")}
+  <g transform="rotate(-20 300 70)"><ellipse cx="300" cy="70" rx="24" ry="16" fill="#e7e1d4" stroke="${INK}" stroke-width="2.5"/><rect x="320" y="64" width="60" height="10" rx="5" fill="#c8b48e" stroke="${INK}" stroke-width="2"/></g>
+  ${bubble(12,20,150,"조금만 주세요!","left")}${bubble(200,8,140,"많이 주세요!","right")}`),
+eat:()=>svg("숟가락 위에서 웃는 밥알이",`<rect width="400" height="260" fill="#e3f3e7"/>
+  <circle cx="200" cy="130" r="100" fill="#cbead3"/>
+  <ellipse cx="190" cy="160" rx="70" ry="40" fill="#d7dddc" stroke="${INK}" stroke-width="2.5"/>
+  <rect x="250" y="150" width="140" height="18" rx="9" fill="#c4cbca" stroke="${INK}" stroke-width="2.5" transform="rotate(-12 250 150)"/>
+  ${bab(190,140,1.3,"happy")}
+  <path d="M90 70 c-10 -14 -30 0 -14 16 l14 12 l14 -12 c16 -16 -4 -30 -14 -16z" fill="#f08a8a"/>
+  <path d="M310 60 c-7 -10 -22 0 -10 12 l10 9 l10 -9 c12 -12 -3 -22 -10 -12z" fill="#f08a8a"/>
+  <text x="300" y="215" font-family="Jua, sans-serif" font-size="34" fill="#2f7a55">냠!</text>`),
+full:()=>svg("식판에 남은 밥과 슬픈 밥알이",`<rect width="400" height="260" fill="#fdf0de"/>
+  <rect y="200" width="400" height="60" fill="#d9c7ad"/>
+  ${tray(70,110,260,135)}
+  ${Array.from({length:22},(_,i)=>`<ellipse cx="${92+(i%8)*14}" cy="${192+Math.floor(i/8)*11}" rx="6" ry="8" fill="#fffdf4" stroke="#cfc6b2" stroke-width="1"/>`).join("")}
+  <path d="M215 195 q30 -10 40 10 q10 20 40 5" stroke="#d98a5a" stroke-width="5" fill="none" stroke-linecap="round"/>
+  ${bab(140,180,.8,"sad")}
+  ${bubble(220,30,150,"아, 배불러…","left")}`),
+bin:(dirty)=>svg("잔반통 위로 떨어지는 밥알이",`<rect width="400" height="260" fill="#e8ebe8"/>
+  <rect y="215" width="400" height="45" fill="#c9cfcb"/>
+  <path d="M120 120 h160 l-14 115 h-132z" fill="#3d8b5a" stroke="${INK}" stroke-width="2.5"/>
+  <rect x="110" y="108" width="180" height="18" rx="8" fill="#2f6f47" stroke="${INK}" stroke-width="2.5"/>
+  <text x="200" y="185" text-anchor="middle" font-family="Jua, sans-serif" font-size="24" fill="#ffffff">음식물</text>
+  <path d="M150 112 q20 -10 40 0 q20 10 50 0" stroke="#b9895a" stroke-width="6" fill="none"/>
+  ${bab(200,55,.9,"worried")}
+  <path d="M170 40 v-18 M200 26 v-20 M230 40 v-18" stroke="#8a9a90" stroke-width="3" stroke-linecap="round"/>
+  ${dirty?"":`<path d="M300 70 q20 -10 30 10" fill="none"/>`}
+  <line x1="300" y1="60" x2="330" y2="30" stroke="#c9a46a" stroke-width="5" stroke-linecap="round"/>
+  <path d="M60 40 q14 -14 28 -4 q10 10 22 -2 l2 20 q-14 8 -26 0 q-12 -8 -24 2z" fill="#dfeff7" fill-opacity=".9" stroke="#7ba3b8" stroke-width="2"/>
+  <text x="315" y="85" text-anchor="middle" font-family="Jua, sans-serif" font-size="13" fill="${INK}">이쑤시개</text>
+  <text x="84" y="80" text-anchor="middle" font-family="Jua, sans-serif" font-size="13" fill="${INK}">비닐 뚜껑</text>`),
+truck:()=>svg("밤에 달리는 음식물 수거차",`<rect width="400" height="260" fill="#2f3b5c"/>
+  <circle cx="330" cy="55" r="26" fill="#f3e9b8"/><circle cx="342" cy="48" r="22" fill="#2f3b5c"/>
+  ${[[40,40],[120,70],[200,30],[260,90],[90,110]].map(([x,y])=>sparkle(x,y,.5,"#f3e9b8")).join("")}
+  <rect y="222" width="400" height="38" fill="#4a4f5c"/>
+  ${truck(false)}`),
+truckDirty:()=>svg("비닐과 이쑤시개를 함께 싣고 달리는 수거차",`<rect width="400" height="260" fill="#2f3b5c"/>
+  <circle cx="330" cy="55" r="26" fill="#f3e9b8"/><circle cx="342" cy="48" r="22" fill="#2f3b5c"/>
+  <rect y="222" width="400" height="38" fill="#4a4f5c"/>
+  ${truck(true)}`),
+sorting:()=>svg("선별기에서 비닐과 함께 걸러지는 밥알이",`<rect width="400" height="260" fill="#dfe3e6"/>
+  <rect x="20" y="170" width="360" height="22" rx="11" fill="#555b60" stroke="${INK}" stroke-width="2.5"/>
+  ${Array.from({length:8},(_,i)=>`<circle cx="${45+i*45}" cy="181" r="7" fill="#9aa2a8"/>`).join("")}
+  <rect x="250" y="60" width="110" height="95" rx="10" fill="#8796a0" stroke="${INK}" stroke-width="2.5"/>
+  <circle cx="305" cy="85" r="12" fill="#e2483a"/><text x="305" y="135" text-anchor="middle" font-family="Jua, sans-serif" font-size="16" fill="#ffffff">선별기</text>
+  <path d="M110 128 q14 -14 28 -4 q10 10 22 -2 l2 20 q-14 8 -26 0 q-12 -8 -24 2z" fill="#dfeff7" fill-opacity=".9" stroke="#7ba3b8" stroke-width="2"/>
+  ${bab(125,140,.8,"sad")}
+  <line x1="170" y1="160" x2="200" y2="130" stroke="#c9a46a" stroke-width="5" stroke-linecap="round"/>
+  <path d="M90 60 l40 40 M130 60 l-40 40" stroke="#e2483a" stroke-width="9" stroke-linecap="round"/>
+  ${bubble(140,20,90,"삐익!","right")}`),
+facility:()=>svg("퇴비 시설, 바이오가스 시설, 사료 공장 앞에서 고민하는 밥알이",`<rect width="400" height="260" fill="#d6ebf2"/>
+  <rect y="190" width="400" height="70" fill="#a8cf95"/>
+  <path d="M20 200 q50 -70 100 0z" fill="#8a5a36" stroke="${INK}" stroke-width="2.5"/>
+  <path d="M55 140 q-6 -10 0 -20 M80 135 q6 -10 0 -20" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <ellipse cx="200" cy="160" rx="42" ry="48" fill="#c9d6db" stroke="${INK}" stroke-width="2.5"/>
+  <path d="M190 102 q10 -18 20 0 q-10 8 -20 0z" fill="#4aa3ff" class="flick"/>
+  <rect x="300" y="120" width="60" height="80" fill="#d9c38f" stroke="${INK}" stroke-width="2.5"/>
+  <path d="M295 120 l35 -30 l35 30z" fill="#c4a96c" stroke="${INK}" stroke-width="2.5"/>
+  <circle cx="330" cy="158" r="16" fill="#f4b6b9" stroke="${INK}" stroke-width="2"/><ellipse cx="330" cy="162" rx="7" ry="5" fill="#e88f96"/>
+  <text x="70" y="228" text-anchor="middle" font-family="Jua, sans-serif" font-size="17" fill="${INK}">퇴비</text>
+  <text x="200" y="228" text-anchor="middle" font-family="Jua, sans-serif" font-size="17" fill="${INK}">바이오가스</text>
+  <text x="330" y="228" text-anchor="middle" font-family="Jua, sans-serif" font-size="17" fill="${INK}">사료</text>
+  ${bab(200,50,.75,"wow")}<text x="232" y="38" font-family="Jua, sans-serif" font-size="26" fill="${INK}">?</text>`),
+E1:()=>svg("깨끗한 식판 옆에서 웃는 지구",`<rect width="400" height="260" fill="#fff4d2"/>
+  ${tray(40,110,190,110)}
+  ${sparkle(70,95)}${sparkle(210,100,.8)}${sparkle(130,236,.6)}
+  <circle cx="310" cy="120" r="60" fill="#5aa6d6" stroke="${INK}" stroke-width="2.5"/>
+  <path d="M275 90 q20 -15 35 0 q10 15 -10 25 q-20 5 -25 -25z M320 135 q25 -10 30 10 q-5 20 -25 15z" fill="#79c27a"/>
+  <circle cx="295" cy="118" r="4" fill="${INK}"/><circle cx="325" cy="118" r="4" fill="${INK}"/>
+  <path d="M296 132 q14 12 28 0" stroke="${INK}" stroke-width="3" fill="none" stroke-linecap="round"/>
+  ${bab(135,62,.8,"happy")}
+  ${bubble(230,10,140,"고마워!","right")}`),
+E2:()=>svg("퇴비 더미 속에서 새싹을 틔운 밥알이",`<rect width="400" height="260" fill="#e6f1dc"/>
+  <path d="M30 240 q170 -170 340 0z" fill="#7a4f2e" stroke="${INK}" stroke-width="2.5"/>
+  ${Array.from({length:14},(_,i)=>`<circle cx="${80+(i*37)%240}" cy="${200+(i*13)%30}" r="${2+(i%3)}" fill="#5c3a20"/>`).join("")}
+  <path d="M120 110 q-8 -14 0 -28 M280 110 q8 -14 0 -28" stroke="#ffffff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".85"/>
+  ${bab(200,150,1,"happy")}
+  <path d="M200 123 v-30" stroke="#4f9a4a" stroke-width="4"/>
+  <path d="M200 100 q-22 -6 -26 -24 q22 2 26 24z M200 95 q20 -10 28 -28 q-24 4 -28 28z" fill="#79c27a" stroke="#4f9a4a" stroke-width="2"/>
+  <rect x="330" y="40" width="22" height="120" rx="11" fill="#ffffff" stroke="${INK}" stroke-width="2.5"/>
+  <rect x="336" y="80" width="10" height="74" rx="5" fill="#e2483a"/><circle cx="341" cy="158" r="14" fill="#e2483a" stroke="${INK}" stroke-width="2.5"/>
+  <text x="300" y="34" font-family="Jua, sans-serif" font-size="18" fill="${INK}">약 60℃</text>`),
+E3:()=>svg("소화조에서 만든 바이오가스가 파란 불꽃이 되는 모습",`<rect width="400" height="260" fill="#dde8ef"/>
+  <rect y="215" width="400" height="45" fill="#a8cf95"/>
+  <ellipse cx="120" cy="150" rx="70" ry="80" fill="#c9d6db" stroke="${INK}" stroke-width="2.5"/>
+  ${ch4(100,170,0)}${ch4(140,190,1)}${ch4(115,205,2)}
+  <path d="M190 140 h80 v50" stroke="#7d8a90" stroke-width="10" fill="none"/>
+  <rect x="245" y="190" width="100" height="25" rx="5" fill="#556068" stroke="${INK}" stroke-width="2.5"/>
+  <g class="flick"><path d="M295 190 q-28 -40 0 -80 q28 40 0 80z" fill="#4aa3ff"/><path d="M295 188 q-12 -22 0 -46 q12 24 0 46z" fill="#bfe3ff"/></g>
+  ${bab(295,82,.7,"happy")}
+  <text x="120" y="70" text-anchor="middle" font-family="Jua, sans-serif" font-size="16" fill="${INK}">산소 없는 소화조</text>`),
+E4:()=>svg("사료가 된 밥알이와 맛있게 먹는 돼지",`<rect width="400" height="260" fill="#f6e8d6"/>
+  <rect y="200" width="400" height="60" fill="#d8b98a"/>
+  <circle cx="160" cy="135" r="70" fill="#f4b6b9" stroke="${INK}" stroke-width="2.5"/>
+  <path d="M110 80 l-10 -30 l30 18z M210 80 l10 -30 l-30 18z" fill="#f0a0a5" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+  <ellipse cx="160" cy="150" rx="26" ry="18" fill="#e88f96" stroke="${INK}" stroke-width="2.5"/>
+  <circle cx="151" cy="150" r="4" fill="${INK}"/><circle cx="169" cy="150" r="4" fill="${INK}"/>
+  <circle cx="135" cy="115" r="5" fill="${INK}"/><circle cx="185" cy="115" r="5" fill="${INK}"/>
+  <rect x="190" y="195" width="170" height="30" rx="6" fill="#8a5a36" stroke="${INK}" stroke-width="2.5"/>
+  ${Array.from({length:12},(_,i)=>`<circle cx="${205+i*13}" cy="${193-(i%3)*3}" r="5" fill="#c99a5a" stroke="${INK}" stroke-width="1"/>`).join("")}
+  ${bab(300,150,.75,"happy")}
+  ${bubble(230,30,130,"꿀꿀, 맛있다!","left")}`),
+E5:()=>svg("소각장 굴뚝에서 연기가 나고 슬퍼하는 밥알이",`<rect width="400" height="260" fill="#e4e0dc"/>
+  <rect y="215" width="400" height="45" fill="#bdb6ae"/>
+  <rect x="80" y="110" width="200" height="105" fill="#8d8a86" stroke="${INK}" stroke-width="2.5"/>
+  <rect x="220" y="40" width="34" height="75" fill="#76726e" stroke="${INK}" stroke-width="2.5"/>
+  <circle cx="240" cy="30" r="18" fill="#a5a19c"/><circle cx="268" cy="18" r="22" fill="#b5b1ac"/><circle cx="300" cy="14" r="16" fill="#c4c0bb"/>
+  <rect x="110" y="140" width="80" height="50" rx="8" fill="#3a2a22" stroke="${INK}" stroke-width="2.5"/>
+  <g class="flick"><path d="M150 188 q-28 -24 -8 -46 q4 16 12 10 q8 -18 20 -6 q12 22 -24 42z" fill="#f28a2e"/></g>
+  ${bab(330,170,.85,"sad")}`),
+E6:()=>svg("땅속에 묻힌 밥알이와 올라오는 메탄 거품",`<rect width="400" height="260" fill="#cfe3ea"/>
+  <rect y="60" width="400" height="200" fill="#9c7a55"/>
+  <rect y="60" width="400" height="20" fill="#7aa86a"/>
+  <rect y="140" width="400" height="60" fill="#8a6a48"/><rect y="200" width="400" height="60" fill="#76593c"/>
+  ${[[60,170,"#c7c2b8"],[300,180,"#b6c9d6"],[340,230,"#d9c38f"],[90,235,"#c7c2b8"]].map(([x,y,c])=>`<rect x="${x}" y="${y}" width="40" height="22" rx="4" fill="${c}" stroke="${INK}" stroke-width="1.5" transform="rotate(${x%30-15} ${x} ${y})"/>`).join("")}
+  ${bab(200,200,.9,"sad")}
+  ${ch4(160,150,0)}${ch4(235,130,1.1)}${ch4(200,110,2.2)}
+  <rect x="12" y="12" width="128" height="34" rx="8" fill="#fff8e8" stroke="${INK}" stroke-width="2"/>
+  <text x="76" y="35" text-anchor="middle" font-family="Jua, sans-serif" font-size="17" fill="${INK}">2005년 이전</text>`)
+};
+
+/* ---------- 이야기 ---------- */
+const ENDINGS=[
+  {id:"E1",short:"깨끗한 식판"},{id:"E2",short:"다시 흙으로"},{id:"E3",short:"파란 불꽃"},
+  {id:"E4",short:"돼지의 한 끼"},{id:"E5",short:"불길 속으로"},{id:"E6",short:"땅속의 메탄"}
+];
+const SC={
+ title:{chap:"표지",h:"잔반의 일생",big:true,t:"안녕! 나는 <b>밥알이</b>야. 오늘 네 식판에 오를 쌀 한 톨이지. 내가 어디서 와서 어디로 가게 될지는 네 선택에 달려 있어. 숨겨진 엔딩은 모두 6개야.",go:[["이야기 시작하기","paddy"]]},
+ paddy:{chap:"1장 · 봄에서 가을까지",h:"논에서 태어나다",t:"나는 물이 찰랑이는 논에서 자랐어. 햇빛과 물, 그리고 농부님의 땀이 나를 키웠지.",note:["과학 노트","물에 잠긴 논흙에는 산소가 부족해요. 이런 곳에 사는 메탄생성균이 메탄(CH₄)을 만들어요. 쌀 한 톨이 식판에 오르기 전부터 이미 온실가스가 나오고 있는 거예요."],go:[["다음","harvest"]]},
+ harvest:{chap:"2장 · 가을",h:"먼 길을 떠나다",t:"누렇게 익은 나는 수확되고, 껍질을 벗고, 트럭을 타고 학교까지 왔어. 수확 기계도, 도정 공장도, 트럭도 모두 에너지를 썼지.",go:[["다음","kitchen"]]},
+ kitchen:{chap:"3장 · 새벽의 급식실",h:"커다란 솥 속으로",t:"조리사님들이 새벽부터 나를 씻고 커다란 솥에 쪄 주셨어. 따끈한 밥이 된 나는 이제 배식대에서 너를 기다려.",go:[["배식대로","line"]]},
+ line:{chap:"4장 · 점심시간",h:"배식대 앞에서",t:"드디어 너를 만났어! 오늘 반찬은 네가 좋아하는 메뉴야. 밥을 얼마나 받을래?",go:[["먹을 만큼만 받는다","eat"],["일단 많이 받고 본다","full","alt"]]},
+ eat:{chap:"5장 · 식사",h:"마지막 한 톨까지",t:"너는 먹을 만큼만 받아서 나를 마지막 한 톨까지 먹었어. 나는 네 몸속에서 오후 수업을 버틸 힘이 되었지.",note:["과학 노트","밥의 녹말은 포도당으로 분해되고, 세포 호흡을 거쳐 ATP라는 에너지로 바뀌어요."],go:[["엔딩 보기","E1"]]},
+ full:{chap:"5장 · 식사",h:"배가 너무 불러",t:"반찬을 다 먹고 나니 배가 너무 불러. 결국 나와 친구 밥알들은 식판에 남게 됐어. 이제 잔반통으로 가야 해.",go:[["잔반통으로","bin"]]},
+ bin:{chap:"6장 · 잔반통 앞",h:"어떻게 버릴까?",t:"식판에는 나 말고도 국물, 이쑤시개, 요구르트 비닐 뚜껑이 있어. 뒤에서 친구들이 줄 서서 기다리고 있어.",go:[["국물은 따로, 이물질은 골라내고 버린다","truck"],["바쁘니까 한꺼번에 털어 버린다","truckDirty","alt"]]},
+ truck:{chap:"7장 · 밤",h:"밤의 수거차",t:"모두가 잠든 밤, 음식물 수거차가 나를 데리러 왔어. 깨끗하게 버려진 덕분에 나는 재활용 시설로 가게 됐어.",note:["알고 있나요?","우리나라는 2005년부터 음식물쓰레기를 땅에 바로 묻는 것(직매립)을 금지하고, 대부분을 재활용하고 있어요. 음식물쓰레기는 대부분 수분이라 국물과 물기를 빼면 처리가 훨씬 쉬워져요."],go:[["처리 시설 도착","facility"]]},
+ truckDirty:{chap:"7장 · 밤",h:"덜컹덜컹 수거차",t:"수거차가 나를 싣고 처리 시설로 달렸어. 그런데 내 옆에 비닐 뚜껑과 이쑤시개가 딱 붙어서 계속 따라와…",go:[["처리 시설 도착","sorting"]]},
+ sorting:{chap:"8장 · 처리 시설",h:"선별기에서 생긴 일",t:"선별기가 삐익! 경고음을 냈어. 비닐과 이쑤시개가 섞인 덩어리는 재활용하기 어려워서 따로 빼내야 했지. 비닐에 엉킨 나도 함께 빠져나갔어.",go:[["엔딩 보기","E5"]]},
+ facility:{chap:"8장 · 재활용 시설",h:"무엇으로 다시 태어날까?",t:"재활용 시설에 도착했어. 나는 어떻게 다시 태어나게 될까? 하나를 골라 봐. 나중에 다른 길도 확인할 수 있어.",go:[["퇴비 시설로","E2"],["바이오가스 시설로","E3"],["사료 공장으로","E4"],["타임머신을 타고 2005년 이전으로","E6","alt"]]},
+ E1:{end:"best",label:"최고의 엔딩",h:"깨끗한 식판",t:"나는 버려지지 않고 제 할 일을 다 했어. 버려지지 않은 음식은 수거하고 옮기고 처리하는 에너지도 필요 없어. 가장 좋은 재활용은 처음부터 남기지 않는 거야!",note:["더 알아보기","전 세계에서 생산되는 식량의 약 3분의 1이 버려진다고 해요. 음식물 손실과 낭비가 세계 온실가스 배출의 약 8~10%를 차지한다는 분석도 있어요."]},
+ E2:{end:"mid",label:"순환 엔딩",h:"다시 흙으로",t:"퇴비 시설에서 나는 미생물 친구들을 만났어. 미생물들이 산소를 마시며 나를 분해하자 더미 속이 뜨끈해졌지. 몇 주 뒤 나는 거름이 되어 다시 논밭으로 돌아갔어.",note:["과학 노트","퇴비화는 산소를 쓰는 호기성 미생물이 유기물을 분해하는 과정이에요. 분해하면서 열이 나서 60℃ 안팎까지 오르고, 이 열에 병원균과 잡초 씨앗이 죽어요."]},
+ E3:{end:"mid",label:"에너지 엔딩",h:"파란 불꽃",t:"나는 산소가 없는 커다란 소화조로 들어갔어. 그곳 미생물들이 나를 분해해 메탄이 든 바이오가스를 만들었지. 그 가스는 모여서 누군가의 집을 데우는 불꽃이 되었어.",note:["과학 노트","1장의 논처럼 산소 없는 곳에서는 메탄생성균이 메탄을 만들어요. 논이나 매립지에서는 메탄이 공기로 빠져나가지만, 소화조에서는 그 메탄을 붙잡아 연료로 써요."]},
+ E4:{end:"mid",label:"사료 엔딩",h:"돼지의 한 끼",t:"나는 높은 온도로 살균되고 바싹 말려져 사료가 되었어. 농장의 돼지가 나를 맛있게 먹었지!",note:["알고 있나요?","음식물 사료는 열처리로 병원균을 없애야 해요. 너무 짜게 남긴 음식이나 뼈, 껍데기 같은 이물질은 사료로 쓰기 어려워요. 국물을 따로 버리는 게 도움이 되는 이유예요."]},
+ E5:{end:"bad",label:"아쉬운 엔딩",h:"불길 속으로",t:"이물질과 엉킨 나는 결국 소각장으로 갔어. 물기가 많은 나는 잘 타지도 않아서 불을 지피는 데 연료가 더 들었지. 다시 태어날 기회를 놓쳐 버렸어…",note:["기억해요","음식물쓰레기에 비닐, 이쑤시개, 병뚜껑이 섞이면 선별 과정에서 걸러져 재활용되지 못하기도 해요. 버리는 순간의 10초가 운명을 바꿔요."]},
+ E6:{end:"bad",label:"과거의 엔딩",h:"땅속의 메탄",t:"2005년 이전에는 음식물쓰레기가 다른 쓰레기와 함께 땅에 묻히는 경우가 많았어. 산소가 닿지 않는 땅속에서 나는 천천히 썩으며 메탄을 뿜었고, 더러운 침출수도 흘러나왔지.",note:["과학 노트","메탄은 100년 기준으로 이산화탄소보다 약 28배 강한 온실가스예요. 직매립 금지 이후 지금은 이런 일이 크게 줄었어요."]}
+};
+
+/* ---------- 상태 ---------- */
+let found=new Set();
+
+const save=()=>{};
+const book=$id("book");
+
+function dex(){
+  return `<div class="dex"><p class="chap"><span>엔딩 도감 · ${found.size>=GOAL?'스탬프 획득!':'엔딩 '+GOAL+'개를 모으면 스탬프'}</span><span>${found.size} / 6</span></p>
+  <div class="dex-row">${ENDINGS.map((e,i)=>`<div class="dex-item ${found.has(e.id)?"got":""}"><span class="n">${i+1}</span>${found.has(e.id)?e.short:"???"}</div>`).join("")}</div></div>`;
+}
+
+function show(id){
+  const s=SC[id];
+  if(s.end){found.add(id);save();if(found.size>=GOAL)window.GREEN&&GREEN.done('life');}
+  const art = id==="bin" ? ART.bin(false) : ART[id]();
+  let choices=s.go||[];
+  if(s.end){
+    choices = found.size<6
+      ? [["다른 엔딩 찾으러 배식대로","line"],["처음부터 다시","title","alt"]]
+      : [["처음부터 다시","title"]];
+  }
+  const endIdx=ENDINGS.findIndex(e=>e.id===id);
+  book.innerHTML=`<div class="fade" style="display:flex;flex-direction:column;gap:14px">
+    <div class="plate">${art}</div>
+    <div class="text">
+      <p class="chap"><span>${s.end?`엔딩 ${endIdx+1}`:s.chap}</span>${s.end?`<span class="ending-tag ${s.end}">${s.label}</span>`:""}</p>
+      ${s.big?`<h1>${s.h}</h1>`:`<h2>${s.h}</h2>`}
+      <p>${s.t}</p>
+      ${s.note?`<div class="note"><b>${s.note[0]}</b>${s.note[1]}</div>`:""}
+      ${s.end&&found.size===6?`<div class="note"><b>모든 엔딩을 모았어요!</b>밥알이의 모든 운명을 확인했어요. 스탬프 카드에서 참여 완료를 제출하세요.</div>`:""}
+      <div class="choices">${choices.map(([label,to,cls])=>`<button class="choice ${cls||""}" data-to="${to}">${label}</button>`).join("")}</div>
+      ${(s.end||id==="title")?dex():""}
+    </div></div>`;
+  book.querySelectorAll(".choice").forEach(b=>b.onclick=()=>{show(b.dataset.to);window.scrollTo({top:0})});
+}
+show("title");
+
+if(found.size>=GOAL)window.GREEN&&GREEN.done('life');
+})();
+(function(){
+const ROOT=document.getElementById('g-sort');
+const $id=x=>ROOT.querySelector('#'+CSS.escape(x));
+const SORT_PASS=9;
+
+/* ---------- 그림 ---------- */
+const K="#33302a";
+const S=(body,label)=>`<svg viewBox="0 0 200 160" role="img" aria-label="${label}" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
+const ART={
+chickenbone:()=>S(`<g transform="rotate(-25 100 80)"><rect x="55" y="70" width="90" height="20" rx="10" fill="#f1e6cf" stroke="${K}" stroke-width="3"/>
+  <circle cx="52" cy="68" r="13" fill="#f1e6cf" stroke="${K}" stroke-width="3"/><circle cx="52" cy="92" r="13" fill="#f1e6cf" stroke="${K}" stroke-width="3"/>
+  <circle cx="148" cy="68" r="13" fill="#f1e6cf" stroke="${K}" stroke-width="3"/><circle cx="148" cy="92" r="13" fill="#f1e6cf" stroke="${K}" stroke-width="3"/>
+  <rect x="50" y="72" width="100" height="16" fill="#f1e6cf"/></g>
+  <path d="M120 50 q20 -10 34 6 q-10 14 -30 10z" fill="#c98a4a" stroke="${K}" stroke-width="2.5"/>`,"닭뼈"),
+fishbone:()=>S(`<path d="M30 80 l35 -28 v56z" fill="#e9eef0" stroke="${K}" stroke-width="3" stroke-linejoin="round"/><circle cx="48" cy="74" r="4" fill="${K}"/>
+  <path d="M65 80 H160" stroke="${K}" stroke-width="5" stroke-linecap="round"/>
+  ${[80,95,110,125,140].map(x=>`<path d="M${x} 80 q8 -24 2 -36 M${x} 80 q8 24 2 36" stroke="${K}" stroke-width="3" fill="none" stroke-linecap="round"/>`).join("")}
+  <path d="M160 80 l20 -22 v44z" fill="#e9eef0" stroke="${K}" stroke-width="3" stroke-linejoin="round"/>`,"생선 뼈"),
+shell:()=>S(`<path d="M100 135 L40 70 Q100 5 160 70Z" fill="#f2ddc8" stroke="${K}" stroke-width="3" stroke-linejoin="round"/>
+  ${[-48,-28,-10,10,28,48].map(d=>`<path d="M100 132 L${100+d} ${48-Math.abs(d)*.25}" stroke="#c99a7a" stroke-width="3"/>`).join("")}
+  <rect x="86" y="128" width="28" height="16" rx="5" fill="#e6c9ad" stroke="${K}" stroke-width="3"/>`,"조개껍데기"),
+eggshell:()=>S(`<path d="M35 95 q0 45 40 45 q40 0 40 -45 l-10 -12 l-10 14 l-10 -14 l-10 14 l-10 -14 l-10 14 l-10 -14z" fill="#fbf6ec" stroke="${K}" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M100 60 q0 -45 40 -45 q40 0 40 45 l-10 12 l-10 -14 l-10 14 l-10 -14 l-10 14 l-10 -14 l-10 14z" transform="rotate(20 140 40)" fill="#fbf6ec" stroke="${K}" stroke-width="3" stroke-linejoin="round"/>`,"달걀 껍데기"),
+onion:()=>S(`<path d="M40 120 q10 -70 50 -80 q-20 30 -10 80z" fill="#d9a36a" stroke="${K}" stroke-width="3"/>
+  <path d="M85 125 q20 -60 70 -70 q-30 25 -25 70z" fill="#c98b52" stroke="${K}" stroke-width="3"/>
+  <path d="M120 135 q30 -30 55 -25 q-20 10 -20 30z" fill="#e2b47c" stroke="${K}" stroke-width="3"/>
+  <path d="M55 110 q6 -30 22 -48 M100 115 q12 -30 35 -45" stroke="#a8743f" stroke-width="2" fill="none"/>`,"양파 껍질"),
+corn:()=>S(`<g transform="rotate(-20 100 80)"><rect x="35" y="55" width="130" height="50" rx="25" fill="#e8d6a8" stroke="${K}" stroke-width="3"/>
+  ${Array.from({length:24},(_,i)=>`<ellipse cx="${52+(i%8)*14}" cy="${66+Math.floor(i/8)*14}" rx="4" ry="5" fill="#cbb47c"/>`).join("")}</g>`,"옥수수 속대"),
+peachpit:()=>S(`<ellipse cx="100" cy="80" rx="52" ry="40" fill="#9c5a3a" stroke="${K}" stroke-width="3"/>
+  <path d="M100 40 q-6 40 0 80" stroke="#6e3a22" stroke-width="3" fill="none"/>
+  ${[[70,60],[75,85],[68,100],[125,62],[130,88],[122,104]].map(([x,y])=>`<path d="M${x-10} ${y} q10 -8 20 0" stroke="#6e3a22" stroke-width="3" fill="none"/>`).join("")}`,"복숭아 씨"),
+teabag:()=>S(`<path d="M60 60 h70 v70 h-70z" fill="#efe7d4" stroke="${K}" stroke-width="3"/><path d="M60 60 l35 -15 l35 15" fill="#efe7d4" stroke="${K}" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="68" y="85" width="54" height="38" rx="4" fill="#b98b5a" opacity=".55"/>
+  <path d="M95 45 q20 -30 55 -10" stroke="${K}" stroke-width="2" fill="none"/><rect x="146" y="20" width="30" height="24" rx="3" fill="#e2483a" stroke="${K}" stroke-width="2.5"/>`,"티백"),
+coffee:()=>S(`<path d="M45 40 h110 l-35 90 h-40z" fill="#fbf7ee" stroke="${K}" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M55 52 h90 l-28 70 h-34z" fill="#5a3a26"/>
+  ${Array.from({length:18},(_,i)=>`<circle cx="${70+(i*13)%60}" cy="${60+(i*7)%50}" r="2" fill="#7a5238"/>`).join("")}`,"커피 찌꺼기"),
+walnut:()=>S(`<path d="M30 95 a40 40 0 0 1 80 0z" fill="#b98a55" stroke="${K}" stroke-width="3"/>
+  <path d="M90 75 a40 40 0 0 1 80 0z" transform="rotate(25 130 75)" fill="#a8773f" stroke="${K}" stroke-width="3"/>
+  <path d="M45 90 q10 -20 25 -10 q10 -14 25 4" stroke="#7e5428" stroke-width="2.5" fill="none"/>`,"호두 껍데기"),
+banana:()=>S(`<path d="M100 120 q-50 -10 -70 -70 q40 20 70 55z" fill="#f4d24a" stroke="${K}" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M100 120 q50 -10 70 -70 q-40 20 -70 55z" fill="#f4d24a" stroke="${K}" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M100 120 q-5 -60 5 -95 q15 40 -5 95z" fill="#f8de6c" stroke="${K}" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="92" y="118" width="16" height="22" rx="4" fill="#8a6a2e" stroke="${K}" stroke-width="2.5"/>`,"바나나 껍질"),
+watermelon:()=>S(`<path d="M25 70 a75 75 0 0 0 150 0z" fill="#3f8f45" stroke="${K}" stroke-width="3"/>
+  <path d="M37 70 a63 63 0 0 0 126 0z" fill="#e9f3cf"/>
+  <path d="M47 70 a53 53 0 0 0 106 0z" fill="#f2a3a0"/><path d="M53 70 a47 47 0 0 0 94 0z" fill="#e9f3cf"/>
+  <path d="M40 92 l12 -6 M60 120 l10 -10 M100 140 v-14 M140 120 l-10 -10 M160 92 l-12 -6" stroke="#2c6e33" stroke-width="3"/>`,"수박 껍질"),
+tangerine:()=>S(`${[[45,60,-20],[100,45,10],[140,85,35],[70,105,-5]].map(([x,y,r])=>`<path transform="rotate(${r} ${x} ${y})" d="M${x-28} ${y} q28 -26 56 0 q-28 22 -56 0z" fill="#f39a2a" stroke="${K}" stroke-width="3"/>`).join("")}
+  ${Array.from({length:16},(_,i)=>`<circle cx="${40+(i*23)%120}" cy="${45+(i*17)%70}" r="1.8" fill="#d67a12"/>`).join("")}`,"귤 껍질"),
+rice:()=>S(`<path d="M35 80 h130 q-6 55 -65 55 q-59 0 -65 -55z" fill="#5a8fc0" stroke="${K}" stroke-width="3"/>
+  <path d="M40 82 q60 -60 120 0z" fill="#fffdf4" stroke="${K}" stroke-width="3"/>
+  ${Array.from({length:10},(_,i)=>`<ellipse cx="${62+(i%5)*18}" cy="${68-Math.floor(i/5)*12}" rx="4" ry="6" fill="#ffffff" stroke="#d8d0bc" stroke-width="1"/>`).join("")}`,"남은 밥"),
+kimchi:()=>S(`<ellipse cx="100" cy="115" rx="75" ry="20" fill="#eef0f2" stroke="${K}" stroke-width="3"/>
+  <path d="M45 110 q10 -60 55 -60 q45 0 55 60z" fill="#d8452f" stroke="${K}" stroke-width="3"/>
+  <path d="M70 105 q8 -40 30 -45 M100 105 q5 -35 25 -40" stroke="#f3e6c8" stroke-width="6" fill="none" stroke-linecap="round"/>
+  ${Array.from({length:8},(_,i)=>`<circle cx="${60+i*11}" cy="${80+(i%3)*8}" r="2" fill="#8c1f12"/>`).join("")}`,"김치"),
+cabbage:()=>S(`<path d="M100 145 q-80 -20 -70 -90 q30 -40 70 -40 q40 0 70 40 q10 70 -70 90z" fill="#9fcf6a" stroke="${K}" stroke-width="3"/>
+  <path d="M100 145 q-8 -60 0 -125" stroke="#f1f5df" stroke-width="12" stroke-linecap="round" fill="none"/>
+  <path d="M100 90 q-30 -10 -45 -35 M100 110 q30 -10 45 -40 M100 70 q20 -8 30 -28" stroke="#78ad4c" stroke-width="3" fill="none"/>`,"배추 겉잎"),
+potato:()=>S(`${[[50,60,-30],[100,90,15],[150,55,40]].map(([x,y,r])=>`<path transform="rotate(${r} ${x} ${y})" d="M${x-35} ${y} q15 -18 35 -8 q20 10 35 -4 q-6 22 -35 18 q-25 -4 -35 -6z" fill="#c9a06a" stroke="${K}" stroke-width="3"/>`).join("")}
+  ${Array.from({length:8},(_,i)=>`<circle cx="${40+i*16}" cy="${60+(i%3)*16}" r="2" fill="#8a6338"/>`).join("")}`,"감자 껍질")
+};
+const BIN_FOOD=`<svg viewBox="0 0 100 90" aria-hidden="true"><path d="M20 28 h60 l-6 56 h-48z" fill="currentColor" opacity=".25" stroke="currentColor" stroke-width="3"/><rect x="14" y="16" width="72" height="12" rx="5" fill="currentColor"/><rect x="40" y="8" width="20" height="8" rx="3" fill="currentColor"/><path d="M35 50 q15 -12 30 0 q-15 14 -30 0z" fill="currentColor"/></svg>`;
+const BIN_TRASH=`<svg viewBox="0 0 100 90" aria-hidden="true"><path d="M22 30 q-8 50 6 54 h44 q14 -4 6 -54z" fill="currentColor" opacity=".2" stroke="currentColor" stroke-width="3"/><path d="M38 30 q12 -18 24 0" fill="none" stroke="currentColor" stroke-width="4"/><path d="M42 16 l8 8 l8 -8" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/><rect x="30" y="50" width="40" height="14" rx="3" fill="currentColor" opacity=".55"/></svg>`;
+
+/* ---------- 문제 ---------- */
+const ITEMS=[
+ {id:"chickenbone",n:"치킨 먹고 남은 닭뼈",a:"t",why:"뼈는 딱딱해서 동물이 먹을 수 없고, 음식물 처리 기계도 망가뜨려요. 살코기는 떼어서 음식물로, 뼈는 종량제 봉투로!"},
+ {id:"fishbone",n:"생선 뼈",a:"t",why:"가시와 뼈는 사료나 퇴비로 쓰기 어려워요. 종량제 봉투에 넣어요."},
+ {id:"shell",n:"조개껍데기",a:"t",why:"조개·굴 껍데기는 돌처럼 단단해서 분해되지 않아요."},
+ {id:"eggshell",n:"달걀 껍데기",a:"t",why:"가장 많이 틀리는 문제! 달걀 껍데기는 딱딱한 탄산칼슘이라 일반쓰레기예요."},
+ {id:"onion",n:"양파 바깥 껍질",a:"t",why:"마르고 얇은 겉껍질은 동물이 먹지 못하고 기계에 엉켜요. 마늘·대파 뿌리도 마찬가지예요."},
+ {id:"corn",n:"옥수수 속대",a:"t",why:"옥수수 속대와 껍질은 섬유질이 질기고 단단해서 일반쓰레기예요."},
+ {id:"peachpit",n:"복숭아 씨",a:"t",why:"복숭아·자두·살구 같은 핵과류의 딱딱한 씨는 일반쓰레기예요."},
+ {id:"teabag",n:"다 우린 티백",a:"t",why:"티백 주머니는 종이나 부직포라서 찻잎째 종량제 봉투로 가요."},
+ {id:"coffee",n:"커피 찌꺼기",a:"t",why:"커피 찌꺼기는 동물이 먹을 수 없어 일반쓰레기예요. 바싹 말리면 탈취제로 다시 쓸 수 있어요."},
+ {id:"walnut",n:"호두 껍데기",a:"t",why:"호두·땅콩 같은 견과류 껍데기는 단단해서 일반쓰레기예요."},
+ {id:"banana",n:"바나나 껍질",a:"f",why:"부드러운 과일 껍질은 음식물이에요. 사료나 퇴비로 다시 태어날 수 있어요."},
+ {id:"watermelon",n:"수박 껍질",a:"f",why:"수박 껍질은 음식물이에요. 잘게 잘라서 버리면 부피와 물기가 줄어들어요."},
+ {id:"tangerine",n:"귤 껍질",a:"f",why:"귤 껍질은 음식물이에요. 단, 딱딱한 씨앗이나 스티커는 떼고 버려요."},
+ {id:"rice",n:"남은 밥",a:"f",why:"남은 밥은 당연히 음식물! 하지만 가장 좋은 건 먹을 만큼만 받는 거예요."},
+ {id:"kimchi",n:"남은 김치",a:"f",why:"김치는 음식물이에요. 국물은 따로 빼고, 물기를 꼭 짜서 버려요."},
+ {id:"cabbage",n:"배추 겉잎",a:"f",why:"부드러운 채소 잎은 음식물이에요. 흙이 많이 묻은 뿌리는 일반쓰레기로 보내요."},
+ {id:"potato",n:"감자 껍질",a:"f",why:"감자·고구마 껍질은 부드러워서 음식물이에요."}
+];
+const ROUNDS=12;
+
+/* ---------- 상태 ---------- */
+const st={screen:"intro",deck:[],i:0,res:[],streak:0,best:0,answered:null,code:"",time:""};
+const app=$id("app");
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+
+function start(){
+  const t=shuffle(ITEMS.filter(x=>x.a==="t")).slice(0,7), f=shuffle(ITEMS.filter(x=>x.a==="f")).slice(0,5);
+  st.deck=shuffle([...t,...f]);st.i=0;st.res=[];st.streak=0;st.best=0;st.answered=null;st.screen="play";render();
+}
+
+function intro(){
+  const pv=["eggshell","banana","chickenbone","tangerine","teabag","watermelon","shell","corn"];
+  app.innerHTML=`<div class="fade wrap" style="padding:0">
+  <p class="eyebrow">녹색환경도우미 분리배출 챌린지</p>
+  <h1>이건 어디에 버릴까?</h1>
+  <p>급식실과 집에서 자주 헷갈리는 쓰레기 ${ROUNDS}개가 나와요. <b>음식물 통</b>과 <b>종량제 봉투</b> 중 맞는 곳에 넣어 보세요. <b>${SORT_PASS}개 이상</b> 맞히면 스탬프를 받아요.</p>
+  <div class="preview">${pv.map(k=>`<div>${ART[k]()}</div>`).join("")}</div>
+  <div class="rule"><div style="color:var(--food)">${BIN_FOOD}</div>
+    <p><b>판단 기준 하나만 기억해요.</b><br>동물이 먹을 수 있으면 음식물, 딱딱하거나 질겨서 먹을 수 없으면 일반쓰레기예요.</p></div>
+  <button class="btn" id="go">시작하기</button>
+  ${foot()}</div>`;
+  $id("go").onclick=start;
+}
+
+function play(){
+  const it=st.deck[st.i], done=st.answered!==null, ok=done&&st.answered===it.a;
+  app.innerHTML=`<div class="wrap" style="padding:0">
+  <div class="hud"><span class="eyebrow num">${st.i+1} / ${ROUNDS}</span><div class="bar"><i style="width:${(st.i+(done?1:0))/ROUNDS*100}%"></i></div><span class="streak num">연속 ${st.streak}</span></div>
+  <div class="stage">
+    <div class="item-area"><div class="item-art" id="art">${ART[it.id]()}</div>
+    <p class="item-name">${it.n}</p></div>
+    <div class="belt" aria-hidden="true"></div>
+  </div>
+  ${done?`<div class="feedback ${ok?"good":"bad"} fade" role="status">
+      <h3>${ok?"정답!":"아쉬워요!"} ${it.a==="f"?"음식물 통":"종량제 봉투(일반쓰레기)"}에 버려요</h3><p>${it.why}</p></div>
+    <button class="btn" id="next">${st.i+1<ROUNDS?"다음 쓰레기":"결과 보기"}</button>`
+  :`<div class="bins">
+    <button class="bin food" data-a="f">${BIN_FOOD}<span>음식물</span><small>사료·퇴비로</small></button>
+    <button class="bin trash" data-a="t">${BIN_TRASH}<span>종량제 봉투</span><small>일반쓰레기</small></button></div>`}
+  </div>`;
+  app.querySelectorAll(".bin").forEach(b=>b.onclick=()=>{
+    st.answered=b.dataset.a; const right=st.answered===it.a;
+    st.res.push({id:it.id,ok:right}); st.streak=right?st.streak+1:0; st.best=Math.max(st.best,st.streak);
+    app.querySelectorAll(".bin").forEach(x=>x.disabled=true);
+    const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+    $id("art").classList.add(st.answered==="f"?"to-food":"to-trash");
+    setTimeout(render, reduce?0:450);
+  });
+  const n=$id("next");
+  if(n){n.focus({preventScroll:true});n.onclick=()=>{st.i++;st.answered=null;
+    if(st.i>=ROUNDS){const t=new Date();st.time=`${String(t.getHours()).padStart(2,"0")}:${String(t.getMinutes()).padStart(2,"0")}`;
+      const L="ABCDEFGHJKLMNPQRSTUVWXYZ";st.code=`SORT-${st.res.filter(r=>r.ok).length}${L[Math.floor(Math.random()*24)]}${L[Math.floor(Math.random()*24)]}`;st.screen="result";}
+    render();window.scrollTo({top:0});}}
+}
+
+function result(){
+  const PASS=st.res.filter(r=>r.ok).length>=SORT_PASS;
+  if(PASS)window.GREEN&&GREEN.done('sort');
+  const sc=st.res.filter(r=>r.ok).length, wrong=st.res.filter(r=>!r.ok).map(r=>ITEMS.find(x=>x.id===r.id));
+  const title=sc===ROUNDS?"분리배출 마스터":sc>=9?"우리 반 분리배출 반장":sc>=6?"조금만 더 연습해요":"오늘부터 시작!";
+  app.innerHTML=`<div class="fade wrap" style="padding:0">
+  <div class="score"><p class="eyebrow">분리배출 챌린지 결과</p>
+    <p class="big num">${sc} / ${ROUNDS}</p><h2>${title}</h2>
+    <p class="muted">최고 연속 정답 <b class="num">${st.best}</b>개</p>
+    <p class="eyebrow" style="color:${PASS?'var(--good)':'var(--bad)'}">${PASS?'스탬프 획득! 위의 ‘스탬프 카드’로 돌아가세요':`아직 스탬프 전이에요 · ${ROUNDS}개 중 ${SORT_PASS}개 이상 맞혀야 해요`}</p>
+    <div style="display:none"><p>
+    <p class="code" style="margin-top:6px">${st.code}</p><p class="muted num" style="font-size:.85rem;margin-top:4px">완료 시각 ${st.time}</p></div></div>
+  ${wrong.length?`<h3>틀린 쓰레기 다시 보기</h3><div class="review">${wrong.map(w=>`<div class="rv">${ART[w.id]()}<div><b>${w.n}</b><span class="tag ${w.a}">${w.a==="f"?"음식물":"일반쓰레기"}</span><p style="font-size:.92rem">${w.why}</p></div></div>`).join("")}</div>`
+   :`<div class="rule"><div style="color:var(--food)">${BIN_FOOD}</div><p>하나도 틀리지 않았어요! 오늘 급식실 잔반통 앞에서 친구들에게 알려 주세요.</p></div>`}
+  <button class="btn" id="again">다시 도전</button>
+  <button class="btn ghost" id="home">처음 화면으로</button>
+  ${foot()}</div>`;
+  $id("again").onclick=start;
+  $id("home").onclick=()=>{st.screen="intro";render()};
+}
+
+function foot(){return `<p class="foot">일반적인 음식물쓰레기 배출 기준을 바탕으로 만들었어요. 지역(지자체)마다 기준이 조금 다를 수 있으니, 사는 곳의 안내를 함께 확인하세요.</p>`}
+function render(){({intro,play,result})[st.screen]()}
+render();
+
+})();
+</script>
+
+</body>
+</html>

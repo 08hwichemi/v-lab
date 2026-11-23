@@ -11,7 +11,7 @@
   --text: #111111; --text-2: #3F4652; --muted: #6B7280;
   --line: #E6E8EC; --line-2: #F0F1F3;
   --accent: #3182F6;
-  --phys: #2F6BFF; --chem: #F0640A; --bio: #12A66B; --earth: #7A5AF8;
+  --phys: #2F6BFF; --chem: #F0640A; --bio: #12A66B; --earth: #7A5AF8; --env: #0E9AA7;
   --maxw: 1800px; --top-h: 58px; --sub-h: 48px; --gutter: 48px;
 }
 :root[data-theme="dark"] {
@@ -34,6 +34,7 @@ svg { display: block; }
 [data-subject="chemistry"] { --sc: var(--chem); }
 [data-subject="biology"]   { --sc: var(--bio); }
 [data-subject="earth"]     { --sc: var(--earth); }
+[data-subject="environment"] { --sc: var(--env); }
 
 /* 상단 바 ------------------------------------------------------------- */
 .top {

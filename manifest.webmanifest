@@ -1,0 +1,17 @@
+{
+  "name": "V-Lab 가상 실험실",
+  "short_name": "V-Lab",
+  "description": "물리·화학·생명·지구과학·환경 가상 실험을 브라우저에서 바로 실행합니다.",
+  "lang": "ko",
+  "id": "./",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    { "src": "assets/img/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/img/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/img/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

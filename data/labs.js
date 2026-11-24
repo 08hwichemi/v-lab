@@ -200,6 +200,32 @@ window.VLAB = {
       added: "2026-11-02"
     },
     {
+      id: "molarity-lab",
+      subject: "chemistry",
+      title: "몰농도 실험실",
+      summary: "보호 장비를 갖추고 들어가 부피 플라스크로 정해진 몰농도의 용액을 직접 만듭니다. 필요한 질량 계산 → 부피 플라스크 고르기 → 저울로 달기·녹이기·옮기기·표선 맞추기·섞기 → 시약병에 옮겨 라벨 붙이기 순서로 진행하고, 만든 용액을 피펫으로 덜어 희석(M₁V₁ = M₂V₂)하는 실험과 시약장, 몰·몰농도·부피 플라스크·희석 개념 정리가 들어 있습니다. 순서를 틀리면 멈추고 안내받는 방식과, 멈추지 않고 실수가 농도 오차로 나타나는 방식을 고를 수 있습니다.",
+      file: "labs/chemistry/molarity-lab.html",
+      author: "홍채린",
+      grade: ["고2"],
+      unit: "화학 · 화학의 언어",
+      tags: ["몰농도", "몰", "부피 플라스크", "표선", "피펫", "희석", "용액 만들기"],
+      thumbnail: "assets/img/thumbs/molarity-lab/0.png",
+      added: "2026-11-24"
+    },
+    {
+      id: "buffer-solution-lab",
+      subject: "chemistry",
+      title: "완충 용액 실험실",
+      summary: "증류수와 완충 용액에 같은 양의 산·염기를 넣어 pH 변화를 비교하고, 입자 모형으로 H₃O⁺와 OH⁻가 남는지 사라지는지 봅니다. 완충 용량(농도·성분비), 적정 곡선의 완충 구간과 중화점, 혈액의 탄산 완충계(운동·과호흡·호흡 저하)를 다루고, 12가지 시약을 눈금실린더로 재어 섞어 완충 용액을 직접 만드는 미션 6개가 있습니다. 공통 이온 효과·짝산 짝염기·Ka와 Kb 설명과 용어 풀이가 들어 있습니다.",
+      file: "labs/chemistry/buffer-solution-lab.html",
+      author: "홍채린",
+      grade: ["고2", "고3"],
+      unit: "화학 반응의 세계 · 산 염기 평형",
+      tags: ["완충 용액", "짝산 짝염기", "이온화 상수", "공통 이온 효과", "완충 용량", "적정 곡선", "혈액의 완충 작용"],
+      thumbnail: "assets/img/thumbs/buffer-solution-lab/0.png",
+      added: "2026-11-24"
+    },
+    {
       id: "monster-designer",
       subject: "biology",
       title: "몬스터 디자이너",

@@ -342,7 +342,8 @@ body.fs-open{overflow:hidden}
 @media (max-width:1250px) and (min-width:961px){
   .tab.active{height:auto}
   .g3{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-  .g3>div.col:nth-of-type(3){grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;align-items:start}
+  .g3>.col:last-child{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;align-items:start}
+  #tab-prep .card{max-height:none!important}
   .card.grow{flex:1 1 auto;min-height:300px}
   details.card.grow-d[open]{flex:none}
 }
@@ -538,10 +539,23 @@ main{padding:12px 16px}
 .modal-body{font-size:15px}
 .modal-body h3{color:#111;font-weight:600;font-size:16px}
 .modal-body table{font-size:14px}
+.pager{position:sticky;bottom:-16px;background:#fff;padding-bottom:12px;z-index:1}
 .modal-body th{background:#F7F8FA}
 .toast{background:#111;border-radius:12px!important;box-shadow:0 12px 30px rgba(0,0,0,.18)}
 .fs-btn{font-size:13px!important}
 .card.fs{box-shadow:0 0 0 100vmax rgba(17,17,17,.5)}
+/* 961~1250px(뷰어 1180 폭 포함): ③ 탭의 미시 세계 카드는 전체 폭을 쓰고, 안에서 그림 | 설명 2열 */
+@media (max-width:1250px) and (min-width:961px){
+  #tab-tit>.col:last-child{grid-template-columns:minmax(0,1fr)}
+  #tab-tit>.col:last-child>.card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:16px;align-content:start}
+  #tab-tit>.col:last-child>.card>.card-head,#tab-tit>.col:last-child>.card>.stages{grid-column:1/-1}
+  #tab-tit>.col:last-child>.card>.micro-solo{grid-column:1;grid-row:3;min-height:300px}
+  #tab-tit>.col:last-child>.card>.legend{grid-column:1;grid-row:4}
+  #tab-tit>.col:last-child>.card>#titInfo{grid-column:2;grid-row:3;align-self:start;margin-top:0}
+  #tab-tit>.col:last-child>.card>#titEq{grid-column:2;grid-row:4}
+  #tab-prep>.col:last-child .micro-box{min-height:240px}
+  #tab-cap .mp .micro-box{min-height:220px}
+}
 @media (max-width:960px){
   .m-bar{background:rgba(255,255,255,.97);box-shadow:none}
   .m-bar .m-ph{font-size:12.5px}
@@ -572,7 +586,7 @@ main{padding:12px 16px}
     <button class="pill" data-pop="common">💡 공통 이온</button>
     <button class="pill" data-pop="pair">🤝 짝산·짝염기</button>
     <button class="pill" data-pop="ka">⚖️ Ka·Kb</button>
-    <button class="pill" data-pop="adv">📐 H–H 식</button>
+    <button class="pill" data-pop="adv">📐 H–H 식(심화)</button>
     <button class="pill reset" id="labReset" title="모든 실험을 처음 상태로">↺ 초기화</button>
   </div>
 </header>
@@ -679,7 +693,7 @@ main{padding:12px 16px}
       <h3>완충 용량 비교 실험</h3>
       <label class="fld">무엇을 비교할까?<select id="capMode">
         <option value="conc">농도: 묽은 완충 용액 vs 진한 완충 용액</option>
-        <option value="ratio">성분비: 1 : 1 vs 9 : 1</option></select></label>
+        <option value="ratio">성분비(약산 : 짝염기): 9 : 1 vs 1 : 1</option></select></label>
       <div class="ctrl-row"><span class="small muted">넣을 물질</span><div class="seg" id="capReagent"><button data-v="HCl" class="on"><span class="m-hide2">1 M </span>HCl</button><button data-v="NaOH"><span class="m-hide2">1 M </span>NaOH</button></div></div>
       <div class="ctrl-row"><button class="btn primary" id="capStep">1 mL<span class="m-hide"> 넣기</span></button><button class="btn" id="capPlay">▶<span class="m-hide"> 계속 넣기</span></button><button class="btn ghost" id="capReset">↺<span class="m-hide"> 처음으로</span></button></div>
       <div class="small muted" id="capAdded"></div>
@@ -719,8 +733,8 @@ main{padding:12px 16px}
         <option value="php">페놀프탈레인 (변색 pH 8.2~10)</option><option value="mo">메틸 오렌지 (변색 pH 3.1~4.4)</option>
         <option value="btb">BTB (변색 pH 6.0~7.6)</option><option value="uni">만능 지시약</option><option value="none">없음</option></select></label>
       <div class="fld"><div class="row"><span>넣은 적정액</span><b id="titVTxt">0.0 mL</b></div><input type="range" id="titV" min="0" max="50" step="0.5" value="0"></div>
-      <div class="ctrl-row"><button class="btn primary" id="titPlay">▶ <span class="m-hide2">적정 </span>시작</button><button class="btn" id="titStep">+0.5 mL</button><button class="btn ghost" id="titReset">↺</button></div>
-      <label class="chk small"><input type="checkbox" id="titMarks" checked> 반당량점 · 당량점 · 완충 구간 표시</label>
+      <div class="ctrl-row"><button class="btn primary" id="titPlay">▶ <span class="m-hide2">적정 </span>시작</button><button class="btn" id="titStep">+0.5 mL</button><button class="btn ghost" id="titReset">↺<span class="m-hide"> 처음으로</span></button></div>
+      <label class="chk small"><input type="checkbox" id="titMarks" checked> 반중화점 · 중화점 · 완충 구간 표시</label>
       <label class="chk small"><input type="checkbox" id="titCmp" checked> 비교 곡선 겹치기 (<span id="titCmpName">강산 HCl</span>)</label>
       <label class="chk small"><input type="checkbox" id="titFull"> 전체 곡선 미리 보기</label>
     </div>
@@ -751,7 +765,7 @@ main{padding:12px 16px}
     <div class="card">
       <h3>직접 조절해 보기</h3>
       <div class="fld"><div class="row"><span>혈액에 들어온 산 (젖산 등)</span><b id="bioAcidTxt">0 mM</b></div><input type="range" id="bioAcid" min="0" max="12" step="1" value="0"></div>
-      <div class="fld"><div class="row"><span>호흡 세기</span><b id="bioPTxt">보통</b></div><input type="range" id="bioP" min="20" max="70" step="1" value="50">
+      <div class="fld"><div class="row"><span>호흡 세기</span><b id="bioPTxt">보통</b></div><input type="range" id="bioP" min="30" max="70" step="1" value="50">
         <div class="range-labels"><span>← 약한 호흡</span><span>정상</span><span>빠르고 깊은 호흡 →</span></div>
         <div class="small muted" id="bioPSub" style="font-weight:500"></div></div>
       <label class="chk small"><input type="checkbox" id="bioLung" checked> 폐에서 CO₂를 내보낼 수 있음 (열린 계)</label>
@@ -784,11 +798,12 @@ main{padding:12px 16px}
       <div class="info"><p>교과서의 완충 용액은 약산 : 짝염기 = 1 : 1일 때 가장 튼튼하다고 배워요. 그런데 혈액은 HCO₃⁻가 H₂CO₃보다 약 <b>20배</b> 많아요.</p>
       <p>① 우리 몸은 대사 과정에서 <b>산이 훨씬 많이</b> 생겨요(젖산, CO₂ 등). 그래서 산을 막는 HCO₃⁻를 넉넉히 준비해 둔 셈이에요.</p>
       <p>② 산을 막고 생긴 H₂CO₃는 CO₂가 되어 <b>폐로 빠져나가요</b>. 생성물이 계속 제거되니(열린 계) 적은 H₂CO₃로도 문제가 없어요.</p>
-      <p>③ 염기 쪽은 <b>신장</b>이 HCO₃⁻를 내보내거나 다시 흡수해 천천히 조절해요.</p></div></details>
+      <p>③ 염기 쪽은 <b>콩팥(신장)</b>이 HCO₃⁻를 내보내거나 다시 흡수해 천천히 조절해요.</p>
+      <p class="small muted">※ 20 : 1은 체온(37 °C)에서 혈액에 녹아 있는 CO₂ 전체를 H₂CO₃로 셈한 값이에요. ⑤ 탭의 실험실 조건(25 °C, Ka 4.3 × 10⁻⁷)에서는 약 10 : 1일 때 pH 7.4가 돼요.</p></div></details>
     <details class="card"><summary>몸속의 다른 완충계</summary>
       <div class="info"><p><b>인산 완충계</b> (세포 속, 오줌): H₂PO₄⁻ ⇌ H⁺ + HPO₄²⁻</p>
       <p class="small">H₂PO₄⁻와 HPO₄²⁻를 1 : 1로 섞으면 pH가 약 7.2로 세포 속 pH(약 7.0~7.2)와 가까워 완충 효과가 커요.</p>
-      <p><b>단백질 완충계</b>: 단백질의 –COO⁻, –NH₂ 같은 부분이 H⁺를 받거나 내놓아요. 적혈구의 <b>헤모글로빈</b>이 대표적이에요.</p>
+      <p><b>단백질 완충계</b>: 단백질의 –COOH는 H⁺를 내놓고, –NH₂는 H⁺를 받아요. 적혈구의 <b>헤모글로빈</b>이 대표적이에요.</p>
       <p class="small muted">⑤ 완충 용액 만들기 탭에서 NaH₂PO₄와 Na₂HPO₄로 인산 완충 용액을 직접 만들어 보세요!</p></div></details>
   </div>
 </section>
@@ -921,7 +936,7 @@ class MicroView{
   draw(){const s=this.size;if(!s)return;const ctx=this.ctx,R=s/2-4,cx=s/2,cy=s/2;ctx.clearRect(0,0,s,s);
     ctx.save();ctx.beginPath();ctx.arc(cx,cy,R,0,6.283);const g=ctx.createRadialGradient(cx-R*.35,cy-R*.35,R*.1,cx,cy,R);g.addColorStop(0,'#fdfeff');g.addColorStop(1,'#d8e9fa');ctx.fillStyle=g;ctx.fill();ctx.clip();
     ctx.fillStyle='rgba(110,150,205,.22)';for(const[a,b]of this.dots){ctx.beginPath();ctx.arc(cx+a*R,cy+b*R,1.5,0,6.283);ctx.fill()}
-    const fs=Math.max(9,Math.round(s*.036));ctx.textAlign='center';ctx.textBaseline='middle';
+    const fs=Math.max(10.5,Math.round(s*.04));ctx.textAlign='center';ctx.textBaseline='middle';
     for(const p of this.parts){if(p.delay>0||p.dead)continue;const inf=TI[p.t];const lab=(p.st==='rise'&&this.riseLabel)?this.riseLabel:inf.lab;const f=inf.small?Math.round(fs*.85):fs;
       ctx.font=`700 ${f}px sans-serif`;const w=ctx.measureText(lab).width+f*.95,h=f*1.6,x=cx+p.x*R,y=cy+p.y*R;
       ctx.globalAlpha=clamp(p.a,0,1);this.pill(ctx,x,y,w,h,h/2);ctx.fillStyle=(p.st==='rise'&&this.riseLabel)?'#9aa7b6':inf.col;ctx.fill();
@@ -949,8 +964,8 @@ class Chart{
     const x=this.ctx;x.setTransform(dp,0,0,dp,0,0);x.clearRect(0,0,w,h);const K=this.c.closest('.card.fs')?1.9:1,F=K>1?1.35:1;const o=this.o,d=this.d,L=38*F,R=12,T=10,B=38*F,pw=w-L-R,ph=h-T-B;
     const X=v=>L+(v-o.x0)/(o.x1-o.x0)*pw,Y=v=>T+(1-(v-o.y0)/(o.y1-o.y0))*ph;
     x.fillStyle='#fff';x.fillRect(L,T,pw,ph);
-    for(const b of d.bands||[]){x.fillStyle=b.col;x.fillRect(X(b.x0),T,X(b.x1)-X(b.x0),ph);if(b.label){x.fillStyle=b.tc;x.font=`700 ${Math.round(11*F)}px sans-serif`;x.textAlign='center';x.textBaseline='top';x.fillText(b.label,(X(b.x0)+X(b.x1))/2,b.top?T+4:T+ph-18)}}
-    x.strokeStyle='#e7ecf3';x.lineWidth=1;x.font=`${Math.round(11*F)}px sans-serif`;x.fillStyle='#5d6d81';
+    for(const b of d.bands||[]){x.fillStyle=b.col;x.fillRect(X(b.x0),T,X(b.x1)-X(b.x0),ph);if(b.label){x.fillStyle=b.tc;x.font=`700 ${Math.round(12.5*F)}px sans-serif`;x.textAlign='center';x.textBaseline='top';x.fillText(b.label,(X(b.x0)+X(b.x1))/2,b.top?T+4:T+ph-18)}}
+    x.strokeStyle='#e7ecf3';x.lineWidth=1;x.font=`${Math.round(12.5*F)}px sans-serif`;x.fillStyle='#5d6d81';
     x.textAlign='right';x.textBaseline='middle';for(let v=o.y0;v<=o.y1+1e-9;v+=o.ys){const yy=Y(v);x.beginPath();x.moveTo(L,yy);x.lineTo(L+pw,yy);x.stroke();x.fillText(v,L-5,yy)}
     x.textAlign='center';x.textBaseline='top';for(let v=o.x0;v<=o.x1+1e-9;v+=o.xs){const xx=X(v);x.beginPath();x.moveTo(xx,T);x.lineTo(xx,T+ph);x.stroke();x.fillText(o.xfmt?o.xfmt(v):v,xx,T+ph+4)}
     if(o.zeroLine){x.strokeStyle='#9aa7b6';x.beginPath();x.moveTo(X(0),T);x.lineTo(X(0),T+ph);x.stroke()}
@@ -962,9 +977,9 @@ class Chart{
       if(s.dots){x.fillStyle=s.col;s.pts.forEach(([a,b])=>{x.beginPath();x.arc(X(a),Y(b),2.7*K,0,7);x.fill()})}}
     x.restore();
     for(const m of d.markers||[]){const xx=X(m.x),yy=Y(m.y);x.fillStyle=m.fill||'#fff';x.strokeStyle=m.col||'#222';x.lineWidth=2.2*K;x.beginPath();x.arc(xx,yy,(m.r||5)*K,0,7);x.fill();x.stroke();
-      if(m.label){x.font=`700 ${Math.round(11*F)}px sans-serif`;const tw=x.measureText(m.label).width;let lx=xx+(m.dx??9),ly=yy+(m.dy??-17);if(lx+tw+5>L+pw)lx=xx-tw-12;if(lx<L+3)lx=L+3;if(ly<T+2)ly=yy+8;if(ly>T+ph-16)ly=yy-22;
+      if(m.label){x.font=`700 ${Math.round(12.5*F)}px sans-serif`;const tw=x.measureText(m.label).width;let lx=xx+(m.dx??9),ly=yy+(m.dy??-17);if(lx+tw+5>L+pw)lx=xx-tw-12;if(lx<L+3)lx=L+3;if(ly<T+2)ly=yy+8;if(ly>T+ph-16)ly=yy-22;
         x.fillStyle='rgba(255,255,255,.9)';x.fillRect(lx-3,ly-2,tw+6,16*F);x.fillStyle=m.col||'#222';x.textAlign='left';x.textBaseline='top';x.fillText(m.label,lx,ly)}}
-    const lg=d.series.filter(s=>s.label);if(lg.length){x.font=`600 ${Math.round(11*F)}px sans-serif`;const LH=16*F;x.textAlign='left';x.textBaseline='middle';const wm=Math.max(...lg.map(s=>x.measureText(s.label).width))+30;
+    const lg=d.series.filter(s=>s.label);if(lg.length){x.font=`600 ${Math.round(12.5*F)}px sans-serif`;const LH=16*F;x.textAlign='left';x.textBaseline='middle';const wm=Math.max(...lg.map(s=>x.measureText(s.label).width))+30;
       const pos=d.legend||'tl';const lx=pos[1]==='r'?L+pw-wm-6:L+8,ly=pos[0]==='b'?T+ph-lg.length*LH-8:T+6;
       x.fillStyle='rgba(255,255,255,.9)';x.fillRect(lx-4,ly-2,wm+6,lg.length*LH+4);
       lg.forEach((s,i)=>{const yy=ly+8*F+i*LH;x.strokeStyle=s.col;x.lineWidth=3*K;x.setLineDash(s.dash||[]);x.beginPath();x.moveTo(lx,yy);x.lineTo(lx+18,yy);x.stroke();x.setLineDash([]);x.fillStyle='#2b3a4c';x.fillText(s.label,lx+24*F,yy)})}}
@@ -974,7 +989,7 @@ class Chart{
 let UID=0;
 class Beaker{
   constructor(host,cap=200,n=4){this.cap=cap;this.lv=0;const id='bk'+(UID++);let t='';
-    for(let i=1;i<=n;i++){const y=130-110*i/n;t+=`<line x1="17" x2="26" y1="${y}" y2="${y}" stroke="#7d8da1" stroke-width="1"/><text x="28" y="${y+2.6}" font-size="8" fill="#6b7a8c">${Math.round(cap*i/n)}</text>`}
+    for(let i=1;i<=n;i++){const y=130-110*i/n;t+=`<line x1="17" x2="26" y1="${y}" y2="${y}" stroke="#7d8da1" stroke-width="1"/><text x="28" y="${y+2.6}" font-size="9.5" fill="#6b7a8c">${Math.round(cap*i/n)}</text>`}
     host.innerHTML=`<svg viewBox="4 0 112 136"><defs><clipPath id="${id}"><path d="M17 4 L17 124 Q17 130 23 130 L97 130 Q103 130 103 124 L103 4 Z"/></clipPath></defs>
       <g clip-path="url(#${id})"><rect class="liq" x="0" y="130" width="120" height="0" fill="#dcebfb"/><rect class="lt" x="0" y="130" width="120" height="2.5" fill="#fff" opacity="0"/></g>
       <path d="M9 3 L15 7 L15 124 Q15 132 23 132 L97 132 Q105 132 105 124 L105 7 L111 3" fill="rgba(230,240,250,.25)" stroke="#56677d" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>${t}</svg>`;
@@ -1059,7 +1074,7 @@ function cmpInit(){
   $('#cmpInd').onchange=cmpRender;$('#cmpSpect').onchange=e=>{cmpMV.water.setSpect(e.target.checked);cmpMV.buf.setSpect(e.target.checked)};
   cmpReset()}
 function cmpReset(){CMP.acid=0;CMP.base=0;CMP.last=null;CMP.limit=false;$('#cmpLimit').hidden=true;CMPD.forEach(d=>CMP.hist[d.id]={0:pHof(d.base)});cmpRender();cmpMicroSet(false)}
-function cmpAdd(k){let done=0;const isA=CMP.reag==='HCl';
+function cmpAdd(k){let done=0;const isA=CMP.reag==='HCl';CMP.limit=false;$('#cmpLimit').hidden=true;
   for(let i=0;i<k;i++){
     if(CMP.acid+CMP.base>=150){toast('비커가 가득 찼어요. ↺ 처음으로를 눌러 다시 해 보세요.');break}
     const na=CMP.acid+(isA?1:0),nb=CMP.base+(isA?0:1);
@@ -1079,26 +1094,26 @@ function cmpRender(){const ind=$('#cmpInd').checked;const series=[],markers=[];
 function cmpIonLine(){const net=cmpNet();
   CMPD.forEach(d=>{const s=species(cmpMix(d)),h=s.H3O*1000,o=s.OH*1000,pH=pHof(cmpMix(d)),el=$(d.id==='water'?'#cmpPhW':'#cmpPhB');let t;
     const cnt=v=>v>=0.5?`${Math.round(v)}개`:`0개 <span class="muted">(${v<0.001?'0.001 미만':fmt(v,3)} mmol)</span>`;
-    if(net<0)t=`넣은 H₃O⁺ ${-net}개 → 남은 <b class="h">H₃O⁺ ${cnt(h)}</b>`;
-    else if(net>0)t=`넣은 OH⁻ ${net}개 → 남은 <b class="o">OH⁻ ${cnt(o)}</b>`;
+    if(net<0)t=`${CMP.base>0?'중화하고 남은':'넣은'} H₃O⁺ ${-net}개 → 남은 <b class="h">H₃O⁺ ${cnt(h)}</b>`;
+    else if(net>0)t=`${CMP.acid>0?'중화하고 남은':'넣은'} OH⁻ ${net}개 → 남은 <b class="o">OH⁻ ${cnt(o)}</b>`;
     else t=`남은 <b class="h">H₃O⁺ ${cnt(h)}</b> · <b class="o">OH⁻ ${cnt(o)}</b>`;
     el.innerHTML=`${t}<br>→ <b>pH ${fmt(pH)}</b>`})}
 function cmpInfo(){const net=cmpNet();let h='';cmpIonLine();
-  const KEY=`<div class="key-big"><span class="kt">🔑 pH를 정하는 것은 용액에 남아 있는 H₃O⁺(H⁺)와 OH⁻의 양이에요.</span><div class="kr"><span style="color:#c62828">H₃O⁺가 많이 남을수록 → pH ↓ (산성)</span><span style="color:#6a2fc4">OH⁻가 많이 남을수록 → pH ↑ (염기성)</span></div><span class="kn">💧 물속의 H⁺는 물 분자와 결합해 H₃O⁺로 있어요.</span></div>`;
+  const KEY=`<div class="key-big"><span class="kt">🔑 pH를 정하는 것은 용액에 남아 있는 H₃O⁺(H⁺)와 OH⁻의 농도예요.</span><div class="kr"><span style="color:#c62828">H₃O⁺가 많이 남을수록 → pH ↓ (산성)</span><span style="color:#6a2fc4">OH⁻가 많이 남을수록 → pH ↑ (염기성)</span></div><span class="kn">💧 부피가 같으면 남은 양(mmol)이 많을수록 농도가 커요. · 물속의 H⁺는 물 분자와 결합해 H₃O⁺로 있어요.</span></div>`;
   if(!CMP.last&&net===0){h=`<div class="def-big">💧 <b>완충 용액</b>은 산이나 염기를 조금 넣어도 <b>pH가 거의 변하지 않는 용액</b>이에요.<br><span class="small">약산과 그 짝염기(또는 약염기와 그 짝산)가 함께 들어 있어요. <button class="link" data-pop="pair">왜 짝산·짝염기가 있으면 될까?</button></span></div>`+KEY+`<p>두 비커에 <b>1 M HCl</b> 또는 <b>1 M NaOH</b>를 똑같이 넣고, 미시 세계에서 <b>H₃O⁺와 OH⁻가 남는지, 사라지는지</b> 살펴보세요.</p>
     <p class="small muted">💡 밑줄 친 용어에 마우스를 올리면(휴대폰은 누르면) 뜻을 볼 수 있어요.</p>`;$('#cmpInfo').innerHTML=h;return}
   const amt=Math.abs(net),W=CMPD[0],B=CMPD[1],sw=species(cmpMix(W)),sb=species(cmpMix(B)),pw0=CMP.hist.water[0],pw=pHof(cmpMix(W)),pb0=CMP.hist.buf[0],pb=pHof(cmpMix(B));
-  h+=KEY+`<div class="sec-t">지금까지 넣은 양: ${net<0?`1 M HCl ${amt} mL (H₃O⁺ ${amt} mmol)`:net>0?`1 M NaOH ${amt} mL (OH⁻ ${amt} mmol)`:'산과 염기가 같은 양 (서로 중화)'}</div>`;
+  h+=KEY+`<div class="sec-t">지금까지 넣은 양: ${CMP.acid>0&&CMP.base>0?`1 M HCl ${CMP.acid} mL + 1 M NaOH ${CMP.base} mL → ${net===0?'같은 양이라 서로 중화':`서로 중화하고 남은 ${net<0?'H₃O⁺':'OH⁻'} ${amt} mmol`}`:net<0?`1 M HCl ${amt} mL (H₃O⁺ ${amt} mmol)`:`1 M NaOH ${amt} mL (OH⁻ ${amt} mmol)`}</div>`;
   if(net<0){
     h+=`<div class="sec-t" style="color:#56677d">증류수</div><div class="eq red">HCl + H₂O → H₃O⁺ + Cl⁻</div>
       <p class="small">넣은 H₃O⁺를 없애 줄 입자가 없어 <b>H₃O⁺ ${fmt(sw.H3O*1000,1)} mmol이 그대로 남아요</b> → H₃O⁺가 많아져 pH ${fmt(pw0)} → <b>${fmt(pw)}</b> (${deltaHTML(pw-pw0)})</p>
       <div class="sec-t" style="color:#2f6fec">완충 용액</div><div class="eq green">CH₃COO⁻ + H₃O⁺ → CH₃COOH + H₂O</div>
-      <p class="small">짝염기 <b>CH₃COO⁻가 H₃O⁺를 받아</b> CH₃COOH가 돼요. 넣은 H₃O⁺가 <b>반응으로 사라져서</b> 남은 H₃O⁺는 ${fmt(sb.H3O*1000,4)} mmol뿐 → pH ${fmt(pb0)} → <b>${fmt(pb)}</b> (${deltaHTML(pb-pb0)})</p>`}
+      <p class="small">${sb.H3O*1000>=0.05?`짝염기 <b>CH₃COO⁻가 거의 다 반응해</b> 더 받아 줄 입자가 없어요(완충 한계를 넘음). 그래서 <b>H₃O⁺ ${fmt(sb.H3O*1000,1)} mmol이 그대로 남아요</b>`:`짝염기 <b>CH₃COO⁻가 H₃O⁺를 받아</b> CH₃COOH가 돼요. 넣은 H₃O⁺가 <b>반응으로 사라져서</b> 남은 H₃O⁺는 ${fmt(sb.H3O*1000,4)} mmol뿐`} → pH ${fmt(pb0)} → <b>${fmt(pb)}</b> (${deltaHTML(pb-pb0)})</p>`}
   else if(net>0){
     h+=`<div class="sec-t" style="color:#56677d">증류수</div><div class="eq blue">NaOH → Na⁺ + OH⁻</div>
       <p class="small">넣은 <b>OH⁻ ${fmt(sw.OH*1000,1)} mmol이 그대로 남아요</b> → OH⁻가 많아져 pH ${fmt(pw0)} → <b>${fmt(pw)}</b> (${deltaHTML(pw-pw0)})</p>
       <div class="sec-t" style="color:#2f6fec">완충 용액</div><div class="eq green">CH₃COOH + OH⁻ → CH₃COO⁻ + H₂O</div>
-      <p class="small">약산 <b>CH₃COOH가 OH⁻와 반응</b>해 물이 돼요. 넣은 OH⁻가 <b>사라져서</b> 남은 OH⁻는 거의 없어요 → pH ${fmt(pb0)} → <b>${fmt(pb)}</b> (${deltaHTML(pb-pb0)})</p>`}
+      <p class="small">${sb.OH*1000>=0.05?`약산 <b>CH₃COOH가 거의 다 반응해</b> 더 막아 줄 입자가 없어요(완충 한계를 넘음). 그래서 <b>OH⁻ ${fmt(sb.OH*1000,1)} mmol이 그대로 남아요</b>`:`약산 <b>CH₃COOH가 OH⁻와 반응</b>해 물이 돼요. 넣은 OH⁻가 <b>사라져서</b> 남은 OH⁻는 거의 없어요`} → pH ${fmt(pb0)} → <b>${fmt(pb)}</b> (${deltaHTML(pb-pb0)})</p>`}
   else h+=`<p class="small">넣은 H₃O⁺와 OH⁻가 서로 중화되어 두 비커 모두 처음과 거의 같아요.</p>`;
   h+=`<p class="small muted">완충 용액 속 남은 양 → CH₃COOH ${fmt(sb.HA*1000,1)} mmol · CH₃COO⁻ ${fmt(sb.A*1000,1)} mmol</p>`;
   if(amt>=9)h+=`<div class="warnbox">완충 용액의 ${net<0?'CH₃COO⁻':'CH₃COOH'}를 거의 다 써 버렸어요! 이제는 넣은 ${net<0?'H₃O⁺':'OH⁻'}가 반응하지 못하고 남기 때문에 완충 용액도 pH가 크게 변해요. → <b>② 완충 용량</b> 탭에서 더 알아보세요.</div>`;
@@ -1121,7 +1136,7 @@ function prInit(){
   $('#prTestA').onclick=()=>prTest('HCl');$('#prTestB').onclick=()=>prTest('NaOH');$$('[data-test]').forEach(b=>b.onclick=()=>prTest(b.dataset.test));
   $('#prInd').onchange=()=>prUpdate('none');$('#prSpect').onchange=e=>prMV.setSpect(e.target.checked);
   prCylLabel();prUpdate('rebuild')}
-function prCylLabel(){const c=PR.cyl;$('#prCylLabel').innerHTML=c?`<b>${RG[c.key].f}</b><br>${c.key==='water'?'':c.conc+' M · '}${c.vol} mL${c.key==='water'?'':`<br><span class="muted small">= ${fmt(c.conc*c.vol,c.conc*c.vol<1?3:1)} mmol</span>`}`:'비어 있음<br><span class="muted small">위에서 시약을 고르고 재 보세요</span>'}
+function prCylLabel(){const c=PR.cyl;$('#prCylLabel').innerHTML=c?`<b>${RG[c.key].f}</b><br>${c.key==='water'?'':c.conc+' M · '}${c.vol} mL${c.key==='water'?'':`<br><span class="muted small">= ${fmt(c.conc*c.vol,c.conc*c.vol<1?3:2)} mmol</span>`}`:'비어 있음<br><span class="muted small">위에서 시약을 고르고 재 보세요</span>'}
 function prTake(){const key=$('#prReagent').value,conc=+$('#prConc').value,vol=+$('#prVol').value;
   if(PR.cyl){toast('실린더에 이미 시약이 있어요. 먼저 비커에 붓거나 비워 주세요.');return}
   PR.cyl={key,conc:key==='water'?0:conc,vol};prCyl.set(vol,key==='water'?'#dcebfb':'#bfe0ff');prCylLabel()}
@@ -1139,11 +1154,11 @@ function prTest(reag){const m=PR.m;if(m.V<=0){toast('비커가 비어 있어요.
   const w0=mk({V:m.V*1000}),w1=pHof(addStrong(w0,reag,1,1));
   $('#prTestRes').innerHTML=`<b>${reag==='HCl'?'1 M HCl':'1 M NaOH'} 1 mL</b>를 넣었더니 → 이 용액: pH ${fmt(p0)} → <b>${fmt(p1)}</b> (${deltaHTML(p1-p0)})<br><span class="muted">같은 부피(${fmt(m.V*1000,0)} mL)의 증류수였다면: 7.00 → ${fmt(w1)} (${deltaHTML(w1-7)})</span>`;
   {const mi=$('#prTestMini');if(mi)mi.innerHTML=`pH ${fmt(p0)} → <b>${fmt(p1)}</b> (${deltaHTML(p1-p0)}) · 증류수였다면 7.00 → ${fmt(w1)}`;}
-  const k=Math.max(1,Math.round(PR.scale));prMV.inject(reag==='HCl'?'H3O':'OH',k,reag==='HCl'?'Cl':'Na');prUpdate('inject')}
-function prUpdate(mode){const m=PR.m,V=m.V*1000,pH=V>0?pHof(m):null;
+  const k=Math.round(PR.scale);if(k>0)prMV.inject(reag==='HCl'?'H3O':'OH',k,reag==='HCl'?'Cl':'Na');prUpdate('inject')}
+function prUpdate(mode){const m=PR.m,V=m.V*1000,pH=V>0?pHof(m):null;prMV.empty=V>0?'이 배율에서는 보이는 입자가 없어요\n(거의 다 물 분자)':'비커가 비어 있어요';
   $('#prPh').textContent=pH==null?'—':fmt(pH);$('#prVnow').textContent=fmt(V,0)+' mL';
   prBk.set(V,pH==null?'#dcebfb':($('#prInd').checked?uniColor(pH):'#dcebfb'));
-  $('#prList').innerHTML=PR.log.length?PR.log.map(e=>`<div class="li"><b>${RG[e.key].f}${e.test?' <span>(시험)</span>':''}</b><span>${e.key==='water'?'':e.conc+' M · '}${e.vol} mL${e.key==='water'?'':' · '+fmt(e.conc*e.vol,e.conc*e.vol<1?3:1)+' mmol'}</span></div>`).join('')+`<div class="li"><b>합계</b><span>${fmt(V,0)} mL</span></div>`:'<span class="muted">아직 아무것도 넣지 않았어요.</span>';
+  $('#prList').innerHTML=PR.log.length?PR.log.map(e=>`<div class="li"><b>${RG[e.key].f}${e.test?' <span>(시험)</span>':''}</b><span>${e.key==='water'?'':e.conc+' M · '}${e.vol} mL${e.key==='water'?'':' · '+fmt(e.conc*e.vol,e.conc*e.vol<1?3:2)+' mmol'}</span></div>`).join('')+`<div class="li"><b>합계</b><span>${fmt(V,0)} mL</span></div>`:'<span class="muted">아직 아무것도 넣지 않았어요.</span>';
   const j=judge(m);prJudge(j);const nI=neutInfo();if(nI)$('#prJudge').insertAdjacentHTML('afterbegin',neutHTML(nI));PR.neut=nI;prEq(j);
   if(mode==='rescale'){PR.scale=niceScale(m);prMV.setComposition(countsOf(m,PR.scale),true)}
   else if(mode==='rebuild'){PR.scale=niceScale(m);prMV.setComposition(countsOf(m,PR.scale),false)}
@@ -1208,7 +1223,7 @@ const MISSIONS=[
       if(!(u.has('CH3COOH')&&u.has('NaOH')))return 'CH₃COOH와 NaOH를 모두 사용해야 해요.';if(j.ok)return true;return (j.r>20||!j.k)?'NaOH가 너무 많아 CH₃COOH가 거의 다 중화됐어요. NaOH의 양(mmol)을 CH₃COOH보다 적게 줄여 보세요.':'NaOH가 너무 적어 CH₃COO⁻가 거의 생기지 않았어요. NaOH를 조금 더 넣어 보세요.'}},
   {id:3,t:'염기성 완충 용액',d:'pH 8 이상인 완충 용액을 만들어 보세요.',hint:'약염기 NH₃와, 그 짝산 NH₄⁺를 내놓는 NH₄Cl을 떠올려 보세요.',
     check:(m,u,j)=>!j.ok?j.msg||'완충 용액이 아니에요.':j.pH<8?`완충 용액이지만 pH ${fmt(j.pH)}예요. pH 8 이상이 되어야 해요.`:true},
-  {id:4,t:'혈액과 비슷하게',d:'탄산수소 나트륨(NaHCO₃)을 이용해 혈액처럼 pH 7.35 ~ 7.45인 완충 용액을 만들어 보세요.',hint:'혈액의 완충 쌍은 H₂CO₃ / HCO₃⁻예요. NaHCO₃에 HCl을 조금 넣으면 HCO₃⁻ 일부가 H₂CO₃로 바뀌어요(HCO₃⁻ + H⁺ → H₂CO₃). 혈액처럼 HCO₃⁻가 H₂CO₃보다 약 10~20배 많게 만들어 보세요!',
+  {id:4,t:'혈액과 비슷하게',d:'탄산수소 나트륨(NaHCO₃)을 이용해 혈액처럼 pH 7.35 ~ 7.45인 완충 용액을 만들어 보세요.',hint:'혈액의 완충 쌍은 H₂CO₃ / HCO₃⁻예요. NaHCO₃에 HCl을 조금 넣으면 HCO₃⁻ 일부가 H₂CO₃로 바뀌어요(HCO₃⁻ + H⁺ → H₂CO₃). 이 실험실(25 °C)에서는 HCO₃⁻가 H₂CO₃보다 약 10배 많을 때 pH 7.4가 돼요. (실제 혈액은 체온에서 녹아 있는 CO₂까지 합쳐 셈하기 때문에 약 20배예요.)',
     check:(m,u,j)=>!u.has('NaHCO3')?'NaHCO₃를 사용해야 해요.':!j.ok?(j.r>20?'HCO₃⁻만 거의 있고 짝산 H₂CO₃가 부족해요. HCl을 조금 넣어 HCO₃⁻ 일부를 H₂CO₃로 바꿔 보세요.':j.msg||'완충 용액이 아니에요.'):j.acid!=='H2CO3'?'혈액과 같은 H₂CO₃ / HCO₃⁻ 완충 쌍이 되어야 해요. NaHCO₃에 산을 조금 넣어 H₂CO₃를 만들어 보세요.':(j.pH<7.35||j.pH>7.45)?`H₂CO₃ / HCO₃⁻ 완충 용액이 되었어요! 그런데 pH가 ${fmt(j.pH)}예요. 7.35 ~ 7.45가 되도록 HCl 양을 조절해 보세요.`:true},
   {id:5,t:'튼튼한 완충 용액',d:'1 M HCl 5 mL를 넣어도 pH가 0.3 이하로 변하는 완충 용액을 만들어 보세요. (총 부피 200 mL 이하)',hint:'완충 용량은 농도가 진할수록, 산 : 짝염기 비가 1 : 1에 가까울수록 커요.',
     check:(m,u,j)=>{if(!j.ok)return j.msg||'완충 용액이 아니에요.';if(m.V>0.2+1e-9)return `총 부피가 ${fmt(m.V*1000,0)} mL예요. 200 mL 이하로 만들어 주세요.`;
@@ -1216,7 +1231,7 @@ const MISSIONS=[
   {id:6,t:'목표 pH 5.0 (심화)',d:'아세트산 완충 용액으로 pH를 4.9 ~ 5.1에 맞춰 보세요.',hint:'아세트산 쌍은 1 : 1일 때 pH 4.7이에요. 0.3 올리려면 CH₃COO⁻ : CH₃COOH = 2 : 1로! 🎯 pH 도우미를 참고하세요.',
     check:(m,u,j)=>!j.ok?j.msg||'완충 용액이 아니에요.':j.acid!=='HA'?'아세트산 완충 용액이어야 해요.':(j.pH<4.9||j.pH>5.1)?`지금 pH는 ${fmt(j.pH)}예요. 조금 더 조절해 보세요.`:true}
 ];
-let misDone=new Set();try{misDone=new Set(JSON.parse(localStorage.getItem('bufferLabMissions')||'[]'))}catch(e){}
+let misDone=new Set();try{const a=JSON.parse(localStorage.getItem('bufferLabMissions')||'[]');if(Array.isArray(a))misDone=new Set(a.filter(x=>MISSIONS.some(m=>m.id===x)))}catch(e){}
 function misSave(){try{localStorage.setItem('bufferLabMissions',JSON.stringify([...misDone]))}catch(e){}}
 function misRender(){const sel=$('#misSel'),cur=PR.mission||'';
   sel.innerHTML=`<option value="">🧪 자유 실험 (미션 없이 만들기)</option>`+MISSIONS.map(ms=>`<option value="${ms.id}">${misDone.has(ms.id)?'✅':'⬜'} 미션 ${ms.id}. ${ms.t}</option>`).join('');sel.value=cur;
@@ -1235,8 +1250,8 @@ const CAP={mode:'conc',reag:'HCl',added:0,timer:null};
 const CAPD={
   conc:[{id:'A',name:'A. 묽은 완충 용액',sub:'0.02 M CH₃COOH + 0.02 M CH₃COONa',o:{V:100,acetate:4,Na:2},col:'#e9902f'},
         {id:'B',name:'B. 진한 완충 용액',sub:'0.2 M CH₃COOH + 0.2 M CH₃COONa',o:{V:100,acetate:40,Na:20},col:'#2f6fec'}],
-  ratio:[{id:'A',name:'A. 성분비 9 : 1',sub:'CH₃COOH 18 mmol + CH₃COO⁻ 2 mmol',o:{V:100,acetate:20,Na:2},col:'#e9902f'},
-         {id:'B',name:'B. 성분비 1 : 1',sub:'CH₃COOH 10 mmol + CH₃COO⁻ 10 mmol',o:{V:100,acetate:20,Na:10},col:'#2f6fec'}]};
+  ratio:[{id:'A',name:'A. 약산 : 짝염기 = 9 : 1',sub:'CH₃COOH 18 mmol + CH₃COO⁻ 2 mmol',o:{V:100,acetate:20,Na:2},col:'#e9902f'},
+         {id:'B',name:'B. 약산 : 짝염기 = 1 : 1',sub:'CH₃COOH 10 mmol + CH₃COO⁻ 10 mmol',o:{V:100,acetate:20,Na:10},col:'#2f6fec'}]};
 let capChart,capMV={},capBk={};
 function capMix(d,x){return addStrong(mk(d.o),CAP.reag,x,x)}
 function capInit(){capChart=new Chart($('#capChart'),{x0:0,x1:25,y0:0,y1:14,xs:5,ys:2,xl:'넣은 양 (mL) — 1 mL = 1 mmol',yl:'pH'});
@@ -1245,7 +1260,7 @@ function capInit(){capChart=new Chart($('#capChart'),{x0:0,x1:25,y0:0,y1:14,xs:5
   $('#capStep').onclick=()=>capStep();$('#capPlay').onclick=capPlay;$('#capReset').onclick=capReset;$('#capSpect').onchange=e=>{capMV.A.setSpect(e.target.checked);capMV.B.setSpect(e.target.checked)};capReset()}
 function capStopPlay(){clearInterval(CAP.timer);CAP.timer=null;const b=$('#capPlay');b.innerHTML=(CAP.added>0&&CAP.added<25)?'▶<span class="m-hide"> 이어서 넣기</span>':'▶<span class="m-hide"> 계속 넣기</span>'}
 function capPlay(){if(CAP.timer){capStopPlay();return}if(CAP.added>=25)capReset();$('#capPlay').innerHTML='⏸<span class="m-hide"> 일시정지</span>';CAP.timer=setInterval(()=>{if(!capStep())capStopPlay()},650)}
-function capReset(){capStopPlay();CAP.added=0;$('#capLimit').hidden=true;CAPD[CAP.mode].forEach(d=>$('#capMt'+d.id).textContent=d.name);
+function capReset(){CAP.added=0;capStopPlay();$('#capLimit').hidden=true;CAPD[CAP.mode].forEach(d=>$('#capMt'+d.id).textContent=d.name);
   $('#capBeakers').innerHTML=CAPD[CAP.mode].map(d=>`<div class="bk-card" id="cap-${d.id}" style="--c:${d.col}"><div class="bk-name">${d.name}</div><div class="bk-sub">${d.sub} (100 mL)</div><div class="bk-vis"></div><div class="bk-ph"><span>pH</span><b>—</b></div><div class="bk-d"></div><div class="bk-bar"><i></i></div><div class="bk-rem"></div></div>`).join('');
   CAPD[CAP.mode].forEach(d=>capBk[d.id]=new Beaker($(`#cap-${d.id} .bk-vis`),200));capRender();capMicroSet(false)}
 function capStep(){if(CAP.added>=25){toast('25 mL까지만 넣을 수 있어요.');return false}
@@ -1255,8 +1270,8 @@ function capMicroSet(anim){CAPD[CAP.mode].forEach(d=>capMV[d.id].setComposition(
 function capRender(){const isA=CAP.reag==='HCl',x=CAP.added,defs=CAPD[CAP.mode];const series=[],markers=[];
   $('#capAdded').innerHTML=`넣은 양: <b>1 M ${CAP.reag} ${x} mL</b> (= ${x} mmol)`;
   const lim={};
-  defs.forEach(d=>{const p0=pHof(mk(d.o)),pts=[];let li=null;for(let i=0;i<=x;i++){const p=pHof(capMix(d,i));pts.push([i,p]);if(li==null&&Math.abs(p-p0)>=1)li=[i,p]}
-    const p=pts[pts.length-1][1],s0=species(mk(d.o)),s=species(capMix(d,x)),key=isA?'A':'HA',r0=s0[key]*1000,r=Math.max(0,s[key]*1000);
+  defs.forEach(d=>{const p0=pHof(mk(d.o)),pts=[],s0=species(mk(d.o)),key=isA?'A':'HA',r0=s0[key]*1000;let li=null;for(let i=0;i<=x;i++){const mi=capMix(d,i),p=pHof(mi);pts.push([i,p]);if(li==null&&i>0&&species(mi)[key]*1000<=0.1*r0)li=[i,p]}
+    const p=pts[pts.length-1][1],s=species(capMix(d,x)),r=Math.max(0,s[key]*1000);
     const c=$('#cap-'+d.id);$('.bk-ph b',c).textContent=fmt(p);$('.bk-d',c).innerHTML=deltaHTML(p-p0);capBk[d.id].set(100+x,uniColor(p));
     $('.bk-bar i',c).style.width=clamp(r/Math.max(r0,s0[isA?'HA':'A']*1000,1e-9)*100,0,100)+'%';
     $('.bk-rem',c).innerHTML=`${isA?'H₃O⁺를 막는 CH₃COO⁻':'OH⁻를 막는 CH₃COOH'} 남은 양: <b>${fmt(r,1)} mmol</b><br>pH를 바꾸는 ${isA?'<b style="color:#c62828">H₃O⁺</b>':'<b style="color:#6a2fc4">OH⁻</b>'} 남은 양: <b>${fmt((isA?s.H3O:s.OH)*1000,(isA?s.H3O:s.OH)*1000<0.1?4:1)} mmol</b>`;
@@ -1270,7 +1285,7 @@ function capRender(){const isA=CAP.reag==='HCl',x=CAP.added,defs=CAPD[CAP.mode];
     <p>① <b>농도가 진할수록</b> 막아 줄 입자가 많아 완충 용량이 커요.</p><p>② <b>약산 : 짝염기 비가 1 : 1에 가까울수록</b> 산과 염기를 모두 고르게 막아요.</p>`;
   if(CAP.mode==='ratio')h+=`<p class="small muted">💡 9 : 1 용액은 CH₃COO⁻가 적어 산(HCl)에는 금방 무너지지만, NaOH에는 꽤 오래 버텨요. 넣을 물질을 바꿔 확인해 보세요!</p>`;
   const done=defs.filter(d=>lim[d.id]!=null);
-  if(done.length)h+=`<div class="warnbox">${done.map(d=>`<b>${d.id}</b>는 ${lim[d.id]} mL에서 완충 한계에 도달 (pH 1 이상 변화)`).join('<br>')}<br>${isA?'CH₃COO⁻':'CH₃COOH'}가 거의 다 소모되면 더 이상 막을 수 없어 pH가 급변해요.</div>`;
+  if(done.length)h+=`<div class="warnbox">${done.map(d=>`<b>${d.id}</b>는 ${lim[d.id]} mL에서 완충 한계에 도달 (막아 줄 입자가 처음의 10 % 아래로 줄어듦)`).join('<br>')}<br>${isA?'CH₃COO⁻':'CH₃COOH'}가 거의 다 소모되면 더 이상 막을 수 없어 pH가 급변해요.</div>`;
   else if(x>0)h+=`<div class="okbox">아직 두 용액 모두 버티고 있어요. 계속 넣어 보세요!</div>`;
   h+=`<div class="sec-t">완충 한계 이후</div><div class="eq ${isA?'red':'blue'}">${isA?'HCl + H₂O → H₃O⁺ + Cl⁻ <small>(남은 H₃O⁺가 쌓임)</small>':'NaOH → Na⁺ + OH⁻ <small>(남은 OH⁻가 쌓임)</small>'}</div>`;
   $('#capInfo').innerHTML=h}
@@ -1291,10 +1306,11 @@ function titInit(){titChart=new Chart($('#titChart'),{x0:0,x1:50,y0:0,y1:14,xs:1
   $('#titType').onchange=e=>{TIT.type=e.target.value;titReset()};$('#titInd').onchange=titRender;
   $('#titV').oninput=e=>titSetV(+e.target.value);$('#titPlay').onclick=titPlay;$('#titStep').onclick=()=>titSetV(Math.min(50,TIT.v+.5));$('#titReset').onclick=titReset;
   ['titMarks','titCmp','titFull'].forEach(id=>$('#'+id).onchange=titRender);$('#titSpect').onchange=e=>titMV.setSpect(e.target.checked);titReset()}
-function titStop(){clearInterval(TIT.timer);TIT.timer=null;const b=$('#titPlay');b.innerHTML=(TIT.v>0&&TIT.v<50)?'▶ <span class=\\"m-hide2\\">적정 </span>다시 시작':'▶ <span class=\\"m-hide2\\">적정 </span>시작';b.classList.add('primary');const d=$('#titDrop');d&&d.classList.remove('dripping')}
+function titStop(){clearTimeout(TIT.timer);TIT.timer=null;const b=$('#titPlay');b.innerHTML=(TIT.v>0&&TIT.v<50)?'▶ <span class="m-hide2">적정 </span>이어서 하기':'▶ <span class="m-hide2">적정 </span>시작';b.classList.add('primary');const d=$('#titDrop');d&&d.classList.remove('dripping')}
 function titPlay(){if(TIT.timer){titStop();return}if(TIT.v>=50)titSetV(0);$('#titPlay').innerHTML='⏸ 일시정지';$('#titPlay').classList.remove('primary');$('#titDrop').classList.add('dripping');
-  TIT.timer=setInterval(()=>{const nv=TIT.v+.5;titSetV(Math.min(50,nv));if(nv>=50)titStop()},Math.abs(TIT.v-25)<4?420:260)}
-function titReset(){titStop();const t=TT[TIT.type];$('#titCmpName').textContent=t.cmpName;titBuild();TIT.v=0;TIT.prevV=0;$('#titV').value=0;titRender();titMV.setComposition(countsOf(titMix(TIT.type,0),TSCALE),false)}
+  const tick=()=>{const nv=TIT.v+.5;titSetV(Math.min(50,nv));if(!TIT.timer)return;if(nv>=50){titStop();return}TIT.timer=setTimeout(tick,Math.abs(TIT.v-25)<4?420:260)};
+  TIT.timer=setTimeout(tick,260)}
+function titReset(){TIT.v=0;titStop();const t=TT[TIT.type];$('#titCmpName').textContent=t.cmpName;titBuild();TIT.prevV=0;$('#titV').value=0;titRender();titMV.setComposition(countsOf(titMix(TIT.type,0),TSCALE),false)}
 function titBuild(){const t=TT[TIT.type];let tk='';for(let v=0;v<=50;v+=5){const y=22+v*2.9;tk+=`<line x1="${v%10?104:100}" x2="111" y1="${y}" y2="${y}" stroke="#56677d" stroke-width=".8"/>`+(v%10===0?`<text x="114" y="${y+3}" font-size="8" fill="#46566b">${v}</text>`:'')}
   $('#titApp').innerHTML=`<svg viewBox="20 0 160 306"><defs><clipPath id="burc"><rect x="96" y="20" width="14" height="149"/></clipPath><clipPath id="flc"><path d="${FLASK}"/></clipPath></defs>
     <rect x="28" y="299" width="150" height="6" rx="2" fill="#9aa7b6"/><rect x="40" y="6" width="5" height="294" fill="#b4bfcc"/><rect x="45" y="70" width="50" height="5" fill="#b4bfcc"/>
@@ -1309,26 +1325,26 @@ function titSetV(v){v=Math.round(v*2)/2;const prev=TIT.v;if(v>prev&&tooBig(count
   const t=TT[TIT.type],target=countsOf(titMix(TIT.type,v),TSCALE);
   if(v>prev){const k=Math.round(v*.1*TSCALE)-Math.round(prev*.1*TSCALE);if(k>0)titMV.inject(t.ti==='NaOH'?'OH':'H3O',Math.min(k,12),t.ti==='NaOH'?'Na':'Cl');titMV.setComposition(target,true)}
   else titMV.setComposition(target,v<prev-3?false:true)}
-function titRegion(type,v){const Veq=25,near=Math.abs(v-Veq)<=.75;
+function titRegion(type,v){const Veq=25,near=Math.abs(v-Veq)<.25;
   if(type==='wa'){
     if(v===0)return{h:'시작: 약산 용액',p:'CH₃COOH는 약산이라 일부만 이온화해요. H₃O⁺가 적어 pH가 약 2.9예요.',eq:[['','CH₃COOH + H₂O ⇌ CH₃COO⁻ + H₃O⁺']]};
-    if(v<Veq-.75){if(Math.abs(v-12.5)<=1)return{h:'반당량점: 완충 작용이 가장 강한 곳',tag:'완충 구간',p:'CH₃COOH의 절반이 CH₃COO⁻로 바뀌어 두 입자의 양이 같아요(1 : 1). 산과 염기를 모두 가장 잘 막아요.',adv:'[CH₃COOH] = [CH₃COO⁻]이므로 Ka 식에서 [H₃O⁺] = Ka = 1.8 × 10<sup>−5</sup> M → pH ≈ 4.74',eq:[['blue','CH₃COOH + OH⁻ → CH₃COO⁻ + H₂O'],['green','완충 쌍: CH₃COOH / CH₃COO⁻']]};
-      if(v>=22.5)return{h:'당량점 직전: 완충 능력이 바닥나요',p:'CH₃COOH가 거의 다 소모되어 OH⁻를 막을 입자가 부족해요. pH가 가파르게 오르기 시작해요.',eq:[['blue','CH₃COOH + OH⁻ → CH₃COO⁻ + H₂O']]};
+    if(v<Veq-.25){if(Math.abs(v-12.5)<=1)return{h:'반중화점: 완충 작용이 가장 강한 곳',tag:'완충 구간',p:'CH₃COOH의 절반이 CH₃COO⁻로 바뀌어 두 입자의 양이 같아요(1 : 1). 산과 염기를 모두 가장 잘 막아요.',adv:'[CH₃COOH] = [CH₃COO⁻]이므로 Ka 식에서 [H₃O⁺] = Ka = 1.8 × 10<sup>−5</sup> M → pH = pKa ≈ 4.7',eq:[['blue','CH₃COOH + OH⁻ → CH₃COO⁻ + H₂O'],['green','완충 쌍: CH₃COOH / CH₃COO⁻']]};
+      if(v>=22.5)return{h:'중화점 직전: 완충 능력이 바닥나요',p:'CH₃COOH가 거의 다 소모되어 OH⁻를 막을 입자가 부족해요. pH가 가파르게 오르기 시작해요.',eq:[['blue','CH₃COOH + OH⁻ → CH₃COO⁻ + H₂O']]};
       return{h:'완충 구간',tag:'완충 구간',p:'넣은 OH⁻가 CH₃COOH와 반응해 CH₃COO⁻를 만들어요. 약산과 짝염기가 함께 있는 <b>완충 용액</b>이 되므로 NaOH를 넣어도 pH가 천천히 변해요.',eq:[['blue','CH₃COOH + OH⁻ → CH₃COO⁻ + H₂O'],['green','완충 쌍: CH₃COOH / CH₃COO⁻']]}}
-    if(near)return{h:'당량점',p:'CH₃COOH가 모두 CH₃COO⁻로 바뀌었어요. CH₃COO⁻가 물과 조금 반응해 OH⁻를 만들기 때문에 중성이 아니라 <b>약한 염기성</b>(pH ≈ 8.7)이에요. 그래서 페놀프탈레인이 알맞은 지시약이에요.',eq:[['','CH₃COOH + NaOH → CH₃COONa + H₂O'],['blue','CH₃COO⁻ + H₂O ⇌ CH₃COOH + OH⁻']]};
-    return{h:'당량점 이후',p:'반응할 CH₃COOH가 없어 넣은 OH⁻가 그대로 쌓여요.',eq:[['blue','NaOH → Na⁺ + OH⁻']]}}
+    if(near)return{h:'중화점',p:'CH₃COOH가 모두 CH₃COO⁻로 바뀌었어요. CH₃COO⁻가 물과 조금 반응해 OH⁻를 만들기 때문에 중성이 아니라 <b>약한 염기성</b>(pH ≈ 8.7)이에요. 그래서 페놀프탈레인이 알맞은 지시약이에요.',eq:[['','CH₃COOH + NaOH → CH₃COONa + H₂O'],['blue','CH₃COO⁻ + H₂O ⇌ CH₃COOH + OH⁻']]};
+    return{h:'중화점 이후',p:'반응할 CH₃COOH가 없어 넣은 OH⁻가 그대로 쌓여요.',eq:[['blue','NaOH → Na⁺ + OH⁻']]}}
   if(type==='sa'){
     if(v===0)return{h:'시작: 강산 용액',p:'HCl은 거의 완전히 이온화해 H₃O⁺가 아주 많아요(pH 1.0).',eq:[['red','HCl + H₂O → H₃O⁺ + Cl⁻']]};
-    if(v<Veq-.75){if(v>=22.5)return{h:'당량점 직전',p:'H₃O⁺가 바닥나는 순간 pH가 거의 수직으로 치솟아요.',eq:[['','H₃O⁺ + OH⁻ → 2H₂O']]};
+    if(v<Veq-.25){if(v>=22.5)return{h:'중화점 직전',p:'H₃O⁺가 바닥나는 순간 pH가 거의 수직으로 치솟아요.',eq:[['','H₃O⁺ + OH⁻ → 2H₂O']]};
       return{h:'중화 진행 중 (완충 작용 아님!)',p:'처음에 pH가 천천히 변하는 건 H₃O⁺가 아주 많아서예요. 완충 쌍이 있는 게 아니에요. <b>비교 곡선(약산)</b>과 겹쳐 모양을 비교해 보세요.',eq:[['','H₃O⁺ + OH⁻ → 2H₂O']]}}
-    if(near)return{h:'당량점: 중성 (pH 7)',p:'H₃O⁺와 OH⁻가 모두 반응했어요. 남은 Na⁺, Cl⁻는 물과 반응하지 않아 중성이에요.',eq:[['','HCl + NaOH → NaCl + H₂O']]};
-    return{h:'당량점 이후',p:'넣은 OH⁻가 그대로 쌓여요.',eq:[['blue','NaOH → Na⁺ + OH⁻']]}}
+    if(near)return{h:'중화점: 중성 (pH 7)',p:'H₃O⁺와 OH⁻가 모두 반응했어요. 남은 Na⁺, Cl⁻는 물과 반응하지 않아 중성이에요.',eq:[['','HCl + NaOH → NaCl + H₂O']]};
+    return{h:'중화점 이후',p:'넣은 OH⁻가 그대로 쌓여요.',eq:[['blue','NaOH → Na⁺ + OH⁻']]}}
   if(v===0)return{h:'시작: 약염기 용액',p:'NH₃는 약염기라 물과 일부만 반응해요. pH가 약 11.1이에요.',eq:[['','NH₃ + H₂O ⇌ NH₄⁺ + OH⁻']]};
-  if(v<Veq-.75){if(Math.abs(v-12.5)<=1)return{h:'반당량점: 완충 작용이 가장 강한 곳',tag:'완충 구간',p:'NH₃와 NH₄⁺의 양이 같아요(1 : 1).',adv:'[NH₃] = [NH₄⁺]이므로 Kb 식에서 [OH⁻] = Kb = 1.8 × 10<sup>−5</sup> M → pOH ≈ 4.75, pH ≈ 9.25',eq:[['red','NH₃ + H₃O⁺ → NH₄⁺ + H₂O'],['green','완충 쌍: NH₄⁺ / NH₃']]};
-    if(v>=22.5)return{h:'당량점 직전: 완충 능력이 바닥나요',p:'NH₃가 거의 다 소모되어 pH가 가파르게 떨어지기 시작해요.',eq:[['red','NH₃ + H₃O⁺ → NH₄⁺ + H₂O']]};
+  if(v<Veq-.25){if(Math.abs(v-12.5)<=1)return{h:'반중화점: 완충 작용이 가장 강한 곳',tag:'완충 구간',p:'NH₃와 NH₄⁺의 양이 같아요(1 : 1).',adv:'[NH₃] = [NH₄⁺]이므로 Kb 식에서 [OH⁻] = Kb = 1.8 × 10<sup>−5</sup> M → pOH ≈ 4.75, pH ≈ 9.25',eq:[['red','NH₃ + H₃O⁺ → NH₄⁺ + H₂O'],['green','완충 쌍: NH₄⁺ / NH₃']]};
+    if(v>=22.5)return{h:'중화점 직전: 완충 능력이 바닥나요',p:'NH₃가 거의 다 소모되어 pH가 가파르게 떨어지기 시작해요.',eq:[['red','NH₃ + H₃O⁺ → NH₄⁺ + H₂O']]};
     return{h:'완충 구간',tag:'완충 구간',p:'넣은 H₃O⁺가 NH₃와 반응해 NH₄⁺를 만들어요. 약염기와 짝산이 함께 있는 <b>완충 용액</b>이라 pH가 천천히 변해요.',eq:[['red','NH₃ + H₃O⁺ → NH₄⁺ + H₂O'],['green','완충 쌍: NH₄⁺ / NH₃']]}}
-  if(near)return{h:'당량점',p:'NH₃가 모두 NH₄⁺로 바뀌었어요. NH₄⁺가 물과 조금 반응해 H₃O⁺를 만들므로 <b>약한 산성</b>(pH ≈ 5.3)이에요. 메틸 오렌지가 알맞아요.',eq:[['','NH₃ + HCl → NH₄Cl'],['red','NH₄⁺ + H₂O ⇌ NH₃ + H₃O⁺']]};
-  return{h:'당량점 이후',p:'반응할 NH₃가 없어 넣은 H₃O⁺가 그대로 쌓여요.',eq:[['red','HCl + H₂O → H₃O⁺ + Cl⁻']]}}
+  if(near)return{h:'중화점',p:'NH₃가 모두 NH₄⁺로 바뀌었어요. NH₄⁺가 물과 조금 반응해 H₃O⁺를 만들므로 <b>약한 산성</b>(pH ≈ 5.3)이에요. 메틸 오렌지가 알맞아요.',eq:[['','NH₃ + HCl → NH₄Cl'],['red','NH₄⁺ + H₂O ⇌ NH₃ + H₃O⁺']]};
+  return{h:'중화점 이후',p:'반응할 NH₃가 없어 넣은 H₃O⁺가 그대로 쌓여요.',eq:[['red','HCl + H₂O → H₃O⁺ + Cl⁻']]}}
 function titRender(){const ty=TIT.type,t=TT[ty],v=TIT.v,pH=pHof(titMix(ty,v)),ind=$('#titInd').value,cv=curve(ty);
   $('#titVTxt').textContent=fmt(v,1)+' mL';
   const series=[],markers=[],bands=[];
@@ -1338,22 +1354,22 @@ function titRender(){const ty=TIT.type,t=TT[ty],v=TIT.v,pH=pHof(titMix(ty,v)),in
   if($('#titMarks').checked){
     if(t.weak)bands.push({x0:2.5,x1:22.5,col:'rgba(31,157,99,.09)',label:'완충 구간',tc:'#1f8a58',top:ty==='wb'});
     const ph=pHof(titMix(ty,12.5)),pe=pHof(titMix(ty,25));
-    if(t.weak)markers.push({x:12.5,y:ph,col:'#1f8a58',label:`반당량점 (pH ≈ ${fmt(ph)})`,dy:ty==='wb'?6:-20});
-    markers.push({x:25,y:pe,col:'#c0392b',label:`당량점 (pH ≈ ${fmt(pe,1)})`,dx:9,dy:ty==='wb'?6:-18})}
+    if(t.weak)markers.push({x:12.5,y:ph,col:'#1f8a58',label:`반중화점 (pH ≈ ${fmt(ph)})`,dy:ty==='wb'?6:-20});
+    markers.push({x:25,y:pe,col:'#c0392b',label:`중화점 (pH ≈ ${fmt(pe,1)})`,dx:9,dy:ty==='wb'?6:-18})}
   markers.push({x:v,y:pH,col:t.col,fill:t.col,r:5.5});
   titChart.set({series,markers,bands,legend:ty==='wb'?'bl':'tl'});if(typeof mbarPh==='function')mbarPh();
   const lv=22+v*2.9;const bl=$('#burLiq');if(bl){bl.setAttribute('y',lv);bl.setAttribute('height',Math.max(0,169-lv))}
   const fl=$('#flLiq');if(fl){const y=293-(25+v)/80*62;fl.setAttribute('y',y);fl.setAttribute('height',306-y);fl.setAttribute('fill',indColor(ind,pH));const sf=$('#flSurf');sf&&sf.setAttribute('y',y)}
   const r=titRegion(ty,v);
-  const Veq=25,near=Math.abs(v-Veq)<=.75;let si,names;
-  if(t.weak){names=['시작','완충 구간','반당량점','당량점','당량점 이후'];si=v===0?0:v<Veq-.75?(Math.abs(v-12.5)<=1?2:1):near?3:4}
-  else{names=['시작','중화 진행','당량점','당량점 이후'];si=v===0?0:v<Veq-.75?1:near?2:3}
+  const Veq=25,near=Math.abs(v-Veq)<.25;let si,names;
+  if(t.weak){names=['시작','완충 구간','반중화점','중화점','중화점 이후'];si=v===0?0:v<Veq-.25?(Math.abs(v-12.5)<=1?2:1):near?3:4}
+  else{names=['시작','중화 진행','중화점','중화점 이후'];si=v===0?0:v<Veq-.25?1:near?2:3}
   $('#titStages').innerHTML=names.map((n,i)=>`<span class="${i===si?'on':i<si?'done':''}">${n}</span>`).join('');
   const sp=species(titMix(ty,v)),mm=k=>(sp[k]||0)*1000,f3=x=>x<0.0005?'0':x<0.1?fmt(x,3):fmt(x,2);
   const amt=ty==='wa'?`CH₃COOH <b>${f3(mm('HA'))}</b> · CH₃COO⁻ <b>${f3(mm('A'))}</b> · OH⁻ <b>${f3(mm('OH'))}</b> · H₃O⁺ <b>${f3(mm('H3O'))}</b>`
     :ty==='wb'?`NH₃ <b>${f3(mm('NH3'))}</b> · NH₄⁺ <b>${f3(mm('NH4'))}</b> · H₃O⁺ <b>${f3(mm('H3O'))}</b> · OH⁻ <b>${f3(mm('OH'))}</b>`
     :`H₃O⁺ <b>${f3(mm('H3O'))}</b> · OH⁻ <b>${f3(mm('OH'))}</b>`;
-  $('#titInfo').innerHTML=`<div class="region-h">${r.tag?`<span class="tag">${r.tag}</span>`:''}${r.h}</div><p>${r.p}</p>${r.adv?`<div class="adv-only">⚖️ ${r.adv}</div>`:''}<div class="tit-amt">플라스크 속 (mmol): ${amt}</div><p class="small muted" style="margin:2px 0 0">넣은 ${t.tiName}: ${fmt(v,1)} mL · 현재 pH <b>${fmt(pH)}</b></p>`;
+  $('#titInfo').innerHTML=`<div class="region-h">${r.tag?`<span class="tag">${r.tag}</span>`:''}${r.h}</div><p>${r.p}</p>${r.adv?`<div class="adv-only">⚖️ <b>심화</b> · ${r.adv}</div>`:''}<div class="tit-amt">플라스크 속 (mmol): ${amt}</div><p class="small muted" style="margin:2px 0 0">넣은 ${t.tiName}: ${fmt(v,1)} mL · 현재 pH <b>${fmt(pH)}</b></p>`;
   $('#titEq').innerHTML=r.eq.map(([c,e])=>`<div class="eq ${c}">${e}</div>`).join('')}
 
 /* ================= ⑤ 생체 완충 ================= */
@@ -1370,40 +1386,38 @@ function bioInit(){$('#bioScen').innerHTML=SCEN.map(s=>`<button data-s="${s.id}"
   $$('#bioScen button').forEach(b=>b.onclick=()=>{const s=SCEN.find(x=>x.id===b.dataset.s);BIO.acid=s.acid;BIO.p=s.p;BIO.lung=s.lung;BIO.scen=s.id;$('#bioAcid').value=s.acid;$('#bioP').value=90-s.p;$('#bioLung').checked=s.lung;bioUpdate(true)});
   $('#bioAcid').oninput=e=>{BIO.acid=+e.target.value;BIO.scen=null;bioUpdate(true)};$('#bioP').oninput=e=>{BIO.p=90-(+e.target.value);BIO.scen=null;bioUpdate(true)};
   $('#bioLung').onchange=e=>{BIO.lung=e.target.checked;BIO.scen=null;bioUpdate(true)};
-  bioMV=new MicroView($('#bioMicro'),$('#bioLegend'),{spect:false,rise:['H2CO3','CO2'],riseLabel:'CO₂',riseNote:'↑ CO₂ → 폐로 배출'});bioMV.note='입자 1개 = HCO₃⁻ 1 mM · CO₂ 0.2 mM · H₃O⁺ 5 nM';
+  bioMV=new MicroView($('#bioMicro'),$('#bioLegend'),{spect:false,rise:['H2CO3','CO2'],riseLabel:'CO₂',riseNote:'↑ CO₂ → 폐로 배출'});bioMV.note='입자 1개 = HCO₃⁻ 1 mM · CO₂ 0.2 mM · H₃O⁺ 5 nM<br>※ H₃O⁺는 실제로 HCO₃⁻의 백만분의 1 수준이라, 보이도록 훨씬 크게 확대해 그렸어요. (종류마다 100개까지만 표시)';
   bioUpdate(false)}
 function bioCalc(){const h=Math.max(.5,24-BIO.acid),co2=.03*BIO.p+(BIO.lung?0:BIO.acid);return{h,co2,pH:6.1+Math.log10(h/co2),r:h/co2,nb:BIO.acid>0?-Math.log10(BIO.acid*1e-3):null}}
 const BSC={HCO3:1,CO2:5,H3O:.2};
-function bioTarget(c){return{HCO3:c.h*BSC.HCO3,CO2:c.co2*BSC.CO2,H3O:Math.pow(10,9-c.pH)*BSC.H3O}}
+function bioTarget(c){return{HCO3:c.h*BSC.HCO3,CO2:Math.min(100,c.co2*BSC.CO2),H3O:Math.min(100,Math.pow(10,9-c.pH)*BSC.H3O)}}
 function bioUpdate(anim){let c=bioCalc(),tg=bioTarget(c);
-  if(tooBig(tg)&&BIO.okState){limitMsg();Object.assign(BIO,BIO.okState);$('#bioAcid').value=BIO.acid;$('#bioP').value=90-BIO.p;$('#bioLung').checked=BIO.lung;c=bioCalc();tg=bioTarget(c);anim=false}
-  BIO.okState={acid:BIO.acid,p:BIO.p,lung:BIO.lung,prev:BIO.prev};
   const Hn=Math.pow(10,9-c.pH),co2c=.03*BIO.p;
   $('#bioAcidTxt').textContent=BIO.acid+' mM';
   $('#bioPTxt').textContent=BIO.p<36?'빠르고 깊음':BIO.p>44?'약함':'보통';
-  $('#bioPSub').innerHTML=`→ 혈액 속 CO₂ 압력 <b>${BIO.p} mmHg</b> = CO₂ 농도 <b>${fmt(co2c,2)} mM</b> <span title="기체는 압력이 클수록 더 많이 녹아요">(압력 ↑ = 농도 ↑)</span>`;
+  $('#bioPSub').innerHTML=`→ 혈액 속 CO₂ 압력 <b>${BIO.p} mmHg</b> → 녹은 CO₂ 농도 <b>${fmt(co2c,2)} mM</b>${!BIO.lung&&BIO.acid>0?` + 못 나가고 쌓인 CO₂ <b>${BIO.acid} mM</b>`:''}<br>기체는 압력이 클수록 더 많이 녹아요 (압력 ↑ → 농도 ↑)`;
   $$('#bioScen button').forEach(b=>b.classList.toggle('on',b.dataset.s===BIO.scen));
-  $('#bioMark').style.left=clamp((c.pH-6.8)/1.0*100,0,100)+'%';$('#bioPhTxt').textContent=(c.pH<6.8?'< ':'')+fmt(c.pH);
+  $('#bioMark').style.left=clamp((c.pH-6.8)/1.0*100,0,100)+'%';$('#bioPhTxt').textContent=fmt(c.pH);
   $('#bioVals').innerHTML=`<div class="val"><span>[HCO₃⁻]</span><b>${fmt(c.h,1)}</b><small>mM</small></div>
     <div class="val"><span>CO₂ (H₂CO₃)</span><b>${fmt(c.co2,2)}</b><small>mM</small></div>
     <div class="val"><span style="color:#c62828">[H₃O⁺]</span><b>${fmt(Hn,0)}</b><small>nM (10<sup>−9</sup> M)</small></div>
     <div class="val"><span>HCO₃⁻ : CO₂</span><b>${fmt(c.r,0)} : 1</b><small>정상 20 : 1</small></div>
-    <div class="val"><span>완충계가 없다면</span><b>${c.nb==null?'—':fmt(c.nb,1)}</b><small>pH</small></div>`;
-  let st,col;if(c.pH<7.0){st='⚠️ 심한 산증 — 생명이 위험해요';col='#b02a1a'}else if(c.pH<7.35){st='산증 경향 (pH가 정상보다 낮음)';col='#c0392b'}else if(c.pH<=7.45){st='✅ 정상 범위';col='#1f9d63'}else if(c.pH<=7.7){st='알칼리증 경향 (pH가 정상보다 높음)';col='#5a4bc0'}else{st='⚠️ 심한 알칼리증 — 위험해요';col='#4a2aa8'}
+    <div class="val"><span>증류수였다면</span><b>${c.nb==null?'—':fmt(c.nb,1)}</b><small>pH</small></div>`;
+  const pr=Math.round(c.pH*100)/100;let st,col;if(pr<7.0){st='⚠️ 심한 산증 — 생명이 위험해요';col='#b02a1a'}else if(pr<7.35){st='산증 경향 (pH가 정상보다 낮음)';col='#c0392b'}else if(pr<=7.45){st='✅ 정상 범위';col='#1f9d63'}else if(pr<=7.7){st='알칼리증 경향 (pH가 정상보다 높음)';col='#5a4bc0'}else{st='⚠️ 심한 알칼리증 — 위험해요';col='#4a2aa8'}
   $('#bioStatus').innerHTML=`<span style="color:${col}">${st}</span>`;
   // 평형 이동 설명
   const strong=BIO.p<36,weak=BIO.p>44;let m='',dir='n';
   if(BIO.acid===0&&!strong&&!weak&&BIO.lung)m+=`<div class="okbox">정상: 혈액 속 HCO₃⁻가 CO₂(H₂CO₃)보다 약 <b>20배</b> 많고 pH는 <b>7.40</b>이에요. 상황을 골라 보세요!</div>`;
   if(BIO.acid>0){dir='r';m+=`<div class="sec-t">💪 젖산이 들어오면</div><ol class="steps sm"><li>근육에서 젖산 생성 → 혈액의 <b>H₃O⁺(H⁺) 증가</b></li><li><b>HCO₃⁻가 H⁺를 받음</b>: HCO₃⁻ + H⁺ → H₂CO₃ → CO₂ + H₂O</li>
       <li>${BIO.lung?'생긴 CO₂는 <b>폐로 빠져나감</b> (열린 계) → H⁺가 대부분 사라짐':'CO₂가 <b>빠져나가지 못하고 쌓임</b> (닫힌 계) → CO₂ 농도↑ → 평형이 다시 오른쪽으로 밀려 H⁺가 계속 남음'}</li>
-      <li>HCO₃⁻가 ${BIO.acid} mM 줄어 pH 조금 ↓ (완충이 없었다면 pH ${fmt(c.nb,1)}!)</li></ol>`}
-  if(strong){dir='l';m+=`<div class="sec-t">😮‍💨 숨을 빠르고 깊게 쉬면${BIO.acid>0?' (호흡 보상)':''}</div><ol class="steps sm"><li>CO₂를 많이 내보냄</li><li>혈액 속 CO₂ <b>압력 ↓ = 농도 ↓</b> (${BIO.p} mmHg → ${fmt(co2c,2)} mM)</li>
-      <li>줄어든 CO₂를 채우는 방향, 즉 <b>왼쪽으로 평형 이동</b> (르 샤틀리에 원리)<br>H⁺ + HCO₃⁻ → H₂CO₃ → CO₂ + H₂O</li><li><b>H₃O⁺ 감소</b> (${fmt(Hn,0)} nM) → <b>pH ↑</b>${BIO.acid>0?' → 젖산으로 낮아진 pH가 정상 쪽으로 회복':' → 알칼리증'}</li></ol>`}
-  if(weak){dir='r';m+=`<div class="sec-t">😴 호흡이 약하면</div><ol class="steps sm"><li>CO₂가 덜 빠져나가 몸에 쌓임</li><li>혈액 속 CO₂ <b>압력 ↑ = 농도 ↑</b> (${BIO.p} mmHg → ${fmt(co2c,2)} mM)</li>
-      <li>늘어난 CO₂를 줄이는 방향, 즉 <b>오른쪽으로 평형 이동</b> (르 샤틀리에 원리)<br>CO₂ + H₂O → H₂CO₃ → H⁺ + HCO₃⁻</li><li><b>H₃O⁺ 증가</b> (${fmt(Hn,0)} nM) → <b>pH ↓</b> → 산증</li></ol>`}
+      <li>HCO₃⁻가 ${BIO.acid} mM 줄어 ${BIO.lung?'pH 조금 ↓':'pH 크게 ↓'} (증류수에 같은 양의 H⁺가 들어갔다면 pH ${fmt(c.nb,1)}!)</li></ol>`}
+  if(strong){dir='l';m+=`<div class="sec-t">😮‍💨 숨을 빠르고 깊게 쉬면${BIO.acid>0?' (호흡 보상)':''}</div><ol class="steps sm"><li>CO₂를 많이 내보냄</li><li>혈액 속 CO₂ <b>압력 ↓ → 농도 ↓</b> (${BIO.p} mmHg → ${fmt(co2c,2)} mM)</li>
+      <li>줄어든 CO₂를 채우는 방향, 즉 <b>왼쪽으로 평형 이동</b> (르샤틀리에 원리)<br>H⁺ + HCO₃⁻ → H₂CO₃ → CO₂ + H₂O</li><li><b>H₃O⁺ 감소</b> (${fmt(Hn,0)} nM) → <b>pH ↑</b>${BIO.acid>0?' → 젖산으로 낮아진 pH가 정상 쪽으로 회복':' → 알칼리증'}</li></ol>`}
+  if(weak){dir='r';m+=`<div class="sec-t">😴 호흡이 약하면</div><ol class="steps sm"><li>CO₂가 덜 빠져나가 몸에 쌓임</li><li>혈액 속 CO₂ <b>압력 ↑ → 농도 ↑</b> (${BIO.p} mmHg → ${fmt(co2c,2)} mM)</li>
+      <li>늘어난 CO₂를 줄이는 방향, 즉 <b>오른쪽으로 평형 이동</b> (르샤틀리에 원리)<br>CO₂ + H₂O → H₂CO₃ → H⁺ + HCO₃⁻</li><li><b>H₃O⁺ 증가</b> (${fmt(Hn,0)} nM) → <b>pH ↓</b> → 산증</li></ol>`}
   if(!BIO.lung&&BIO.acid>0)m+=`<div class="warnbox">혈액 완충계가 강력한 이유는 CO₂를 폐로 내보낼 수 있는 <b>열린 계</b>이기 때문이에요.</div>`;
   const arrow={n:'<div class="shift n">⚖️ 평형 상태</div>',l:'<div class="shift l">⟵ 평형이 왼쪽으로 이동 (H⁺ 감소)</div>',r:'<div class="shift r">평형이 오른쪽으로 이동 (H⁺ 증가) ⟶</div>'}[dir];
-  $('#bioEqCard').innerHTML=`<h3>⚖️ 평형 반응식</h3><div class="eqcard"><div class="pg-eq">CO₂ + H₂O ⇌ H₂CO₃ ⇌ H⁺ + HCO₃⁻</div>${arrow}</div>${m}<p class="small"><button class="link" data-pop="bio">📖 생체 완충 개념 다시 보기</button> · <button class="link" data-pop="common">르 샤틀리에 원리</button></p>`;
+  $('#bioEqCard').innerHTML=`<h3>⚖️ 평형 반응식</h3><div class="eqcard"><div class="pg-eq">CO₂ + H₂O ⇌ H₂CO₃ ⇌ H⁺ + HCO₃⁻</div>${arrow}</div>${m}<p class="small"><button class="link" data-pop="bio">📖 생체 완충 개념 다시 보기</button> · <button class="link" data-pop="common">르샤틀리에 원리</button></p>`;
   const d=Math.round(BIO.acid)-Math.round(BIO.prev);
   if(anim&&d>0){bioMV.inject('H3O',Math.min(d,12));bioMV.setComposition(tg,true)}else bioMV.setComposition(tg,anim);BIO.prev=BIO.acid}
 
@@ -1411,9 +1425,9 @@ function bioUpdate(anim){let c=bioCalc(),tg=bioTarget(c);
 const POPS={
   intro:{t:'🧪 완충 용액 실험실에 오신 것을 환영해요!',pages:[
     `<div class="pg-h">① 완충 용액이란?</div>
-     <div class="hook"><div class="q">🍊 귤이나 레몬처럼 신 과일을 많이 먹으면, 우리 혈액은 산성으로 변할까요?</div><button class="btn sm primary" onclick="this.nextElementSibling.hidden=false;this.remove()">정답 확인하기</button><div class="a" hidden><b>아니요!</b> 신맛을 내는 시트르산(구연산)은 약한 산이에요. 이런 음식을 많이 먹어도 혈액의 pH는 언제나 <b>7.35 ~ 7.45</b>로 거의 일정하게 유지돼요. 그 비밀은 바로 혈액이 <b>완충 용액</b>이라는 데 있어요. 이 실험실에서 그 원리를 하나씩 알아봐요!</div></div>
+     <div class="hook"><div class="q">🍊 귤이나 레몬처럼 신 과일을 많이 먹으면, 우리 혈액은 산성으로 변할까요?</div><button class="btn sm primary" onclick="this.nextElementSibling.hidden=false;this.remove()">정답 확인하기</button><div class="a" hidden><b>아니요!</b> 신 음식을 많이 먹어도 건강한 사람의 혈액 pH는 <b>7.35 ~ 7.45</b>로 거의 일정하게 유지돼요. 들어온 산을 혈액 속 <b>완충 용액</b>이 막아 주고, 폐와 콩팥이 뒤처리를 해 주기 때문이에요. 이 실험실에서 그 원리를 하나씩 알아봐요!</div></div>
      <div class="def-big">💧 <b>완충 용액</b>은 산이나 염기를 조금 넣어도 <b>pH가 거의 변하지 않는 용액</b>이에요.</div>
-     <div class="key-big"><span class="kt">🔑 pH를 정하는 것은 용액에 남아 있는 H₃O⁺(H⁺)와 OH⁻의 양이에요.</span><div class="kr"><span style="color:#c62828">H₃O⁺가 많이 남을수록 → pH ↓ (산성)</span><span style="color:#6a2fc4">OH⁻가 많이 남을수록 → pH ↑ (염기성)</span></div><span class="kn">💧 물속의 H⁺는 물 분자와 결합해 H₃O⁺로 있어요.</span></div>
+     <div class="key-big"><span class="kt">🔑 pH를 정하는 것은 용액에 남아 있는 H₃O⁺(H⁺)와 OH⁻의 농도예요.</span><div class="kr"><span style="color:#c62828">H₃O⁺가 많이 남을수록 → pH ↓ (산성)</span><span style="color:#6a2fc4">OH⁻가 많이 남을수록 → pH ↑ (염기성)</span></div><span class="kn">💧 부피가 같으면 남은 양(mmol)이 많을수록 농도가 커요. · 물속의 H⁺는 물 분자와 결합해 H₃O⁺로 있어요.</span></div>
      <div class="two-box"><div><b>증류수 100 mL</b><p class="small">1 M HCl 1 mL를 넣으면<br>pH 7.00 → <b style="color:#c0392b">2.00</b> (5 이상 뚝!)</p></div>
        <div><b>아세트산 완충 용액 100 mL</b><p class="small">1 M HCl 1 mL를 넣으면<br>pH 4.74 → <b style="color:#1f9d63">4.66</b> (거의 그대로)</p></div></div>
      <div class="key">🔑 비밀은 구성 성분에 있어요.<br>완충 용액 = <b>약산 + 그 짝염기</b> (예: CH₃COOH + CH₃COO⁻)<br>또는 <b>약염기 + 그 짝산</b> (예: NH₃ + NH₄⁺)<br>이 입자들이 pH를 바꾸는 <b>H₃O⁺와 OH⁻를 반응으로 없애</b> 주어요.</div>
@@ -1421,7 +1435,7 @@ const POPS={
     `<div class="pg-h">② 강산과 약산</div>
      <p>산의 세기는 물에 녹았을 때 <b>얼마나 많이 이온화하는지</b>로 정해져요.</p>
      <div class="two-box"><div><b style="color:#c0392b">강산 (예: HCl)</b><div class="eq red">HCl + H₂O → H₃O⁺ + Cl⁻</div><p class="small">거의 <b>모두</b> 이온화해요.<br>반응이 <b>한쪽 방향(→)</b>으로만 일어나요.</p></div>
-       <div><b style="color:#1f9d63">약산 (예: CH₃COOH)</b><div class="eq green">CH₃COOH + H₂O ⇌ CH₃COO⁻ + H₃O⁺</div><p class="small"><b>일부(약 1%)</b>만 이온화해요.<br>반응이 <b>양쪽 방향(⇌)</b>으로 일어나는 가역 반응이에요.</p></div></div>
+       <div><b style="color:#1f9d63">약산 (예: CH₃COOH)</b><div class="eq green">CH₃COOH + H₂O ⇌ CH₃COO⁻ + H₃O⁺</div><p class="small"><b>일부</b>(0.1 M일 때 약 1 %)만 이온화해요.<br>반응이 <b>양쪽 방향(⇌)</b>으로 일어나는 가역 반응이에요.</p></div></div>
      <p class="small" style="margin-top:8px"><b>분자 100개를 물에 넣으면, H₃O⁺는 몇 개 생길까?</b></p>
      <div class="ion-row"><span class="lab" style="color:#c0392b">강산 HCl</span><span class="dots2">${'<i style="background:#e0302f"></i>'.repeat(30)}…</span><b>약 100개</b></div>
      <div class="ion-row"><span class="lab" style="color:#1f9d63">약산 CH₃COOH</span><span class="dots2"><i style="background:#e0302f"></i></span><b>약 1개</b></div>
@@ -1431,15 +1445,15 @@ const POPS={
      <ul class="goals">
       <li>완충 용액의 뜻과 구성 성분(약산과 짝염기, 약염기와 짝산)을 설명할 수 있다.</li>
       <li>증류수와 완충 용액에 산·염기를 넣었을 때의 pH 변화를 비교하고, <b>H₃O⁺와 OH⁻의 변화</b>로 설명할 수 있다.</li>
-      <li>짝산·짝염기, 가역 반응, 이온화 상수(Ka·Kb), 공통 이온 효과, 르 샤틀리에 원리로 완충 작용을 설명할 수 있다.</li>
+      <li>짝산·짝염기, 가역 반응, 이온화 상수(Ka·Kb), 공통 이온 효과, 르샤틀리에 원리로 완충 작용을 설명할 수 있다.</li>
       <li>여러 물질로 완충 용액을 만들고, <b>완충 용량</b>에 영향을 주는 요인(농도, 성분비)을 찾을 수 있다.</li>
-      <li>적정 곡선에서 <b>완충 구간, 반당량점, 당량점</b>을 찾고 그 의미를 설명할 수 있다.</li>
+      <li>적정 곡선에서 <b>완충 구간, 반중화점, 중화점</b>을 찾고 그 의미를 설명할 수 있다.</li>
       <li>혈액의 탄산 완충계가 호흡과 함께 pH를 유지하는 과정을 설명할 수 있다.</li></ul>`,
     `<div class="pg-h">④ 이 실험실에서 할 수 있는 것</div>
      <div class="feat">
       <div><b>① pH 비교</b>증류수와 완충 용액에 같은 양의 산·염기를 넣고 pH 변화와 미시 세계를 비교해요.</div>
       <div><b>② 완충 용량</b>농도와 성분비가 다른 완충 용액이 언제 '완충 한계'에 도달하는지 비교해요.</div>
-      <div><b>③ 적정 곡선</b>약산·강산·약염기 적정을 하며 완충 구간, 반당량점, 당량점을 관찰해요.</div>
+      <div><b>③ 적정 곡선</b>약산·강산·약염기 적정을 하며 완충 구간, 반중화점, 중화점을 관찰해요.</div>
       <div><b>④ 생체 완충</b>운동, 과호흡 같은 상황에서 혈액 pH가 어떻게 유지되는지 알아봐요.</div>
       <div style="grid-column:1/-1;border-color:#5cc08b;background:#effaf4"><b style="color:#126b3f">⑤ 완충 용액 만들기 — 마지막 단계!</b>🧪 <b>앞에서 배운 개념을 토대로 다양한 완충 용액을 만들어 봅시다.</b> 12가지 시약을 눈금실린더로 재어 섞고, 완충 용액인지 판정받고, 🎯 미션 6개에도 도전해요.</div>
       <div style="grid-column:1/-1"><b>상단 버튼</b>💡 공통 이온 효과 · 🤝 짝산·짝염기 · ⚖️ Ka·Kb · 📐 H–H 식(심화) 설명을 언제든 열 수 있어요.</div></div>
@@ -1449,29 +1463,29 @@ const POPS={
      <p>혈액에는 약산인 <b>H₂CO₃</b>(탄산)와 그 짝염기인 <b>HCO₃⁻</b>(탄산수소 이온)가 함께 녹아 있어요. 짝산과 짝염기가 함께 있으니 혈액은 <b>완충 용액</b>이에요.</p>
      <div class="pg-eq">CO₂ + H₂O ⇌ H₂CO₃ ⇌ H⁺ + HCO₃⁻</div>
      <p>• 세포 호흡으로 생긴 <b>CO₂</b>가 혈액의 물에 녹아 H₂CO₃가 돼요.<br>• 그래서 혈액의 pH는 <b>7.35 ~ 7.45</b>의 좁은 범위로 유지돼요.<br>• pH가 이 범위를 벗어나면 몸속 효소가 제대로 일하지 못해 위험해요.</p>
-     <div class="key">혈액 pH를 조절하는 두 기관<br>🫁 <b>폐</b>: CO₂를 내보내는 양을 바꿔요 (몇 분 안에, 빠르게)<br>🫘 <b>신장</b>: H⁺를 내보내고 HCO₃⁻를 다시 흡수해요 (수 시간~며칠, 느리게)</div>`,
+     <div class="key">혈액 pH를 조절하는 두 기관<br>🫁 <b>폐</b>: CO₂를 내보내는 양을 바꿔요 (몇 분 안에, 빠르게)<br>🫘 <b>콩팥(신장)</b>: H⁺를 내보내고 HCO₃⁻를 다시 흡수해요 (수 시간~며칠, 느리게)</div>`,
     `<div class="pg-h">② 운동하면 젖산이 생겨요</div>
      <p>격렬한 운동을 하면 근육에 산소가 부족해져 <b>젖산</b>이 만들어지고, 혈액 속 <b>H⁺가 늘어나요</b>.</p>
      <ol class="steps"><li>근육에서 젖산 생성 → 혈액의 H⁺ 증가</li><li>짝염기 <b>HCO₃⁻가 H⁺를 받아요</b><div class="eq red">HCO₃⁻ + H⁺ → H₂CO₃ → CO₂ + H₂O</div></li><li>혈액 속 CO₂가 늘어나요 → 이를 내보내려고 <b>숨이 가빠져요</b></li><li>CO₂가 폐로 빠져나가면서 pH가 다시 정상 쪽으로 돌아와요 (<b>호흡 보상</b>)</li></ol>
-     <p class="small muted">만약 완충 작용이 없었다면, 같은 양의 H⁺만으로도 pH가 2 근처까지 떨어졌을 거예요.</p>`,
+     <p class="small muted">만약 완충 작용이 없는 증류수였다면, 같은 양의 H⁺만으로도 pH가 2 근처까지 떨어졌을 거예요.</p>`,
     `<div class="pg-h">③ 과호흡하면 pH가 올라가요</div>
      <p>긴장하거나 불안해서 숨을 너무 빠르고 깊게 쉬는 것을 <b>과호흡</b>이라고 해요.</p>
-     <ol class="steps"><li>CO₂를 지나치게 많이 내보내요</li><li>혈액 속 CO₂ <b>압력 ↓ = 농도 ↓</b><br><span class="small muted">기체는 압력이 클수록 더 많이 녹아요. 압력이 줄면 녹아 있는 CO₂의 농도도 줄어요.</span></li><li>르 샤틀리에 원리: 줄어든 CO₂를 채우는 방향, 즉 <b>왼쪽</b>으로 평형 이동</li></ol>
+     <ol class="steps"><li>CO₂를 지나치게 많이 내보내요</li><li>혈액 속 CO₂ <b>압력 ↓ → 농도 ↓</b><br><span class="small muted">기체는 압력이 클수록 더 많이 녹아요. 압력이 줄면 녹아 있는 CO₂의 농도도 줄어요.</span></li><li>르샤틀리에 원리: 줄어든 CO₂를 채우는 방향, 즉 <b>왼쪽</b>으로 평형 이동</li></ol>
      <div class="pg-eq">CO₂ + H₂O ⇌ H₂CO₃ ⇌ H⁺ + HCO₃⁻</div><div class="shift l">⟵ 평형 이동: H⁺가 소모돼요</div>
      <p>→ H⁺가 줄어 <b>pH가 올라가요</b>. 이런 상태를 <b>알칼리증</b>이라고 해요. <span class="small muted">(어지럽거나 손발이 저릴 수 있어요)</span></p>`,
     `<div class="pg-h">④ 호흡이 약해지면 pH가 내려가요</div>
      <p>잠이 들거나 폐 질환 등으로 숨을 제대로 쉬지 못하면 CO₂가 충분히 빠져나가지 못해요.</p>
-     <ol class="steps"><li>CO₂가 몸에 쌓여요</li><li>혈액 속 CO₂ <b>압력 ↑ = 농도 ↑</b></li><li>르 샤틀리에 원리: 늘어난 CO₂를 줄이는 방향, 즉 <b>오른쪽</b>으로 평형 이동</li></ol>
+     <ol class="steps"><li>CO₂가 몸에 쌓여요</li><li>혈액 속 CO₂ <b>압력 ↑ → 농도 ↑</b></li><li>르샤틀리에 원리: 늘어난 CO₂를 줄이는 방향, 즉 <b>오른쪽</b>으로 평형 이동</li></ol>
      <div class="pg-eq">CO₂ + H₂O ⇌ H₂CO₃ ⇌ H⁺ + HCO₃⁻</div><div class="shift r">평형 이동: H⁺가 생겨요 ⟶</div>
      <p>→ H⁺가 늘어 <b>pH가 내려가요</b>. 이런 상태를 <b>산증</b>이라고 해요.</p>
      <div class="okbox">이제 실험실에서 상황을 골라 혈액 pH와 미시 세계의 <b>CO₂, H₃O⁺ 입자 수</b>가 어떻게 변하는지 직접 확인해 보세요!</div>`]},
   pair:{t:'🤝 짝산·짝염기와 완충 용액의 원리',h:()=>`
     <p class="small muted">강산·약산이 헷갈린다면 → <button class="link" id="goSA">강산과 약산 보기</button></p>
     <h3>① 산과 염기를 H⁺로 다시 보기</h3>
-    <p><b>산</b>: H⁺를 <b>내놓는</b> 물질 &nbsp;|&nbsp; <b>염기</b>: H⁺를 <b>받는</b> 물질 <span class="muted small">(브뢴스테드–로리의 정의)</span></p>
+    <p><b>산</b>: H⁺를 <b>내놓는</b> 물질 &nbsp;|&nbsp; <b>염기</b>: H⁺를 <b>받는</b> 물질 <span class="muted small">(브뢴스테드·로리의 정의)</span></p>
     <h3>② 짝산과 짝염기</h3>
     <p>H⁺ <b>하나만큼 차이 나는 한 쌍</b>을 짝산–짝염기라고 해요. 산이 H⁺를 내놓고 남은 것이 짝염기, 짝염기가 다시 H⁺를 받으면 원래의 산(짝산)이 돼요.</p>
-    <div class="pair-demo"><span class="chip acid">CH₃COOH</span><span class="arr">⇄<small>H⁺를 내놓음 → / ← H⁺를 받음</small></span><span class="chip base">CH₃COO⁻</span></div>
+    <div class="pair-demo"><span class="chip acid">CH₃COOH</span><span class="arr">⇌<small>H⁺를 내놓음 → / ← H⁺를 받음</small></span><span class="chip base">CH₃COO⁻</span></div>
     <table><tr><th>짝산 (H⁺가 하나 더 있음)</th><th>짝염기 (H⁺가 하나 적음)</th><th>이용</th></tr>
       <tr><td>CH₃COOH</td><td>CH₃COO⁻</td><td>아세트산 완충 용액</td></tr>
       <tr><td>H₂CO₃</td><td>HCO₃⁻</td><td>혈액의 완충계</td></tr>
@@ -1480,7 +1494,7 @@ const POPS={
       <tr><td>H₃O⁺</td><td>H₂O</td><td></td></tr>
       <tr><td>H₂O</td><td>OH⁻</td><td></td></tr></table>
     <h3>③ 왜 짝산과 짝염기가 함께 있으면 완충 용액이 될까?</h3>
-    <p>pH를 바꾸는 것은 용액에 <b>남아 있는 H₃O⁺(H⁺)와 OH⁻</b>예요. 완충 용액에는 이 두 가지를 각각 없애 주는 입자가 함께 있어요.</p>
+    <p>pH를 바꾸는 것은 용액에 <b>남아 있는 H₃O⁺(H⁺)와 OH⁻</b>(의 농도)예요. 완충 용액에는 이 두 가지를 각각 없애 주는 입자가 함께 있어요.</p>
     <div class="two-box"><div><b style="color:#c62828">산(H₃O⁺)이 들어오면</b><div class="eq red">CH₃COO⁻ + H₃O⁺ → CH₃COOH + H₂O</div><p class="small">짝염기가 H⁺를 받아 짝산이 돼요. H₃O⁺가 사라져 pH가 거의 그대로!</p></div>
       <div><b style="color:#6a2fc4">염기(OH⁻)가 들어오면</b><div class="eq blue">CH₃COOH + OH⁻ → CH₃COO⁻ + H₂O</div><p class="small">짝산이 H⁺를 내주어 OH⁻를 물로 바꿔요. OH⁻가 사라져 pH가 거의 그대로!</p></div></div>
     <p>둘 중 <b>하나만 있으면 한쪽만 막을 수 있어요</b>. 그래서 짝산과 짝염기가 <b>둘 다 넉넉히</b> 있어야 해요.</p>
@@ -1525,8 +1539,8 @@ const POPS={
         const rt=r>=1?`${fmt(r,1)} : 1`:`1 : ${fmt(1/r,1)}`;
         $('#tgRes').innerHTML=`① 완충 쌍: <b>${best.an} + ${best.bn}</b> (1 : 1일 때 pH ${best.c})<br>② 목표가 ${d>=0?fmt(d,1)+' 높으므로 짝염기를 더 많이':fmt(-d,1)+' 낮으므로 짝산을 더 많이'} → 짝염기 : 짝산 ≈ <b>${rt}</b><br>③ 레시피 (각 0.1 M): <b>${best.bn} ${bv} mL + ${best.an} ${av} mL</b><br><span class="muted">→ 이 실험실에서 계산한 실제 pH: <b>${fmt(ph)}</b></span>`};
       $('#tgS').oninput=f;f()}},
-  common:{t:'💡 공통 이온 효과와 르 샤틀리에 원리',h:()=>`
-    <h3>르 샤틀리에 원리</h3><p>평형 상태에 있는 반응에 농도·압력·온도 같은 조건을 바꾸면, 평형은 <b>그 변화를 줄이는 방향</b>으로 이동해요.</p>
+  common:{t:'💡 공통 이온 효과와 르샤틀리에 원리',h:()=>`
+    <h3>르샤틀리에 원리</h3><p>평형 상태에 있는 반응에 농도·압력·온도 같은 조건을 바꾸면, 평형은 <b>그 변화를 줄이는 방향</b>으로 이동해요.</p>
     <table><tr><th>CH₃COOH ⇌ CH₃COO⁻ + H⁺ 에서</th><th>평형 이동</th><th>결과</th></tr>
     <tr><td>CH₃COO⁻를 넣으면 (CH₃COONa)</td><td>⬅ 왼쪽</td><td>CH₃COOH의 이온화가 줄어요 (공통 이온 효과)</td></tr>
     <tr><td>H⁺를 넣으면 (HCl)</td><td>⬅ 왼쪽</td><td>CH₃COO⁻가 H⁺를 받아 소모 → pH 유지</td></tr>
@@ -1541,18 +1555,18 @@ const POPS={
     init(){const base=mk({V:100,acetate:10}),C=.1;let added=false;
       const show=()=>{const m=added?mk({V:100,acetate:20,Na:10}):base;const H=solveH(m),pH=-Math.log10(H),a=H/C*100;
         $('#ciBar').style.width=clamp(a/1.5*100,0.6,100)+'%';$('#ciVal').textContent=fmt(a,a<.1?3:2)+' %';$('#ciBar2').style.width=(pH/14*100)+'%';$('#ciPh').textContent=fmt(pH);
-        const arr=$('#ciEq .arr');arr.textContent=added?'⇐':'⇌';arr.classList.toggle('lft',added);$('#ciA').classList.toggle('big',added);
+        const arr=$('#ciEq .arr');arr.textContent=added?'⇌ (← 평형 이동)':'⇌';arr.classList.toggle('lft',added);$('#ciA').classList.toggle('big',added);
         $('#ciTxt').innerHTML=added?'CH₃COO⁻가 많아지자 평형이 <b>왼쪽</b>으로 이동! 이온화한 비율이 크게 줄었어요.':'0.1 M CH₃COOH 수용액이에요. 약산이라 일부만 이온화해요.'};
       $('#ciAdd').onclick=()=>{added=true;show()};$('#ciRe').onclick=()=>{added=false;show()};show()}},
   ka:{t:'⚖️ 이온화 상수 Ka와 Kb',h:()=>`
     <h3>① 산의 이온화 상수 Ka</h3><p>약산 HA가 물에서 이온화하는 반응은 가역 반응이라 평형을 이뤄요. 이때의 평형 상수를 <b>산의 이온화 상수 K<sub>a</sub></b>라고 해요.</p>
     <div class="eq" style="text-align:center">HA + H₂O ⇌ A⁻ + H₃O⁺</div>
     <p style="text-align:center;font-size:18px">K<sub>a</sub> = <span class="frac"><span>[A⁻][H₃O⁺]</span><span>[HA]</span></span></p>
-    <p>• 온도가 일정하면 Ka는 일정해요. <span class="muted small">(물 [H₂O]는 거의 일정해서 식에 넣지 않아요)</span><br>• <b>Ka가 클수록</b> 더 많이 이온화하는 <b>센 산</b>이에요.</p>
+    <p>• 온도가 일정하면 Ka는 일정해요. <span class="muted small">(물 [H₂O]는 거의 일정해서 식에 넣지 않아요)</span><br>• <b>Ka가 클수록</b> 더 많이 이온화하는 <b>더 강한 산</b>이에요.</p>
     <h3>② 염기의 이온화 상수 Kb</h3>
     <div class="eq" style="text-align:center">B + H₂O ⇌ BH⁺ + OH⁻ &nbsp;&nbsp;(예: NH₃ + H₂O ⇌ NH₄⁺ + OH⁻)</div>
     <p style="text-align:center;font-size:18px">K<sub>b</sub> = <span class="frac"><span>[BH⁺][OH⁻]</span><span>[B]</span></span></p>
-    <p>• <b>Kb가 클수록</b> 센 염기예요.</p>
+    <p>• <b>Kb가 클수록</b> 더 강한 염기예요.</p>
     <table><tr><th>물질</th><th>Ka (25 °C)</th><th>짝염기</th><th>Kb (25 °C)</th></tr>
       <tr><td>CH₃COOH</td><td>1.8 × 10<sup>−5</sup></td><td>CH₃COO⁻</td><td>5.6 × 10<sup>−10</sup></td></tr>
       <tr><td>H₂CO₃</td><td>4.3 × 10<sup>−7</sup></td><td>HCO₃⁻</td><td>2.3 × 10<sup>−8</sup></td></tr>
@@ -1560,10 +1574,10 @@ const POPS={
       <tr><td>NH₄⁺</td><td>5.6 × 10<sup>−10</sup></td><td>NH₃</td><td>1.8 × 10<sup>−5</sup></td></tr></table>
     <h3>③ 짝산과 짝염기의 관계</h3>
     <p style="text-align:center;font-size:17px"><b>K<sub>a</sub> × K<sub>b</sub> = K<sub>w</sub> = 1.0 × 10<sup>−14</sup></b> <span class="small muted">(25 °C)</span></p>
-    <p>짝산의 Ka가 클수록(센 산일수록) 그 짝염기의 Kb는 작아요(약한 염기). 예) CH₃COOH의 Ka 1.8 × 10<sup>−5</sup> → CH₃COO⁻의 Kb = 10<sup>−14</sup> ÷ (1.8 × 10<sup>−5</sup>) ≈ 5.6 × 10<sup>−10</sup></p>
+    <p>짝산의 Ka가 클수록(더 강한 산일수록) 그 짝염기의 Kb는 작아요(더 약한 염기). 예) CH₃COOH의 Ka 1.8 × 10<sup>−5</sup> → CH₃COO⁻의 Kb = 10<sup>−14</sup> ÷ (1.8 × 10<sup>−5</sup>) ≈ 5.6 × 10<sup>−10</sup></p>
     <h3>④ Ka로 약산 용액 계산하기</h3>
     <p>농도 C인 약산에서 이온화한 양을 x라 하면, x가 C보다 매우 작을 때 <b>[H₃O⁺] = x ≈ √(C·Ka)</b>예요.</p>
-    <div class="helper"><div class="ctrl-row"><label class="fld" style="flex:1">약산<select id="kaA"><option value="acetate">CH₃COOH (Ka 1.8 × 10<sup>−5</sup>)</option><option value="nh4">NH₄⁺ (Ka 5.6 × 10<sup>−10</sup>, NH₄Cl)</option></select></label>
+    <div class="helper"><div class="ctrl-row"><label class="fld" style="flex:1">약산<select id="kaA"><option value="acetate">CH₃COOH (Ka 1.8 × 10⁻⁵)</option><option value="nh4">NH₄⁺ (Ka 5.6 × 10⁻¹⁰, NH₄Cl)</option></select></label>
       <label class="fld" style="flex:1">농도<select id="kaC"><option>0.01</option><option selected>0.1</option><option>1</option></select></label></div>
       <div class="res" id="kaRes"></div></div>
     <h3>⑤ Ka로 보는 완충 작용</h3>
@@ -1588,7 +1602,7 @@ const POPS={
     <table><tr><th>완충 쌍</th><th>Ka</th><th>pKa</th></tr>
       <tr><td>CH₃COOH / CH₃COO⁻</td><td>1.8 × 10<sup>−5</sup></td><td>4.74</td></tr><tr><td>H₂CO₃ / HCO₃⁻</td><td>4.3 × 10<sup>−7</sup></td><td>6.37</td></tr>
       <tr><td>H₂PO₄⁻ / HPO₄²⁻</td><td>6.2 × 10<sup>−8</sup></td><td>7.21</td></tr><tr><td>NH₄⁺ / NH₃</td><td>5.6 × 10<sup>−10</sup></td><td>9.25</td></tr><tr><td>HCO₃⁻ / CO₃²⁻</td><td>4.7 × 10<sup>−11</sup></td><td>10.33</td></tr></table>
-    <p>• [A⁻] = [HA] (1 : 1, 반당량점) → <b>pH = pKa</b><br>• 짝염기가 10배 많으면 pH = pKa + 1, 약산이 10배 많으면 pH = pKa − 1<br>• 완충 용액은 보통 <b>pKa ± 1</b> 범위에서 잘 작동해요.</p>
+    <p>• [A⁻] = [HA] (1 : 1, 반중화점) → <b>pH = pKa</b><br>• 짝염기가 10배 많으면 pH = pKa + 1, 약산이 10배 많으면 pH = pKa − 1<br>• 완충 용액은 보통 <b>pKa ± 1</b> 범위에서 잘 작동해요.</p>
     <div class="ci-demo"><label class="fld">약산 선택<select id="hhAcid"><option value="4.74">CH₃COOH / CH₃COO⁻ (pKa 4.74)</option><option value="7.21">H₂PO₄⁻ / HPO₄²⁻ (pKa 7.21)</option><option value="9.25">NH₄⁺ / NH₃ (pKa 9.25)</option></select></label>
       <div class="fld"><div class="row"><span>[짝염기] : [약산]</span><b id="hhR">1 : 1</b></div><input type="range" id="hhS" min="-1" max="1" step="0.05" value="0"></div>
       <p style="text-align:center;font-size:17px;margin:4px 0">pH = <span id="hhK"></span> + log(<span id="hhRv"></span>) = <b id="hhP"></b></p></div>
@@ -1621,13 +1635,13 @@ const GLOSS={
   '짝산':'염기가 H⁺를 받아 생긴 입자예요. NH₃의 짝산은 NH₄⁺예요.',
   '이온화':'물질이 물에 녹아 양이온과 음이온으로 나뉘는 것이에요.',
   '공통 이온 효과':'약산(약염기) 수용액에 같은 이온을 내놓는 물질을 넣으면, 평형이 이동해 이온화가 억제되는 현상이에요.',
-  '르 샤틀리에 원리':'평형 상태에 농도·압력·온도 변화를 주면, 그 변화를 줄이는 방향으로 평형이 이동한다는 원리예요.',
+  '르샤틀리에 원리':'평형 상태에 농도·압력·온도 변화를 주면, 그 변화를 줄이는 방향으로 평형이 이동한다는 원리예요.',
   '가역 반응':'정반응(→)과 역반응(←)이 모두 일어날 수 있는 반응이에요(⇌). 완충 작용은 이 양방향 반응 덕분에 일어나요.',
   '평형':'정반응과 역반응이 같은 속도로 일어나 겉보기에는 변화가 없는 상태예요.',
   '중화':'산의 H⁺(H₃O⁺)와 염기의 OH⁻가 반응해 물이 생기는 반응이에요.',
   '부분 중화':'약산의 일부만 강염기로 중화하는 것이에요. 남은 약산과 새로 생긴 짝염기가 완충 용액을 이뤄요.',
-  '당량점':'넣은 산과 염기의 양(mol)이 반응식의 비율대로 정확히 반응한 지점이에요.',
-  '반당량점':'당량점까지 넣어야 할 양의 절반을 넣은 지점이에요. 약산과 짝염기의 양이 같아져요.',
+  '중화점':'넣은 산과 염기의 양(mol)이 반응식의 비율대로 남김없이 반응한 지점이에요. 대학에서는 당량점이라고도 해요.',
+  '반중화점':'중화점까지 넣어야 할 양의 절반을 넣은 지점이에요. 약산과 짝염기의 양이 같아져요. (심화)',
   '구경꾼 이온':'용액 속에 있지만 반응에 참여하지 않는 이온이에요. (예: Na⁺, Cl⁻)',
   '성분비':'완충 용액 속 약산과 짝염기의 양(mol)의 비예요.',
   '산증':'혈액의 pH가 7.35보다 낮아진 상태예요.',
@@ -1637,10 +1651,10 @@ const GLOSS={
   '호흡 보상':'호흡의 빠르기를 바꿔 CO₂ 양을 조절하고, 혈액의 pH를 되돌리려는 작용이에요.',
   'H₃O⁺':'하이드로늄 이온. 물속에서 H⁺는 물 분자와 결합해 H₃O⁺로 있어요. 많이 남을수록 pH가 낮아요(산성).',
   'OH⁻':'수산화 이온. 많이 남을수록 pH가 높아요(염기성).',
-  '브뢴스테드–로리':'H⁺를 내놓는 물질을 산, H⁺를 받는 물질을 염기로 보는 산·염기의 정의예요.',
-  'Ka':'산의 이온화 상수. Ka = [A⁻][H₃O⁺] / [HA]. 클수록 센 산이에요.',
-  'Kb':'염기의 이온화 상수. Kb = [BH⁺][OH⁻] / [B]. 클수록 센 염기예요.',
-  'pKa':'산의 이온화 상수 Ka에 −log를 취한 값이에요. 작을수록 센 산이에요. (심화)',
+  '브뢴스테드·로리':'H⁺를 내놓는 물질을 산, H⁺를 받는 물질을 염기로 보는 산·염기의 정의예요.',
+  'Ka':'산의 이온화 상수. Ka = [A⁻][H₃O⁺] / [HA]. 클수록 더 강한 산이에요.',
+  'Kb':'염기의 이온화 상수. Kb = [BH⁺][OH⁻] / [B]. 클수록 더 강한 염기예요.',
+  'pKa':'산의 이온화 상수 Ka에 −log를 취한 값이에요. 작을수록 더 강한 산이에요. (심화)',
 };
 const GKEYS=Object.keys(GLOSS).sort((a,b)=>b.length-a.length);
 const GRE=new RegExp(GKEYS.map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'g');
@@ -1689,7 +1703,11 @@ function fsToggle(card){const on=!card.classList.contains('fs');$$('.card.fs').f
 
 /* ================= 초기화 ================= */
 function confirmBtn(b,ask,fn){const orig=b.innerHTML;let t=0;b.onclick=()=>{if(b.classList.contains('confirm')){clearTimeout(t);b.classList.remove('confirm');b.innerHTML=orig;fn()}else{b.classList.add('confirm');b.innerHTML='⚠️ '+ask;t=setTimeout(()=>{b.classList.remove('confirm');b.innerHTML=orig},3000)}}}
+let LAB_DEF=[];
+function labDefaults(){LAB_DEF=$$('main select,main input').map(e=>[e,e.type==='checkbox'?e.checked:e.value])}
 function labReset(){const f=$('.card.fs');f&&fsToggle(f);
+  LAB_DEF.forEach(([e,v])=>{if(e.type==='checkbox'){if(e.checked!==v){e.checked=v;e.dispatchEvent(new Event('change'))}}else if(e.value!==v){e.value=v;e.dispatchEvent(new Event(e.type==='range'?'input':'change'))}});
+  {const mi=$('#prTestMini');if(mi)mi.innerHTML=''}
   cmpReset();
   PR.m=newMix();PR.log=[];PR.hist=[];PR.cyl=null;prCyl.set(0);prCylLabel();$('#prTestRes').innerHTML='비커에 용액을 만든 뒤 산·염기를 조금 넣어 pH가 얼마나 변하는지 확인해 보세요.';PR.mission=null;misRender();prUpdate('rebuild');
   $('#capMode').value='conc';CAP.mode='conc';CAP.reag='HCl';$$('#capReagent button').forEach(b=>b.classList.toggle('on',b.dataset.v==='HCl'));capReset();
@@ -1719,12 +1737,14 @@ function seg(sel,fn){$$(sel+' button').forEach(b=>b.onclick=()=>{$$(sel+' button
 function goTab(id){const f=$('.card.fs');f&&fsToggle(f);$$('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));$$('.tab').forEach(s=>s.classList.toggle('active',s.id==='tab-'+id));
   if(id!=='cap')capStopPlay();if(id!=='tit')titStop();const nb=$(`#tabs button[data-tab="${id}"]`);nb&&nb.scrollIntoView({block:'nearest',inline:'nearest'});
   if(window.innerWidth<=960)window.scrollTo(0,0)}
-$$('#tabs button').forEach(b=>b.onclick=()=>{const was=$('#tab-bio').classList.contains('active');goTab(b.dataset.tab);if(b.dataset.tab==='bio'&&!was)openPop('bio')});
+let bioSeen=false;
+$$('#tabs button').forEach(b=>b.onclick=()=>{goTab(b.dataset.tab);if(b.dataset.tab==='bio'&&!bioSeen){bioSeen=true;openPop('bio')}});
 
 
 let lastT=performance.now();
 function loop(t){const dt=Math.min(.05,(t-lastT)/1000);lastT=t;for(const m of MicroView.all){if(m.c.offsetParent===null)continue;if(!m.size)m.resize();m.step(dt);m.draw()}requestAnimationFrame(loop)}
-cmpInit();prInit();capInit();titInit();bioInit();misInit();glossInit();bioFoldInit();fsInit();confirmBtn($('#labReset'),'초기화할까요?',labReset);mbarInit();stickyHdr();openPop('intro');
+cmpInit();prInit();capInit();titInit();bioInit();misInit();glossInit();bioFoldInit();fsInit();confirmBtn($('#labReset'),'초기화할까요?',labReset);mbarInit();stickyHdr();labDefaults();
+{let seen=false;try{seen=sessionStorage.getItem('bufferLabIntro')==='1';sessionStorage.setItem('bufferLabIntro','1')}catch(e){}if(!seen)openPop('intro')}
 requestAnimationFrame(loop);
 </script>
 </body>

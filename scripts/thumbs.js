@@ -11,6 +11,15 @@ const PREP = {
   'chemistry/lewis-dot': p => p.click('#helpClose').catch(() => {}),
   'chemistry/vsepr-lab': p => p.evaluate(() => { const m = document.getElementById('modal'); if (m) m.style.display = 'none'; }),
   'chemistry/metal-ionization': p => p.evaluate(() => { document.querySelectorAll('#help, .modal').forEach(o => o.classList.remove('on')); }),
+  'chemistry/molarity-lab': async p => {   // 보호구·진행 방식 고르고 입장 → NaCl 용액 만들기의 실험대 화면까지 가서 저울에 시약을 조금 올려 둔 모습
+    await p.click('#g-coat'); await p.click('#g-gloves'); await p.click('#g-goggles'); await p.click('#m-strict'); await p.click('#startBtn'); await p.waitForTimeout(2600);
+    await p.evaluate(() => { startPrep(0); S.job.calc.step = 99; S.job.flask = S.job.m.V; S.job.stage = 'lab'; render(); });
+    await p.waitForTimeout(400);
+    await p.evaluate(() => { const s = document.querySelector('.scenebox'); if (s) { s.scrollIntoView({ block: 'start' }); window.scrollBy(0, -62); } });
+  },
+  'chemistry/buffer-solution-lab': async p => {   // 안내 닫고 ① pH 비교에서 HCl 6 mL 넣은 모습
+    await p.click('#modalClose').catch(() => {}); await p.click('#cmpAdd1'); await p.click('#cmpAdd5'); await p.waitForTimeout(1600);
+  },
   'chemistry/chemical-cell': async p => { await p.click('[data-pickmode="daniel"]'); await p.click('[data-study="free"]'); await p.click('#startBtn'); },
   'physics/mechanics-energy': async p => {   // 실험 동작 한 번 실행하고 시뮬레이션 화면이 맨 위에 오도록 스크롤
     await p.evaluate(() => { const set = (id, v) => { const n = document.querySelector('.lab:not([hidden]) ' + id); if (n) { n.value = v; n.dispatchEvent(new Event('change')); } }; set('#s-v-n', '7.7'); set('#p-v-n', '30'); set('#p-a-n', '60'); });

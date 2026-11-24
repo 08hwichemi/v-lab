@@ -1,6 +1,11 @@
 # GitHub Pages 자동 배포
 # - 이 브랜치(또는 main)에 푸시될 때마다 저장소 전체를 그대로 Pages 에 올립니다.
 # - 첫 실행 때 Pages 를 자동으로 켭니다 (enablement: true).
+# - 2026-11-24: 올리기(build)와 배포(deploy)를 두 단계로 나눔.
+#   한 단계 안에서 올리자마자 배포하면, 방금 올린 묶음이 GitHub 목록에 아직 안 잡혀
+#   "No artifacts named github-pages were found" 로 실패하는 일이 잦았음.
+#   그래서 배포 단계는 묶음이 목록에 보일 때까지 기다린 뒤 시작합니다.
+#   묶음 이름에 실행 차수를 붙여, 다시 실행해도 같은 이름이 두 개 생기지 않습니다.
 name: Deploy to GitHub Pages
 
 on:
@@ -12,24 +17,49 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: read
 
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      artifact: ${{ steps.name.outputs.artifact }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
         with:
           enablement: true
+      - id: name
+        run: echo "artifact=github-pages-${{ github.run_attempt }}" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-pages-artifact@v3
         with:
+          name: ${{ steps.name.outputs.artifact }}
           path: .
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 올린 묶음이 목록에 잡힐 때까지 기다림 (최대 2분)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT: ${{ needs.build.outputs.artifact }}
+        run: |
+          for i in $(seq 1 24); do
+            n=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?name=$ARTIFACT" --jq '.total_count' 2>/dev/null || echo 0)
+            echo "확인 $i: $ARTIFACT 묶음 ${n:-0}개"
+            if [ "${n:-0}" -ge 1 ]; then exit 0; fi
+            sleep 5
+          done
+          echo "::warning::묶음이 목록에 보이지 않지만 배포를 시도합니다."
       - id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: ${{ needs.build.outputs.artifact }}

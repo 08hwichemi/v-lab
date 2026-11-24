@@ -147,6 +147,14 @@ body.viewer { height: 100vh; height: 100dvh; overflow: hidden; }
 .loading { position: absolute; inset: 0; display: grid; place-items: center; background: var(--bg); color: var(--muted); font-size: 13px; pointer-events: none; transition: opacity .25s; }
 .loading.hide { opacity: 0; }
 body.fs .top, body.fs .sub { display: none; }
+.show-compact { display: none; }
+/* 휴대폰·낮은 화면: 뷰어에서는 사이트 머리줄을 접고 한 줄(뒤로 · 제목 · 도구 · 전체화면)만 남겨 실험 화면을 넓힌다 */
+@media (max-width: 720px), (max-height: 560px) {
+  body.viewer { --top-h: 0px; }
+  body.viewer .top, body.viewer .mtabs { display: none; }
+  body.viewer .show-compact { display: inline-flex; }
+}
+@media (max-height: 560px) and (min-width: 721px) { body.viewer { --sub-h: 40px; } }
 .notfound { padding: 80px var(--gutter); text-align: center; color: var(--muted); }
 .notfound b { display: block; color: var(--text); font-size: 18px; margin-bottom: 6px; }
 
@@ -307,7 +315,7 @@ table.list th { color: var(--muted); font-weight: 600; font-size: 11.5px; }
 .pt-sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
 .pt-detail dl { display: grid; grid-template-columns: 90px 1fr; gap: 5px 10px; margin: 12px 0 0; font-size: 13px; }
 .pt-detail dt { color: var(--muted); } .pt-detail dd { margin: 0; color: var(--text); font-family: var(--mono); }
-@media (max-width: 720px) { .tools { width: 100%; } .tl-unit input { width: 140px; } .tb { padding: 0 10px; } }
+@media (max-width: 720px) { .tools { width: 100%; } .tl-unit input { width: 140px; } .tb { padding: 0 10px; } .tools-tabs { overflow-x: auto; scrollbar-width: none; } .tools-tabs::-webkit-scrollbar { display: none; } .tools-tabs button { white-space: nowrap; flex: none; padding: 0 9px; } }
 
 /* 반응형 ------------------------------------------------------------- */
 @media (max-width: 1200px) { :root { --gutter: 28px; } }
@@ -328,8 +336,9 @@ table.list th { color: var(--muted); font-weight: 600; font-size: 11.5px; }
   .card h3 { font-size: 14.5px; } .card p { font-size: 12.5px; }
   .sr.m { display: flex; width: 100%; margin: 10px 16px 0; }
   .sub { gap: 10px; height: auto; flex-wrap: wrap; }
-  .sub .bc { height: 44px; flex: 1 1 0; overflow: hidden; } .sub .bc #labTitle { overflow: hidden; text-overflow: ellipsis; } .sub .r { height: 44px; align-items: center; }
-  .etabs { order: 3; width: 100%; height: 40px; }
+  .sub .bc { height: 42px; flex: 1 1 0; overflow: hidden; } .sub .bc #labTitle { overflow: hidden; text-overflow: ellipsis; } .sub .r { height: 42px; align-items: center; }
+  .etabs { order: 3; width: 100%; height: 36px; border-top: 1px solid var(--line); }
+  .sub:not(.multi) .etabs { display: none; }   /* 실험이 하나뿐인 파일은 탭 줄을 접는다 (과목 목록은 뒤로 가기로) */
   .info { position: absolute; inset: 0; width: auto; border-left: 0; z-index: 5; }
   .fg { grid-template-columns: 1fr; }
 

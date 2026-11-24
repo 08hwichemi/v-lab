@@ -1,0 +1,1731 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>완충 용액 실험실 · V-Lab</title>
+<style>
+/* V-Lab 공용 글꼴·색 토큰만 가져옴 (공용 클래스는 이 파일의 클래스 이름과 겹치므로 lab-theme.css 전체는 쓰지 않음) */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+/* 위·아래첨자(₆ ⁺ ⁻ …)는 한글 글꼴에 ₁₂₃₄ 만 들어 있어 화학식 숫자 크기가 들쭉날쭉해진다. 같은 계열 라틴 글꼴에서 첨자만 가져와 맨 앞에 둔다 */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&text=%E2%81%B0%C2%B9%C2%B2%C2%B3%E2%81%B4%E2%81%B5%E2%81%B6%E2%81%B7%E2%81%B8%E2%81%B9%E2%81%BA%E2%81%BB%E2%82%80%E2%82%81%E2%82%82%E2%82%83%E2%82%84%E2%82%85%E2%82%86%E2%82%87%E2%82%88%E2%82%89%E2%82%8A%E2%82%8B&display=swap');
+:root{--font: 'IBM Plex Sans', 'IBM Plex Sans KR', 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; --bg: #ffffff; --panel: #ffffff; --panel-2: #F7F8FA; --line: #E6E8EC; --line-2: #F0F1F3; --text: #111111; --text-2: #3F4652; --muted: #6B7280; --accent: #3182F6; --accent-soft: #EAF2FF; --ok: #12A66B; --warn: #F5A623; --err: #E5484D; --radius: 12px; --radius-sm: 8px;}
+</style>
+<style>
+:root{--bg:#eef3f9;--card:#fff;--ink:#1d2a3a;--muted:#5d6d81;--line:#d9e2ee;--accent:#2f6fec;--accent2:#12a89d;--warn:#e2553f;--blue:#2f6fec;--hdr:#15233f;--ok:#1f9d63;}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45;-webkit-text-size-adjust:100%}
+button,select,input{font-family:inherit;font-size:inherit}
+.app{height:100vh;height:100dvh;display:flex;flex-direction:column}
+header{background:var(--hdr);color:#fff;display:flex;align-items:center;gap:10px 14px;padding:8px 14px;flex-wrap:wrap;flex:none}
+.brand{font-weight:800;font-size:17px;white-space:nowrap;letter-spacing:-.3px}
+.brand small{font-weight:500;opacity:.65;font-size:12px;margin-left:6px}
+nav.tabs{display:flex;gap:4px;flex:1 0 auto;min-width:0;overflow-x:auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{background:transparent;color:#c9d5ea;border:0;border-radius:8px;padding:7px 11px;cursor:pointer;white-space:nowrap;font-weight:600}
+nav.tabs button:hover{background:rgba(255,255,255,.08);color:#fff}
+nav.tabs button.active{background:#fff;color:var(--hdr)}
+.hdr-actions{display:flex;gap:5px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
+.pill{background:#2a3d63;color:#fff;border:1px solid #3d5383;border-radius:999px;padding:6px 10px;cursor:pointer;font-weight:600;white-space:nowrap;font-size:13px}
+.pill:hover{background:#34497a}
+.pill.reset{background:#5a2a2a;border-color:#8a4040}
+.pill.reset:hover{background:#733434}
+.pill.reset.confirm{background:#c0392b;border-color:#e57060}
+.switch{display:flex;align-items:center;gap:5px;font-size:13px;color:#c9d5ea;white-space:nowrap;cursor:pointer}
+main{flex:1;min-height:0;overflow:auto;padding:10px}
+.tab{display:none}
+.tab.active{display:grid;gap:10px;height:100%;min-height:620px}
+.g2{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
+.g3{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr) minmax(0,1fr)}
+.col{display:flex;flex-direction:column;gap:10px;min-height:0;min-width:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:0;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(20,40,80,.04)}
+.card.grow{flex:1 1 0}
+details.card{display:block;overflow:auto;flex:none}
+details.card.grow-d[open]{flex:1 1 0;min-height:70px}
+details.card>summary{cursor:pointer;font-weight:700;font-size:14px;list-style:none;display:flex;align-items:center;gap:6px;user-select:none}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::before{content:"▸";color:var(--accent);transition:transform .2s;display:inline-block}
+details.card[open]>summary::before{transform:rotate(90deg)}
+details.card>summary+*{margin-top:6px}
+.card h3{margin:0 0 6px;font-size:14px;font-weight:700}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.card-head h3{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:12.5px}
+.scroll{overflow:auto;min-height:0}
+.ctrl-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:4px 0}
+.btn{border:1px solid var(--line);background:#f5f8fc;color:var(--ink);border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:600;white-space:nowrap;transition:background .15s,transform .05s}
+.btn:hover{background:#e9f0f9}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:#255fd1}
+.btn.warn{background:#fdecea;border-color:#f3c0b7;color:#b8321e}
+.btn.blue{background:#e8f0ff;border-color:#bcd0f7;color:#1f4fb8}
+.btn.ghost{background:transparent}
+.btn.sm{padding:4px 9px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#f5f8fc}
+.seg button{border:0;background:transparent;padding:6px 11px;cursor:pointer;font-weight:600;color:var(--muted);white-space:nowrap}
+.seg button.on{background:var(--accent);color:#fff}
+.seg.sm button{padding:4px 8px;font-size:12.5px}
+.chk{display:flex;align-items:center;gap:6px;cursor:pointer;margin:3px 0}
+.chk.small{font-size:12.5px;color:var(--muted)}
+.fld{display:flex;flex-direction:column;gap:3px;font-weight:600;font-size:13px;margin:4px 0}
+.fld select{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:500}
+.fld .row{display:flex;justify-content:space-between;align-items:center}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.slider-row{display:flex;gap:6px;align-items:center}
+.chart-box{position:relative;flex:1;min-height:170px}
+.chart-box canvas{position:absolute;inset:0;width:100%;height:100%}
+.micro-wrap{display:flex;gap:8px;flex:1;min-height:0}
+.micro-box{position:relative;flex:1;min-height:160px;min-width:0}
+.micro-box canvas{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+.legend{width:128px;flex:none;display:flex;flex-direction:column;gap:3px;overflow:auto;font-size:12px}
+.lg{display:flex;align-items:center;gap:5px;white-space:nowrap}
+.lg i{width:12px;height:12px;border-radius:4px;flex:none}
+.lg b{margin-left:auto;color:var(--muted);font-weight:600}
+.lg-note{font-size:11px;color:var(--muted);margin-top:4px;white-space:normal}
+.info{font-size:13.5px}
+.info p{margin:4px 0}
+.eq{font-family:"Cambria Math","Times New Roman",serif;font-size:15px;background:#f3f7fd;border-left:3px solid var(--accent);padding:4px 9px;border-radius:6px;margin:4px 0;line-height:1.5}
+.eq small{font-family:inherit;color:var(--muted);font-size:12px}
+.eq.red{border-color:var(--warn);background:#fdf3f1}
+.eq.blue{border-color:var(--blue)}
+.eq.green{border-color:var(--ok);background:#effaf4}
+.info sup,.modal-body sup,.val sup,.key sup{font-size:.72em;line-height:0;vertical-align:.45em}
+.hook{background:linear-gradient(135deg,#eef6ff,#f4efff);border:2px solid #b9cdf5;border-radius:12px;padding:10px 14px;margin:4px 0 10px}
+.hook .q{font-size:17px;font-weight:800;color:#1d3f8f;line-height:1.5}
+.hook .a{margin-top:6px;font-size:14px;background:#fff;border-radius:9px;padding:8px 11px;line-height:1.6}
+.hook .btn{margin-top:6px}
+.def-big{font-size:16px;background:#e9f7f0;border:2px solid #8fd3ad;border-radius:12px;padding:9px 14px;margin:6px 0 8px;line-height:1.6}
+.neut{background:#fff5e6;border:2px solid #f0b35a;border-radius:10px;padding:7px 10px;margin-bottom:8px;font-size:13px}
+.neut>b{font-size:14px;color:#8a4b00}
+.neut .eq{margin:5px 0;font-size:15px}
+.neut details summary{cursor:pointer;font-weight:700;font-size:12.5px;color:#8a4b00}
+.ntab{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:4px}
+.ntab td,.ntab th{border:1px solid #f0d6a8;padding:3px 6px;text-align:center}
+.ntab th{background:#fdebc8}
+.ntab .dn{color:#c0392b}.ntab .up{color:#1f9d63}
+.key-big{background:linear-gradient(135deg,#fff3d6,#ffe9b8);border:2px solid #f0b94a;border-radius:12px;padding:10px 14px;margin:6px 0 10px;font-size:15px;line-height:1.6;color:#4a3300}
+.key-big .kt{display:block;font-size:17.5px;font-weight:800;margin-bottom:3px;color:#2b1d00}
+.key-big .kr{display:flex;gap:8px;flex-wrap:wrap;font-weight:700;margin:4px 0 2px}
+.key-big .kr span{background:#fff;border-radius:8px;padding:3px 10px;border:1px solid #f0d08a}
+.key-big .kn{font-size:13px;color:#6b5320}
+.key{background:#fff8e6;border:1px solid #f4dea3;border-radius:8px;padding:6px 9px;margin:6px 0;font-size:13px}
+.warnbox{background:#fdecea;border:1px solid #f3c0b7;border-radius:8px;padding:6px 9px;margin:6px 0;font-size:13px;color:#8f2a18}
+.okbox{background:#e8f7ef;border:1px solid #b4e2c8;border-radius:8px;padding:6px 9px;margin:6px 0;font-size:13px}
+.sec-t{font-weight:700;font-size:12.5px;color:var(--muted);margin:8px 0 2px}
+.link{color:var(--accent);cursor:pointer;font-weight:700;text-decoration:underline;text-underline-offset:2px;background:none;border:0;padding:0}
+.adv-only{border-left:3px solid #9b6dd6;background:#f6f1fd;padding:4px 8px;border-radius:6px;margin:4px 0;font-size:12.5px}
+
+.dn{color:#c0392b;font-weight:700}.up{color:#1f4fb8;font-weight:700}.flat{color:var(--ok);font-weight:700}
+/* beakers */
+.beakers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:4px}
+.beakers.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.bk-card{border:1px solid var(--line);border-top:4px solid var(--c);border-radius:10px;padding:6px 8px;text-align:center;display:flex;flex-direction:column;min-width:0}
+.bk-name{font-weight:700;font-size:13.5px}
+.bk-sub{font-size:11px;color:var(--muted);min-height:28px;line-height:1.3}
+.bk-vis{height:clamp(80px,14vh,130px);display:flex;justify-content:center;margin:2px 0}
+.bk-vis svg{height:100%;width:auto}
+.bk-ph{display:flex;align-items:baseline;justify-content:center;gap:4px}
+.bk-ph span{font-size:12px;color:var(--muted);font-weight:700}
+.bk-ph b{font-size:24px;font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+.bk-d{font-size:12px;min-height:18px}
+.bk-bar{height:7px;background:#edf1f6;border-radius:4px;overflow:hidden;margin:3px 0 1px}
+.bk-bar i{display:block;height:100%;background:var(--c);transition:width .4s}
+.bk-rem{font-size:11px;color:var(--muted)}
+/* prep */
+.cyl-area{display:flex;gap:10px;flex:1;min-height:0;align-items:stretch}
+.cyl-vis{flex:none;height:100%;min-height:200px;display:flex;justify-content:center}
+.cyl-vis svg{height:100%;width:auto;max-width:110px}
+.cyl-side{flex:1;display:flex;flex-direction:column;gap:8px;justify-content:center;min-width:0}
+.cyl-label{font-size:13px;background:#f3f7fd;border-radius:8px;padding:8px;text-align:center;font-weight:600}
+.beaker-area{display:flex;gap:10px;align-items:center;justify-content:center;flex:1;min-height:0}
+.beaker-area .bk-vis{height:100%;min-height:150px;max-height:340px;flex:none}
+.phm{background:#14213d;color:#9ff5c8;border-radius:10px;padding:8px 12px;text-align:center;min-width:96px;box-shadow:inset 0 0 0 3px #2a3d63}
+.phm span{display:block;font-size:11px;color:#8fa3c6;font-weight:700}
+.phm b{font-size:28px;font-variant-numeric:tabular-nums;font-family:"Consolas","Menlo",monospace}
+.phm em{display:block;font-style:normal;font-size:11px;color:#c9d5ea}
+.uni-bar{height:8px;border-radius:4px;background:linear-gradient(90deg,#d7263d 0%,#f46036 14%,#f6a609 28.6%,#f5ce28 35.7%,#d6de46 42.9%,#57ba4d 50%,#28aa96 57%,#2e86de 64.3%,#3f51b5 71.4%,#6a3fb5 85.7%,#7b2d8e 100%);margin-top:4px}
+.uni-lab{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}
+.mix-list{font-size:12.5px;border-top:1px dashed var(--line);margin-top:6px;padding-top:4px;max-height:110px}
+.mix-list .li{display:flex;justify-content:space-between;gap:6px;padding:1px 0}
+.mix-list .li span{color:var(--muted)}
+.judge{border-radius:10px;padding:8px 10px}
+.judge.ok{background:#e8f7ef;border:1px solid #b4e2c8}
+.judge.no{background:#f7f2ea;border:1px solid #ead9bd}
+.judge.empty{background:#f3f6fa;border:1px solid var(--line)}
+.judge h4{margin:0 0 3px;font-size:15px}
+.judge p{margin:2px 0;font-size:13px}
+.mission-banner{background:linear-gradient(90deg,#2f6fec,#12a89d);color:#fff;border-radius:12px;padding:8px 12px;display:flex;flex-direction:column;gap:6px}
+.mission-banner[hidden]{display:none}
+.mission-banner b{font-size:14px}
+.mission-banner .ctrl-row .btn{background:#fff;color:#1d4fb3;border:0}
+.mission-banner .ctrl-row .btn.ghost{background:rgba(255,255,255,.18);color:#fff}
+/* capacity */
+.cap-beakers{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cap-ref{font-size:12.5px;color:var(--muted);margin-top:6px;text-align:center}
+/* titration */
+.tit-vis{flex:1;min-height:200px;display:flex;justify-content:center;align-items:center;gap:8px}
+.tit-vis svg{height:100%;max-height:340px;width:auto}
+.tit-cap{font-size:12px;color:var(--muted);text-align:center}
+.dripping{animation:drip .45s linear infinite}
+@keyframes drip{0%{transform:translateY(0);opacity:1}100%{transform:translateY(50px);opacity:0}}
+.region-h{font-weight:800;font-size:15px;margin:0 0 3px}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 7px;border-radius:999px;background:#e8f0ff;color:#1f4fb8;margin-right:4px}
+/* bio */
+.scen{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.scen button{text-align:left;border:1px solid var(--line);background:#f7f9fc;border-radius:9px;padding:6px 8px;cursor:pointer;font-weight:600;font-size:13px;line-height:1.3}
+.scen button small{display:block;font-weight:500;color:var(--muted);font-size:11.5px}
+.scen button.on{border-color:var(--accent);background:#e8f0ff}
+.range-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:-2px}
+.flow{display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1;min-height:0;align-content:start;overflow:auto}
+.fbox{border:1.5px solid var(--line);border-radius:10px;padding:6px 8px;font-size:12.5px;transition:all .3s;background:#fbfcfe}
+.fbox>b{display:block;font-size:13px}
+.fbox.on{border-color:#f0a04b;background:#fff6ea;box-shadow:0 0 0 3px rgba(240,160,75,.18)}
+.fbox.blood{grid-column:1/-1}
+.fbox .eq{font-size:13.5px;margin:3px 0 0}
+.gauge{margin:4px 0 6px}
+.g-bar{position:relative;height:18px;border-radius:9px;background:linear-gradient(90deg,#d94c4c 0%,#f0a04b 54%,#43b874 55%,#43b874 65%,#5a8de0 66%,#7a5ad0 100%)}
+.g-mark{position:absolute;top:-6px;width:4px;height:30px;background:#14213d;border-radius:2px;transform:translateX(-2px);transition:left .5s}
+.g-mark span{position:absolute;top:-22px;left:50%;transform:translateX(-50%);background:#14213d;color:#fff;font-weight:800;font-size:12.5px;padding:1px 6px;border-radius:5px;white-space:nowrap}
+.g-ticks{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:2px}
+.g-zones{display:grid;grid-template-columns:55fr 10fr 35fr;font-size:11.5px;font-weight:700;text-align:center;margin-top:1px}
+.g-zones span:nth-child(1){color:#c0392b}.g-zones span:nth-child(2){color:var(--ok)}.g-zones span:nth-child(3){color:#5a4bc0}
+.vals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.val{background:#f3f7fd;border-radius:8px;padding:5px 6px;text-align:center}
+.val span{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.val b{font-size:16px;font-variant-numeric:tabular-nums}
+.status{font-weight:800;text-align:center;margin-top:6px;font-size:14px}
+/* missions */
+.mis-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;overflow:auto}
+.mis{border:1px solid var(--line);border-radius:10px;padding:9px 10px;display:flex;flex-direction:column;gap:5px;background:#fbfcfe}
+.mis.done{border-color:#b4e2c8;background:#f0faf4}
+.mis h4{margin:0;font-size:14px}
+.mis p{margin:0;font-size:12.5px}
+.mis .st{font-size:12px;font-weight:700;color:var(--muted)}
+.mis.done .st{color:var(--ok)}
+/* micro pair */
+.micro-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:8px;flex:1;min-height:0}
+.mp{display:flex;flex-direction:column;min-height:0;min-width:0}
+.mp-t{font-weight:700;font-size:13px;text-align:center;border-bottom:3px solid var(--c);padding-bottom:2px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mp .micro-box{min-height:130px}
+.legend.h{width:auto;flex:none;flex-direction:row;flex-wrap:wrap;gap:2px 10px;justify-content:center;max-height:60px;margin-top:4px}
+.legend.h .lg b{margin-left:2px}
+.legend.h .lg-note{width:100%;text-align:center;margin-top:0}
+.limit-note{background:#fdecea;border:1px solid #f3c0b7;color:#8f2a18;border-radius:8px;padding:5px 9px;font-size:12.5px;font-weight:700;margin-top:4px;text-align:center}
+.limit-note[hidden]{display:none}
+.g1{grid-template-columns:minmax(0,1fr)}
+.m-bar{display:none}
+.m-only{display:none!important}
+.m-test{flex-wrap:wrap;gap:6px;align-items:center;border-top:1px dashed var(--line);padding-top:6px;margin-top:6px}
+.m-test-res{flex-basis:100%;color:var(--muted)}
+.col.scroll>*{flex-shrink:0}
+.mis-card select{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:600;margin:2px 0 4px}
+.mis-card{background:linear-gradient(135deg,#f3f8ff,#eefaf8);border-color:#cfe0f7}
+.mis-desc{font-size:12.5px;line-height:1.45}
+.test-box{border-top:1px dashed var(--line);margin-top:6px;padding-top:6px}
+.test-box h4{margin:0 0 3px;font-size:13px}
+.goals{list-style:none;padding:0;margin:6px 0}
+.goals li{padding:6px 10px 6px 34px;position:relative;border-bottom:1px dashed var(--line);font-size:14px}
+.goals li::before{content:"🎯";position:absolute;left:6px;top:5px}
+.feat{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.feat>div{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fbfcfe;font-size:13px}
+.feat b{display:block;font-size:13.5px;color:#1d4fb3;margin-bottom:2px}
+.ion-row{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px}
+.ion-row .lab{width:120px;flex:none;font-weight:700}
+.ion-row .dots2{display:flex;flex-wrap:wrap;gap:3px;flex:1}
+.ion-row .dots2 i{width:13px;height:13px;border-radius:50%}
+@media (max-width:960px){.feat{grid-template-columns:1fr}}
+.mp-ph{font-size:12.5px;text-align:center;background:#f3f7fd;border-radius:8px;padding:4px 6px;margin-top:4px;line-height:1.4}
+.mp-ph b.h{color:#c62828}.mp-ph b.o{color:#6a2fc4}
+#tab-bio{grid-template-rows:auto minmax(0,1fr)}
+#tab-bio{grid-template-rows:none}
+.chk-list{list-style:none;padding:0;margin:5px 0}
+.chk-list li{display:flex;gap:6px;align-items:flex-start;font-size:13px;padding:3px 0;border-top:1px dashed #e6dcc8}
+.chk-list li:first-child{border-top:0}
+.chk-list .ic{flex:none;width:18px;text-align:center}
+.chk-list .no{color:#b8321e;font-weight:700}
+.chk-list small{color:var(--muted);display:block}
+.why{background:#fff;border-radius:8px;padding:6px 8px;margin-top:5px;font-size:12.5px;border:1px solid #ead9bd}
+.stages{display:flex;gap:3px;margin:2px 0 4px;flex-wrap:wrap}
+.stages span{flex:1;min-width:58px;text-align:center;font-size:11.5px;font-weight:700;padding:4px 2px;border-radius:7px;background:#eef2f7;color:#7d8da1;white-space:nowrap}
+.stages span.on{background:var(--accent);color:#fff}
+.stages span.done{background:#dbe7fb;color:#1f4fb8}
+.micro-solo{position:relative;flex:1;min-height:170px;display:flex}
+.micro-solo .micro-box{flex:1}
+.tit-info{background:#f6f9ff;border:1px solid #d6e3fa;border-radius:10px;padding:7px 10px;margin-top:6px}
+.tit-amt{font-size:12.5px;margin-top:3px}
+.tit-amt b{font-variant-numeric:tabular-nums}
+.pager{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+.dots{display:flex;gap:6px}
+.dots i{width:10px;height:10px;border-radius:50%;background:#cfd8e3;cursor:pointer}
+.dots i.on{background:var(--accent)}
+.pg-h{font-size:18px;font-weight:800;color:#1d4fb3;margin:2px 0 8px}
+.pg-eq{font-family:"Cambria Math","Times New Roman",serif;font-size:21px;text-align:center;background:#f3f7fd;border-radius:10px;padding:10px;margin:8px 0}
+.shift{text-align:center;font-weight:800;font-size:15px;margin:-2px 0 8px}
+.shift.l{color:#5a4bc0}.shift.r{color:#c0392b}.shift.n{color:var(--ok)}
+.steps{list-style:none;padding:0;margin:6px 0}
+.steps li{background:#f7f9fc;border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-size:14px;position:relative}
+.steps li+li{margin-top:18px}
+.steps li+li::before{content:"↓";position:absolute;top:-18px;left:50%;transform:translateX(-50%);color:var(--muted);font-weight:800}
+.steps.sm li{font-size:12.5px;padding:4px 8px}
+.steps.sm li+li{margin-top:14px}.steps.sm li+li::before{top:-15px}
+.eqcard{text-align:center}
+.eqcard .pg-eq{font-size:17px;padding:7px;margin:4px 0}
+.vals{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+.val small{display:block;font-size:10.5px;color:var(--muted)}
+.intro-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.ib{border:1px solid var(--line);border-radius:10px;padding:7px 9px;background:#fbfcfe;font-size:13px}
+.ib h4{margin:0 0 3px;font-size:13.5px;color:#1d4fb3}
+.ib p{margin:2px 0}
+.ib .eq{font-size:13.5px;margin:4px 0}
+.pair-demo{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:8px 0;font-family:"Cambria Math","Times New Roman",serif;font-size:19px}
+.chip{padding:4px 12px;border-radius:999px;color:#fff;font-weight:700}
+.chip.acid{background:#ee9a2e}.chip.base{background:#3a78d4}
+.pair-demo .arr{display:flex;flex-direction:column;align-items:center;font-size:20px;line-height:1.1}
+.pair-demo .arr small{font-family:inherit;font-size:11.5px;color:var(--muted)}
+.two-box{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.two-box>div{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fbfcfe}
+.helper{border:2px solid #bcd0f7;border-radius:12px;padding:10px;background:#f6f9ff}
+.helper .res{background:#fff;border-radius:8px;padding:8px 10px;margin-top:6px;font-size:13.5px}
+.btn.helper-btn{width:100%;margin-top:6px;background:#fff8e6;border-color:#f4dea3;color:#8a5a00}
+/* glossary */
+.term{border-bottom:1.5px dotted #5f86d4;cursor:help;border-radius:2px}
+.term:hover,.term:focus{background:#e9f1ff;outline:none}
+#tip{position:fixed;z-index:70;max-width:290px;background:#14213d;color:#fff;padding:8px 11px;border-radius:9px;font-size:12.5px;line-height:1.5;pointer-events:none;opacity:0;transition:opacity .15s;box-shadow:0 8px 24px rgba(0,0,0,.25);left:0;top:0}
+#tip b{color:#9fd0ff;display:block;margin-bottom:2px;font-size:13px}
+#tip.show{opacity:1}
+.score{font-weight:800;color:var(--accent)}
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(10,20,40,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:14px}
+.modal.show{display:flex}
+.modal-box{background:#fff;border-radius:14px;max-width:760px;width:100%;max-height:92vh;max-height:92dvh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--hdr);color:#fff}
+.modal-head h2{margin:0;font-size:16px}
+.modal-head button{background:transparent;border:0;color:#fff;font-size:22px;cursor:pointer;line-height:1}
+.modal-body{padding:12px 16px 16px;overflow:auto;font-size:14px}
+.modal-body h3{font-size:15px;margin:14px 0 6px;color:#1d4fb3}
+.modal-body h3:first-child{margin-top:2px}
+.modal-body table{border-collapse:collapse;width:100%;font-size:13px}
+.modal-body td,.modal-body th{border:1px solid var(--line);padding:5px 7px;text-align:center}
+.modal-body th{background:#f3f7fd}
+.ci-demo{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fbfcfe}
+.ci-eq{font-family:"Cambria Math","Times New Roman",serif;font-size:19px;text-align:center;margin:4px 0 8px}
+.ci-eq .arr{display:inline-block;margin:0 8px;transition:all .4s}
+.ci-eq .big{color:#1f4fb8;font-weight:700;font-size:23px}
+.ci-eq .lft{color:#c0392b;font-weight:800}
+.barrow{display:flex;align-items:center;gap:8px;margin:4px 0;font-size:13px}
+.barrow .lab{width:150px;flex:none}
+.barrow .bar{flex:1;height:14px;background:#edf1f6;border-radius:7px;overflow:hidden}
+.barrow .bar i{display:block;height:100%;background:#e9a23b;transition:width .6s}
+.barrow b{width:72px;text-align:right;font-variant-numeric:tabular-nums}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 3px}
+.frac span:first-child{border-bottom:1.5px solid currentColor;padding:0 3px}
+.toast{position:fixed;left:50%;top:64px;bottom:auto;transform:translateX(-50%) translateY(-20px);background:#14213d;color:#fff;padding:9px 16px;border-radius:10px;font-weight:600;opacity:0;pointer-events:none;transition:all .3s;z-index:60;max-width:90vw;text-align:center;font-size:13.5px}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast{font-size:16px!important;padding:14px 24px!important;border-radius:14px!important;box-shadow:0 12px 30px rgba(0,0,0,.25);border:2px solid transparent;line-height:1.5}
+.toast.ok{background:#e8f8ef;color:#126b3f;border-color:#5cc08b}
+.toast.warn{background:#fff4e5;color:#8a4b00;border-color:#f0b35a}
+.toast.err{background:#fdecea;color:#9b2a17;border-color:#e58c7d}
+.fs-btn{margin-left:auto;padding:3px 9px!important;font-size:12.5px!important}
+.card.fs{position:fixed!important;inset:14px;z-index:45;box-shadow:0 0 0 100vmax rgba(10,20,40,.6);height:auto!important;max-height:none!important}
+.card.fs .chart-box,.card.fs .micro-box{flex:1 1 0!important;height:auto!important;min-height:0!important}
+.card.fs .micro-wrap,.card.fs .micro-pair,.card.fs .micro-solo{flex:1 1 0!important;min-height:0!important}
+.card.fs .mp{min-height:0}
+.card.fs .legend.h{max-height:none}
+body.fs-open{overflow:hidden}
+@media (max-width:960px){.card.fs{inset:6px}.card.fs .micro-pair{grid-template-columns:1fr;grid-template-rows:1fr 1fr}}
+
+/* ---------- responsive ---------- */
+@media (max-width:1250px) and (min-width:961px){
+  .tab.active{height:auto}
+  .g3{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .g3>div.col:nth-of-type(3){grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;align-items:start}
+  .card.grow{flex:1 1 auto;min-height:300px}
+  details.card.grow-d[open]{flex:none}
+}
+@media (max-width:1250px){.intro-grid{grid-template-columns:1fr 1fr}}
+@media (max-height:700px) and (min-width:961px){
+  .tab.active{height:auto}
+  .card.grow{flex:1 1 auto;min-height:280px}
+}
+@media (max-width:960px){
+  #tab-prep .card{max-height:none!important}
+  .app{height:auto;min-height:100vh}
+  main{overflow:visible;padding:8px}
+  header{padding:8px 10px;gap:6px}
+  .brand{font-size:15.5px}
+  nav.tabs{order:3;flex:1 1 100%}
+  .hdr-actions{margin-left:0;justify-content:flex-start;order:2;flex:1 1 100%;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+  .hdr-actions::-webkit-scrollbar{display:none}
+  .pill{flex:none}
+  header{position:sticky;top:var(--hdrTop,0px);z-index:30}
+  #tab-compare>.col,#tab-tit>.col,#tab-bio>.col{display:contents}
+  #tab-compare>.col:nth-child(1)>:nth-child(1){order:1}
+  #tab-compare>.col:nth-child(2)>:nth-child(1){order:2}
+  #tab-compare>.col:nth-child(2)>:nth-child(2){order:3}
+  #tab-compare>.col:nth-child(1)>:nth-child(2){order:4}
+  #tab-tit>.col:nth-child(1)>:nth-child(1){order:1}
+  #tab-tit>.col:nth-child(2)>:nth-child(1){order:2}
+  #tab-tit>.col:nth-child(1)>:nth-child(2){order:3}
+  #tab-tit>.col:nth-child(3)>*{order:4}
+  #tab-bio>.col:nth-child(1)>:nth-child(1){order:1}
+  #tab-bio>.col:nth-child(1)>:nth-child(2){order:2}
+  #tab-bio>.col:nth-child(2)>:nth-child(1){order:3}
+  #tab-bio>.col:nth-child(1)>:nth-child(3){order:4}
+  #tab-bio>.col:nth-child(2)>:nth-child(2){order:5}
+  #tab-bio>.col:nth-child(3)>*{order:6}
+  .tab.active{display:flex;flex-direction:column;height:auto;min-height:0;gap:8px}
+  .col{gap:8px}
+  .card.grow,details.card.grow-d[open]{flex:none}
+  .chart-box{flex:none;height:280px}
+  .micro-wrap{flex-direction:column;flex:none}
+  .micro-box{flex:none;height:min(86vw,340px)}
+  .micro-pair{flex:none}
+  .mp .micro-box{height:min(44vw,250px);min-height:0}
+  .intro-grid{grid-template-columns:1fr}
+  .two-box{grid-template-columns:1fr}
+  .legend{width:auto;flex-direction:row;flex-wrap:wrap;gap:4px 10px}
+  .lg b{margin-left:2px}
+  .cyl-area{height:300px;flex:none}
+  .beaker-area{height:210px;flex:none}
+  .tit-vis{height:300px;flex:none}
+  .flow{flex:none}
+  .mix-list{max-height:none}
+  .modal{padding:6px}
+  .m-bar{display:flex;position:sticky;top:var(--barTop,50px);z-index:20;gap:5px;flex-wrap:nowrap;align-items:center;overflow-x:auto;scrollbar-width:none;margin:-8px -8px 0;padding:7px 8px;background:rgba(238,243,249,.97);border-bottom:1px solid var(--line);box-shadow:0 4px 10px rgba(20,40,80,.08)}
+  .m-bar::-webkit-scrollbar{display:none}
+  .m-bar>*{flex:none}
+  .m-bar .btn{padding:6px 9px;font-size:13px}
+  .m-bar .seg button{padding:6px 8px;font-size:13px}
+  .m-bar .m-hide{display:none}
+  .m-only{display:flex!important}
+  .m-bar .m-ph{font-size:11.5px}
+  .m-bar .btn,.m-bar .seg button{min-width:36px}
+  .m-bar .m-ph{font-size:12px;color:var(--muted);margin-left:auto;white-space:nowrap;line-height:1.25;text-align:right}
+  .m-bar .m-ph b{color:var(--ink)}
+  .toast{font-size:14.5px!important;padding:10px 16px!important;top:58px}
+}
+@media (max-width:370px){.m-bar .m-hide2{display:none}}
+@media (max-width:520px){
+  body{font-size:13.5px}
+  .beakers{gap:5px}
+  .bk-card{padding:5px 4px}
+  .bk-ph b{font-size:20px}
+  .bk-sub{font-size:10.5px}
+  .vals{grid-template-columns:repeat(2,1fr)!important}
+  .scen{grid-template-columns:1fr}
+  .barrow .lab{width:110px}
+  .pill{padding:5px 9px;font-size:12px}
+}
+
+/* ===== V-Lab 공용 테마에 맞춘 덮어쓰기 ===== */
+:root{--bg:#fff;--card:#fff;--ink:#111;--muted:#6B7280;--line:#E6E8EC;--accent:#3182F6;--blue:#3182F6;--hdr:#111;--ok:#12A66B}
+body{font-family:var(--font);letter-spacing:-0.012em;-webkit-font-smoothing:antialiased;font-size:15px}
+header{background:#fff;color:#111;border-bottom:1px solid var(--line);padding:8px 16px}
+.brand{font-weight:600;font-size:18px;letter-spacing:-.02em}
+body.vlab-embed .brand{display:none}
+nav.tabs button{color:#3F4652;font-weight:600;font-size:15px;padding:7px 12px}
+nav.tabs button:hover{background:#F7F8FA;color:#111}
+nav.tabs button.active{background:#111;color:#fff}
+.pill{background:#fff;color:#111;border:1px solid var(--line);border-radius:8px;font-size:13.5px}
+.pill:hover{background:#F7F8FA}
+.pill.reset{background:#fff;border-color:#F3C0B7;color:#B8321E}
+.pill.reset:hover{background:#FDECEA}
+.pill.reset.confirm{background:#E5484D;border-color:#E5484D;color:#fff}
+.switch{color:#3F4652}
+main{padding:12px 16px}
+.tab.active{gap:12px}
+.col{gap:12px}
+.card{border-radius:12px;box-shadow:none;padding:12px 14px}
+.card h3,details.card>summary{font-weight:600;font-size:15.5px}
+.small,.seg.sm button,.chk.small,.sec-t,.adv-only,.cap-ref,.mis-desc,.mp-ph,.why,.tit-amt,.limit-note,.mix-list,.steps.sm li,.mis p,.fbox,.neut details summary,.ntab{font-size:13.5px}
+.info{font-size:14.5px}
+.fld{font-size:14px}
+.btn{background:#fff;border-radius:8px;color:#111}
+.btn:hover{background:#F7F8FA}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:#1B64DA}
+.btn.blue{background:#EAF2FF;border-color:#C9DDFB;color:#1B64DA}
+.btn.sm{font-size:13.5px}
+.seg{border-radius:8px;background:#F7F8FA}
+.seg button.on{background:#111;color:#fff}
+.fld select,.mis-card select{border-radius:8px}
+.eq,.pg-eq,.pair-demo,.ci-eq{font-family:var(--font)}
+.eq{font-size:15px;background:#F7F8FA;border-radius:8px}
+.eq small{font-size:13px}
+.eq.red{background:#FDF3F1}
+.eq.green{background:#EFFAF4}
+.hook{background:#F7F8FA;border:1px solid var(--line);border-radius:12px}
+.hook .q{color:#111;font-weight:700}
+.hook .a{border-radius:8px;font-size:15px}
+.def-big{border-width:1px;border-radius:12px}
+.neut{border-width:1px;border-radius:8px;font-size:14px}
+.neut>b{font-size:15px}
+.key-big{background:#FFF6DD;border:1px solid #F0C75A;border-radius:12px}
+.key-big .kt{font-weight:700}
+.key-big .kn{font-size:13.5px}
+.key,.warnbox,.okbox{font-size:14px;border-radius:8px}
+.legend{font-size:13px}
+.lg-note{font-size:12.5px}
+.bk-card{border-radius:12px}
+.bk-name{font-weight:600;font-size:14.5px}
+.bk-sub{font-size:12.5px;min-height:32px}
+.bk-ph span,.bk-d{font-size:13px}
+.bk-rem{font-size:12.5px}
+.cyl-label{background:#F7F8FA;font-size:14px}
+.phm{background:#111;box-shadow:none;border-radius:10px}
+.phm b{font-family:var(--mono);color:#7CFFB2}
+.phm span,.phm em{font-size:12.5px;color:#C9CED6}
+.uni-lab{font-size:12px}
+.judge{border-radius:12px}
+.judge h4{font-weight:600;font-size:16px}
+.judge p{font-size:14px}
+.judge.empty{background:#F7F8FA}
+.mission-banner{background:#111;border-radius:12px}
+.mission-banner b{font-size:15px}
+.mission-banner .ctrl-row .btn{color:#111}
+.tit-cap{font-size:13px}
+.region-h{font-weight:700;font-size:16px}
+.tag{font-size:12.5px;background:#EAF2FF;color:#1B64DA;border-radius:6px}
+.scen button{background:#fff;border-radius:8px;font-size:14px}
+.scen button small{font-size:12.5px}
+.scen button.on{border-color:#111;background:#F7F8FA;box-shadow:0 0 0 1px #111 inset}
+.range-labels{font-size:12.5px}
+.fbox{background:#fff}
+.fbox>b{font-size:14px}
+.fbox .eq{font-size:14px}
+.g-mark,.g-mark span{background:#111}
+.g-ticks{font-size:12px}
+.g-zones{font-size:12.5px}
+.val{background:#F7F8FA}
+.val span{font-size:12.5px}
+.val small{font-size:12px}
+.status{font-weight:700;font-size:15px}
+.mis{background:#fff;border-radius:12px}
+.mis h4{font-weight:600;font-size:15px}
+.mis .st{font-size:13px}
+.mp-t{font-weight:600;font-size:14px}
+.mp-ph{background:#F7F8FA}
+.mis-card{background:#F7F8FA;border-color:var(--line)}
+.test-box h4{font-size:14px;font-weight:600}
+.feat>div,.ib,.two-box>div,.ci-demo{background:#fff;border-radius:12px}
+.feat>div,.ib{font-size:14px}
+.feat b,.ib h4{color:#111;font-size:14.5px;font-weight:600}
+.ib .eq{font-size:14px}
+.ion-row,.barrow,.chk-list li{font-size:14px}
+.stages span{font-size:12.5px;font-weight:600;background:#F0F1F3;color:#6B7280;border-radius:6px}
+.stages span.on{background:#111;color:#fff}
+.stages span.done{background:#EAF2FF;color:#1B64DA}
+.tit-info{background:#F7F8FA;border-color:var(--line);border-radius:12px}
+.pg-h{color:#111;font-weight:700}
+.pg-eq{background:#F7F8FA}
+.pair-demo .arr small{font-size:12.5px}
+.steps li{background:#F7F8FA;border-radius:8px}
+.helper{border:1px solid var(--line);border-radius:12px;background:#F7F8FA}
+.helper .res{font-size:14.5px}
+.term{border-bottom-color:#3182F6}
+.term:hover,.term:focus{background:#EAF2FF}
+#tip{background:#111;border-radius:8px;font-size:13.5px;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+#tip b{font-size:14px}
+.modal{background:rgba(17,17,17,.45)}
+.modal-box{border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-head{background:#fff;color:#111;border-bottom:1px solid var(--line)}
+.modal-head h2{font-weight:600;font-size:17px}
+.modal-head button{color:#111}
+.modal-body{font-size:15px}
+.modal-body h3{color:#111;font-weight:600;font-size:16px}
+.modal-body table{font-size:14px}
+.modal-body th{background:#F7F8FA}
+.toast{background:#111;border-radius:12px!important;box-shadow:0 12px 30px rgba(0,0,0,.18)}
+.fs-btn{font-size:13px!important}
+.card.fs{box-shadow:0 0 0 100vmax rgba(17,17,17,.5)}
+@media (max-width:960px){
+  .m-bar{background:rgba(255,255,255,.97);box-shadow:none}
+  .m-bar .m-ph{font-size:12.5px}
+  header{padding:8px 10px}
+  main{padding:8px}
+}
+@media (max-width:520px){
+  body{font-size:14.5px}
+  .bk-sub{font-size:11.5px}
+  .pill{font-size:13px}
+}
+</style>
+</head>
+<body>
+<script>if(/embed/.test(location.hash))document.body.classList.add("vlab-embed");</script>
+<div class="app">
+<header>
+  <div class="brand">🧪 완충 용액 실험실</div>
+  <nav class="tabs" id="tabs">
+    <button data-tab="compare" class="active">① pH 비교</button>
+    <button data-tab="cap">② 완충 용량</button>
+    <button data-tab="tit">③ 적정 곡선</button>
+    <button data-tab="bio">④ 생체 완충</button>
+    <button data-tab="prep">⑤ 완충 용액 만들기</button>
+  </nav>
+  <div class="hdr-actions">
+    <button class="pill" data-pop="intro">🏠 안내</button>
+    <button class="pill" data-pop="common">💡 공통 이온</button>
+    <button class="pill" data-pop="pair">🤝 짝산·짝염기</button>
+    <button class="pill" data-pop="ka">⚖️ Ka·Kb</button>
+    <button class="pill" data-pop="adv">📐 H–H 식</button>
+    <button class="pill reset" id="labReset" title="모든 실험을 처음 상태로">↺ 초기화</button>
+  </div>
+</header>
+
+<main>
+<!-- ================= ① pH 비교 ================= -->
+<section class="tab g2 active" id="tab-compare">
+  <div class="col">
+    <div class="card">
+      <div class="card-head"><h3>두 비커에 같은 양을 넣어 보자</h3>
+        <label class="chk small"><input type="checkbox" id="cmpInd" checked> 만능 지시약 색으로 보기</label></div>
+      <div class="ctrl-row">
+        <div class="seg" id="cmpReagent"><button data-v="HCl" class="on"><span class="m-hide2">1 M </span>HCl</button><button data-v="NaOH"><span class="m-hide2">1 M </span>NaOH</button></div>
+        <button class="btn primary" id="cmpAdd1">1 mL<span class="m-hide"> 넣기</span></button>
+        <button class="btn" id="cmpAdd5">5 mL<span class="m-hide"> 넣기</span></button>
+        <button class="btn ghost" id="cmpReset">↺<span class="m-hide"> 처음으로</span></button>
+      </div>
+      <div class="beakers two" id="cmpBeakers"></div>
+    </div>
+    <details class="card grow-d" open>
+      <summary>무슨 일이 일어났을까? (반응식)</summary>
+      <div id="cmpInfo" class="info"></div>
+    </details>
+  </div>
+  <div class="col">
+    <div class="card grow"><h3>📈 pH 변화 그래프</h3><div class="chart-box"><canvas id="cmpChart"></canvas></div></div>
+    <div class="card grow">
+      <div class="card-head"><h3>🔍 미시 세계 확대</h3><span class="muted small">입자 1개 ≈ 1 mmol (모형)</span></div>
+      <div class="micro-pair">
+        <div class="mp"><div class="mp-t" style="--c:#8a99ab">증류수</div><div class="micro-box"><canvas id="cmpMicroW"></canvas></div><div class="legend h" id="cmpLegW"></div><div class="mp-ph" id="cmpPhW"></div></div>
+        <div class="mp"><div class="mp-t" style="--c:#2f6fec">아세트산 완충 용액</div><div class="micro-box"><canvas id="cmpMicroB"></canvas></div><div class="legend h" id="cmpLegB"></div><div class="mp-ph" id="cmpPhB"></div></div>
+      </div>
+      <div class="limit-note" id="cmpLimit" hidden>⚠️ 한 종류의 입자가 100개를 넘어요. 더 이상 넣을 수 없어요.</div>
+      <label class="chk small"><input type="checkbox" id="cmpSpect" checked> 구경꾼 이온(Na⁺, Cl⁻) 보기</label>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ② 완충 용액 만들기 ================= -->
+<section class="tab g3" id="tab-prep">
+  <div class="col">
+    <div class="card mis-card">
+      <div class="card-head"><h3>🎯 미션</h3><span class="ctrl-row" style="margin:0"><span class="score small" id="misScore"></span><button class="btn sm ghost" id="misReset" title="미션 성공 기록 지우기">↺ 기록 초기화</button></span></div>
+      <select id="misSel"></select>
+      <div class="mis-desc" id="misDesc"></div>
+      <div class="ctrl-row" id="misBtns"><button class="btn sm primary" id="misGrade">채점하기</button><button class="btn sm" id="misHint">💡 힌트</button><button class="btn sm" data-pop="target">🎯 pH 도우미</button></div>
+    </div>
+    <div class="card">
+      <h3>① 시약 고르기</h3>
+      <label class="fld">물질<select id="prReagent"></select></label>
+      <div class="muted small" id="prDesc"></div>
+      <label class="fld">농도<select id="prConc">
+        <option value="0.01">0.01 M</option><option value="0.05">0.05 M</option><option value="0.1" selected>0.1 M</option>
+        <option value="0.2">0.2 M</option><option value="0.5">0.5 M</option><option value="1">1.0 M</option></select></label>
+      <div class="fld"><div class="row"><span>부피</span><b id="prVolTxt">50 mL</b></div>
+        <div class="slider-row"><button class="btn sm" id="prVm">−</button><input type="range" id="prVol" min="1" max="100" value="50"><button class="btn sm" id="prVp">+</button></div></div>
+      <div class="ctrl-row"><button class="btn primary" id="prTake" style="flex:1">눈금실린더에 재기 ↓</button></div>
+      <button class="btn sm helper-btn" data-pop="target">🎯 원하는 pH의 완충 용액은 어떻게 만들까?</button>
+    </div>
+    <div class="card grow">
+      <h3>② 100 mL 눈금실린더</h3>
+      <div class="cyl-area">
+        <div class="cyl-vis" id="prCyl"></div>
+        <div class="cyl-side">
+          <div class="cyl-label" id="prCylLabel">비어 있음</div>
+          <button class="btn primary" id="prPour">비커에 붓기 →</button>
+          <button class="btn ghost" id="prCylEmpty">실린더 비우기</button>
+          <div class="muted small">💡 같은 실린더로 여러 번 재서 비커에 차례로 부을 수 있어요.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card grow">
+      <div class="card-head"><h3>③ 비커 (최대 500 mL)</h3><label class="chk small"><input type="checkbox" id="prInd" checked> 만능 지시약</label></div>
+      <div class="beaker-area"><div class="bk-vis" id="prBeaker"></div>
+        <div><div class="phm"><span>pH 미터</span><b id="prPh">—</b><em id="prVnow">0 mL</em></div>
+          <div class="uni-bar"></div><div class="uni-lab"><span>0</span><span>7</span><span>14</span></div></div></div>
+      <div class="test-box"><h4>④ 완충 능력 시험하기</h4>
+        <div class="ctrl-row"><button class="btn warn sm" id="prTestA">+ 1 M HCl 1 mL</button><button class="btn blue sm" id="prTestB">+ 1 M NaOH 1 mL</button></div>
+        <div id="prTestRes" class="info small muted">비커에 용액을 만든 뒤 산·염기를 조금 넣어 pH가 얼마나 변하는지 확인해 보세요.</div></div>
+    </div>
+    <div class="card" style="flex:none">
+      <div class="card-head"><h3>📋 넣은 용액 목록</h3><div class="ctrl-row" style="margin:0"><button class="btn sm" id="prUndo">↶ 되돌리기</button><button class="btn sm ghost" id="prClear">비커 비우기</button></div></div>
+      <div class="mix-list scroll" id="prList" style="max-height:92px;border-top:0;margin-top:0"></div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card" style="flex:0 1 auto;max-height:40%;overflow:auto;min-height:110px"><div id="prJudge"></div></div>
+    <div class="card grow" style="min-height:230px">
+      <div class="card-head"><h3>🔍 미시 세계</h3><span class="muted small" id="prScale"></span></div>
+      <div class="micro-wrap"><div class="micro-box"><canvas id="prMicro"></canvas></div><div class="legend" id="prLegend"></div></div>
+      <div class="m-only m-test"><span class="small"><b>완충 능력 시험</b></span><button class="btn warn sm" data-test="HCl">+ HCl 1 mL</button><button class="btn blue sm" data-test="NaOH">+ NaOH 1 mL</button><div class="small m-test-res" id="prTestMini"></div></div>
+      <label class="chk small"><input type="checkbox" id="prSpect" checked> 구경꾼 이온(Na⁺, Cl⁻) 보기</label>
+    </div>
+    <details class="card" open style="flex:0 1 auto;max-height:26%;min-height:42px"><summary>반응식</summary><div id="prEq" class="info"></div></details>
+  </div>
+</section>
+
+<!-- ================= ③ 완충 용량 ================= -->
+<section class="tab g3" id="tab-cap">
+  <div class="col">
+    <div class="card">
+      <h3>완충 용량 비교 실험</h3>
+      <label class="fld">무엇을 비교할까?<select id="capMode">
+        <option value="conc">농도: 묽은 완충 용액 vs 진한 완충 용액</option>
+        <option value="ratio">성분비: 1 : 1 vs 9 : 1</option></select></label>
+      <div class="ctrl-row"><span class="small muted">넣을 물질</span><div class="seg" id="capReagent"><button data-v="HCl" class="on"><span class="m-hide2">1 M </span>HCl</button><button data-v="NaOH"><span class="m-hide2">1 M </span>NaOH</button></div></div>
+      <div class="ctrl-row"><button class="btn primary" id="capStep">1 mL<span class="m-hide"> 넣기</span></button><button class="btn" id="capPlay">▶<span class="m-hide"> 계속 넣기</span></button><button class="btn ghost" id="capReset">↺<span class="m-hide"> 처음으로</span></button></div>
+      <div class="small muted" id="capAdded"></div>
+    </div>
+    <div class="card grow scroll">
+      <div class="cap-beakers" id="capBeakers"></div>
+      <div class="cap-ref" id="capRef"></div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card grow"><h3>📈 넣은 양에 따른 pH</h3><div class="chart-box"><canvas id="capChart"></canvas></div></div>
+  </div>
+  <div class="col">
+    <div class="card grow">
+      <div class="card-head"><h3>🔍 미시 세계</h3><span class="muted small">입자 1개 ≈ 1 mmol</span></div>
+      <div class="micro-pair">
+        <div class="mp"><div class="mp-t" id="capMtA" style="--c:#e9902f">A</div><div class="micro-box"><canvas id="capMicroA"></canvas></div><div class="legend h" id="capLegA"></div></div>
+        <div class="mp"><div class="mp-t" id="capMtB" style="--c:#2f6fec">B</div><div class="micro-box"><canvas id="capMicroB"></canvas></div><div class="legend h" id="capLegB"></div></div>
+      </div>
+      <div class="limit-note" id="capLimit" hidden>⚠️ 한 종류의 입자가 100개를 넘어요. 더 이상 넣을 수 없어요.</div>
+      <label class="chk small"><input type="checkbox" id="capSpect"> 구경꾼 이온(Na⁺, Cl⁻) 보기</label>
+    </div>
+    <details class="card grow-d" open><summary>정리: 완충 용량을 크게 하려면?</summary><div class="info" id="capInfo"></div></details>
+  </div>
+</section>
+
+<!-- ================= ④ 적정 곡선 ================= -->
+<section class="tab g3" id="tab-tit">
+  <div class="col">
+    <div class="card">
+      <h3>적정 설정</h3>
+      <label class="fld">적정 종류<select id="titType">
+        <option value="wa">약산(CH₃COOH) + 강염기(NaOH)</option>
+        <option value="sa">강산(HCl) + 강염기(NaOH)</option>
+        <option value="wb">약염기(NH₃) + 강산(HCl)</option></select></label>
+      <label class="fld">지시약<select id="titInd">
+        <option value="php">페놀프탈레인 (변색 pH 8.2~10)</option><option value="mo">메틸 오렌지 (변색 pH 3.1~4.4)</option>
+        <option value="btb">BTB (변색 pH 6.0~7.6)</option><option value="uni">만능 지시약</option><option value="none">없음</option></select></label>
+      <div class="fld"><div class="row"><span>넣은 적정액</span><b id="titVTxt">0.0 mL</b></div><input type="range" id="titV" min="0" max="50" step="0.5" value="0"></div>
+      <div class="ctrl-row"><button class="btn primary" id="titPlay">▶ <span class="m-hide2">적정 </span>시작</button><button class="btn" id="titStep">+0.5 mL</button><button class="btn ghost" id="titReset">↺</button></div>
+      <label class="chk small"><input type="checkbox" id="titMarks" checked> 반당량점 · 당량점 · 완충 구간 표시</label>
+      <label class="chk small"><input type="checkbox" id="titCmp" checked> 비교 곡선 겹치기 (<span id="titCmpName">강산 HCl</span>)</label>
+      <label class="chk small"><input type="checkbox" id="titFull"> 전체 곡선 미리 보기</label>
+    </div>
+    <div class="card grow"><div class="tit-vis" id="titApp"></div><div class="tit-cap" id="titCap"></div></div>
+  </div>
+  <div class="col">
+    <div class="card grow"><h3>📈 적정 곡선</h3><div class="chart-box"><canvas id="titChart"></canvas></div></div>
+  </div>
+  <div class="col">
+    <div class="card grow">
+      <div class="card-head"><h3>🔍 삼각 플라스크 속 미시 세계</h3><label class="chk small"><input type="checkbox" id="titSpect"> 구경꾼 이온</label></div>
+      <div class="stages" id="titStages"></div>
+      <div class="micro-solo"><div class="micro-box"><canvas id="titMicro"></canvas></div></div>
+      <div class="legend h" id="titLegend"></div>
+      <div id="titInfo" class="info tit-info"></div>
+      <div id="titEq" class="info"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ⑤ 생체 완충 ================= -->
+<section class="tab g3" id="tab-bio">
+  <div class="col">
+    <div class="card">
+      <div class="card-head"><h3>상황 선택</h3><button class="btn sm" data-pop="bio">📖 생체 완충 개념 보기</button></div>
+      <div class="scen" id="bioScen"></div>
+    </div>
+    <div class="card">
+      <h3>직접 조절해 보기</h3>
+      <div class="fld"><div class="row"><span>혈액에 들어온 산 (젖산 등)</span><b id="bioAcidTxt">0 mM</b></div><input type="range" id="bioAcid" min="0" max="12" step="1" value="0"></div>
+      <div class="fld"><div class="row"><span>호흡 세기</span><b id="bioPTxt">보통</b></div><input type="range" id="bioP" min="20" max="70" step="1" value="50">
+        <div class="range-labels"><span>← 약한 호흡</span><span>정상</span><span>빠르고 깊은 호흡 →</span></div>
+        <div class="small muted" id="bioPSub" style="font-weight:500"></div></div>
+      <label class="chk small"><input type="checkbox" id="bioLung" checked> 폐에서 CO₂를 내보낼 수 있음 (열린 계)</label>
+    </div>
+    <div class="card grow scroll" id="bioEqCard" style="overflow:auto"></div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <h3>🩸 혈액 pH</h3>
+      <div class="gauge" style="margin-top:26px"><div class="g-bar"><div class="g-mark" id="bioMark"><span id="bioPhTxt">7.40</span></div></div>
+        <div class="g-ticks"><span>6.8</span><span>7.0</span><span>7.2</span><span>7.4</span><span>7.6</span><span>7.8</span></div>
+        <div class="g-zones"><span>산증 (pH 7.35 미만)</span><span>정상</span><span>알칼리증 (7.45 초과)</span></div></div>
+      <div class="vals" id="bioVals"></div>
+      <div class="status" id="bioStatus"></div>
+    </div>
+    <div class="card grow">
+      <div class="card-head"><h3>🔍 혈액 속 미시 세계</h3><span class="muted small">입자 배율은 종류마다 달라요 (모형)</span></div>
+      <div class="micro-wrap"><div class="micro-box"><canvas id="bioMicro"></canvas></div><div class="legend" id="bioLegend"></div></div>
+    </div>
+  </div>
+  <div class="col scroll">
+    <details class="card" open><summary>혈액의 탄산 완충계</summary>
+      <div class="info">
+        <div class="eq">CO₂ + H₂O ⇌ H₂CO₃ ⇌ H⁺ + HCO₃⁻</div>
+        <p><b>산(H⁺)이 들어오면</b></p><div class="eq red">HCO₃⁻ + H⁺ → H₂CO₃ → CO₂ + H₂O <small>(CO₂는 폐로)</small></div>
+        <p><b>염기(OH⁻)가 들어오면</b></p><div class="eq blue">H₂CO₃ + OH⁻ → HCO₃⁻ + H₂O</div>
+        <p class="small muted">정상 혈액의 pH는 7.35 ~ 7.45로 아주 좁은 범위에서 유지돼요.</p>
+      </div></details>
+    <details class="card"><summary>왜 HCO₃⁻ : H₂CO₃ = 20 : 1 일까?</summary>
+      <div class="info"><p>교과서의 완충 용액은 약산 : 짝염기 = 1 : 1일 때 가장 튼튼하다고 배워요. 그런데 혈액은 HCO₃⁻가 H₂CO₃보다 약 <b>20배</b> 많아요.</p>
+      <p>① 우리 몸은 대사 과정에서 <b>산이 훨씬 많이</b> 생겨요(젖산, CO₂ 등). 그래서 산을 막는 HCO₃⁻를 넉넉히 준비해 둔 셈이에요.</p>
+      <p>② 산을 막고 생긴 H₂CO₃는 CO₂가 되어 <b>폐로 빠져나가요</b>. 생성물이 계속 제거되니(열린 계) 적은 H₂CO₃로도 문제가 없어요.</p>
+      <p>③ 염기 쪽은 <b>신장</b>이 HCO₃⁻를 내보내거나 다시 흡수해 천천히 조절해요.</p></div></details>
+    <details class="card"><summary>몸속의 다른 완충계</summary>
+      <div class="info"><p><b>인산 완충계</b> (세포 속, 오줌): H₂PO₄⁻ ⇌ H⁺ + HPO₄²⁻</p>
+      <p class="small">H₂PO₄⁻와 HPO₄²⁻를 1 : 1로 섞으면 pH가 약 7.2로 세포 속 pH(약 7.0~7.2)와 가까워 완충 효과가 커요.</p>
+      <p><b>단백질 완충계</b>: 단백질의 –COO⁻, –NH₂ 같은 부분이 H⁺를 받거나 내놓아요. 적혈구의 <b>헤모글로빈</b>이 대표적이에요.</p>
+      <p class="small muted">⑤ 완충 용액 만들기 탭에서 NaH₂PO₄와 Na₂HPO₄로 인산 완충 용액을 직접 만들어 보세요!</p></div></details>
+  </div>
+</section>
+
+</main>
+</div>
+
+<div class="modal" id="modal"><div class="modal-box"><div class="modal-head"><h2 id="modalTitle"></h2><button id="modalClose" aria-label="닫기">×</button></div><div class="modal-body" id="modalBody"></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ================= 유틸 ================= */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const fmt=(x,d=2)=>(x==null||!isFinite(x))?'—':Number(x).toFixed(d);
+const sgn=(x,d=2)=>(x>=0?'+':'−')+Math.abs(x).toFixed(d);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function toast(msg,ms=2400,type=''){const t=$('#toast');t.className='toast'+(type?' '+type:'');t.innerHTML=msg;void t.offsetWidth;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),ms)}
+function tween(obj,key,to,ms,fn){obj._tk=(obj._tk||0)+1;const tk=obj._tk,from=obj[key],t0=performance.now();
+  const st=t=>{if(obj._tk!==tk)return;const k=Math.min(1,(t-t0)/ms);const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;obj[key]=from+(to-from)*e;fn(obj[key]);if(k<1)requestAnimationFrame(st)};requestAnimationFrame(st)}
+function deltaHTML(d){if(Math.abs(d)<0.005)return '<span class="flat">변화 없음</span>';const cls=Math.abs(d)<0.3?'flat':(d<0?'dn':'up');return `<span class="${cls}">ΔpH ${sgn(d)}</span>`}
+
+/* ================= 화학 계산 엔진 (전하 균형식으로 정확히 풀이) ================= */
+const KW=1e-14;
+const SYS={
+  acetate:{Ka:[1.8e-5],z0:0,forms:['HA','A']},
+  ammonia:{Ka:[5.6e-10],z0:1,forms:['NH4','NH3']},
+  phosphate:{Ka:[7.5e-3,6.2e-8,4.8e-13],z0:0,forms:['H3PO4','H2PO4','HPO4','PO4']},
+  carbonate:{Ka:[4.3e-7,4.7e-11],z0:0,forms:['H2CO3','HCO3','CO3']}
+};
+function alphas(Ka,H){const t=[1];let p=1;for(const k of Ka){p*=k/H;t.push(p)}const s=t.reduce((a,b)=>a+b,0);return t.map(v=>v/s)}
+function newMix(){return{V:0,Na:0,Cl:0,sys:{acetate:0,ammonia:0,phosphate:0,carbonate:0}}}
+function cloneMix(m){return{V:m.V,Na:m.Na,Cl:m.Cl,sys:{...m.sys}}}
+/* mk: 부피 mL, 양 mmol 로 입력 → 내부는 L, mol */
+function mk(o){const m=newMix();m.V=(o.V||0)/1000;m.Na=(o.Na||0)/1000;m.Cl=(o.Cl||0)/1000;for(const k in SYS)m.sys[k]=(o[k]||0)/1000;return m}
+function solveH(m){if(m.V<=0)return null;const V=m.V,cat=m.Na/V,an=m.Cl/V;
+  const f=lh=>{const H=Math.pow(10,lh);let s=H-KW/H+cat-an;for(const k in SYS){const n=m.sys[k];if(n<=0)continue;const a=alphas(SYS[k].Ka,H);let nb=0;a.forEach((v,i)=>nb+=i*v);s+=(n/V)*(SYS[k].z0-nb)}return s};
+  let lo=-15.5,hi=1.5;for(let i=0;i<70;i++){const mid=(lo+hi)/2;if(f(mid)>0)hi=mid;else lo=mid}return Math.pow(10,(lo+hi)/2)}
+function pHof(m){const H=solveH(m);return H==null?null:-Math.log10(H)}
+function species(m){const H=solveH(m);if(H==null)return{};const V=m.V;const o={H3O:H*V,OH:KW/H*V,Na:m.Na,Cl:m.Cl};
+  for(const k in SYS){const n=m.sys[k];if(n<=0)continue;const a=alphas(SYS[k].Ka,H);SYS[k].forms.forEach((t,i)=>o[t]=(o[t]||0)+n*a[i])}return o}
+function countsOf(m,scale){const s=species(m),t={};for(const k in s)t[k]=s[k]*1000*scale;return t}
+function addStrong(m,reag,mmol,mL){const r=cloneMix(m);r.V+=mL/1000;if(reag==='HCl')r.Cl+=mmol/1000;else r.Na+=mmol/1000;return r}
+
+/* ================= 지시약 색 ================= */
+function lerpStops(st,x){if(x<=st[0][0])return st[0][1];for(let i=1;i<st.length;i++){if(x<=st[i][0]){const[a,c1]=st[i-1],[b,c2]=st[i];const k=(x-a)/(b-a);return c1.map((v,j)=>Math.round(v+(c2[j]-v)*k))}}return st[st.length-1][1]}
+const UNI=[[0,[215,38,61]],[2,[244,96,54]],[4,[246,166,9]],[5,[245,206,40]],[6,[214,222,70]],[7,[87,186,77]],[8,[40,170,150]],[9,[46,134,222]],[10,[63,81,181]],[12,[106,63,181]],[14,[123,45,142]]];
+const rgb=c=>`rgb(${c[0]},${c[1]},${c[2]})`;
+function uniColor(pH){return rgb(lerpStops(UNI,pH))}
+function indColor(ind,pH){
+  if(ind==='uni')return uniColor(pH);
+  if(ind==='php')return rgb(lerpStops([[8.2,[220,234,250]],[10,[226,44,140]]],pH));
+  if(ind==='mo')return rgb(lerpStops([[3.1,[222,58,45]],[4.4,[246,196,48]]],pH));
+  if(ind==='btb')return rgb(lerpStops([[6.0,[232,200,40]],[6.8,[110,175,70]],[7.6,[40,100,200]]],pH));
+  return '#dceafa'}
+
+/* ================= 입자 정보 ================= */
+const TI={
+  HA:{lab:'CH₃COOH',col:'#ee9a2e'},A:{lab:'CH₃COO⁻',col:'#3a78d4'},
+  NH4:{lab:'NH₄⁺',col:'#e46767'},NH3:{lab:'NH₃',col:'#1fa595'},
+  H3PO4:{lab:'H₃PO₄',col:'#c48650'},H2PO4:{lab:'H₂PO₄⁻',col:'#d9708a'},HPO4:{lab:'HPO₄²⁻',col:'#4f9a6b'},PO4:{lab:'PO₄³⁻',col:'#6d5a8d'},
+  H2CO3:{lab:'H₂CO₃',col:'#e2ab3f'},HCO3:{lab:'HCO₃⁻',col:'#4b9bd3'},CO3:{lab:'CO₃²⁻',col:'#8e63c7'},
+  CO2:{lab:'CO₂',col:'#8f9db0'},
+  H3O:{lab:'H₃O⁺',col:'#e0302f'},OH:{lab:'OH⁻',col:'#7a3fd1'},
+  Na:{lab:'Na⁺',col:'#a0abb8',small:true},Cl:{lab:'Cl⁻',col:'#86bf62',small:true}
+};
+const ACID_OF={A:'HA',NH3:'NH4',H2PO4:'H3PO4',HPO4:'H2PO4',PO4:'HPO4',HCO3:'H2CO3',CO3:'HCO3'};
+const BASE_OF={HA:'A',NH4:'NH3',H3PO4:'H2PO4',H2PO4:'HPO4',HPO4:'PO4',H2CO3:'HCO3',HCO3:'CO3'};
+const BASE_PRI=['OH','PO4','CO3','NH3','HPO4','HCO3','A','H2PO4'];
+const ACID_PRI=['H3O','H3PO4','HA','H2CO3','H2PO4','NH4','HCO3','HPO4'];
+const LAB=t=>TI[t].lab;
+
+/* ================= 미시 세계 확대도 ================= */
+class MicroView{
+  constructor(cv,leg,o={}){this.c=cv;this.ctx=cv.getContext('2d');this.leg=leg;this.parts=[];this.fx=[];this.showSpect=o.spect!==false;
+    this.empty='';this.rise=o.rise||[];this.riseLabel=o.riseLabel||'';this.riseNote=o.riseNote||'';this.pending=null;this.last={};this.size=0;this.legKey='';this.legT=0;this.note='';
+    this.dots=Array.from({length:80},()=>{const r=Math.sqrt(Math.random())*.97,a=Math.random()*6.283;return[r*Math.cos(a),r*Math.sin(a)]});
+    new ResizeObserver(()=>this.resize()).observe(cv.parentElement);MicroView.all.push(this)}
+  resize(){const p=this.c.parentElement;if(!p.clientWidth||!p.clientHeight)return;const s=Math.max(110,Math.floor(Math.min(p.clientWidth,p.clientHeight)));const d=window.devicePixelRatio||1;
+    this.size=s;this.c.width=s*d;this.c.height=s*d;this.c.style.width=s+'px';this.c.style.height=s+'px';this.ctx.setTransform(d,0,0,d,0,0)}
+  rp(){const r=Math.sqrt(Math.random())*.8,a=Math.random()*6.283;return[r*Math.cos(a),r*Math.sin(a)]}
+  add(t,st){const[x,y]=this.rp();const p={t,x,y,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,a:st==='in'?0:1,st};this.parts.push(p);return p}
+  live(p){return !p.dead&&p.st!=='out'&&p.st!=='rise'}
+  counts(){const c={};for(const p of this.parts){if(!this.live(p)||p.seek)continue;c[p.t]=(c[p.t]||0)+1}return c}
+  seeking(){return this.parts.some(p=>p.seek&&!p.dead)}
+  setSpect(v){this.showSpect=v;this.setComposition(this.last,false)}
+  setComposition(target,animate=true){
+    this.last={...target};const tg={};for(const k in target){if(!this.showSpect&&(k==='Na'||k==='Cl'))continue;tg[k]=Math.max(0,Math.round(target[k]))}
+    if(!animate){this.parts=[];this.fx=[];this.pending=null;for(const k in tg)for(let i=0;i<tg[k];i++)this.add(k,'n');this.updLegend(true);return}
+    if(this.seeking()){this.pending=target;return}
+    const cur=this.counts(),diff={};new Set([...Object.keys(cur),...Object.keys(tg)]).forEach(k=>diff[k]=(tg[k]||0)-(cur[k]||0));
+    for(const[a,b]of[...Object.entries(BASE_OF),['H2CO3','CO2']]){const da=diff[a]||0,db=diff[b]||0;
+      if(da>0&&db<0){const k=Math.min(da,-db);const n=this.convert(b,a,k);diff[a]-=n;diff[b]+=n}
+      else if(da<0&&db>0){const k=Math.min(-da,db);const n=this.convert(a,b,k);diff[a]+=n;diff[b]-=n}}
+    for(const k in diff){let d=diff[k];
+      while(d<0){const p=this.parts.find(q=>q.t===k&&this.live(q)&&!q.seek&&!q.res);if(!p)break;p.st=this.rise.includes(k)?'rise':'out';d++}
+      while(d>0){this.add(k,'in');d--}}
+    this.updLegend(true)}
+  convert(from,to,k){const c=this.parts.filter(p=>p.t===from&&this.live(p)&&!p.seek&&!p.res);let n=0;
+    for(let i=c.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[c[i],c[j]]=[c[j],c[i]]}
+    for(let i=0;i<k&&i<c.length;i++){c[i].t=to;this.fx.push({x:c[i].x,y:c[i].y,r:0,a:1,col:TI[to].col});n++}return n}
+  inject(t,n,counter){for(let i=0;i<n;i++){const ang=-Math.PI/2+(Math.random()-.5)*1.3;
+      this.parts.push({t,x:Math.cos(ang)*.9,y:Math.sin(ang)*.9,vx:0,vy:0,a:0,st:'in',seek:true,delay:i*.13});
+      if(counter&&this.showSpect){const q=this.add(counter,'in');q.delay=i*.13}}
+    this.updLegend(true)}
+  findPartner(p){const pri=p.t==='H3O'?BASE_PRI:ACID_PRI;
+    for(const ty of pri){let best=null,bd=1e9;for(const q of this.parts){if(q.t!==ty||!this.live(q)||q.seek||q.res||q===p)continue;const d=(q.x-p.x)**2+(q.y-p.y)**2;if(d<bd){bd=d;best=q}}
+      if(best){p.tg=best;p.tgt=best.t;best.res=true;return}}p.tg=null}
+  react(p,q){q.res=false;p.dead=true;p.seek=false;
+    if(q.t==='OH'||q.t==='H3O'){q.dead=true}else{q.t=p.t==='H3O'?ACID_OF[q.t]:BASE_OF[q.t]}
+    this.fx.push({x:q.x,y:q.y,r:0,a:1,col:'#ffd23f',txt:'H₂O'});this.updLegend(true)}
+  step(dt){
+    for(const p of this.parts){if(p.dead)continue;
+      if(p.delay>0){p.delay-=dt;continue}
+      if(p.st==='in'){p.a+=dt*2.5;if(p.a>=1){p.a=1;p.st='n'}}
+      else if(p.st==='out')p.a-=dt*1.5;
+      else if(p.st==='rise'){p.y-=dt*.42;p.a-=dt*.42;continue}
+      if(p.seek){
+        if(!p.tg||p.tg.dead||p.tg.t!==p.tgt||!this.live(p.tg))this.findPartner(p);
+        if(p.tg){const dx=p.tg.x-p.x,dy=p.tg.y-p.y,d=Math.hypot(dx,dy);if(d<.075){this.react(p,p.tg);continue}const sp=.75;p.x+=dx/d*sp*dt;p.y+=dy/d*sp*dt;continue}
+        p.seek=false;p.vx=(Math.random()-.5)*.2;p.vy=.1;this.updLegend(true)}
+      p.vx+=(Math.random()-.5)*dt*1.1;p.vy+=(Math.random()-.5)*dt*1.1;const v=Math.hypot(p.vx,p.vy),mx=.16;if(v>mx){p.vx*=mx/v;p.vy*=mx/v}
+      p.x+=p.vx*dt;p.y+=p.vy*dt;const r=Math.hypot(p.x,p.y);if(r>.86){p.x*=.86/r;p.y*=.86/r;p.vx=-p.vx*.6;p.vy=-p.vy*.6}}
+    this.parts=this.parts.filter(p=>!p.dead&&!((p.st==='out'||p.st==='rise')&&p.a<=0));
+    for(const f of this.fx){f.r+=dt*(f.txt?.12:.35);f.a-=dt*(f.txt?.9:1.6)}this.fx=this.fx.filter(f=>f.a>0);
+    if(this.pending&&!this.seeking()){const t=this.pending;this.pending=null;setTimeout(()=>this.setComposition(t,true),250)}
+    this.legT+=dt;if(this.legT>.4){this.legT=0;this.updLegend()}}
+  pill(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x-w/2+r,y-h/2);ctx.lineTo(x+w/2-r,y-h/2);ctx.arc(x+w/2-r,y,r,-Math.PI/2,Math.PI/2);ctx.lineTo(x-w/2+r,y+h/2);ctx.arc(x-w/2+r,y,r,Math.PI/2,Math.PI*1.5);ctx.closePath()}
+  draw(){const s=this.size;if(!s)return;const ctx=this.ctx,R=s/2-4,cx=s/2,cy=s/2;ctx.clearRect(0,0,s,s);
+    ctx.save();ctx.beginPath();ctx.arc(cx,cy,R,0,6.283);const g=ctx.createRadialGradient(cx-R*.35,cy-R*.35,R*.1,cx,cy,R);g.addColorStop(0,'#fdfeff');g.addColorStop(1,'#d8e9fa');ctx.fillStyle=g;ctx.fill();ctx.clip();
+    ctx.fillStyle='rgba(110,150,205,.22)';for(const[a,b]of this.dots){ctx.beginPath();ctx.arc(cx+a*R,cy+b*R,1.5,0,6.283);ctx.fill()}
+    const fs=Math.max(9,Math.round(s*.036));ctx.textAlign='center';ctx.textBaseline='middle';
+    for(const p of this.parts){if(p.delay>0||p.dead)continue;const inf=TI[p.t];const lab=(p.st==='rise'&&this.riseLabel)?this.riseLabel:inf.lab;const f=inf.small?Math.round(fs*.85):fs;
+      ctx.font=`700 ${f}px sans-serif`;const w=ctx.measureText(lab).width+f*.95,h=f*1.6,x=cx+p.x*R,y=cy+p.y*R;
+      ctx.globalAlpha=clamp(p.a,0,1);this.pill(ctx,x,y,w,h,h/2);ctx.fillStyle=(p.st==='rise'&&this.riseLabel)?'#9aa7b6':inf.col;ctx.fill();
+      if(p.seek){ctx.lineWidth=2.5;ctx.strokeStyle='#ffd23f';ctx.stroke()}else if(p.t==='H3O'||p.t==='OH'){ctx.lineWidth=2;ctx.strokeStyle='#1d2a3a';ctx.stroke()}
+      ctx.fillStyle='#fff';ctx.fillText(lab,x,y+.5)}
+    for(const f of this.fx){ctx.globalAlpha=clamp(f.a,0,1);const x=cx+f.x*R,y=cy+f.y*R;
+      if(f.txt){ctx.font=`700 ${Math.round(fs*.9)}px sans-serif`;ctx.fillStyle='#4a6b93';ctx.fillText(f.txt,x,y-fs*1.4-f.r*R)}
+      else{ctx.lineWidth=3;ctx.strokeStyle=f.col;ctx.beginPath();ctx.arc(x,y,fs*.9+f.r*R,0,6.283);ctx.stroke()}}
+    ctx.globalAlpha=1;
+    if(this.riseNote&&this.parts.some(p=>p.st==='rise')){ctx.font=`700 ${fs}px sans-serif`;ctx.fillStyle='#5d6d81';ctx.fillText(this.riseNote,cx,cy-R*.86)}
+    if(!this.parts.some(p=>!p.dead)&&this.empty){ctx.fillStyle='#5d6d81';ctx.font=`600 ${Math.round(fs*1.05)}px sans-serif`;this.empty.split('\n').forEach((l,i,a)=>ctx.fillText(l,cx,cy+(i-(a.length-1)/2)*fs*1.5))}
+    ctx.restore();ctx.lineWidth=5;ctx.strokeStyle='#5f7fa8';ctx.beginPath();ctx.arc(cx,cy,R,0,6.283);ctx.stroke();ctx.lineWidth=1.5;ctx.strokeStyle='rgba(255,255,255,.8)';ctx.beginPath();ctx.arc(cx,cy,R-4,Math.PI*1.1,Math.PI*1.45);ctx.stroke()}
+  updLegend(force){if(!this.leg)return;const c={};for(const p of this.parts){if(p.dead||p.st==='out'||p.st==='rise')continue;c[p.t]=(c[p.t]||0)+1}
+    const order=Object.keys(TI).filter(k=>c[k]);const key=order.map(k=>k+c[k]).join()+this.note;if(!force&&key===this.legKey)return;this.legKey=key;
+    this.leg.innerHTML=(order.length?order.map(k=>`<div class="lg"><i style="background:${TI[k].col}"></i>${TI[k].lab}<b>${c[k]}</b></div>`).join(''):'<div class="lg-note">입자 없음</div>')+(this.note?`<div class="lg-note">${this.note}</div>`:'')}
+}
+MicroView.all=[];
+
+/* ================= 그래프 ================= */
+class Chart{
+  constructor(cv,o){this.c=cv;this.ctx=cv.getContext('2d');this.o=o;this.d={series:[]};new ResizeObserver(()=>this.draw()).observe(cv.parentElement)}
+  set(d){this.d=d;this.draw()}
+  draw(){const p=this.c.parentElement,w=p.clientWidth,h=p.clientHeight;if(!w||!h)return;const dp=window.devicePixelRatio||1;
+    if(this.c.width!==Math.round(w*dp)||this.c.height!==Math.round(h*dp)){this.c.width=Math.round(w*dp);this.c.height=Math.round(h*dp)}
+    const x=this.ctx;x.setTransform(dp,0,0,dp,0,0);x.clearRect(0,0,w,h);const K=this.c.closest('.card.fs')?1.9:1,F=K>1?1.35:1;const o=this.o,d=this.d,L=38*F,R=12,T=10,B=38*F,pw=w-L-R,ph=h-T-B;
+    const X=v=>L+(v-o.x0)/(o.x1-o.x0)*pw,Y=v=>T+(1-(v-o.y0)/(o.y1-o.y0))*ph;
+    x.fillStyle='#fff';x.fillRect(L,T,pw,ph);
+    for(const b of d.bands||[]){x.fillStyle=b.col;x.fillRect(X(b.x0),T,X(b.x1)-X(b.x0),ph);if(b.label){x.fillStyle=b.tc;x.font=`700 ${Math.round(11*F)}px sans-serif`;x.textAlign='center';x.textBaseline='top';x.fillText(b.label,(X(b.x0)+X(b.x1))/2,b.top?T+4:T+ph-18)}}
+    x.strokeStyle='#e7ecf3';x.lineWidth=1;x.font=`${Math.round(11*F)}px sans-serif`;x.fillStyle='#5d6d81';
+    x.textAlign='right';x.textBaseline='middle';for(let v=o.y0;v<=o.y1+1e-9;v+=o.ys){const yy=Y(v);x.beginPath();x.moveTo(L,yy);x.lineTo(L+pw,yy);x.stroke();x.fillText(v,L-5,yy)}
+    x.textAlign='center';x.textBaseline='top';for(let v=o.x0;v<=o.x1+1e-9;v+=o.xs){const xx=X(v);x.beginPath();x.moveTo(xx,T);x.lineTo(xx,T+ph);x.stroke();x.fillText(o.xfmt?o.xfmt(v):v,xx,T+ph+4)}
+    if(o.zeroLine){x.strokeStyle='#9aa7b6';x.beginPath();x.moveTo(X(0),T);x.lineTo(X(0),T+ph);x.stroke()}
+    x.strokeStyle='#8a99ab';x.strokeRect(L,T,pw,ph);
+    x.fillStyle='#3d4c5e';x.font=`600 ${Math.round(11.5*F)}px sans-serif`;x.fillText(o.xl,L+pw/2,T+ph+20*F);
+    x.save();x.translate(11,T+ph/2);x.rotate(-Math.PI/2);x.textBaseline='middle';x.fillText(o.yl,0,0);x.restore();
+    x.save();x.beginPath();x.rect(L,T,pw,ph);x.clip();
+    for(const s of d.series){if(!s.pts||!s.pts.length)continue;x.strokeStyle=s.col;x.lineWidth=(s.w||2.6)*K;x.setLineDash(s.dash||[]);x.lineJoin='round';x.beginPath();s.pts.forEach(([a,b],i)=>i?x.lineTo(X(a),Y(b)):x.moveTo(X(a),Y(b)));x.stroke();x.setLineDash([]);
+      if(s.dots){x.fillStyle=s.col;s.pts.forEach(([a,b])=>{x.beginPath();x.arc(X(a),Y(b),2.7*K,0,7);x.fill()})}}
+    x.restore();
+    for(const m of d.markers||[]){const xx=X(m.x),yy=Y(m.y);x.fillStyle=m.fill||'#fff';x.strokeStyle=m.col||'#222';x.lineWidth=2.2*K;x.beginPath();x.arc(xx,yy,(m.r||5)*K,0,7);x.fill();x.stroke();
+      if(m.label){x.font=`700 ${Math.round(11*F)}px sans-serif`;const tw=x.measureText(m.label).width;let lx=xx+(m.dx??9),ly=yy+(m.dy??-17);if(lx+tw+5>L+pw)lx=xx-tw-12;if(lx<L+3)lx=L+3;if(ly<T+2)ly=yy+8;if(ly>T+ph-16)ly=yy-22;
+        x.fillStyle='rgba(255,255,255,.9)';x.fillRect(lx-3,ly-2,tw+6,16*F);x.fillStyle=m.col||'#222';x.textAlign='left';x.textBaseline='top';x.fillText(m.label,lx,ly)}}
+    const lg=d.series.filter(s=>s.label);if(lg.length){x.font=`600 ${Math.round(11*F)}px sans-serif`;const LH=16*F;x.textAlign='left';x.textBaseline='middle';const wm=Math.max(...lg.map(s=>x.measureText(s.label).width))+30;
+      const pos=d.legend||'tl';const lx=pos[1]==='r'?L+pw-wm-6:L+8,ly=pos[0]==='b'?T+ph-lg.length*LH-8:T+6;
+      x.fillStyle='rgba(255,255,255,.9)';x.fillRect(lx-4,ly-2,wm+6,lg.length*LH+4);
+      lg.forEach((s,i)=>{const yy=ly+8*F+i*LH;x.strokeStyle=s.col;x.lineWidth=3*K;x.setLineDash(s.dash||[]);x.beginPath();x.moveTo(lx,yy);x.lineTo(lx+18,yy);x.stroke();x.setLineDash([]);x.fillStyle='#2b3a4c';x.fillText(s.label,lx+24*F,yy)})}}
+}
+
+/* ================= 비커 · 눈금실린더 SVG ================= */
+let UID=0;
+class Beaker{
+  constructor(host,cap=200,n=4){this.cap=cap;this.lv=0;const id='bk'+(UID++);let t='';
+    for(let i=1;i<=n;i++){const y=130-110*i/n;t+=`<line x1="17" x2="26" y1="${y}" y2="${y}" stroke="#7d8da1" stroke-width="1"/><text x="28" y="${y+2.6}" font-size="8" fill="#6b7a8c">${Math.round(cap*i/n)}</text>`}
+    host.innerHTML=`<svg viewBox="4 0 112 136"><defs><clipPath id="${id}"><path d="M17 4 L17 124 Q17 130 23 130 L97 130 Q103 130 103 124 L103 4 Z"/></clipPath></defs>
+      <g clip-path="url(#${id})"><rect class="liq" x="0" y="130" width="120" height="0" fill="#dcebfb"/><rect class="lt" x="0" y="130" width="120" height="2.5" fill="#fff" opacity="0"/></g>
+      <path d="M9 3 L15 7 L15 124 Q15 132 23 132 L97 132 Q105 132 105 124 L105 7 L111 3" fill="rgba(230,240,250,.25)" stroke="#56677d" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>${t}</svg>`;
+    this.liq=$('.liq',host);this.lt=$('.lt',host)}
+  set(vol,color){const f=clamp(vol/this.cap,0,1);if(color)this.liq.setAttribute('fill',color);
+    tween(this,'lv',f,550,v=>{const h=110*v;this.liq.setAttribute('y',130-h);this.liq.setAttribute('height',h);this.lt.setAttribute('y',130-h);this.lt.setAttribute('opacity',v>.004?.5:0)})}
+}
+class Cylinder{
+  constructor(host){this.lv=0;const id='cy'+(UID++),Y=v=>262-v*2.3;let t='';
+    for(let v=0;v<=100;v+=5){const y=Y(v),mj=v%10===0;t+=`<line x1="${mj?44:51}" x2="59" y1="${y}" y2="${y}" stroke="#56677d" stroke-width="${mj?1.2:.8}"/>`;if(mj&&v>0)t+=`<text x="63" y="${y+3}" font-size="9" fill="#46566b">${v}</text>`}
+    host.innerHTML=`<svg viewBox="8 4 80 284"><defs><clipPath id="${id}"><rect x="31" y="12" width="28" height="254"/></clipPath></defs>
+      <g clip-path="url(#${id})"><rect class="liq" x="31" y="266" width="28" height="0" fill="#bfe0ff"/></g>
+      <path d="M24 9 L30 13 L30 266 M60 13 L60 266" fill="none" stroke="#56677d" stroke-width="2"/><path d="M30 13 L30 266 L60 266 L60 13" fill="rgba(230,240,250,.25)"/>
+      <rect x="16" y="266" width="58" height="10" rx="3" fill="#cdd6e2" stroke="#56677d"/>${t}<text x="45" y="286" font-size="9" text-anchor="middle" fill="#56677d">mL</text></svg>`;
+    this.liq=$('.liq',host);this.Y=Y}
+  set(v,color){if(color)this.liq.setAttribute('fill',color);tween(this,'lv',v,600,x=>{const y=x>0.05?this.Y(x):266;this.liq.setAttribute('y',y);this.liq.setAttribute('height',266-y)})}
+}
+
+/* ================= 시약 ================= */
+const RG={
+  CH3COOH:{f:'CH₃COOH',n:'아세트산',g:'약산 · 약염기',d:'약산: 물에서 일부만 이온화해요.',add(m,n){m.sys.acetate+=n}},
+  NH3:{f:'NH₃',n:'암모니아수',g:'약산 · 약염기',d:'약염기: 물과 일부만 반응해 OH⁻를 만들어요.',add(m,n){m.sys.ammonia+=n}},
+  CH3COONa:{f:'CH₃COONa',n:'아세트산 나트륨',g:'염',d:'아세트산의 짝염기인 CH₃COO⁻를 내놓는 염이에요.',add(m,n){m.sys.acetate+=n;m.Na+=n}},
+  NH4Cl:{f:'NH₄Cl',n:'염화 암모늄',g:'염',d:'암모니아의 짝산인 NH₄⁺를 내놓는 염이에요.',add(m,n){m.sys.ammonia+=n;m.Cl+=n}},
+  NaH2PO4:{f:'NaH₂PO₄',n:'인산 이수소 나트륨',g:'염',d:'H₂PO₄⁻를 내놓아요. H₂PO₄⁻는 약산처럼 행동해요.',add(m,n){m.sys.phosphate+=n;m.Na+=n}},
+  Na2HPO4:{f:'Na₂HPO₄',n:'인산 수소 이나트륨',g:'염',d:'H₂PO₄⁻의 짝염기인 HPO₄²⁻를 내놓아요.',add(m,n){m.sys.phosphate+=n;m.Na+=2*n}},
+  NaHCO3:{f:'NaHCO₃',n:'탄산수소 나트륨',g:'염',d:'HCO₃⁻를 내놓는 염이에요. (베이킹 소다)',add(m,n){m.sys.carbonate+=n;m.Na+=n}},
+  Na2CO3:{f:'Na₂CO₃',n:'탄산 나트륨',g:'염',d:'HCO₃⁻의 짝염기인 CO₃²⁻를 내놓아요.',add(m,n){m.sys.carbonate+=n;m.Na+=2*n}},
+  NaCl:{f:'NaCl',n:'염화 나트륨',g:'염',d:'중성 염: Na⁺, Cl⁻는 산·염기와 반응하지 않아요.',add(m,n){m.Na+=n;m.Cl+=n}},
+  HCl:{f:'HCl',n:'염산',g:'강산 · 강염기',d:'강산: 물에서 거의 완전히 이온화해요.',add(m,n){m.Cl+=n}},
+  NaOH:{f:'NaOH',n:'수산화 나트륨',g:'강산 · 강염기',d:'강염기: 물에서 거의 완전히 이온화해요.',add(m,n){m.Na+=n}},
+  water:{f:'H₂O',n:'증류수',g:'기타',d:'물만 더해요. 농도를 선택할 필요가 없어요.',add(){}}
+};
+const EQ_DISS={
+  CH3COOH:'CH₃COOH + H₂O ⇌ CH₃COO⁻ + H₃O⁺ <small>(일부만 이온화)</small>',NH3:'NH₃ + H₂O ⇌ NH₄⁺ + OH⁻ <small>(일부만 반응)</small>',
+  CH3COONa:'CH₃COONa → Na⁺ + CH₃COO⁻',NH4Cl:'NH₄Cl → NH₄⁺ + Cl⁻',NaH2PO4:'NaH₂PO₄ → Na⁺ + H₂PO₄⁻',Na2HPO4:'Na₂HPO₄ → 2Na⁺ + HPO₄²⁻',
+  NaHCO3:'NaHCO₃ → Na⁺ + HCO₃⁻',Na2CO3:'Na₂CO₃ → 2Na⁺ + CO₃²⁻',NaCl:'NaCl → Na⁺ + Cl⁻ <small>(반응에 참여하지 않음)</small>',
+  HCl:'HCl + H₂O → H₃O⁺ + Cl⁻ <small>(완전히 이온화)</small>',NaOH:'NaOH → Na⁺ + OH⁻ <small>(완전히 이온화)</small>'};
+
+/* 완충 용액 판정 */
+function judge(m){
+  if(m.V<=0)return{empty:true};
+  const pH=pHof(m),H=Math.pow(10,-pH);let best=null;
+  for(const k in SYS){const n=m.sys[k];if(n<=0)continue;const C=n/m.V,a=alphas(SYS[k].Ka,H);
+    for(let i=0;i<a.length-1;i++){const lo=Math.min(a[i],a[i+1]);if(!best||lo>best.lo)best={k,i,lo,ac:C*a[i],bc:C*a[i+1],acid:SYS[k].forms[i],base:SYS[k].forms[i+1],pKa:-Math.log10(SYS[k].Ka[i])}}}
+  if(!best)return{ok:false,pH,msg:'약산–짝염기(또는 약염기–짝산) 쌍이 없어요. 강산, 강염기, 중성 염만으로는 완충 용액이 되지 않아요.'};
+  const r=best.bc/best.ac,minC=Math.min(best.ac,best.bc),A=LAB(best.acid),B=LAB(best.base);
+  const o={...best,pH,r};
+  if(r>=0.05&&r<=20&&minC>=0.002){o.ok=true;if(r<0.1||r>10)o.skew=true;return o}
+  o.ok=false;
+  if(r>=0.05&&r<=20)o.msg=`${A}와 ${B}가 함께 있지만 농도가 너무 묽어 완충 능력이 거의 없어요.`;
+  else if(r<0.1)o.msg=`${A} 쪽만 거의 있고, 짝염기(${B}) 쪽이 부족해요.`;
+  else o.msg=`${B} 쪽만 거의 있고, 짝산(${A}) 쪽이 부족해요.`;
+  if(r<0.05)o.hint='짝염기를 내놓는 염을 넣거나, 강염기(NaOH)를 약산보다 적게 넣어 보세요.';
+  else if(r>20)o.hint='약산(또는 짝산을 내놓는 염)을 더 넣거나, 강산(HCl)을 조금 넣어 보세요.';
+  if(pH>11.5)o.extra='강염기가 너무 많이 들어가 남은 OH⁻가 있어요.';
+  if(pH<2.5)o.extra='강산이 너무 많이 들어가 남은 H₃O⁺가 있어요.';
+  return o}
+function ratioWord(r){if(r>=0.8&&r<=1.25)return'약 1 : 1 → 산과 염기를 모두 잘 막아요';if(r>1.25)return'짝염기가 더 많음 → 산을 더 잘 막아요';return'산(짝산)이 더 많음 → 염기를 더 잘 막아요'}
+
+/* ================= 입자 수 한도 ================= */
+const LIMIT=100;
+function tooBig(c){return Object.values(c).some(v=>Math.round(v)>LIMIT)}
+function limitMsg(id){toast('⚠️ 미시 세계에서 한 종류의 입자가 100개를 넘어요. 더 이상 넣을 수 없어요!',4000,'err');if(id){const n=$(id);n.hidden=false}}
+
+/* ================= ① pH 비교 ================= */
+const CMP={reag:'HCl',acid:0,base:0,hist:{},last:null,limit:false};
+const CMPD=[
+  {id:'water',name:'증류수',sub:'H₂O 100 mL',base:mk({V:100}),col:'#8a99ab'},
+  {id:'buf',name:'아세트산 완충 용액',sub:'0.1 M CH₃COOH + 0.1 M CH₃COONa 100 mL',base:mk({V:100,acetate:20,Na:10}),col:'#2f6fec'}];
+const cmpNet=()=>CMP.base-CMP.acid;
+function cmpMix(d,acid=CMP.acid,base=CMP.base){const m=cloneMix(d.base);m.V+=(acid+base)/1000;m.Cl+=acid/1000;m.Na+=base/1000;return m}
+let cmpBk={},cmpChart,cmpMV={};
+function cmpInit(){
+  $('#cmpBeakers').innerHTML=CMPD.map(d=>`<div class="bk-card" id="cb-${d.id}" style="--c:${d.col}"><div class="bk-name">${d.name}</div><div class="bk-sub">${d.sub}</div><div class="bk-vis"></div><div class="bk-ph"><span>pH</span><b>—</b></div><div class="bk-d"></div></div>`).join('');
+  CMPD.forEach(d=>cmpBk[d.id]=new Beaker($(`#cb-${d.id} .bk-vis`),250,5));
+  cmpChart=new Chart($('#cmpChart'),{x0:-15,x1:15,y0:0,y1:14,xs:5,ys:2,xfmt:v=>Math.abs(v),zeroLine:true,xl:'← 넣은 1 M HCl (mL)        넣은 1 M NaOH (mL) →',yl:'pH'});
+  cmpMV.water=new MicroView($('#cmpMicroW'),$('#cmpLegW'),{spect:true});cmpMV.water.empty='물(H₂O) 분자가 대부분\nH₃O⁺·OH⁻는 아주 적어\n거의 보이지 않아요';
+  cmpMV.buf=new MicroView($('#cmpMicroB'),$('#cmpLegB'),{spect:true});
+  seg('#cmpReagent',v=>CMP.reag=v);
+  $('#cmpAdd1').onclick=()=>cmpAdd(1);$('#cmpAdd5').onclick=()=>cmpAdd(5);$('#cmpReset').onclick=cmpReset;
+  $('#cmpInd').onchange=cmpRender;$('#cmpSpect').onchange=e=>{cmpMV.water.setSpect(e.target.checked);cmpMV.buf.setSpect(e.target.checked)};
+  cmpReset()}
+function cmpReset(){CMP.acid=0;CMP.base=0;CMP.last=null;CMP.limit=false;$('#cmpLimit').hidden=true;CMPD.forEach(d=>CMP.hist[d.id]={0:pHof(d.base)});cmpRender();cmpMicroSet(false)}
+function cmpAdd(k){let done=0;const isA=CMP.reag==='HCl';
+  for(let i=0;i<k;i++){
+    if(CMP.acid+CMP.base>=150){toast('비커가 가득 찼어요. ↺ 처음으로를 눌러 다시 해 보세요.');break}
+    const na=CMP.acid+(isA?1:0),nb=CMP.base+(isA?0:1);
+    if(CMPD.some(d=>tooBig(countsOf(cmpMix(d,na,nb),1)))){CMP.limit=true;limitMsg('#cmpLimit');break}
+    CMP.acid=na;CMP.base=nb;done++;CMPD.forEach(d=>CMP.hist[d.id][cmpNet()]=pHof(cmpMix(d)))}
+  if(!done)return;$('#cmpLimit').hidden=!CMP.limit||false;CMP.last={reag:CMP.reag,k:done};cmpRender();
+  CMPD.forEach(d=>cmpMV[d.id].inject(isA?'H3O':'OH',Math.min(done,12),isA?'Cl':'Na'));cmpMicroSet(true)}
+function cmpMicroSet(anim){CMPD.forEach(d=>cmpMV[d.id].setComposition(countsOf(cmpMix(d),1),anim))}
+function cmpRender(){const ind=$('#cmpInd').checked;const series=[],markers=[];
+  let R=15;CMPD.forEach(d=>Object.keys(CMP.hist[d.id]).forEach(x=>R=Math.max(R,Math.abs(+x))));R=Math.ceil(R/5)*5;
+  const o=cmpChart.o;o.x0=-R;o.x1=R;o.xs=R<=20?5:R<=60?10:25;
+  CMPD.forEach(d=>{const m=cmpMix(d),pH=pHof(m),p0=CMP.hist[d.id][0];const c=$('#cb-'+d.id);
+    $('.bk-ph b',c).textContent=fmt(pH);$('.bk-d',c).innerHTML=deltaHTML(pH-p0);cmpBk[d.id].set(m.V*1000,ind?uniColor(pH):'#dcebfb');
+    const pts=Object.entries(CMP.hist[d.id]).map(([a,b])=>[+a,b]).sort((a,b)=>a[0]-b[0]);
+    series.push({pts,col:d.col,dots:R<=30,label:d.name});markers.push({x:cmpNet(),y:pH,col:d.col,r:5})});
+  cmpChart.set({series,markers,legend:cmpNet()>0?'bl':'tl'});cmpInfo();mbarPh()}
+function cmpIonLine(){const net=cmpNet();
+  CMPD.forEach(d=>{const s=species(cmpMix(d)),h=s.H3O*1000,o=s.OH*1000,pH=pHof(cmpMix(d)),el=$(d.id==='water'?'#cmpPhW':'#cmpPhB');let t;
+    const cnt=v=>v>=0.5?`${Math.round(v)}개`:`0개 <span class="muted">(${v<0.001?'0.001 미만':fmt(v,3)} mmol)</span>`;
+    if(net<0)t=`넣은 H₃O⁺ ${-net}개 → 남은 <b class="h">H₃O⁺ ${cnt(h)}</b>`;
+    else if(net>0)t=`넣은 OH⁻ ${net}개 → 남은 <b class="o">OH⁻ ${cnt(o)}</b>`;
+    else t=`남은 <b class="h">H₃O⁺ ${cnt(h)}</b> · <b class="o">OH⁻ ${cnt(o)}</b>`;
+    el.innerHTML=`${t}<br>→ <b>pH ${fmt(pH)}</b>`})}
+function cmpInfo(){const net=cmpNet();let h='';cmpIonLine();
+  const KEY=`<div class="key-big"><span class="kt">🔑 pH를 정하는 것은 용액에 남아 있는 H₃O⁺(H⁺)와 OH⁻의 양이에요.</span><div class="kr"><span style="color:#c62828">H₃O⁺가 많이 남을수록 → pH ↓ (산성)</span><span style="color:#6a2fc4">OH⁻가 많이 남을수록 → pH ↑ (염기성)</span></div><span class="kn">💧 물속의 H⁺는 물 분자와 결합해 H₃O⁺로 있어요.</span></div>`;
+  if(!CMP.last&&net===0){h=`<div class="def-big">💧 <b>완충 용액</b>은 산이나 염기를 조금 넣어도 <b>pH가 거의 변하지 않는 용액</b>이에요.<br><span class="small">약산과 그 짝염기(또는 약염기와 그 짝산)가 함께 들어 있어요. <button class="link" data-pop="pair">왜 짝산·짝염기가 있으면 될까?</button></span></div>`+KEY+`<p>두 비커에 <b>1 M HCl</b> 또는 <b>1 M NaOH</b>를 똑같이 넣고, 미시 세계에서 <b>H₃O⁺와 OH⁻가 남는지, 사라지는지</b> 살펴보세요.</p>
+    <p class="small muted">💡 밑줄 친 용어에 마우스를 올리면(휴대폰은 누르면) 뜻을 볼 수 있어요.</p>`;$('#cmpInfo').innerHTML=h;return}
+  const amt=Math.abs(net),W=CMPD[0],B=CMPD[1],sw=species(cmpMix(W)),sb=species(cmpMix(B)),pw0=CMP.hist.water[0],pw=pHof(cmpMix(W)),pb0=CMP.hist.buf[0],pb=pHof(cmpMix(B));
+  h+=KEY+`<div class="sec-t">지금까지 넣은 양: ${net<0?`1 M HCl ${amt} mL (H₃O⁺ ${amt} mmol)`:net>0?`1 M NaOH ${amt} mL (OH⁻ ${amt} mmol)`:'산과 염기가 같은 양 (서로 중화)'}</div>`;
+  if(net<0){
+    h+=`<div class="sec-t" style="color:#56677d">증류수</div><div class="eq red">HCl + H₂O → H₃O⁺ + Cl⁻</div>
+      <p class="small">넣은 H₃O⁺를 없애 줄 입자가 없어 <b>H₃O⁺ ${fmt(sw.H3O*1000,1)} mmol이 그대로 남아요</b> → H₃O⁺가 많아져 pH ${fmt(pw0)} → <b>${fmt(pw)}</b> (${deltaHTML(pw-pw0)})</p>
+      <div class="sec-t" style="color:#2f6fec">완충 용액</div><div class="eq green">CH₃COO⁻ + H₃O⁺ → CH₃COOH + H₂O</div>
+      <p class="small">짝염기 <b>CH₃COO⁻가 H₃O⁺를 받아</b> CH₃COOH가 돼요. 넣은 H₃O⁺가 <b>반응으로 사라져서</b> 남은 H₃O⁺는 ${fmt(sb.H3O*1000,4)} mmol뿐 → pH ${fmt(pb0)} → <b>${fmt(pb)}</b> (${deltaHTML(pb-pb0)})</p>`}
+  else if(net>0){
+    h+=`<div class="sec-t" style="color:#56677d">증류수</div><div class="eq blue">NaOH → Na⁺ + OH⁻</div>
+      <p class="small">넣은 <b>OH⁻ ${fmt(sw.OH*1000,1)} mmol이 그대로 남아요</b> → OH⁻가 많아져 pH ${fmt(pw0)} → <b>${fmt(pw)}</b> (${deltaHTML(pw-pw0)})</p>
+      <div class="sec-t" style="color:#2f6fec">완충 용액</div><div class="eq green">CH₃COOH + OH⁻ → CH₃COO⁻ + H₂O</div>
+      <p class="small">약산 <b>CH₃COOH가 OH⁻와 반응</b>해 물이 돼요. 넣은 OH⁻가 <b>사라져서</b> 남은 OH⁻는 거의 없어요 → pH ${fmt(pb0)} → <b>${fmt(pb)}</b> (${deltaHTML(pb-pb0)})</p>`}
+  else h+=`<p class="small">넣은 H₃O⁺와 OH⁻가 서로 중화되어 두 비커 모두 처음과 거의 같아요.</p>`;
+  h+=`<p class="small muted">완충 용액 속 남은 양 → CH₃COOH ${fmt(sb.HA*1000,1)} mmol · CH₃COO⁻ ${fmt(sb.A*1000,1)} mmol</p>`;
+  if(amt>=9)h+=`<div class="warnbox">완충 용액의 ${net<0?'CH₃COO⁻':'CH₃COOH'}를 거의 다 써 버렸어요! 이제는 넣은 ${net<0?'H₃O⁺':'OH⁻'}가 반응하지 못하고 남기 때문에 완충 용액도 pH가 크게 변해요. → <b>② 완충 용량</b> 탭에서 더 알아보세요.</div>`;
+  if(CMP.limit)h+=`<div class="warnbox">⚠️ 미시 세계에서 한 종류의 입자가 100개를 넘어 더 이상 넣을 수 없어요. ↺ 처음으로를 눌러 다시 해 보세요.</div>`;
+  h+=`<p class="small"><button class="link" data-pop="pair">짝산·짝염기와 완충 원리</button> · <button class="link" data-pop="common">공통 이온 효과</button></p>`;
+  $('#cmpInfo').innerHTML=h}
+
+/* ================= ② 완충 용액 만들기 ================= */
+const PR={cyl:null,m:newMix(),log:[],hist:[],scale:1,mission:null};
+let prCyl,prBk,prMV;
+function prInit(){
+  const groups={};for(const k in RG)(groups[RG[k].g]=groups[RG[k].g]||[]).push(k);
+  $('#prReagent').innerHTML=Object.entries(groups).map(([g,ks])=>`<optgroup label="${g}">${ks.map(k=>`<option value="${k}">${RG[k].f} · ${RG[k].n}</option>`).join('')}</optgroup>`).join('');
+  prCyl=new Cylinder($('#prCyl'));prBk=new Beaker($('#prBeaker'),500,5);prMV=new MicroView($('#prMicro'),$('#prLegend'),{spect:true});prMV.empty='비커가 비어 있어요';
+  const vol=$('#prVol'),upd=()=>$('#prVolTxt').textContent=vol.value+' mL';vol.oninput=upd;
+  $('#prVm').onclick=()=>{vol.value=+vol.value-1;upd()};$('#prVp').onclick=()=>{vol.value=+vol.value+1;upd()};
+  const rs=()=>{const k=$('#prReagent').value;$('#prDesc').textContent=RG[k].d;$('#prConc').disabled=k==='water'};$('#prReagent').onchange=rs;rs();
+  $('#prTake').onclick=prTake;$('#prPour').onclick=prPour;$('#prCylEmpty').onclick=()=>{PR.cyl=null;prCyl.set(0);prCylLabel()};
+  $('#prUndo').onclick=prUndo;$('#prClear').onclick=()=>{if(PR.m.V<=0)return;prSnap();PR.m=newMix();PR.log=[];prUpdate('rebuild');$('#prTestRes').innerHTML='비커를 비웠어요.';$('#prTestMini').innerHTML=''};
+  $('#prTestA').onclick=()=>prTest('HCl');$('#prTestB').onclick=()=>prTest('NaOH');$$('[data-test]').forEach(b=>b.onclick=()=>prTest(b.dataset.test));
+  $('#prInd').onchange=()=>prUpdate('none');$('#prSpect').onchange=e=>prMV.setSpect(e.target.checked);
+  prCylLabel();prUpdate('rebuild')}
+function prCylLabel(){const c=PR.cyl;$('#prCylLabel').innerHTML=c?`<b>${RG[c.key].f}</b><br>${c.key==='water'?'':c.conc+' M · '}${c.vol} mL${c.key==='water'?'':`<br><span class="muted small">= ${fmt(c.conc*c.vol,c.conc*c.vol<1?3:1)} mmol</span>`}`:'비어 있음<br><span class="muted small">위에서 시약을 고르고 재 보세요</span>'}
+function prTake(){const key=$('#prReagent').value,conc=+$('#prConc').value,vol=+$('#prVol').value;
+  if(PR.cyl){toast('실린더에 이미 시약이 있어요. 먼저 비커에 붓거나 비워 주세요.');return}
+  PR.cyl={key,conc:key==='water'?0:conc,vol};prCyl.set(vol,key==='water'?'#dcebfb':'#bfe0ff');prCylLabel()}
+function prSnap(){PR.hist.push({m:cloneMix(PR.m),log:PR.log.slice()});if(PR.hist.length>40)PR.hist.shift()}
+function prPour(){const c=PR.cyl;if(!c){toast('먼저 시약을 눈금실린더에 재어 주세요.');return}
+  if(PR.m.V*1000+c.vol>500.001){toast('비커가 넘쳐요! (최대 500 mL)');return}
+  {const t=cloneMix(PR.m);t.V+=c.vol/1000;RG[c.key].add(t,c.conc*c.vol/1000);if(tooBig(countsOf(t,niceScale(t)))){limitMsg();return}}
+  const prevEq=PR.neut&&PR.neut.eq;prSnap();PR.m.V+=c.vol/1000;RG[c.key].add(PR.m,c.conc*c.vol/1000);PR.log.push({...c});PR.cyl=null;prCyl.set(0);prCylLabel();prUpdate('rescale');if(PR.neut&&PR.neut.eq!==prevEq)toast('⚡ 중화 반응이 일어났어요!<br><span style="font-family:Cambria Math,serif">'+PR.neut.eq+'</span>',4200,'warn')}
+function prUndo(){const h=PR.hist.pop();if(!h){toast('되돌릴 단계가 없어요.');return}PR.m=h.m;PR.log=h.log;prUpdate('rebuild')}
+function niceScale(m){const s=species(m);let S=0,mx=0;for(const k in s){const v=s[k]*1000;if(k!=='Na'&&k!=='Cl')S+=v;mx=Math.max(mx,v)}if(S<=0&&mx<=0)return 1;
+  for(const v of[4,2,1,.5,.2,.1,.05,.02,.01,.005,.002,.001])if(S*v<=30&&mx*v<=36)return v;return .001}
+function prTest(reag){const m=PR.m;if(m.V<=0){toast('비커가 비어 있어요.');return}if(m.V*1000+1>500){toast('비커가 가득 찼어요.');return}
+  if(tooBig(countsOf(addStrong(m,reag,1,1),PR.scale))){limitMsg();return}
+  const p0=pHof(m);prSnap();PR.m=addStrong(m,reag,1,1);PR.log.push({key:reag,conc:1,vol:1,test:true});const p1=pHof(PR.m);
+  const w0=mk({V:m.V*1000}),w1=pHof(addStrong(w0,reag,1,1));
+  $('#prTestRes').innerHTML=`<b>${reag==='HCl'?'1 M HCl':'1 M NaOH'} 1 mL</b>를 넣었더니 → 이 용액: pH ${fmt(p0)} → <b>${fmt(p1)}</b> (${deltaHTML(p1-p0)})<br><span class="muted">같은 부피(${fmt(m.V*1000,0)} mL)의 증류수였다면: 7.00 → ${fmt(w1)} (${deltaHTML(w1-7)})</span>`;
+  {const mi=$('#prTestMini');if(mi)mi.innerHTML=`pH ${fmt(p0)} → <b>${fmt(p1)}</b> (${deltaHTML(p1-p0)}) · 증류수였다면 7.00 → ${fmt(w1)}`;}
+  const k=Math.max(1,Math.round(PR.scale));prMV.inject(reag==='HCl'?'H3O':'OH',k,reag==='HCl'?'Cl':'Na');prUpdate('inject')}
+function prUpdate(mode){const m=PR.m,V=m.V*1000,pH=V>0?pHof(m):null;
+  $('#prPh').textContent=pH==null?'—':fmt(pH);$('#prVnow').textContent=fmt(V,0)+' mL';
+  prBk.set(V,pH==null?'#dcebfb':($('#prInd').checked?uniColor(pH):'#dcebfb'));
+  $('#prList').innerHTML=PR.log.length?PR.log.map(e=>`<div class="li"><b>${RG[e.key].f}${e.test?' <span>(시험)</span>':''}</b><span>${e.key==='water'?'':e.conc+' M · '}${e.vol} mL${e.key==='water'?'':' · '+fmt(e.conc*e.vol,e.conc*e.vol<1?3:1)+' mmol'}</span></div>`).join('')+`<div class="li"><b>합계</b><span>${fmt(V,0)} mL</span></div>`:'<span class="muted">아직 아무것도 넣지 않았어요.</span>';
+  const j=judge(m);prJudge(j);const nI=neutInfo();if(nI)$('#prJudge').insertAdjacentHTML('afterbegin',neutHTML(nI));PR.neut=nI;prEq(j);
+  if(mode==='rescale'){PR.scale=niceScale(m);prMV.setComposition(countsOf(m,PR.scale),true)}
+  else if(mode==='rebuild'){PR.scale=niceScale(m);prMV.setComposition(countsOf(m,PR.scale),false)}
+  else if(mode==='inject'){prMV.setComposition(countsOf(m,PR.scale),true)}
+  $('#prScale').textContent=V>0?`입자 1개 ≈ ${+(1/PR.scale).toPrecision(2)} mmol`:'';
+  prMV.note=(V>0&&j.ok)?'':'';
+}
+const NOM={CH3COOH:'HA',NH3:'NH3',CH3COONa:'A',NH4Cl:'NH4',NaH2PO4:'H2PO4',Na2HPO4:'HPO4',NaHCO3:'HCO3',Na2CO3:'CO3',HCl:'H3O',NaOH:'OH'};
+function neutInfo(){const m=PR.m;if(m.V<=0)return null;const nom={};PR.log.forEach(e=>{const t=NOM[e.key];if(t)nom[t]=(nom[t]||0)+e.conc*e.vol});
+  const sp=species(m),act={};for(const k in sp)if(k!=='Na'&&k!=='Cl')act[k]=sp[k]*1000;
+  const types=[...new Set([...Object.keys(nom),...Object.keys(act)])],acids=[],bases=[];
+  const grew=t=>t&&(act[t]||0)>(nom[t]||0)+0.05;
+  for(const t of types){const a=nom[t]||0,b=act[t]||0,d=b-a;if(a<=0||d>=-Math.max(0.02,0.03*a))continue;
+    if(t==='H3O'||grew(BASE_OF[t]))acids.push({t,d});if(t==='OH'||grew(ACID_OF[t]))bases.push({t,d})}
+  if(!acids.length||!bases.length)return null;
+  acids.sort((x,y)=>x.d-y.d);bases.sort((x,y)=>x.d-y.d);let A=null,Bt=null;for(const ac of acids){const bb=bases.find(x=>x.t!==ac.t);if(bb){A=ac.t;Bt=bb.t;break}}if(!A)return null;
+  let eq;if(A==='H3O'&&Bt==='OH')eq='H₃O⁺ + OH⁻ → 2H₂O';else if(A==='H3O')eq=`${LAB(Bt)} + H₃O⁺ → ${LAB(ACID_OF[Bt])} + H₂O`;else if(Bt==='OH')eq=`${LAB(A)} + OH⁻ → ${LAB(BASE_OF[A])} + H₂O`;else eq=`${LAB(A)} + ${LAB(Bt)} → ${LAB(BASE_OF[A])} + ${LAB(ACID_OF[Bt])}`;
+  const rows=types.filter(t=>(nom[t]||0)>0||(act[t]||0)>0.05).sort((x,y)=>(nom[y]||0)-(nom[x]||0));
+  return{eq,rows,nom,act}}
+function neutHTML(n){if(!n)return'';const f=x=>x<0.005?'0':x<1?fmt(x,3):fmt(x,2);
+  return`<div class="neut"><b>⚡ 중화 반응이 일어났어요!</b><br>넣은 물질 일부가 산–염기 반응으로 <b>다른 물질로 바뀌었어요</b>. 그래서 넣은 물질이 그대로 보이지 않을 수 있어요.<div class="eq">${n.eq}</div>
+    <details><summary>넣은 양과 지금 양 비교하기 (mmol)</summary><table class="ntab"><tr><th>입자</th><th>넣은 양</th><th>지금 양</th></tr>${n.rows.map(t=>{const a=n.nom[t]||0,b=n.act[t]||0,c=b<a-Math.max(.02,.1*a)?'dn':b>a+Math.max(.02,.1*a)?'up':'';return`<tr><td>${LAB(t)}</td><td>${f(a)}</td><td class="${c}">${f(b)} ${c==='dn'?'▼':c==='up'?'▲':''}</td></tr>`}).join('')}</table></details></div>`}
+function prJudge(j){const el=$('#prJudge'),V=PR.m.V;
+  if(j.empty){el.innerHTML=`<div class="judge empty"><h4>🧫 완충 용액 판정</h4><p>시약을 골라 <b>눈금실린더로 재고</b> 비커에 부어 보세요. 두 가지 이상 섞어도 돼요.</p></div>`;return}
+  const mmol=c=>c*V*1000,fm=x=>x<0.01?fmt(x,3):fmt(x,2);
+  if(!j.k){const used=[...new Set(PR.log.filter(e=>!e.test).map(e=>RG[e.key].f))].filter(x=>x!=='H₂O');
+    el.innerHTML=`<div class="judge no"><h4>❌ 아직 완충 용액이 아니에요</h4><p><b>이유: 짝산·짝염기 쌍이 없어요.</b></p>
+      <ul class="chk-list"><li><span class="ic no">✗</span><span>약산 또는 약염기 <small>지금 들어 있는 것: ${used.join(', ')||'물'}</small></span></li>
+      <li><span class="ic no">✗</span><span>가역 반응(⇌) <small>강산·강염기·중성 염은 물에서 한쪽으로만(→) 이온화해서, H⁺를 다시 받거나 내놓을 짝이 생기지 않아요.</small></span></li></ul>
+      <div class="why">💡 CH₃COOH ⇌ H⁺ + CH₃COO⁻처럼 <b>양쪽으로 일어나는 반응</b>의 짝산과 짝염기를 함께 넣어 주어야 해요. <button class="link" data-pop="pair">자세히</button></div></div>`;return}
+  const A=LAB(j.acid),B=LAB(j.base),am=mmol(j.ac),bm=mmol(j.bc),aOK=j.r<=20&&j.ac>=0.002,bOK=j.r>=0.05&&j.bc>=0.002;
+  const list=`<ul class="chk-list">
+    <li><span class="ic ${aOK?'':'no'}">${aOK?'✓':'✗'}</span><span>짝산 <b>${A}</b>: ${fm(am)} mmol <small>H⁺를 내주어 들어온 OH⁻를 막아요</small></span></li>
+    <li><span class="ic ${bOK?'':'no'}">${bOK?'✓':'✗'}</span><span>짝염기 <b>${B}</b>: ${fm(bm)} mmol <small>H⁺를 받아 들어온 H₃O⁺를 막아요</small></span></li>
+    <li><span class="ic">✓</span><span>가역 반응: ${A} ⇌ H⁺ + ${B}</span></li></ul>`;
+  if(j.ok){el.innerHTML=`<div class="judge ok"><h4>✅ 완충 용액이에요!</h4>${list}<p class="small">성분비: ${ratioWord(j.r)}</p>${j.skew?`<p class="small" style="color:#8a5a00">⚠️ 성분비가 한쪽으로 많이 치우쳐(10배 이상) 반대쪽 방향의 완충 능력은 약해요.</p>`:''}<p class="small"><button class="link" data-pop="pair">왜 완충 용액이 될까?</button> · <button class="link" data-pop="target">원하는 pH 맞추기</button></p>
+</div>`;return}
+  let why,res;
+  if(!aOK&&!bOK){why=`<b>이유: ${A}와 ${B}가 모두 너무 적어요.</b>`;res='농도가 너무 묽어 들어온 H₃O⁺나 OH⁻를 막을 입자가 부족해요. 더 진한 용액을 쓰거나 양을 늘려 보세요.'}
+  else if(!bOK){why=`<b>이유: 짝염기(${B})가 거의 없어요.</b>`;res=`→ 산(H₃O⁺)이 들어오면 받아 줄 ${B}가 없어서 H₃O⁺가 그대로 남아 pH가 크게 떨어져요.`}
+  else{why=`<b>이유: 짝산(${A})이 거의 없어요.</b>`;res=`→ 염기(OH⁻)가 들어오면 H⁺를 내줄 ${A}이 없어서 OH⁻가 그대로 남아 pH가 크게 올라가요.`}
+  const cause=(!bOK&&aOK)?`약산 ${A}은 물에서 아주 조금만 이온화하기 때문에 혼자서는 ${B}가 거의 생기지 않아요.`:(!aOK&&bOK)?`${B}만 넣으면 가역 반응의 왼쪽(${A}) 물질이 거의 없어요.`:'';
+  el.innerHTML=`<div class="judge no"><h4>❌ 아직 완충 용액이 아니에요</h4><p>${why}</p>${list}<p class="small">${res}</p>${j.extra?`<p class="small">${j.extra}</p>`:''}
+    <div class="why">💡 완충 작용은 <b>${A} ⇌ H⁺ + ${B}</b>가 <b>양쪽 방향</b>으로 일어나야 가능해요. 그러려면 가역 반응의 양쪽에 있는 짝산과 짝염기를 <b>둘 다 넉넉히</b> 넣어 주어야 해요. ${cause}${j.hint?`<br>👉 ${j.hint}`:''} <button class="link" data-pop="pair">자세히</button></div></div>`}
+function prEq(j){const used=[...new Set(PR.log.map(e=>e.key))].filter(k=>k!=='water');let h='';
+  if(!used.length){$('#prEq').innerHTML='<span class="muted small">비커에 넣은 물질의 반응식이 여기에 나타나요.</span>';return}
+  h+='<div class="sec-t">물에 녹을 때</div>'+used.filter(k=>EQ_DISS[k]).map(k=>`<div class="eq">${EQ_DISS[k]}</div>`).join('');
+  const m=PR.m,pH=pHof(m),H=Math.pow(10,-pH),weak=Object.keys(SYS).filter(k=>m.sys[k]>0);
+  const pairOf=k=>{const a=alphas(SYS[k].Ka,H);let bi=0,bl=-1;for(let i=0;i<a.length-1;i++){const lo=Math.min(a[i],a[i+1]);if(lo>bl){bl=lo;bi=i}}return[SYS[k].forms[bi],SYS[k].forms[bi+1]]};
+  if(PR.neut){h+=`<div class="sec-t">⚡ 중화 반응 (넣은 물질이 다른 물질로 바뀜)</div><div class="eq" style="border-color:#f0b35a;background:#fff5e6">${PR.neut.eq}</div>`}
+  if((used.includes('CH3COOH')&&used.includes('CH3COONa'))||(used.includes('NH3')&&used.includes('NH4Cl')))
+    h+=`<div class="key small">같은 이온(${used.includes('CH3COONa')?'CH₃COO⁻':'NH₄⁺'})이 많아져 ${used.includes('CH3COOH')?'CH₃COOH의 이온화':'NH₃와 물의 반응'}가 억제돼요. <button class="link" data-pop="common">공통 이온 효과</button></div>`;
+  if(j.ok){h+=`<div class="sec-t">완충 작용</div><p class="small" style="margin:2px 0">산이 들어오면</p><div class="eq red">${LAB(j.base)} + H₃O⁺ → ${LAB(j.acid)} + H₂O</div><p class="small" style="margin:2px 0">염기가 들어오면</p><div class="eq blue">${LAB(j.acid)} + OH⁻ → ${LAB(j.base)} + H₂O</div>`}
+  $('#prEq').innerHTML=h}
+
+/* ================= 미션 ================= */
+const MISSIONS=[
+  {id:1,t:'첫 완충 용액',d:'CH₃COOH와 CH₃COONa를 섞어 완충 용액을 만들어 보세요.',hint:'두 물질의 양(mmol)을 비슷하게 넣으면 좋아요.',
+    check:(m,u,j)=>!j.ok?j.msg||'완충 용액이 아니에요.':!(u.has('CH3COOH')&&u.has('CH3COONa'))?'CH₃COOH와 CH₃COONa를 모두 사용해야 해요.':j.acid!=='HA'?'아세트산 완충 쌍(CH₃COOH / CH₃COO⁻)이 되어야 해요.':true},
+  {id:2,t:'부분 중화로 만들기',d:'CH₃COOH와 NaOH만 사용해서 완충 용액을 만들어 보세요. (증류수는 사용 가능)',hint:'NaOH가 CH₃COOH 일부와 반응해 CH₃COO⁻를 만들어요. NaOH의 양(mmol)은 CH₃COOH보다 적게!',
+    check:(m,u,j)=>{for(const k of u)if(!['CH3COOH','NaOH','water'].includes(k))return 'CH₃COOH, NaOH, 증류수 외의 물질이 들어 있어요. 비커를 비우고 다시 해 보세요.';
+      if(!(u.has('CH3COOH')&&u.has('NaOH')))return 'CH₃COOH와 NaOH를 모두 사용해야 해요.';if(j.ok)return true;return (j.r>20||!j.k)?'NaOH가 너무 많아 CH₃COOH가 거의 다 중화됐어요. NaOH의 양(mmol)을 CH₃COOH보다 적게 줄여 보세요.':'NaOH가 너무 적어 CH₃COO⁻가 거의 생기지 않았어요. NaOH를 조금 더 넣어 보세요.'}},
+  {id:3,t:'염기성 완충 용액',d:'pH 8 이상인 완충 용액을 만들어 보세요.',hint:'약염기 NH₃와, 그 짝산 NH₄⁺를 내놓는 NH₄Cl을 떠올려 보세요.',
+    check:(m,u,j)=>!j.ok?j.msg||'완충 용액이 아니에요.':j.pH<8?`완충 용액이지만 pH ${fmt(j.pH)}예요. pH 8 이상이 되어야 해요.`:true},
+  {id:4,t:'혈액과 비슷하게',d:'탄산수소 나트륨(NaHCO₃)을 이용해 혈액처럼 pH 7.35 ~ 7.45인 완충 용액을 만들어 보세요.',hint:'혈액의 완충 쌍은 H₂CO₃ / HCO₃⁻예요. NaHCO₃에 HCl을 조금 넣으면 HCO₃⁻ 일부가 H₂CO₃로 바뀌어요(HCO₃⁻ + H⁺ → H₂CO₃). 혈액처럼 HCO₃⁻가 H₂CO₃보다 약 10~20배 많게 만들어 보세요!',
+    check:(m,u,j)=>!u.has('NaHCO3')?'NaHCO₃를 사용해야 해요.':!j.ok?(j.r>20?'HCO₃⁻만 거의 있고 짝산 H₂CO₃가 부족해요. HCl을 조금 넣어 HCO₃⁻ 일부를 H₂CO₃로 바꿔 보세요.':j.msg||'완충 용액이 아니에요.'):j.acid!=='H2CO3'?'혈액과 같은 H₂CO₃ / HCO₃⁻ 완충 쌍이 되어야 해요. NaHCO₃에 산을 조금 넣어 H₂CO₃를 만들어 보세요.':(j.pH<7.35||j.pH>7.45)?`H₂CO₃ / HCO₃⁻ 완충 용액이 되었어요! 그런데 pH가 ${fmt(j.pH)}예요. 7.35 ~ 7.45가 되도록 HCl 양을 조절해 보세요.`:true},
+  {id:5,t:'튼튼한 완충 용액',d:'1 M HCl 5 mL를 넣어도 pH가 0.3 이하로 변하는 완충 용액을 만들어 보세요. (총 부피 200 mL 이하)',hint:'완충 용량은 농도가 진할수록, 산 : 짝염기 비가 1 : 1에 가까울수록 커요.',
+    check:(m,u,j)=>{if(!j.ok)return j.msg||'완충 용액이 아니에요.';if(m.V>0.2+1e-9)return `총 부피가 ${fmt(m.V*1000,0)} mL예요. 200 mL 이하로 만들어 주세요.`;
+      const d=Math.abs(pHof(addStrong(m,'HCl',5,5))-j.pH);return d<=0.3?true:`HCl 5 mL를 넣으면 pH가 ${fmt(d)}만큼 변해요. 더 튼튼하게 만들어 보세요!`}},
+  {id:6,t:'목표 pH 5.0 (심화)',d:'아세트산 완충 용액으로 pH를 4.9 ~ 5.1에 맞춰 보세요.',hint:'아세트산 쌍은 1 : 1일 때 pH 4.7이에요. 0.3 올리려면 CH₃COO⁻ : CH₃COOH = 2 : 1로! 🎯 pH 도우미를 참고하세요.',
+    check:(m,u,j)=>!j.ok?j.msg||'완충 용액이 아니에요.':j.acid!=='HA'?'아세트산 완충 용액이어야 해요.':(j.pH<4.9||j.pH>5.1)?`지금 pH는 ${fmt(j.pH)}예요. 조금 더 조절해 보세요.`:true}
+];
+let misDone=new Set();try{misDone=new Set(JSON.parse(localStorage.getItem('bufferLabMissions')||'[]'))}catch(e){}
+function misSave(){try{localStorage.setItem('bufferLabMissions',JSON.stringify([...misDone]))}catch(e){}}
+function misRender(){const sel=$('#misSel'),cur=PR.mission||'';
+  sel.innerHTML=`<option value="">🧪 자유 실험 (미션 없이 만들기)</option>`+MISSIONS.map(ms=>`<option value="${ms.id}">${misDone.has(ms.id)?'✅':'⬜'} 미션 ${ms.id}. ${ms.t}</option>`).join('');sel.value=cur;
+  $('#misScore').textContent=`${misDone.size} / ${MISSIONS.length} 성공`;misShow()}
+function misShow(){const ms=MISSIONS.find(x=>x.id===PR.mission);
+  if(!ms){$('#misDesc').innerHTML='위 목록에서 미션을 골라 도전해 보세요! 완충 용액을 만든 뒤 <b>[채점하기]</b>를 누르면 돼요.';$('#misBtns').style.display='none';return}
+  $('#misDesc').innerHTML=`<b>${misDone.has(ms.id)?'✅ ':''}미션 ${ms.id}.</b> ${ms.d}`;$('#misBtns').style.display=''}
+function misInit(){$('#misSel').onchange=e=>{PR.mission=e.target.value?+e.target.value:null;misShow()};
+  $('#misGrade').onclick=()=>{const ms=MISSIONS.find(x=>x.id===PR.mission);if(!ms)return;const j=judge(PR.m);if(j.empty){toast('비커가 비어 있어요!');return}const u=new Set(PR.log.filter(e=>!e.test).map(e=>e.key));const r=ms.check(PR.m,u,j);
+    if(r===true){misDone.add(ms.id);misSave();misRender();toast(`🎉 미션 ${ms.id} 성공! 잘했어요!`,3500,'ok')}else toast('🤔 아직이에요! '+r,5500,'warn')};
+  confirmBtn($('#misReset'),'정말 지울까요?',()=>{misDone.clear();misSave();misRender();toast('미션 성공 기록을 모두 지웠어요.',2500,'ok')});
+  $('#misHint').onclick=()=>{const ms=MISSIONS.find(x=>x.id===PR.mission);ms&&toast('💡 '+ms.hint,6500)};misRender()}
+
+/* ================= ③ 완충 용량 ================= */
+const CAP={mode:'conc',reag:'HCl',added:0,timer:null};
+const CAPD={
+  conc:[{id:'A',name:'A. 묽은 완충 용액',sub:'0.02 M CH₃COOH + 0.02 M CH₃COONa',o:{V:100,acetate:4,Na:2},col:'#e9902f'},
+        {id:'B',name:'B. 진한 완충 용액',sub:'0.2 M CH₃COOH + 0.2 M CH₃COONa',o:{V:100,acetate:40,Na:20},col:'#2f6fec'}],
+  ratio:[{id:'A',name:'A. 성분비 9 : 1',sub:'CH₃COOH 18 mmol + CH₃COO⁻ 2 mmol',o:{V:100,acetate:20,Na:2},col:'#e9902f'},
+         {id:'B',name:'B. 성분비 1 : 1',sub:'CH₃COOH 10 mmol + CH₃COO⁻ 10 mmol',o:{V:100,acetate:20,Na:10},col:'#2f6fec'}]};
+let capChart,capMV={},capBk={};
+function capMix(d,x){return addStrong(mk(d.o),CAP.reag,x,x)}
+function capInit(){capChart=new Chart($('#capChart'),{x0:0,x1:25,y0:0,y1:14,xs:5,ys:2,xl:'넣은 양 (mL) — 1 mL = 1 mmol',yl:'pH'});
+  capMV.A=new MicroView($('#capMicroA'),$('#capLegA'),{spect:false});capMV.B=new MicroView($('#capMicroB'),$('#capLegB'),{spect:false});
+  $('#capMode').onchange=e=>{CAP.mode=e.target.value;capReset()};seg('#capReagent',v=>{CAP.reag=v;capReset()});
+  $('#capStep').onclick=()=>capStep();$('#capPlay').onclick=capPlay;$('#capReset').onclick=capReset;$('#capSpect').onchange=e=>{capMV.A.setSpect(e.target.checked);capMV.B.setSpect(e.target.checked)};capReset()}
+function capStopPlay(){clearInterval(CAP.timer);CAP.timer=null;const b=$('#capPlay');b.innerHTML=(CAP.added>0&&CAP.added<25)?'▶<span class="m-hide"> 이어서 넣기</span>':'▶<span class="m-hide"> 계속 넣기</span>'}
+function capPlay(){if(CAP.timer){capStopPlay();return}if(CAP.added>=25)capReset();$('#capPlay').innerHTML='⏸<span class="m-hide"> 일시정지</span>';CAP.timer=setInterval(()=>{if(!capStep())capStopPlay()},650)}
+function capReset(){capStopPlay();CAP.added=0;$('#capLimit').hidden=true;CAPD[CAP.mode].forEach(d=>$('#capMt'+d.id).textContent=d.name);
+  $('#capBeakers').innerHTML=CAPD[CAP.mode].map(d=>`<div class="bk-card" id="cap-${d.id}" style="--c:${d.col}"><div class="bk-name">${d.name}</div><div class="bk-sub">${d.sub} (100 mL)</div><div class="bk-vis"></div><div class="bk-ph"><span>pH</span><b>—</b></div><div class="bk-d"></div><div class="bk-bar"><i></i></div><div class="bk-rem"></div></div>`).join('');
+  CAPD[CAP.mode].forEach(d=>capBk[d.id]=new Beaker($(`#cap-${d.id} .bk-vis`),200));capRender();capMicroSet(false)}
+function capStep(){if(CAP.added>=25){toast('25 mL까지만 넣을 수 있어요.');return false}
+  if(CAPD[CAP.mode].some(d=>tooBig(countsOf(capMix(d,CAP.added+1),1)))){limitMsg('#capLimit');return false}
+  CAP.added++;capRender();const a=CAP.reag==='HCl';CAPD[CAP.mode].forEach(d=>capMV[d.id].inject(a?'H3O':'OH',1,a?'Cl':'Na'));capMicroSet(true);return CAP.added<25}
+function capMicroSet(anim){CAPD[CAP.mode].forEach(d=>capMV[d.id].setComposition(countsOf(capMix(d,CAP.added),1),anim))}
+function capRender(){const isA=CAP.reag==='HCl',x=CAP.added,defs=CAPD[CAP.mode];const series=[],markers=[];
+  $('#capAdded').innerHTML=`넣은 양: <b>1 M ${CAP.reag} ${x} mL</b> (= ${x} mmol)`;
+  const lim={};
+  defs.forEach(d=>{const p0=pHof(mk(d.o)),pts=[];let li=null;for(let i=0;i<=x;i++){const p=pHof(capMix(d,i));pts.push([i,p]);if(li==null&&Math.abs(p-p0)>=1)li=[i,p]}
+    const p=pts[pts.length-1][1],s0=species(mk(d.o)),s=species(capMix(d,x)),key=isA?'A':'HA',r0=s0[key]*1000,r=Math.max(0,s[key]*1000);
+    const c=$('#cap-'+d.id);$('.bk-ph b',c).textContent=fmt(p);$('.bk-d',c).innerHTML=deltaHTML(p-p0);capBk[d.id].set(100+x,uniColor(p));
+    $('.bk-bar i',c).style.width=clamp(r/Math.max(r0,s0[isA?'HA':'A']*1000,1e-9)*100,0,100)+'%';
+    $('.bk-rem',c).innerHTML=`${isA?'H₃O⁺를 막는 CH₃COO⁻':'OH⁻를 막는 CH₃COOH'} 남은 양: <b>${fmt(r,1)} mmol</b><br>pH를 바꾸는 ${isA?'<b style="color:#c62828">H₃O⁺</b>':'<b style="color:#6a2fc4">OH⁻</b>'} 남은 양: <b>${fmt((isA?s.H3O:s.OH)*1000,(isA?s.H3O:s.OH)*1000<0.1?4:1)} mmol</b>`;
+    series.push({pts,col:d.col,label:d.name,dots:x<=25});markers.push({x,y:p,col:d.col,r:4.5});
+    if(li){lim[d.id]=li[0];markers.push({x:li[0],y:li[1],col:d.col,r:6,fill:d.col,label:`${d.id} 완충 한계 (${li[0]} mL)`,dx:isA?8:8,dy:isA?4:-20})}});
+  const w=[];for(let i=0;i<=x;i++)w.push([i,pHof(addStrong(mk({V:100}),CAP.reag,i,i))]);
+  series.push({pts:w,col:'#9aa7b6',dash:[5,4],label:'증류수 (참고)',w:2});
+  capChart.set({series,markers,legend:isA?'tr':'br'});mbarPh();
+  $('#capRef').innerHTML=`증류수 100 mL였다면: pH 7.00 → ${fmt(w[w.length-1][1])}`;
+  let h=`<div class="key"><b>완충 용량</b>: 완충 용액이 pH를 거의 일정하게 유지하면서 받아들일 수 있는 산·염기의 양</div>
+    <p>① <b>농도가 진할수록</b> 막아 줄 입자가 많아 완충 용량이 커요.</p><p>② <b>약산 : 짝염기 비가 1 : 1에 가까울수록</b> 산과 염기를 모두 고르게 막아요.</p>`;
+  if(CAP.mode==='ratio')h+=`<p class="small muted">💡 9 : 1 용액은 CH₃COO⁻가 적어 산(HCl)에는 금방 무너지지만, NaOH에는 꽤 오래 버텨요. 넣을 물질을 바꿔 확인해 보세요!</p>`;
+  const done=defs.filter(d=>lim[d.id]!=null);
+  if(done.length)h+=`<div class="warnbox">${done.map(d=>`<b>${d.id}</b>는 ${lim[d.id]} mL에서 완충 한계에 도달 (pH 1 이상 변화)`).join('<br>')}<br>${isA?'CH₃COO⁻':'CH₃COOH'}가 거의 다 소모되면 더 이상 막을 수 없어 pH가 급변해요.</div>`;
+  else if(x>0)h+=`<div class="okbox">아직 두 용액 모두 버티고 있어요. 계속 넣어 보세요!</div>`;
+  h+=`<div class="sec-t">완충 한계 이후</div><div class="eq ${isA?'red':'blue'}">${isA?'HCl + H₂O → H₃O⁺ + Cl⁻ <small>(남은 H₃O⁺가 쌓임)</small>':'NaOH → Na⁺ + OH⁻ <small>(남은 OH⁻가 쌓임)</small>'}</div>`;
+  $('#capInfo').innerHTML=h}
+
+/* ================= ④ 적정 곡선 ================= */
+const TT={
+  wa:{an:{acetate:2.5},anName:'0.1 M CH₃COOH 25 mL',ti:'NaOH',tiName:'0.1 M NaOH',weak:true,pKa:4.74,cmp:'sa',cmpName:'강산 HCl',col:'#2f6fec'},
+  sa:{an:{Cl:2.5},anName:'0.1 M HCl 25 mL',ti:'NaOH',tiName:'0.1 M NaOH',weak:false,cmp:'wa',cmpName:'약산 CH₃COOH',col:'#d9534f'},
+  wb:{an:{ammonia:2.5},anName:'0.1 M NH₃ 25 mL',ti:'HCl',tiName:'0.1 M HCl',weak:true,pKa:9.25,cmp:'sb',cmpName:'강염기 NaOH',col:'#12a89d'},
+  sb:{an:{Na:2.5},anName:'0.1 M NaOH 25 mL',ti:'HCl',tiName:'0.1 M HCl',weak:false,col:'#8e63c7'}};
+const TIT={type:'wa',v:0,timer:null,prevV:0};const TSCALE=8;const curves={};
+function titMix(type,v){const t=TT[type],m=mk({V:25+v,...t.an});if(t.ti==='NaOH')m.Na+=v*.1/1000;else m.Cl+=v*.1/1000;return m}
+function curve(type){if(!curves[type]){const a=[];for(let v=0;v<=50.001;v+=.25)a.push([v,pHof(titMix(type,v))]);curves[type]=a}return curves[type]}
+let titChart,titMV;
+const FLASK='M90 198 L90 228 L52 290 Q49 297 57 297 L149 297 Q157 297 154 290 L116 228 L116 198 Z';
+function titInit(){titChart=new Chart($('#titChart'),{x0:0,x1:50,y0:0,y1:14,xs:10,ys:2,xl:'넣은 적정액의 부피 (mL)',yl:'pH'});
+  titMV=new MicroView($('#titMicro'),$('#titLegend'),{spect:false});
+  $('#titType').onchange=e=>{TIT.type=e.target.value;titReset()};$('#titInd').onchange=titRender;
+  $('#titV').oninput=e=>titSetV(+e.target.value);$('#titPlay').onclick=titPlay;$('#titStep').onclick=()=>titSetV(Math.min(50,TIT.v+.5));$('#titReset').onclick=titReset;
+  ['titMarks','titCmp','titFull'].forEach(id=>$('#'+id).onchange=titRender);$('#titSpect').onchange=e=>titMV.setSpect(e.target.checked);titReset()}
+function titStop(){clearInterval(TIT.timer);TIT.timer=null;const b=$('#titPlay');b.innerHTML=(TIT.v>0&&TIT.v<50)?'▶ <span class=\\"m-hide2\\">적정 </span>다시 시작':'▶ <span class=\\"m-hide2\\">적정 </span>시작';b.classList.add('primary');const d=$('#titDrop');d&&d.classList.remove('dripping')}
+function titPlay(){if(TIT.timer){titStop();return}if(TIT.v>=50)titSetV(0);$('#titPlay').innerHTML='⏸ 일시정지';$('#titPlay').classList.remove('primary');$('#titDrop').classList.add('dripping');
+  TIT.timer=setInterval(()=>{const nv=TIT.v+.5;titSetV(Math.min(50,nv));if(nv>=50)titStop()},Math.abs(TIT.v-25)<4?420:260)}
+function titReset(){titStop();const t=TT[TIT.type];$('#titCmpName').textContent=t.cmpName;titBuild();TIT.v=0;TIT.prevV=0;$('#titV').value=0;titRender();titMV.setComposition(countsOf(titMix(TIT.type,0),TSCALE),false)}
+function titBuild(){const t=TT[TIT.type];let tk='';for(let v=0;v<=50;v+=5){const y=22+v*2.9;tk+=`<line x1="${v%10?104:100}" x2="111" y1="${y}" y2="${y}" stroke="#56677d" stroke-width=".8"/>`+(v%10===0?`<text x="114" y="${y+3}" font-size="8" fill="#46566b">${v}</text>`:'')}
+  $('#titApp').innerHTML=`<svg viewBox="20 0 160 306"><defs><clipPath id="burc"><rect x="96" y="20" width="14" height="149"/></clipPath><clipPath id="flc"><path d="${FLASK}"/></clipPath></defs>
+    <rect x="28" y="299" width="150" height="6" rx="2" fill="#9aa7b6"/><rect x="40" y="6" width="5" height="294" fill="#b4bfcc"/><rect x="45" y="70" width="50" height="5" fill="#b4bfcc"/>
+    <g clip-path="url(#burc)"><rect id="burLiq" x="96" y="22" width="14" height="147" fill="#cfe3fb"/></g>
+    <rect x="95" y="18" width="16" height="152" rx="2" fill="none" stroke="#56677d" stroke-width="1.6"/>${tk}
+    <path d="M99 170 L107 170 L104.5 188 L101.5 188 Z" fill="#dfe6ee" stroke="#56677d"/><rect x="91" y="174" width="24" height="5" rx="2" fill="#56677d"/>
+    <circle id="titDrop" cx="103" cy="191" r="2.6" fill="#8fbcf0"/>
+    <g clip-path="url(#flc)"><rect id="flLiq" x="40" y="270" width="130" height="36" fill="#dceafa" opacity=".9"/><rect id="flSurf" x="40" y="270" width="130" height="1.6" fill="#fff" opacity=".7"/></g>
+    <path d="${FLASK}" fill="rgba(230,240,250,.2)" stroke="#56677d" stroke-width="2"/></svg>`;
+  $('#titCap').innerHTML=`뷰렛: <b>${t.tiName}</b> · 삼각 플라스크: <b>${t.anName}</b>`}
+function titSetV(v){v=Math.round(v*2)/2;const prev=TIT.v;if(v>prev&&tooBig(countsOf(titMix(TIT.type,v),TSCALE))){limitMsg();$('#titV').value=prev;titStop();return}TIT.v=v;$('#titV').value=v;titRender();
+  const t=TT[TIT.type],target=countsOf(titMix(TIT.type,v),TSCALE);
+  if(v>prev){const k=Math.round(v*.1*TSCALE)-Math.round(prev*.1*TSCALE);if(k>0)titMV.inject(t.ti==='NaOH'?'OH':'H3O',Math.min(k,12),t.ti==='NaOH'?'Na':'Cl');titMV.setComposition(target,true)}
+  else titMV.setComposition(target,v<prev-3?false:true)}
+function titRegion(type,v){const Veq=25,near=Math.abs(v-Veq)<=.75;
+  if(type==='wa'){
+    if(v===0)return{h:'시작: 약산 용액',p:'CH₃COOH는 약산이라 일부만 이온화해요. H₃O⁺가 적어 pH가 약 2.9예요.',eq:[['','CH₃COOH + H₂O ⇌ CH₃COO⁻ + H₃O⁺']]};
+    if(v<Veq-.75){if(Math.abs(v-12.5)<=1)return{h:'반당량점: 완충 작용이 가장 강한 곳',tag:'완충 구간',p:'CH₃COOH의 절반이 CH₃COO⁻로 바뀌어 두 입자의 양이 같아요(1 : 1). 산과 염기를 모두 가장 잘 막아요.',adv:'[CH₃COOH] = [CH₃COO⁻]이므로 Ka 식에서 [H₃O⁺] = Ka = 1.8 × 10<sup>−5</sup> M → pH ≈ 4.74',eq:[['blue','CH₃COOH + OH⁻ → CH₃COO⁻ + H₂O'],['green','완충 쌍: CH₃COOH / CH₃COO⁻']]};
+      if(v>=22.5)return{h:'당량점 직전: 완충 능력이 바닥나요',p:'CH₃COOH가 거의 다 소모되어 OH⁻를 막을 입자가 부족해요. pH가 가파르게 오르기 시작해요.',eq:[['blue','CH₃COOH + OH⁻ → CH₃COO⁻ + H₂O']]};
+      return{h:'완충 구간',tag:'완충 구간',p:'넣은 OH⁻가 CH₃COOH와 반응해 CH₃COO⁻를 만들어요. 약산과 짝염기가 함께 있는 <b>완충 용액</b>이 되므로 NaOH를 넣어도 pH가 천천히 변해요.',eq:[['blue','CH₃COOH + OH⁻ → CH₃COO⁻ + H₂O'],['green','완충 쌍: CH₃COOH / CH₃COO⁻']]}}
+    if(near)return{h:'당량점',p:'CH₃COOH가 모두 CH₃COO⁻로 바뀌었어요. CH₃COO⁻가 물과 조금 반응해 OH⁻를 만들기 때문에 중성이 아니라 <b>약한 염기성</b>(pH ≈ 8.7)이에요. 그래서 페놀프탈레인이 알맞은 지시약이에요.',eq:[['','CH₃COOH + NaOH → CH₃COONa + H₂O'],['blue','CH₃COO⁻ + H₂O ⇌ CH₃COOH + OH⁻']]};
+    return{h:'당량점 이후',p:'반응할 CH₃COOH가 없어 넣은 OH⁻가 그대로 쌓여요.',eq:[['blue','NaOH → Na⁺ + OH⁻']]}}
+  if(type==='sa'){
+    if(v===0)return{h:'시작: 강산 용액',p:'HCl은 거의 완전히 이온화해 H₃O⁺가 아주 많아요(pH 1.0).',eq:[['red','HCl + H₂O → H₃O⁺ + Cl⁻']]};
+    if(v<Veq-.75){if(v>=22.5)return{h:'당량점 직전',p:'H₃O⁺가 바닥나는 순간 pH가 거의 수직으로 치솟아요.',eq:[['','H₃O⁺ + OH⁻ → 2H₂O']]};
+      return{h:'중화 진행 중 (완충 작용 아님!)',p:'처음에 pH가 천천히 변하는 건 H₃O⁺가 아주 많아서예요. 완충 쌍이 있는 게 아니에요. <b>비교 곡선(약산)</b>과 겹쳐 모양을 비교해 보세요.',eq:[['','H₃O⁺ + OH⁻ → 2H₂O']]}}
+    if(near)return{h:'당량점: 중성 (pH 7)',p:'H₃O⁺와 OH⁻가 모두 반응했어요. 남은 Na⁺, Cl⁻는 물과 반응하지 않아 중성이에요.',eq:[['','HCl + NaOH → NaCl + H₂O']]};
+    return{h:'당량점 이후',p:'넣은 OH⁻가 그대로 쌓여요.',eq:[['blue','NaOH → Na⁺ + OH⁻']]}}
+  if(v===0)return{h:'시작: 약염기 용액',p:'NH₃는 약염기라 물과 일부만 반응해요. pH가 약 11.1이에요.',eq:[['','NH₃ + H₂O ⇌ NH₄⁺ + OH⁻']]};
+  if(v<Veq-.75){if(Math.abs(v-12.5)<=1)return{h:'반당량점: 완충 작용이 가장 강한 곳',tag:'완충 구간',p:'NH₃와 NH₄⁺의 양이 같아요(1 : 1).',adv:'[NH₃] = [NH₄⁺]이므로 Kb 식에서 [OH⁻] = Kb = 1.8 × 10<sup>−5</sup> M → pOH ≈ 4.75, pH ≈ 9.25',eq:[['red','NH₃ + H₃O⁺ → NH₄⁺ + H₂O'],['green','완충 쌍: NH₄⁺ / NH₃']]};
+    if(v>=22.5)return{h:'당량점 직전: 완충 능력이 바닥나요',p:'NH₃가 거의 다 소모되어 pH가 가파르게 떨어지기 시작해요.',eq:[['red','NH₃ + H₃O⁺ → NH₄⁺ + H₂O']]};
+    return{h:'완충 구간',tag:'완충 구간',p:'넣은 H₃O⁺가 NH₃와 반응해 NH₄⁺를 만들어요. 약염기와 짝산이 함께 있는 <b>완충 용액</b>이라 pH가 천천히 변해요.',eq:[['red','NH₃ + H₃O⁺ → NH₄⁺ + H₂O'],['green','완충 쌍: NH₄⁺ / NH₃']]}}
+  if(near)return{h:'당량점',p:'NH₃가 모두 NH₄⁺로 바뀌었어요. NH₄⁺가 물과 조금 반응해 H₃O⁺를 만들므로 <b>약한 산성</b>(pH ≈ 5.3)이에요. 메틸 오렌지가 알맞아요.',eq:[['','NH₃ + HCl → NH₄Cl'],['red','NH₄⁺ + H₂O ⇌ NH₃ + H₃O⁺']]};
+  return{h:'당량점 이후',p:'반응할 NH₃가 없어 넣은 H₃O⁺가 그대로 쌓여요.',eq:[['red','HCl + H₂O → H₃O⁺ + Cl⁻']]}}
+function titRender(){const ty=TIT.type,t=TT[ty],v=TIT.v,pH=pHof(titMix(ty,v)),ind=$('#titInd').value,cv=curve(ty);
+  $('#titVTxt').textContent=fmt(v,1)+' mL';
+  const series=[],markers=[],bands=[];
+  if($('#titCmp').checked)series.push({pts:curve(t.cmp),col:'#9aa7b6',dash:[6,4],w:2,label:'비교: '+t.cmpName});
+  if($('#titFull').checked)series.push({pts:cv,col:t.col+'55',w:2});
+  series.push({pts:cv.filter(p=>p[0]<=v+1e-9),col:t.col,label:$('#titType').selectedOptions[0].textContent,w:3});
+  if($('#titMarks').checked){
+    if(t.weak)bands.push({x0:2.5,x1:22.5,col:'rgba(31,157,99,.09)',label:'완충 구간',tc:'#1f8a58',top:ty==='wb'});
+    const ph=pHof(titMix(ty,12.5)),pe=pHof(titMix(ty,25));
+    if(t.weak)markers.push({x:12.5,y:ph,col:'#1f8a58',label:`반당량점 (pH ≈ ${fmt(ph)})`,dy:ty==='wb'?6:-20});
+    markers.push({x:25,y:pe,col:'#c0392b',label:`당량점 (pH ≈ ${fmt(pe,1)})`,dx:9,dy:ty==='wb'?6:-18})}
+  markers.push({x:v,y:pH,col:t.col,fill:t.col,r:5.5});
+  titChart.set({series,markers,bands,legend:ty==='wb'?'bl':'tl'});if(typeof mbarPh==='function')mbarPh();
+  const lv=22+v*2.9;const bl=$('#burLiq');if(bl){bl.setAttribute('y',lv);bl.setAttribute('height',Math.max(0,169-lv))}
+  const fl=$('#flLiq');if(fl){const y=293-(25+v)/80*62;fl.setAttribute('y',y);fl.setAttribute('height',306-y);fl.setAttribute('fill',indColor(ind,pH));const sf=$('#flSurf');sf&&sf.setAttribute('y',y)}
+  const r=titRegion(ty,v);
+  const Veq=25,near=Math.abs(v-Veq)<=.75;let si,names;
+  if(t.weak){names=['시작','완충 구간','반당량점','당량점','당량점 이후'];si=v===0?0:v<Veq-.75?(Math.abs(v-12.5)<=1?2:1):near?3:4}
+  else{names=['시작','중화 진행','당량점','당량점 이후'];si=v===0?0:v<Veq-.75?1:near?2:3}
+  $('#titStages').innerHTML=names.map((n,i)=>`<span class="${i===si?'on':i<si?'done':''}">${n}</span>`).join('');
+  const sp=species(titMix(ty,v)),mm=k=>(sp[k]||0)*1000,f3=x=>x<0.0005?'0':x<0.1?fmt(x,3):fmt(x,2);
+  const amt=ty==='wa'?`CH₃COOH <b>${f3(mm('HA'))}</b> · CH₃COO⁻ <b>${f3(mm('A'))}</b> · OH⁻ <b>${f3(mm('OH'))}</b> · H₃O⁺ <b>${f3(mm('H3O'))}</b>`
+    :ty==='wb'?`NH₃ <b>${f3(mm('NH3'))}</b> · NH₄⁺ <b>${f3(mm('NH4'))}</b> · H₃O⁺ <b>${f3(mm('H3O'))}</b> · OH⁻ <b>${f3(mm('OH'))}</b>`
+    :`H₃O⁺ <b>${f3(mm('H3O'))}</b> · OH⁻ <b>${f3(mm('OH'))}</b>`;
+  $('#titInfo').innerHTML=`<div class="region-h">${r.tag?`<span class="tag">${r.tag}</span>`:''}${r.h}</div><p>${r.p}</p>${r.adv?`<div class="adv-only">⚖️ ${r.adv}</div>`:''}<div class="tit-amt">플라스크 속 (mmol): ${amt}</div><p class="small muted" style="margin:2px 0 0">넣은 ${t.tiName}: ${fmt(v,1)} mL · 현재 pH <b>${fmt(pH)}</b></p>`;
+  $('#titEq').innerHTML=r.eq.map(([c,e])=>`<div class="eq ${c}">${e}</div>`).join('')}
+
+/* ================= ⑤ 생체 완충 ================= */
+const BIO={acid:0,p:40,lung:true,prev:0,scen:'normal'};
+const SCEN=[
+  {id:'normal',t:'😊 평상시',s:'안정된 상태',acid:0,p:40,lung:true},
+  {id:'ex',t:'🏃 격렬한 운동',s:'근육에서 젖산 생성',acid:8,p:40,lung:true},
+  {id:'excomp',t:'😮‍💨 운동 + 가쁜 호흡',s:'호흡으로 보상',acid:8,p:30,lung:true},
+  {id:'hyper',t:'😰 과호흡',s:'CO₂를 너무 많이 내보냄',acid:0,p:25,lung:true},
+  {id:'hypo',t:'😴 호흡 저하',s:'CO₂가 몸에 쌓임',acid:0,p:60,lung:true},
+  {id:'closed',t:'🚫 폐가 CO₂를 못 내보낸다면?',s:'닫힌 계라고 가정',acid:8,p:40,lung:false}];
+let bioMV;
+function bioInit(){$('#bioScen').innerHTML=SCEN.map(s=>`<button data-s="${s.id}">${s.t}<small>${s.s}</small></button>`).join('');
+  $$('#bioScen button').forEach(b=>b.onclick=()=>{const s=SCEN.find(x=>x.id===b.dataset.s);BIO.acid=s.acid;BIO.p=s.p;BIO.lung=s.lung;BIO.scen=s.id;$('#bioAcid').value=s.acid;$('#bioP').value=90-s.p;$('#bioLung').checked=s.lung;bioUpdate(true)});
+  $('#bioAcid').oninput=e=>{BIO.acid=+e.target.value;BIO.scen=null;bioUpdate(true)};$('#bioP').oninput=e=>{BIO.p=90-(+e.target.value);BIO.scen=null;bioUpdate(true)};
+  $('#bioLung').onchange=e=>{BIO.lung=e.target.checked;BIO.scen=null;bioUpdate(true)};
+  bioMV=new MicroView($('#bioMicro'),$('#bioLegend'),{spect:false,rise:['H2CO3','CO2'],riseLabel:'CO₂',riseNote:'↑ CO₂ → 폐로 배출'});bioMV.note='입자 1개 = HCO₃⁻ 1 mM · CO₂ 0.2 mM · H₃O⁺ 5 nM';
+  bioUpdate(false)}
+function bioCalc(){const h=Math.max(.5,24-BIO.acid),co2=.03*BIO.p+(BIO.lung?0:BIO.acid);return{h,co2,pH:6.1+Math.log10(h/co2),r:h/co2,nb:BIO.acid>0?-Math.log10(BIO.acid*1e-3):null}}
+const BSC={HCO3:1,CO2:5,H3O:.2};
+function bioTarget(c){return{HCO3:c.h*BSC.HCO3,CO2:c.co2*BSC.CO2,H3O:Math.pow(10,9-c.pH)*BSC.H3O}}
+function bioUpdate(anim){let c=bioCalc(),tg=bioTarget(c);
+  if(tooBig(tg)&&BIO.okState){limitMsg();Object.assign(BIO,BIO.okState);$('#bioAcid').value=BIO.acid;$('#bioP').value=90-BIO.p;$('#bioLung').checked=BIO.lung;c=bioCalc();tg=bioTarget(c);anim=false}
+  BIO.okState={acid:BIO.acid,p:BIO.p,lung:BIO.lung,prev:BIO.prev};
+  const Hn=Math.pow(10,9-c.pH),co2c=.03*BIO.p;
+  $('#bioAcidTxt').textContent=BIO.acid+' mM';
+  $('#bioPTxt').textContent=BIO.p<36?'빠르고 깊음':BIO.p>44?'약함':'보통';
+  $('#bioPSub').innerHTML=`→ 혈액 속 CO₂ 압력 <b>${BIO.p} mmHg</b> = CO₂ 농도 <b>${fmt(co2c,2)} mM</b> <span title="기체는 압력이 클수록 더 많이 녹아요">(압력 ↑ = 농도 ↑)</span>`;
+  $$('#bioScen button').forEach(b=>b.classList.toggle('on',b.dataset.s===BIO.scen));
+  $('#bioMark').style.left=clamp((c.pH-6.8)/1.0*100,0,100)+'%';$('#bioPhTxt').textContent=(c.pH<6.8?'< ':'')+fmt(c.pH);
+  $('#bioVals').innerHTML=`<div class="val"><span>[HCO₃⁻]</span><b>${fmt(c.h,1)}</b><small>mM</small></div>
+    <div class="val"><span>CO₂ (H₂CO₃)</span><b>${fmt(c.co2,2)}</b><small>mM</small></div>
+    <div class="val"><span style="color:#c62828">[H₃O⁺]</span><b>${fmt(Hn,0)}</b><small>nM (10<sup>−9</sup> M)</small></div>
+    <div class="val"><span>HCO₃⁻ : CO₂</span><b>${fmt(c.r,0)} : 1</b><small>정상 20 : 1</small></div>
+    <div class="val"><span>완충계가 없다면</span><b>${c.nb==null?'—':fmt(c.nb,1)}</b><small>pH</small></div>`;
+  let st,col;if(c.pH<7.0){st='⚠️ 심한 산증 — 생명이 위험해요';col='#b02a1a'}else if(c.pH<7.35){st='산증 경향 (pH가 정상보다 낮음)';col='#c0392b'}else if(c.pH<=7.45){st='✅ 정상 범위';col='#1f9d63'}else if(c.pH<=7.7){st='알칼리증 경향 (pH가 정상보다 높음)';col='#5a4bc0'}else{st='⚠️ 심한 알칼리증 — 위험해요';col='#4a2aa8'}
+  $('#bioStatus').innerHTML=`<span style="color:${col}">${st}</span>`;
+  // 평형 이동 설명
+  const strong=BIO.p<36,weak=BIO.p>44;let m='',dir='n';
+  if(BIO.acid===0&&!strong&&!weak&&BIO.lung)m+=`<div class="okbox">정상: 혈액 속 HCO₃⁻가 CO₂(H₂CO₃)보다 약 <b>20배</b> 많고 pH는 <b>7.40</b>이에요. 상황을 골라 보세요!</div>`;
+  if(BIO.acid>0){dir='r';m+=`<div class="sec-t">💪 젖산이 들어오면</div><ol class="steps sm"><li>근육에서 젖산 생성 → 혈액의 <b>H₃O⁺(H⁺) 증가</b></li><li><b>HCO₃⁻가 H⁺를 받음</b>: HCO₃⁻ + H⁺ → H₂CO₃ → CO₂ + H₂O</li>
+      <li>${BIO.lung?'생긴 CO₂는 <b>폐로 빠져나감</b> (열린 계) → H⁺가 대부분 사라짐':'CO₂가 <b>빠져나가지 못하고 쌓임</b> (닫힌 계) → CO₂ 농도↑ → 평형이 다시 오른쪽으로 밀려 H⁺가 계속 남음'}</li>
+      <li>HCO₃⁻가 ${BIO.acid} mM 줄어 pH 조금 ↓ (완충이 없었다면 pH ${fmt(c.nb,1)}!)</li></ol>`}
+  if(strong){dir='l';m+=`<div class="sec-t">😮‍💨 숨을 빠르고 깊게 쉬면${BIO.acid>0?' (호흡 보상)':''}</div><ol class="steps sm"><li>CO₂를 많이 내보냄</li><li>혈액 속 CO₂ <b>압력 ↓ = 농도 ↓</b> (${BIO.p} mmHg → ${fmt(co2c,2)} mM)</li>
+      <li>줄어든 CO₂를 채우는 방향, 즉 <b>왼쪽으로 평형 이동</b> (르 샤틀리에 원리)<br>H⁺ + HCO₃⁻ → H₂CO₃ → CO₂ + H₂O</li><li><b>H₃O⁺ 감소</b> (${fmt(Hn,0)} nM) → <b>pH ↑</b>${BIO.acid>0?' → 젖산으로 낮아진 pH가 정상 쪽으로 회복':' → 알칼리증'}</li></ol>`}
+  if(weak){dir='r';m+=`<div class="sec-t">😴 호흡이 약하면</div><ol class="steps sm"><li>CO₂가 덜 빠져나가 몸에 쌓임</li><li>혈액 속 CO₂ <b>압력 ↑ = 농도 ↑</b> (${BIO.p} mmHg → ${fmt(co2c,2)} mM)</li>
+      <li>늘어난 CO₂를 줄이는 방향, 즉 <b>오른쪽으로 평형 이동</b> (르 샤틀리에 원리)<br>CO₂ + H₂O → H₂CO₃ → H⁺ + HCO₃⁻</li><li><b>H₃O⁺ 증가</b> (${fmt(Hn,0)} nM) → <b>pH ↓</b> → 산증</li></ol>`}
+  if(!BIO.lung&&BIO.acid>0)m+=`<div class="warnbox">혈액 완충계가 강력한 이유는 CO₂를 폐로 내보낼 수 있는 <b>열린 계</b>이기 때문이에요.</div>`;
+  const arrow={n:'<div class="shift n">⚖️ 평형 상태</div>',l:'<div class="shift l">⟵ 평형이 왼쪽으로 이동 (H⁺ 감소)</div>',r:'<div class="shift r">평형이 오른쪽으로 이동 (H⁺ 증가) ⟶</div>'}[dir];
+  $('#bioEqCard').innerHTML=`<h3>⚖️ 평형 반응식</h3><div class="eqcard"><div class="pg-eq">CO₂ + H₂O ⇌ H₂CO₃ ⇌ H⁺ + HCO₃⁻</div>${arrow}</div>${m}<p class="small"><button class="link" data-pop="bio">📖 생체 완충 개념 다시 보기</button> · <button class="link" data-pop="common">르 샤틀리에 원리</button></p>`;
+  const d=Math.round(BIO.acid)-Math.round(BIO.prev);
+  if(anim&&d>0){bioMV.inject('H3O',Math.min(d,12));bioMV.setComposition(tg,true)}else bioMV.setComposition(tg,anim);BIO.prev=BIO.acid}
+
+/* ================= 팝업 ================= */
+const POPS={
+  intro:{t:'🧪 완충 용액 실험실에 오신 것을 환영해요!',pages:[
+    `<div class="pg-h">① 완충 용액이란?</div>
+     <div class="hook"><div class="q">🍊 귤이나 레몬처럼 신 과일을 많이 먹으면, 우리 혈액은 산성으로 변할까요?</div><button class="btn sm primary" onclick="this.nextElementSibling.hidden=false;this.remove()">정답 확인하기</button><div class="a" hidden><b>아니요!</b> 신맛을 내는 시트르산(구연산)은 약한 산이에요. 이런 음식을 많이 먹어도 혈액의 pH는 언제나 <b>7.35 ~ 7.45</b>로 거의 일정하게 유지돼요. 그 비밀은 바로 혈액이 <b>완충 용액</b>이라는 데 있어요. 이 실험실에서 그 원리를 하나씩 알아봐요!</div></div>
+     <div class="def-big">💧 <b>완충 용액</b>은 산이나 염기를 조금 넣어도 <b>pH가 거의 변하지 않는 용액</b>이에요.</div>
+     <div class="key-big"><span class="kt">🔑 pH를 정하는 것은 용액에 남아 있는 H₃O⁺(H⁺)와 OH⁻의 양이에요.</span><div class="kr"><span style="color:#c62828">H₃O⁺가 많이 남을수록 → pH ↓ (산성)</span><span style="color:#6a2fc4">OH⁻가 많이 남을수록 → pH ↑ (염기성)</span></div><span class="kn">💧 물속의 H⁺는 물 분자와 결합해 H₃O⁺로 있어요.</span></div>
+     <div class="two-box"><div><b>증류수 100 mL</b><p class="small">1 M HCl 1 mL를 넣으면<br>pH 7.00 → <b style="color:#c0392b">2.00</b> (5 이상 뚝!)</p></div>
+       <div><b>아세트산 완충 용액 100 mL</b><p class="small">1 M HCl 1 mL를 넣으면<br>pH 4.74 → <b style="color:#1f9d63">4.66</b> (거의 그대로)</p></div></div>
+     <div class="key">🔑 비밀은 구성 성분에 있어요.<br>완충 용액 = <b>약산 + 그 짝염기</b> (예: CH₃COOH + CH₃COO⁻)<br>또는 <b>약염기 + 그 짝산</b> (예: NH₃ + NH₄⁺)<br>이 입자들이 pH를 바꾸는 <b>H₃O⁺와 OH⁻를 반응으로 없애</b> 주어요.</div>
+`,
+    `<div class="pg-h">② 강산과 약산</div>
+     <p>산의 세기는 물에 녹았을 때 <b>얼마나 많이 이온화하는지</b>로 정해져요.</p>
+     <div class="two-box"><div><b style="color:#c0392b">강산 (예: HCl)</b><div class="eq red">HCl + H₂O → H₃O⁺ + Cl⁻</div><p class="small">거의 <b>모두</b> 이온화해요.<br>반응이 <b>한쪽 방향(→)</b>으로만 일어나요.</p></div>
+       <div><b style="color:#1f9d63">약산 (예: CH₃COOH)</b><div class="eq green">CH₃COOH + H₂O ⇌ CH₃COO⁻ + H₃O⁺</div><p class="small"><b>일부(약 1%)</b>만 이온화해요.<br>반응이 <b>양쪽 방향(⇌)</b>으로 일어나는 가역 반응이에요.</p></div></div>
+     <p class="small" style="margin-top:8px"><b>분자 100개를 물에 넣으면, H₃O⁺는 몇 개 생길까?</b></p>
+     <div class="ion-row"><span class="lab" style="color:#c0392b">강산 HCl</span><span class="dots2">${'<i style="background:#e0302f"></i>'.repeat(30)}…</span><b>약 100개</b></div>
+     <div class="ion-row"><span class="lab" style="color:#1f9d63">약산 CH₃COOH</span><span class="dots2"><i style="background:#e0302f"></i></span><b>약 1개</b></div>
+     <p><b>염기도 마찬가지예요.</b> 강염기 NaOH는 거의 모두 이온화하고(→), 약염기 NH₃는 물과 일부만 반응해요(⇌).</p>
+     <div class="key">⚠️ '강하다/약하다'는 <b>농도(진하기)</b>와 달라요. 진한 약산도 있고, 묽은 강산도 있어요.<br>✨ 완충 용액에 <b>약산</b>을 쓰는 이유: 가역 반응이라 짝염기가 H⁺를 <b>다시 받을 수 있기</b> 때문이에요. 강산의 짝염기 Cl⁻는 H⁺를 다시 받지 않아요.</div>`,
+    `<div class="pg-h">③ 학습 목표</div>
+     <ul class="goals">
+      <li>완충 용액의 뜻과 구성 성분(약산과 짝염기, 약염기와 짝산)을 설명할 수 있다.</li>
+      <li>증류수와 완충 용액에 산·염기를 넣었을 때의 pH 변화를 비교하고, <b>H₃O⁺와 OH⁻의 변화</b>로 설명할 수 있다.</li>
+      <li>짝산·짝염기, 가역 반응, 이온화 상수(Ka·Kb), 공통 이온 효과, 르 샤틀리에 원리로 완충 작용을 설명할 수 있다.</li>
+      <li>여러 물질로 완충 용액을 만들고, <b>완충 용량</b>에 영향을 주는 요인(농도, 성분비)을 찾을 수 있다.</li>
+      <li>적정 곡선에서 <b>완충 구간, 반당량점, 당량점</b>을 찾고 그 의미를 설명할 수 있다.</li>
+      <li>혈액의 탄산 완충계가 호흡과 함께 pH를 유지하는 과정을 설명할 수 있다.</li></ul>`,
+    `<div class="pg-h">④ 이 실험실에서 할 수 있는 것</div>
+     <div class="feat">
+      <div><b>① pH 비교</b>증류수와 완충 용액에 같은 양의 산·염기를 넣고 pH 변화와 미시 세계를 비교해요.</div>
+      <div><b>② 완충 용량</b>농도와 성분비가 다른 완충 용액이 언제 '완충 한계'에 도달하는지 비교해요.</div>
+      <div><b>③ 적정 곡선</b>약산·강산·약염기 적정을 하며 완충 구간, 반당량점, 당량점을 관찰해요.</div>
+      <div><b>④ 생체 완충</b>운동, 과호흡 같은 상황에서 혈액 pH가 어떻게 유지되는지 알아봐요.</div>
+      <div style="grid-column:1/-1;border-color:#5cc08b;background:#effaf4"><b style="color:#126b3f">⑤ 완충 용액 만들기 — 마지막 단계!</b>🧪 <b>앞에서 배운 개념을 토대로 다양한 완충 용액을 만들어 봅시다.</b> 12가지 시약을 눈금실린더로 재어 섞고, 완충 용액인지 판정받고, 🎯 미션 6개에도 도전해요.</div>
+      <div style="grid-column:1/-1"><b>상단 버튼</b>💡 공통 이온 효과 · 🤝 짝산·짝염기 · ⚖️ Ka·Kb · 📐 H–H 식(심화) 설명을 언제든 열 수 있어요.</div></div>
+     <div class="key" style="margin-top:10px">💡 <b>점선 밑줄</b>이 있는 용어에 마우스를 올리면(휴대폰은 누르면) 뜻을 볼 수 있어요.<br>⚖️ [Ka·Kb] 버튼에서 이온화 상수를, 📐 [H–H 식] 버튼에서 심화 내용을 볼 수 있어요. ↺ [초기화]로 모든 실험을 처음 상태로 되돌릴 수 있어요.<br>🏠 이 안내는 상단의 [안내] 버튼으로 다시 볼 수 있어요.</div>`]},
+  bio:{t:'🩸 생체 속 완충 작용',pages:[
+    `<div class="pg-h">① 혈액도 완충 용액이에요</div>
+     <p>혈액에는 약산인 <b>H₂CO₃</b>(탄산)와 그 짝염기인 <b>HCO₃⁻</b>(탄산수소 이온)가 함께 녹아 있어요. 짝산과 짝염기가 함께 있으니 혈액은 <b>완충 용액</b>이에요.</p>
+     <div class="pg-eq">CO₂ + H₂O ⇌ H₂CO₃ ⇌ H⁺ + HCO₃⁻</div>
+     <p>• 세포 호흡으로 생긴 <b>CO₂</b>가 혈액의 물에 녹아 H₂CO₃가 돼요.<br>• 그래서 혈액의 pH는 <b>7.35 ~ 7.45</b>의 좁은 범위로 유지돼요.<br>• pH가 이 범위를 벗어나면 몸속 효소가 제대로 일하지 못해 위험해요.</p>
+     <div class="key">혈액 pH를 조절하는 두 기관<br>🫁 <b>폐</b>: CO₂를 내보내는 양을 바꿔요 (몇 분 안에, 빠르게)<br>🫘 <b>신장</b>: H⁺를 내보내고 HCO₃⁻를 다시 흡수해요 (수 시간~며칠, 느리게)</div>`,
+    `<div class="pg-h">② 운동하면 젖산이 생겨요</div>
+     <p>격렬한 운동을 하면 근육에 산소가 부족해져 <b>젖산</b>이 만들어지고, 혈액 속 <b>H⁺가 늘어나요</b>.</p>
+     <ol class="steps"><li>근육에서 젖산 생성 → 혈액의 H⁺ 증가</li><li>짝염기 <b>HCO₃⁻가 H⁺를 받아요</b><div class="eq red">HCO₃⁻ + H⁺ → H₂CO₃ → CO₂ + H₂O</div></li><li>혈액 속 CO₂가 늘어나요 → 이를 내보내려고 <b>숨이 가빠져요</b></li><li>CO₂가 폐로 빠져나가면서 pH가 다시 정상 쪽으로 돌아와요 (<b>호흡 보상</b>)</li></ol>
+     <p class="small muted">만약 완충 작용이 없었다면, 같은 양의 H⁺만으로도 pH가 2 근처까지 떨어졌을 거예요.</p>`,
+    `<div class="pg-h">③ 과호흡하면 pH가 올라가요</div>
+     <p>긴장하거나 불안해서 숨을 너무 빠르고 깊게 쉬는 것을 <b>과호흡</b>이라고 해요.</p>
+     <ol class="steps"><li>CO₂를 지나치게 많이 내보내요</li><li>혈액 속 CO₂ <b>압력 ↓ = 농도 ↓</b><br><span class="small muted">기체는 압력이 클수록 더 많이 녹아요. 압력이 줄면 녹아 있는 CO₂의 농도도 줄어요.</span></li><li>르 샤틀리에 원리: 줄어든 CO₂를 채우는 방향, 즉 <b>왼쪽</b>으로 평형 이동</li></ol>
+     <div class="pg-eq">CO₂ + H₂O ⇌ H₂CO₃ ⇌ H⁺ + HCO₃⁻</div><div class="shift l">⟵ 평형 이동: H⁺가 소모돼요</div>
+     <p>→ H⁺가 줄어 <b>pH가 올라가요</b>. 이런 상태를 <b>알칼리증</b>이라고 해요. <span class="small muted">(어지럽거나 손발이 저릴 수 있어요)</span></p>`,
+    `<div class="pg-h">④ 호흡이 약해지면 pH가 내려가요</div>
+     <p>잠이 들거나 폐 질환 등으로 숨을 제대로 쉬지 못하면 CO₂가 충분히 빠져나가지 못해요.</p>
+     <ol class="steps"><li>CO₂가 몸에 쌓여요</li><li>혈액 속 CO₂ <b>압력 ↑ = 농도 ↑</b></li><li>르 샤틀리에 원리: 늘어난 CO₂를 줄이는 방향, 즉 <b>오른쪽</b>으로 평형 이동</li></ol>
+     <div class="pg-eq">CO₂ + H₂O ⇌ H₂CO₃ ⇌ H⁺ + HCO₃⁻</div><div class="shift r">평형 이동: H⁺가 생겨요 ⟶</div>
+     <p>→ H⁺가 늘어 <b>pH가 내려가요</b>. 이런 상태를 <b>산증</b>이라고 해요.</p>
+     <div class="okbox">이제 실험실에서 상황을 골라 혈액 pH와 미시 세계의 <b>CO₂, H₃O⁺ 입자 수</b>가 어떻게 변하는지 직접 확인해 보세요!</div>`]},
+  pair:{t:'🤝 짝산·짝염기와 완충 용액의 원리',h:()=>`
+    <p class="small muted">강산·약산이 헷갈린다면 → <button class="link" id="goSA">강산과 약산 보기</button></p>
+    <h3>① 산과 염기를 H⁺로 다시 보기</h3>
+    <p><b>산</b>: H⁺를 <b>내놓는</b> 물질 &nbsp;|&nbsp; <b>염기</b>: H⁺를 <b>받는</b> 물질 <span class="muted small">(브뢴스테드–로리의 정의)</span></p>
+    <h3>② 짝산과 짝염기</h3>
+    <p>H⁺ <b>하나만큼 차이 나는 한 쌍</b>을 짝산–짝염기라고 해요. 산이 H⁺를 내놓고 남은 것이 짝염기, 짝염기가 다시 H⁺를 받으면 원래의 산(짝산)이 돼요.</p>
+    <div class="pair-demo"><span class="chip acid">CH₃COOH</span><span class="arr">⇄<small>H⁺를 내놓음 → / ← H⁺를 받음</small></span><span class="chip base">CH₃COO⁻</span></div>
+    <table><tr><th>짝산 (H⁺가 하나 더 있음)</th><th>짝염기 (H⁺가 하나 적음)</th><th>이용</th></tr>
+      <tr><td>CH₃COOH</td><td>CH₃COO⁻</td><td>아세트산 완충 용액</td></tr>
+      <tr><td>H₂CO₃</td><td>HCO₃⁻</td><td>혈액의 완충계</td></tr>
+      <tr><td>H₂PO₄⁻</td><td>HPO₄²⁻</td><td>세포 속 완충계</td></tr>
+      <tr><td>NH₄⁺</td><td>NH₃</td><td>염기성 완충 용액</td></tr>
+      <tr><td>H₃O⁺</td><td>H₂O</td><td></td></tr>
+      <tr><td>H₂O</td><td>OH⁻</td><td></td></tr></table>
+    <h3>③ 왜 짝산과 짝염기가 함께 있으면 완충 용액이 될까?</h3>
+    <p>pH를 바꾸는 것은 용액에 <b>남아 있는 H₃O⁺(H⁺)와 OH⁻</b>예요. 완충 용액에는 이 두 가지를 각각 없애 주는 입자가 함께 있어요.</p>
+    <div class="two-box"><div><b style="color:#c62828">산(H₃O⁺)이 들어오면</b><div class="eq red">CH₃COO⁻ + H₃O⁺ → CH₃COOH + H₂O</div><p class="small">짝염기가 H⁺를 받아 짝산이 돼요. H₃O⁺가 사라져 pH가 거의 그대로!</p></div>
+      <div><b style="color:#6a2fc4">염기(OH⁻)가 들어오면</b><div class="eq blue">CH₃COOH + OH⁻ → CH₃COO⁻ + H₂O</div><p class="small">짝산이 H⁺를 내주어 OH⁻를 물로 바꿔요. OH⁻가 사라져 pH가 거의 그대로!</p></div></div>
+    <p>둘 중 <b>하나만 있으면 한쪽만 막을 수 있어요</b>. 그래서 짝산과 짝염기가 <b>둘 다 넉넉히</b> 있어야 해요.</p>
+    <h3>④ 가역 반응이어야 해요</h3>
+    <div class="two-box"><div><b>강산: 한쪽으로만 (→)</b><div class="eq red">HCl + H₂O → H₃O⁺ + Cl⁻</div><p class="small">Cl⁻는 H⁺를 다시 받지 않아요. 역반응이 거의 일어나지 않으니 들어온 H₃O⁺를 없앨 수 없어요.</p></div>
+      <div><b>약산: 양쪽으로 (⇌)</b><div class="eq green">CH₃COOH + H₂O ⇌ CH₃COO⁻ + H₃O⁺</div><p class="small">H₃O⁺가 들어오면 <b>역반응(←)</b>으로 없애고, OH⁻가 H⁺를 빼앗으면 <b>정반응(→)</b>으로 H⁺를 보충해요.</p></div></div>
+    <p>양쪽 방향의 반응이 모두 일어나려면 <b>반응식의 왼쪽 물질(짝산)과 오른쪽 물질(짝염기)이 둘 다 충분히</b> 있어야 해요. 그래서 완충 용액을 만들 때 짝산과 짝염기를 함께 넣어 주는 거예요.</p>
+    <div class="key"><b>왜 하필 '약산'의 짝일까?</b><br>강산 HCl의 짝염기 Cl⁻는 H⁺를 거의 붙잡지 못해요(그래서 HCl은 완전히 이온화해요). 그래서 HCl + NaCl은 완충 용액이 되지 않아요. 반면 약산의 짝염기 CH₃COO⁻는 H⁺를 잘 붙잡아요.</div>
+    <h3>⑤ 짝염기는 왜 '염'(CH₃COONa)으로 넣을까?</h3>
+    <p><b>(1) 약산만으로는 짝염기가 너무 적어요.</b> CH₃COOH는 약산이라 아주 조금만 이온화해요.</p>
+    <div class="barrow"><span class="lab">0.1 M CH₃COOH만</span><div class="bar"><i id="pbA" style="background:#3a78d4"></i></div><b id="pbAv"></b></div>
+    <div class="barrow"><span class="lab">+ 0.1 M CH₃COONa</span><div class="bar"><i id="pbB" style="background:#3a78d4"></i></div><b id="pbBv"></b></div>
+    <p class="small muted" style="margin-top:0">막대: 용액 속 CH₃COO⁻의 농도</p>
+    <p><b>(2) 이온은 혼자 담을 수 없어요.</b> CH₃COO⁻ 같은 음이온만 따로 병에 담을 수는 없어요. 물질은 전체 전하가 0이어야 하므로, 양이온 Na⁺와 짝지은 <b>염 CH₃COONa</b>의 형태로 넣어요.</p>
+    <p><b>(3) 염은 물에 녹으면 거의 완전히 이온화해요.</b> CH₃COONa → Na⁺ + CH₃COO⁻ 이므로 넣은 만큼 CH₃COO⁻가 생겨요. 함께 들어간 Na⁺는 <b>구경꾼 이온</b>이라 반응을 방해하지 않아요.</p>
+    <p><b>(4) 다른 방법도 있어요.</b> CH₃COOH에 NaOH를 <b>조금(CH₃COOH보다 적게)</b> 넣으면 일부가 CH₃COO⁻로 바뀌어요 (부분 중화). ⑤ 완충 용액 만들기 탭의 미션 2에서 해 볼 수 있어요.</p>`,
+    init(){$('#goSA').onclick=()=>openPop('intro',1);const a=species(mk({V:100,acetate:10})).A*10,b=species(mk({V:100,acetate:20,Na:10})).A*10;
+      $('#pbA').style.width=Math.max(.8,a/0.1*100)+'%';$('#pbAv').textContent=fmt(a,4)+' M';$('#pbB').style.width=Math.min(100,b/0.1*100)+'%';$('#pbBv').textContent=fmt(b,3)+' M'}},
+  target:{t:'🎯 원하는 pH의 완충 용액 만들기',h:()=>`
+    <p>어떤 물질을 얼마나 섞어야 원하는 pH가 나올까요? 두 단계만 기억하면 돼요.</p>
+    <h3>1단계: 원하는 pH와 가까운 완충 쌍 고르기</h3>
+    <p>완충 쌍마다 <b>짝산과 짝염기를 같은 양(1 : 1)으로 섞었을 때의 pH</b>가 정해져 있어요. 이 pH의 <b>± 1 범위</b>에서 완충 용액이 잘 작동해요.</p>
+    <table><tr><th>완충 쌍 (짝산 / 짝염기)</th><th>넣을 물질</th><th>1 : 1일 때 pH</th><th>만들 수 있는 범위</th></tr>
+      <tr><td>CH₃COOH / CH₃COO⁻</td><td>CH₃COOH + CH₃COONa</td><td><b>4.7</b></td><td>3.7 ~ 5.7</td></tr>
+      <tr><td>H₂PO₄⁻ / HPO₄²⁻</td><td>NaH₂PO₄ + Na₂HPO₄</td><td><b>7.2</b></td><td>6.2 ~ 8.2</td></tr>
+      <tr><td>NH₄⁺ / NH₃</td><td>NH₄Cl + NH₃</td><td><b>9.3</b></td><td>8.3 ~ 10.3</td></tr>
+      <tr><td>HCO₃⁻ / CO₃²⁻</td><td>NaHCO₃ + Na₂CO₃</td><td><b>10.3</b></td><td>9.3 ~ 11.3</td></tr></table>
+    <h3>2단계: 짝염기와 짝산의 비율로 미세 조절</h3>
+    <p><b>짝염기가 많을수록</b> H⁺를 더 많이 붙잡아 pH가 <b>올라가고</b>, <b>짝산이 많을수록</b> pH가 <b>내려가요</b>.</p>
+    <table><tr><th>짝염기 : 짝산</th><td>1 : 10</td><td>1 : 4</td><td>1 : 2</td><td>1 : 1</td><td>2 : 1</td><td>4 : 1</td><td>10 : 1</td></tr>
+      <tr><th>pH 변화</th><td>−1.0</td><td>−0.6</td><td>−0.3</td><td><b>0</b></td><td>+0.3</td><td>+0.6</td><td>+1.0</td></tr></table>
+    <p class="small">💡 두 용액의 <b>농도가 같으면</b>, 부피의 비가 곧 양(mol)의 비예요. 예) pH 5.0 → 아세트산 쌍(4.7)보다 0.3 높게 → 짝염기 : 짝산 = 2 : 1 → <b>0.1 M CH₃COONa 67 mL + 0.1 M CH₃COOH 33 mL</b></p>
+    <div class="adv-only">📐 심화: 이 표는 헨더슨–하셀바흐 식 pH = pKa + log([짝염기]/[짝산])에서 나온 값이에요. (log 2 ≈ 0.3, log 4 ≈ 0.6, log 10 = 1) 상단의 [📐 H–H 식] 버튼에서 자세히 볼 수 있어요.</div>
+    <h3>🧮 레시피 도우미</h3>
+    <div class="helper"><div class="fld"><div class="row"><span>만들고 싶은 pH</span><b id="tgV">5.0</b></div><input type="range" id="tgS" min="3.5" max="11.3" step="0.1" value="5"></div>
+      <div class="res" id="tgRes"></div></div>
+    <p class="small muted">※ 실제 pH는 이 실험실에서 정확히 계산한 값이에요. 표로 어림한 값과 조금 다를 수 있어요.</p>`,
+    init(){const P=[{k:4.74,a:'CH3COOH',b:'CH3COONa',an:'CH₃COOH',bn:'CH₃COONa',c:4.7},{k:7.21,a:'NaH2PO4',b:'Na2HPO4',an:'NaH₂PO₄',bn:'Na₂HPO₄',c:7.2},{k:9.25,a:'NH4Cl',b:'NH3',an:'NH₄Cl',bn:'NH₃',c:9.3},{k:10.33,a:'NaHCO3',b:'Na2CO3',an:'NaHCO₃',bn:'Na₂CO₃',c:10.3}];
+      const f=()=>{const t=+$('#tgS').value;$('#tgV').textContent=t.toFixed(1);let best=P[0];for(const p of P)if(Math.abs(p.c-t)<Math.abs(best.c-t))best=p;
+        const d=t-best.c;if(Math.abs(d)>1.05){$('#tgRes').innerHTML=`pH ${t.toFixed(1)} 근처에는 1 : 1 pH가 가까운 완충 쌍이 목록에 없어요. 다른 pH를 골라 보세요.`;return}
+        const r=Math.pow(10,d),bv=Math.round(100*r/(1+r)),av=100-bv;const m=newMix();m.V=.1;RG[best.a].add(m,av*.1/1000);RG[best.b].add(m,bv*.1/1000);const ph=pHof(m);
+        const rt=r>=1?`${fmt(r,1)} : 1`:`1 : ${fmt(1/r,1)}`;
+        $('#tgRes').innerHTML=`① 완충 쌍: <b>${best.an} + ${best.bn}</b> (1 : 1일 때 pH ${best.c})<br>② 목표가 ${d>=0?fmt(d,1)+' 높으므로 짝염기를 더 많이':fmt(-d,1)+' 낮으므로 짝산을 더 많이'} → 짝염기 : 짝산 ≈ <b>${rt}</b><br>③ 레시피 (각 0.1 M): <b>${best.bn} ${bv} mL + ${best.an} ${av} mL</b><br><span class="muted">→ 이 실험실에서 계산한 실제 pH: <b>${fmt(ph)}</b></span>`};
+      $('#tgS').oninput=f;f()}},
+  common:{t:'💡 공통 이온 효과와 르 샤틀리에 원리',h:()=>`
+    <h3>르 샤틀리에 원리</h3><p>평형 상태에 있는 반응에 농도·압력·온도 같은 조건을 바꾸면, 평형은 <b>그 변화를 줄이는 방향</b>으로 이동해요.</p>
+    <table><tr><th>CH₃COOH ⇌ CH₃COO⁻ + H⁺ 에서</th><th>평형 이동</th><th>결과</th></tr>
+    <tr><td>CH₃COO⁻를 넣으면 (CH₃COONa)</td><td>⬅ 왼쪽</td><td>CH₃COOH의 이온화가 줄어요 (공통 이온 효과)</td></tr>
+    <tr><td>H⁺를 넣으면 (HCl)</td><td>⬅ 왼쪽</td><td>CH₃COO⁻가 H⁺를 받아 소모 → pH 유지</td></tr>
+    <tr><td>OH⁻를 넣으면 (NaOH) → H⁺ 감소</td><td>➡ 오른쪽</td><td>CH₃COOH가 이온화해 H⁺를 보충 → pH 유지</td></tr></table>
+    <h3>공통 이온 효과</h3><p>약산(또는 약염기) 수용액에 <b>같은 이온</b>을 내놓는 물질을 녹이면, 평형이 왼쪽으로 이동해 약산의 <b>이온화가 억제</b>되는 현상이에요.</p>
+    <div class="ci-demo"><div class="ci-eq" id="ciEq">CH₃COOH <span class="arr">⇌</span> <span id="ciA">CH₃COO⁻</span> + H⁺</div>
+      <div class="barrow"><span class="lab">이온화한 CH₃COOH 비율</span><div class="bar"><i id="ciBar"></i></div><b id="ciVal"></b></div>
+      <div class="barrow"><span class="lab">pH</span><div class="bar"><i id="ciBar2" style="background:#3a78d4"></i></div><b id="ciPh"></b></div>
+      <div class="ctrl-row" style="justify-content:center"><button class="btn primary" id="ciAdd">0.1 M CH₃COONa 넣기</button><button class="btn ghost" id="ciRe">처음으로</button></div>
+      <p class="small muted" id="ciTxt" style="text-align:center;margin:2px 0">0.1 M CH₃COOH 수용액이에요.</p></div>
+    <h3>그래서 완충 용액은…</h3><p>완충 용액 속 CH₃COOH는 공통 이온 효과 때문에 거의 이온화하지 않고 <b>그대로 남아 있어요</b>. 짝염기 CH₃COO⁻도 <b>많이 남아 있어요</b>. 그래서 둘 다 넉넉한 상태로, 산이 들어오면 CH₃COO⁻가, 염기가 들어오면 CH₃COOH가 막아 줄 수 있어요.</p>`,
+    init(){const base=mk({V:100,acetate:10}),C=.1;let added=false;
+      const show=()=>{const m=added?mk({V:100,acetate:20,Na:10}):base;const H=solveH(m),pH=-Math.log10(H),a=H/C*100;
+        $('#ciBar').style.width=clamp(a/1.5*100,0.6,100)+'%';$('#ciVal').textContent=fmt(a,a<.1?3:2)+' %';$('#ciBar2').style.width=(pH/14*100)+'%';$('#ciPh').textContent=fmt(pH);
+        const arr=$('#ciEq .arr');arr.textContent=added?'⇐':'⇌';arr.classList.toggle('lft',added);$('#ciA').classList.toggle('big',added);
+        $('#ciTxt').innerHTML=added?'CH₃COO⁻가 많아지자 평형이 <b>왼쪽</b>으로 이동! 이온화한 비율이 크게 줄었어요.':'0.1 M CH₃COOH 수용액이에요. 약산이라 일부만 이온화해요.'};
+      $('#ciAdd').onclick=()=>{added=true;show()};$('#ciRe').onclick=()=>{added=false;show()};show()}},
+  ka:{t:'⚖️ 이온화 상수 Ka와 Kb',h:()=>`
+    <h3>① 산의 이온화 상수 Ka</h3><p>약산 HA가 물에서 이온화하는 반응은 가역 반응이라 평형을 이뤄요. 이때의 평형 상수를 <b>산의 이온화 상수 K<sub>a</sub></b>라고 해요.</p>
+    <div class="eq" style="text-align:center">HA + H₂O ⇌ A⁻ + H₃O⁺</div>
+    <p style="text-align:center;font-size:18px">K<sub>a</sub> = <span class="frac"><span>[A⁻][H₃O⁺]</span><span>[HA]</span></span></p>
+    <p>• 온도가 일정하면 Ka는 일정해요. <span class="muted small">(물 [H₂O]는 거의 일정해서 식에 넣지 않아요)</span><br>• <b>Ka가 클수록</b> 더 많이 이온화하는 <b>센 산</b>이에요.</p>
+    <h3>② 염기의 이온화 상수 Kb</h3>
+    <div class="eq" style="text-align:center">B + H₂O ⇌ BH⁺ + OH⁻ &nbsp;&nbsp;(예: NH₃ + H₂O ⇌ NH₄⁺ + OH⁻)</div>
+    <p style="text-align:center;font-size:18px">K<sub>b</sub> = <span class="frac"><span>[BH⁺][OH⁻]</span><span>[B]</span></span></p>
+    <p>• <b>Kb가 클수록</b> 센 염기예요.</p>
+    <table><tr><th>물질</th><th>Ka (25 °C)</th><th>짝염기</th><th>Kb (25 °C)</th></tr>
+      <tr><td>CH₃COOH</td><td>1.8 × 10<sup>−5</sup></td><td>CH₃COO⁻</td><td>5.6 × 10<sup>−10</sup></td></tr>
+      <tr><td>H₂CO₃</td><td>4.3 × 10<sup>−7</sup></td><td>HCO₃⁻</td><td>2.3 × 10<sup>−8</sup></td></tr>
+      <tr><td>H₂PO₄⁻</td><td>6.2 × 10<sup>−8</sup></td><td>HPO₄²⁻</td><td>1.6 × 10<sup>−7</sup></td></tr>
+      <tr><td>NH₄⁺</td><td>5.6 × 10<sup>−10</sup></td><td>NH₃</td><td>1.8 × 10<sup>−5</sup></td></tr></table>
+    <h3>③ 짝산과 짝염기의 관계</h3>
+    <p style="text-align:center;font-size:17px"><b>K<sub>a</sub> × K<sub>b</sub> = K<sub>w</sub> = 1.0 × 10<sup>−14</sup></b> <span class="small muted">(25 °C)</span></p>
+    <p>짝산의 Ka가 클수록(센 산일수록) 그 짝염기의 Kb는 작아요(약한 염기). 예) CH₃COOH의 Ka 1.8 × 10<sup>−5</sup> → CH₃COO⁻의 Kb = 10<sup>−14</sup> ÷ (1.8 × 10<sup>−5</sup>) ≈ 5.6 × 10<sup>−10</sup></p>
+    <h3>④ Ka로 약산 용액 계산하기</h3>
+    <p>농도 C인 약산에서 이온화한 양을 x라 하면, x가 C보다 매우 작을 때 <b>[H₃O⁺] = x ≈ √(C·Ka)</b>예요.</p>
+    <div class="helper"><div class="ctrl-row"><label class="fld" style="flex:1">약산<select id="kaA"><option value="acetate">CH₃COOH (Ka 1.8 × 10<sup>−5</sup>)</option><option value="nh4">NH₄⁺ (Ka 5.6 × 10<sup>−10</sup>, NH₄Cl)</option></select></label>
+      <label class="fld" style="flex:1">농도<select id="kaC"><option>0.01</option><option selected>0.1</option><option>1</option></select></label></div>
+      <div class="res" id="kaRes"></div></div>
+    <h3>⑤ Ka로 보는 완충 작용</h3>
+    <p>Ka 식을 [H₃O⁺]에 대해 정리하면</p>
+    <p style="text-align:center;font-size:18px"><b>[H₃O⁺] = K<sub>a</sub> × <span class="frac"><span>[HA]</span><span>[A⁻]</span></span></b></p>
+    <p>• 완충 용액에서 [HA]와 [A⁻]가 같으면 <b>[H₃O⁺] = Ka</b>예요.<br>• 산을 조금 넣으면 [HA] / [A⁻] 비가 <b>조금만</b> 변하므로 [H₃O⁺]도 조금만 변해요.</p>
+    <table><tr><th>아세트산 완충 용액 100 mL</th><th>CH₃COOH : CH₃COO⁻</th><th>[H₃O⁺] (M)</th><th>pH</th></tr>
+      <tr><td>처음</td><td>10 : 10 mmol</td><td>1.8 × 10<sup>−5</sup></td><td>4.74</td></tr>
+      <tr><td>1 M HCl 1 mL 넣은 뒤</td><td>11 : 9 mmol</td><td>2.2 × 10<sup>−5</sup></td><td>4.66</td></tr>
+      <tr><td><i>비교: 증류수에 같은 HCl</i></td><td>—</td><td>1.0 × 10<sup>−2</sup></td><td>2.00</td></tr></table>
+    <p class="small">💡 Ka는 일정하므로, CH₃COONa로 [A⁻]를 늘리면 [H₃O⁺]가 줄어요. 이것이 <button class="link" data-pop="common">공통 이온 효과</button>예요.</p>`,
+    init(){const f=()=>{const a=$('#kaA').value,C=+$('#kaC').value;const m=a==='acetate'?mk({V:1000,acetate:C*1000}):mk({V:1000,ammonia:C*1000,Cl:C*1000});
+      const H=solveH(m),Ka=a==='acetate'?1.8e-5:5.6e-10,ap=Math.sqrt(C*Ka);
+      $('#kaRes').innerHTML=`√(C·Ka) = √(${C} × ${a==='acetate'?'1.8 × 10<sup>−5</sup>':'5.6 × 10<sup>−10</sup>'}) ≈ <b>${ap.toExponential(1).replace(/e-(\d+)/,' × 10<sup>−$1</sup>')} M</b><br>→ 이온화도 ≈ ${fmt(H/C*100,H/C*100<0.1?3:1)} % · pH ≈ <b>${fmt(-Math.log10(H))}</b>`};
+      $('#kaA').onchange=f;$('#kaC').onchange=f;f()}},
+  adv:{t:'📐 심화: 헨더슨–하셀바흐 식',h:()=>`
+    <p class="small muted">이 내용은 교과 수준을 넘는 <b>심화</b> 내용이에요. 먼저 <button class="link" data-pop="ka">⚖️ Ka·Kb</button>를 읽어 보세요.</p>
+    <h3>① Ka 식에서 출발해요</h3>
+    <p style="text-align:center;font-size:17px">K<sub>a</sub> = <span class="frac"><span>[A⁻][H₃O⁺]</span><span>[HA]</span></span> &nbsp;→&nbsp; 양변에 −log를 취하고 pK<sub>a</sub> = −log K<sub>a</sub>로 두면</p>
+    <h3>② 헨더슨–하셀바흐 식</h3>
+    <p style="text-align:center;font-size:19px"><b>pH = pK<sub>a</sub> + log <span class="frac"><span>[A⁻]</span><span>[HA]</span></span></b></p>
+    <table><tr><th>완충 쌍</th><th>Ka</th><th>pKa</th></tr>
+      <tr><td>CH₃COOH / CH₃COO⁻</td><td>1.8 × 10<sup>−5</sup></td><td>4.74</td></tr><tr><td>H₂CO₃ / HCO₃⁻</td><td>4.3 × 10<sup>−7</sup></td><td>6.37</td></tr>
+      <tr><td>H₂PO₄⁻ / HPO₄²⁻</td><td>6.2 × 10<sup>−8</sup></td><td>7.21</td></tr><tr><td>NH₄⁺ / NH₃</td><td>5.6 × 10<sup>−10</sup></td><td>9.25</td></tr><tr><td>HCO₃⁻ / CO₃²⁻</td><td>4.7 × 10<sup>−11</sup></td><td>10.33</td></tr></table>
+    <p>• [A⁻] = [HA] (1 : 1, 반당량점) → <b>pH = pKa</b><br>• 짝염기가 10배 많으면 pH = pKa + 1, 약산이 10배 많으면 pH = pKa − 1<br>• 완충 용액은 보통 <b>pKa ± 1</b> 범위에서 잘 작동해요.</p>
+    <div class="ci-demo"><label class="fld">약산 선택<select id="hhAcid"><option value="4.74">CH₃COOH / CH₃COO⁻ (pKa 4.74)</option><option value="7.21">H₂PO₄⁻ / HPO₄²⁻ (pKa 7.21)</option><option value="9.25">NH₄⁺ / NH₃ (pKa 9.25)</option></select></label>
+      <div class="fld"><div class="row"><span>[짝염기] : [약산]</span><b id="hhR">1 : 1</b></div><input type="range" id="hhS" min="-1" max="1" step="0.05" value="0"></div>
+      <p style="text-align:center;font-size:17px;margin:4px 0">pH = <span id="hhK"></span> + log(<span id="hhRv"></span>) = <b id="hhP"></b></p></div>
+    <p class="small muted">※ 이 실험실의 pH는 모든 평형을 함께 풀어 정확히 계산하므로, 헨더슨–하셀바흐 식(근사식)의 값과 조금 다를 수 있어요.</p>`,
+    init(){const f=()=>{const k=+$('#hhAcid').value,l=+$('#hhS').value,r=Math.pow(10,l);$('#hhR').textContent=r>=1?`${fmt(r,2)} : 1`:`1 : ${fmt(1/r,2)}`;$('#hhK').textContent=fmt(k);$('#hhRv').textContent=fmt(r,2);$('#hhP').textContent=fmt(k+l)};
+      $('#hhAcid').onchange=f;$('#hhS').oninput=f;f()}}};
+function openPop(id,start=0){const p=POPS[id];$('#modalTitle').textContent=p.t;$('#modal').classList.add('show');
+  if(p.pages){let i=start;const n=p.pages.length;const show=()=>{$('#modalBody').innerHTML=p.pages[i]+`<div class="pager"><button class="btn" id="pgPrev" ${i===0?'disabled':''}>← 이전</button><div class="dots">${p.pages.map((_,k)=>`<i data-k="${k}" class="${k===i?'on':''}"></i>`).join('')}</div><button class="btn primary" id="pgNext">${i===n-1?(id==='intro'?'실험실 둘러보기 ✓':'실험 시작하기 ✓'):'다음 →'}</button></div>`;
+      $('#modalBody').scrollTop=0;$('#pgPrev').onclick=()=>{if(i>0){i--;show()}};$('#pgNext').onclick=()=>{if(i<n-1){i++;show()}else $('#modal').classList.remove('show')};$$('#modalBody .dots i').forEach(d=>d.onclick=()=>{i=+d.dataset.k;show()})};show();return}
+  $('#modalBody').innerHTML=p.h();p.init&&p.init()}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-pop]');if(b)openPop(b.dataset.pop)});
+$('#modalClose').onclick=()=>$('#modal').classList.remove('show');
+$('#modal').onclick=e=>{if(e.target.id==='modal')$('#modal').classList.remove('show')};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('#modal').classList.remove('show')});
+
+/* ================= 용어 풀이 (마우스를 올리면 뜻이 보임) ================= */
+const GLOSS={
+  '완충 용액':'산이나 염기를 조금 넣어도 pH가 거의 변하지 않는 용액이에요. 약산과 그 짝염기(또는 약염기와 그 짝산)가 함께 들어 있어요.',
+  '완충 용량':'완충 용액이 pH를 거의 일정하게 유지하면서 받아들일 수 있는 산·염기의 양이에요.',
+  '완충 한계':'완충 성분이 거의 다 소모되어 더 이상 pH를 유지하지 못하는 지점이에요.',
+  '완충 작용':'들어온 H₃O⁺나 OH⁻를 완충 성분이 반응으로 없애 pH를 유지하는 작용이에요.',
+  '완충 구간':'적정 곡선에서 약산과 짝염기가 함께 있어 pH가 천천히 변하는 구간이에요.',
+  '완충 쌍':'완충 작용을 하는 약산과 그 짝염기(또는 약염기와 그 짝산)의 짝이에요.',
+  '완충계':'몸속에서 pH를 일정하게 유지하는 완충 성분의 짝이에요. (예: H₂CO₃ / HCO₃⁻)',
+  '약산':'물에서 일부만 이온화하는 산이에요. (예: CH₃COOH)',
+  '강산':'물에서 거의 완전히 이온화하는 산이에요. (예: HCl)',
+  '약염기':'물과 일부만 반응해 OH⁻를 만드는 염기예요. (예: NH₃)',
+  '강염기':'물에서 거의 완전히 이온화해 OH⁻를 내놓는 염기예요. (예: NaOH)',
+  '짝염기':'산이 H⁺를 내놓고 남은 입자예요. CH₃COOH의 짝염기는 CH₃COO⁻예요.',
+  '짝산':'염기가 H⁺를 받아 생긴 입자예요. NH₃의 짝산은 NH₄⁺예요.',
+  '이온화':'물질이 물에 녹아 양이온과 음이온으로 나뉘는 것이에요.',
+  '공통 이온 효과':'약산(약염기) 수용액에 같은 이온을 내놓는 물질을 넣으면, 평형이 이동해 이온화가 억제되는 현상이에요.',
+  '르 샤틀리에 원리':'평형 상태에 농도·압력·온도 변화를 주면, 그 변화를 줄이는 방향으로 평형이 이동한다는 원리예요.',
+  '가역 반응':'정반응(→)과 역반응(←)이 모두 일어날 수 있는 반응이에요(⇌). 완충 작용은 이 양방향 반응 덕분에 일어나요.',
+  '평형':'정반응과 역반응이 같은 속도로 일어나 겉보기에는 변화가 없는 상태예요.',
+  '중화':'산의 H⁺(H₃O⁺)와 염기의 OH⁻가 반응해 물이 생기는 반응이에요.',
+  '부분 중화':'약산의 일부만 강염기로 중화하는 것이에요. 남은 약산과 새로 생긴 짝염기가 완충 용액을 이뤄요.',
+  '당량점':'넣은 산과 염기의 양(mol)이 반응식의 비율대로 정확히 반응한 지점이에요.',
+  '반당량점':'당량점까지 넣어야 할 양의 절반을 넣은 지점이에요. 약산과 짝염기의 양이 같아져요.',
+  '구경꾼 이온':'용액 속에 있지만 반응에 참여하지 않는 이온이에요. (예: Na⁺, Cl⁻)',
+  '성분비':'완충 용액 속 약산과 짝염기의 양(mol)의 비예요.',
+  '산증':'혈액의 pH가 7.35보다 낮아진 상태예요.',
+  '알칼리증':'혈액의 pH가 7.45보다 높아진 상태예요.',
+  '열린 계':'물질이 바깥과 드나들 수 있는 계예요. 혈액은 CO₂를 폐로 내보낼 수 있어요.',
+  '닫힌 계':'물질이 바깥으로 드나들 수 없는 계예요.',
+  '호흡 보상':'호흡의 빠르기를 바꿔 CO₂ 양을 조절하고, 혈액의 pH를 되돌리려는 작용이에요.',
+  'H₃O⁺':'하이드로늄 이온. 물속에서 H⁺는 물 분자와 결합해 H₃O⁺로 있어요. 많이 남을수록 pH가 낮아요(산성).',
+  'OH⁻':'수산화 이온. 많이 남을수록 pH가 높아요(염기성).',
+  '브뢴스테드–로리':'H⁺를 내놓는 물질을 산, H⁺를 받는 물질을 염기로 보는 산·염기의 정의예요.',
+  'Ka':'산의 이온화 상수. Ka = [A⁻][H₃O⁺] / [HA]. 클수록 센 산이에요.',
+  'Kb':'염기의 이온화 상수. Kb = [BH⁺][OH⁻] / [B]. 클수록 센 염기예요.',
+  'pKa':'산의 이온화 상수 Ka에 −log를 취한 값이에요. 작을수록 센 산이에요. (심화)',
+};
+const GKEYS=Object.keys(GLOSS).sort((a,b)=>b.length-a.length);
+const GRE=new RegExp(GKEYS.map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'g');
+const G_SKIP='.stages,.chip,.mp-ph,table,button,select,option,textarea,script,style,svg,canvas,.term,.eq,.legend,.phm,.bk-ph,.val,.g-ticks,.g-mark,.g-zones,header,#tip,.uni-lab,.tag,.toast,.mp-t,.limit-note';
+function glossify(root){if(!root)return;const scopes=new Map();
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>{const p=n.parentElement;if(!p||!n.nodeValue.trim()||p.closest(G_SKIP))return NodeFilter.FILTER_REJECT;GRE.lastIndex=0;return GRE.test(n.nodeValue)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT}});
+  const nodes=[];while(w.nextNode())nodes.push(w.currentNode);
+  for(const n of nodes){const sc=n.parentElement.closest('.card,.modal-body,.mission-banner,.mis,.judge')||document.body;
+    if(!scopes.has(sc))scopes.set(sc,new Set($$('.term',sc).map(t=>t.dataset.t)));const used=scopes.get(sc);
+    const txt=n.nodeValue;GRE.lastIndex=0;let m,last=0,ch=false;const fr=document.createDocumentFragment();
+    while((m=GRE.exec(txt))){if(used.has(m[0]))continue;used.add(m[0]);fr.append(txt.slice(last,m.index));const s=document.createElement('span');s.className='term';s.dataset.t=m[0];s.tabIndex=0;s.textContent=m[0];fr.append(s);last=m.index+m[0].length;ch=true}
+    if(ch){fr.append(txt.slice(last));const pd=getComputedStyle(n.parentElement).display;if(/flex|grid/.test(pd)){const w=document.createElement('span');w.append(fr);n.replaceWith(w)}else n.replaceWith(fr)}}}
+let tipEl,tipCur=null;
+let tipT=0;
+function showTip(el){tipT=Date.now();const k=el.dataset.t;tipEl.innerHTML=`<b>${k}</b>${GLOSS[k]}`;tipEl.classList.add('show');tipCur=el;
+  const r=el.getBoundingClientRect(),tw=tipEl.offsetWidth,th=tipEl.offsetHeight;let x=clamp(r.left+r.width/2-tw/2,6,window.innerWidth-tw-6),y=r.top-th-8;if(y<6)y=r.bottom+8;tipEl.style.left=x+'px';tipEl.style.top=y+'px'}
+function hideTip(){tipEl.classList.remove('show');tipCur=null}
+function glossInit(){tipEl=document.createElement('div');tipEl.id='tip';document.body.append(tipEl);
+  const targets=[$('main'),$('#modalBody')];targets.forEach(glossify);
+  const pend=new Set();let raf=0;
+  const mo=new MutationObserver(recs=>{for(const r of recs){const t=r.target.nodeType===1?r.target:r.target.parentElement;if(t&&!t.closest('.legend'))pend.add(t)}
+    if(!raf&&pend.size)raf=requestAnimationFrame(()=>{raf=0;mo.disconnect();for(const t of pend)if(t.isConnected)glossify(t);pend.clear();mo.takeRecords();targets.forEach(x=>mo.observe(x,{childList:true,subtree:true}))})});
+  targets.forEach(x=>mo.observe(x,{childList:true,subtree:true}));
+  document.addEventListener('mouseover',e=>{const t=e.target.closest&&e.target.closest('.term');if(t)showTip(t)});
+  let lastPT='mouse';document.addEventListener('pointerdown',e=>{lastPT=e.pointerType},true);
+  document.addEventListener('mouseout',e=>{if(lastPT==='touch')return;const t=e.target.closest&&e.target.closest('.term');if(t&&!(e.relatedTarget&&t.contains(e.relatedTarget)))hideTip()});
+  document.addEventListener('focusin',e=>{if(e.target.classList&&e.target.classList.contains('term'))showTip(e.target)});
+  document.addEventListener('focusout',e=>{if(e.target.classList&&e.target.classList.contains('term'))hideTip()});
+  document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('.term');if(t){if(tipCur===t&&Date.now()-tipT>600)hideTip();else showTip(t)}else if(tipCur)hideTip()});
+  window.addEventListener('scroll',()=>{if(tipCur&&Date.now()-tipT>400)hideTip()},true)}
+
+/* ================= 생체 탭 접기 관리 ================= */
+function bioFoldInit(){const col=$('#tab-bio .col.scroll');if(!col)return;let t=0;const ds=$$('details',col);ds.forEach(d=>{if(d.open)d._t=++t});
+  ds.forEach(d=>d.addEventListener('toggle',()=>{if(!d.open)return;d._t=++t;requestAnimationFrame(()=>{
+    if(window.innerWidth<=960)return;let guard=0;
+    while(col.scrollHeight>col.clientHeight+2&&guard++<10){const others=ds.filter(x=>x!==d&&x.open);if(!others.length)break;others.sort((a,b)=>a._t-b._t)[0].open=false}})}))}
+
+/* ================= 전체 화면 ================= */
+function fsInit(){$$('.card').filter(c=>c.querySelector('.chart-box,.micro-box')).forEach(card=>{
+    let head=card.querySelector(':scope>.card-head');
+    if(!head){const h=card.querySelector(':scope>h3');head=document.createElement('div');head.className='card-head';card.insertBefore(head,h);head.append(h)}
+    const b=document.createElement('button');b.className='btn sm fs-btn';b.textContent='⛶ 크게 보기';b.onclick=()=>fsToggle(card);head.append(b);card._fsb=b})
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){const c=$('.card.fs');c&&fsToggle(c)}})}
+function fsToggle(card){const on=!card.classList.contains('fs');$$('.card.fs').forEach(c=>{c.classList.remove('fs');c._fsb.textContent='⛶ 크게 보기'});
+  if(on){card.classList.add('fs');card._fsb.textContent='✕ 닫기'}document.body.classList.toggle('fs-open',on);requestAnimationFrame(()=>[cmpChart,capChart,titChart].forEach(c=>c&&c.draw()))}
+
+/* ================= 초기화 ================= */
+function confirmBtn(b,ask,fn){const orig=b.innerHTML;let t=0;b.onclick=()=>{if(b.classList.contains('confirm')){clearTimeout(t);b.classList.remove('confirm');b.innerHTML=orig;fn()}else{b.classList.add('confirm');b.innerHTML='⚠️ '+ask;t=setTimeout(()=>{b.classList.remove('confirm');b.innerHTML=orig},3000)}}}
+function labReset(){const f=$('.card.fs');f&&fsToggle(f);
+  cmpReset();
+  PR.m=newMix();PR.log=[];PR.hist=[];PR.cyl=null;prCyl.set(0);prCylLabel();$('#prTestRes').innerHTML='비커에 용액을 만든 뒤 산·염기를 조금 넣어 pH가 얼마나 변하는지 확인해 보세요.';PR.mission=null;misRender();prUpdate('rebuild');
+  $('#capMode').value='conc';CAP.mode='conc';CAP.reag='HCl';$$('#capReagent button').forEach(b=>b.classList.toggle('on',b.dataset.v==='HCl'));capReset();
+  $('#titType').value='wa';TIT.type='wa';titReset();
+  BIO.acid=0;BIO.p=40;BIO.lung=true;BIO.scen='normal';BIO.prev=0;$('#bioAcid').value=0;$('#bioP').value=50;$('#bioLung').checked=true;bioUpdate(false);
+  CMP.reag='HCl';$$('#cmpReagent button').forEach(b=>b.classList.toggle('on',b.dataset.v==='HCl'));
+  goTab('compare');window.scrollTo(0,0);toast('↺ 실험실을 처음 상태로 되돌렸어요. (미션 기록은 그대로예요)',3000,'ok')}
+
+/* ================= 모바일 고정 탭 ================= */
+function stickyHdr(){const h=$('header'),n=$('#tabs');const top=window.innerWidth<=960?-(h.offsetHeight-n.offsetHeight-12):0;document.documentElement.style.setProperty('--hdrTop',top+'px');document.documentElement.style.setProperty('--barTop',(h.offsetHeight+top)+'px');mbarApply()}
+/* 휴대폰: 조작 버튼을 고정 바로 옮기기 */
+const MBARS=[{bar:'cmpBar',tab:'#tab-compare',els:['#cmpReagent','#cmpAdd1','#cmpAdd5','#cmpReset']},{bar:'capBar',tab:'#tab-cap',els:['#capReagent','#capStep','#capPlay','#capReset']},{bar:'titBar',tab:'#tab-tit',els:['#titPlay','#titStep','#titReset']}];let mbarMode=null;
+function mbarInit(){MBARS.forEach(c=>{const bar=document.createElement('div');bar.className='m-bar';bar.id=c.bar;$(c.tab).prepend(bar);
+  c.items=c.els.map(sel=>{const e=$(sel);return{e,home:e.parentNode,next:e.nextSibling}});c.homes=[...new Set(c.items.map(i=>i.home))];
+  const ph=document.createElement('div');ph.className='m-ph';ph.id=c.bar+'Ph';bar.append(ph)})}
+function mbarApply(){const mob=window.innerWidth<=960;if(mob===mbarMode)return;mbarMode=mob;
+  MBARS.forEach(c=>{const bar=$('#'+c.bar),ph=$('#'+c.bar+'Ph');
+    if(mob){c.items.forEach(i=>bar.insertBefore(i.e,ph));c.homes.forEach(h=>{if(![...h.children].some(x=>!c.items.some(i=>i.e===x)))h.style.display='none'})}
+    else{[...c.items].reverse().forEach(i=>i.home.insertBefore(i.e,i.next));c.homes.forEach(h=>h.style.display='')}});mbarPh()}
+function mbarPh(){const a=$('#cmpBarPh'),b=$('#capBarPh'),t=$('#titBarPh');if(!a)return;if(t&&typeof TIT!=='undefined')t.innerHTML=`${fmt(TIT.v,1)} mL<br>pH <b>${fmt(pHof(titMix(TIT.type,TIT.v)))}</b>`;
+  a.innerHTML=`물 <b>${fmt(pHof(cmpMix(CMPD[0])))}</b><br>완충 <b>${fmt(pHof(cmpMix(CMPD[1])))}</b>`;
+  if(typeof CAP!=='undefined'&&CAPD[CAP.mode])b.innerHTML=`A <b>${fmt(pHof(capMix(CAPD[CAP.mode][0],CAP.added)))}</b><br>B <b>${fmt(pHof(capMix(CAPD[CAP.mode][1],CAP.added)))}</b>`}
+window.addEventListener('resize',stickyHdr);
+
+/* ================= 공통 ================= */
+function seg(sel,fn){$$(sel+' button').forEach(b=>b.onclick=()=>{$$(sel+' button').forEach(x=>x.classList.remove('on'));b.classList.add('on');fn(b.dataset.v)})}
+function goTab(id){const f=$('.card.fs');f&&fsToggle(f);$$('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));$$('.tab').forEach(s=>s.classList.toggle('active',s.id==='tab-'+id));
+  if(id!=='cap')capStopPlay();if(id!=='tit')titStop();const nb=$(`#tabs button[data-tab="${id}"]`);nb&&nb.scrollIntoView({block:'nearest',inline:'nearest'});
+  if(window.innerWidth<=960)window.scrollTo(0,0)}
+$$('#tabs button').forEach(b=>b.onclick=()=>{const was=$('#tab-bio').classList.contains('active');goTab(b.dataset.tab);if(b.dataset.tab==='bio'&&!was)openPop('bio')});
+
+
+let lastT=performance.now();
+function loop(t){const dt=Math.min(.05,(t-lastT)/1000);lastT=t;for(const m of MicroView.all){if(m.c.offsetParent===null)continue;if(!m.size)m.resize();m.step(dt);m.draw()}requestAnimationFrame(loop)}
+cmpInit();prInit();capInit();titInit();bioInit();misInit();glossInit();bioFoldInit();fsInit();confirmBtn($('#labReset'),'초기화할까요?',labReset);mbarInit();stickyHdr();openPop('intro');
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

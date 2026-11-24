@@ -1351,8 +1351,27 @@ function floatText(el,txt,x,y,color){if(!el)return;const f=document.createElemen
 function confetti(host,n=46){if(!host||calm())return;const box=document.createElement('div');box.className='confetti';const cols=['#e9a23b','#3e9e6a','#3d7fb8','#e2614b','#ffe2a6','#ffffff'];
   for(let k=0;k<n;k++){const s=document.createElement('i');s.style.cssText=`left:${Math.random()*100}%;background:${cols[k%cols.length]};animation-delay:${(Math.random()*.5).toFixed(2)}s;animation-duration:${(1.5+Math.random()*1.3).toFixed(2)}s;--r:${(Math.random()*720-360).toFixed(0)}deg;--x:${(Math.random()*120-60).toFixed(0)}px;width:${(6+Math.random()*5).toFixed(0)}px;height:${(8+Math.random()*7).toFixed(0)}px`;box.appendChild(s)}
   host.appendChild(box);setTimeout(()=>box.remove(),3200)}
+/* 창을 연 바로 그 누름(손가락·스페이스·엔터)이 떨어지면서 새 창의 버튼까지 눌러 버리지 않게 한다.
+   '대화하기'는 누르는 순간 퀴즈 창이 뜨는데, 창이 손가락 밑에 뜨면 손을 뗄 때 그 자리의 보기가 답으로 눌렸다.
+   누름마다 번호(GEST.id)를 매겨, 창이 열릴 때 진행 중이던 누름에서 나온 클릭은 버린다.
+   누르는 도중에 열린 창(대화하기·스페이스)은 연달아 두 번 누른 경우를 위해 열린 뒤 0.5초도 막는다.
+   (버튼을 눌렀다 뗀 뒤 열리는 보통 창은 시간으로 막지 않는다 — 안내 창을 빠르게 넘길 수 있어야 하므로) */
+const GEST={id:0,down:0,key:0};
+window.addEventListener('pointerdown',()=>{GEST.id++;GEST.down=1},true);
+['pointerup','pointercancel'].forEach(t=>window.addEventListener(t,()=>{GEST.down=0},true));
+window.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){if(!e.repeat)GEST.id++;GEST.key=1}},true);
+window.addEventListener('keyup',e=>{if(e.key===' '||e.key==='Enter')GEST.key=0},true);
+window.addEventListener('blur',()=>{GEST.down=0;GEST.key=0});
+function guardClicks(m){
+  const born=performance.now(),g0=GEST.id,held=GEST.down||GEST.key;
+  const stop=e=>{e.stopPropagation();e.preventDefault()};
+  m.addEventListener('click',e=>{if(GEST.id===g0||(held&&performance.now()-born<500))stop(e)},true);
+  /* 엔터를 누른 채로 있으면 반복 입력이 초점 받은 버튼을 누르므로 같은 누름의 키 입력도 버린다 */
+  m.addEventListener('keydown',e=>{if((e.key===' '||e.key==='Enter')&&GEST.id===g0)stop(e)},true);
+  m.addEventListener('keyup',e=>{if((e.key===' '||e.key==='Enter')&&GEST.id===g0)stop(e)},true);
+}
 function modal(html,actions=[{t:'확인',c:'primary'}],opt={}){
-  const m=document.createElement('div');m.className='modal';
+  const m=document.createElement('div');m.className='modal';guardClicks(m);
   m.innerHTML=`<div class="mbox px" role="dialog" aria-modal="true">${html}<div class="mact"></div></div>`;
   actions.forEach(a=>{const b=document.createElement('button');b.className='btn '+(a.c||'');b.textContent=a.t;b.onclick=()=>{m.remove();a.f&&a.f()};$('.mact',m).appendChild(b)});
   document.body.appendChild(m);

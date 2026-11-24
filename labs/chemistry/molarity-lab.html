@@ -458,6 +458,12 @@ summary{font-weight:600}
 #fsSheet .fstitle{color:#111}
 #fsTools .toolbar{border-top-color:var(--line)}
 #fsTools .tool{font-size:11.5px}
+button.chip{border:0;font-family:inherit;line-height:inherit;cursor:pointer}
+.hintbadge.sm{font-size:12px}
+#c1 .cfig{max-width:540px}
+/* 휴대폰: 개념 정리의 고정 목차를 풀어 머리줄이 화면을 덜 가리게 */
+@media (max-width:800px){.chead{position:static;margin:-10px 0 12px;padding:8px 0}.concept{scroll-margin-top:calc(var(--hh,54px) + 8px)}}
+@media (max-width:520px){.tool{font-size:12px}.hwrap{padding:6px 10px;gap:6px}nav button{padding:6px 9px;font-size:14.5px}.modebadge{font-size:12.5px;padding:5px 9px}}
 </style>
 </head>
 <body>
@@ -525,7 +531,7 @@ const SUBS={
  glucose:{name:'포도당',f:'C₆H₁₂O₆',M:180.16,powder:'#f8f6ee'},
  NaOH:{name:'수산화 나트륨',f:'NaOH',M:40.00,powder:'#f1f1f1',caution:{title:'수산화 나트륨(NaOH) 주의',items:['강한 염기라서 피부와 눈을 부식시켜요. 장갑과 보안경을 꼭 착용해요.','공기 중의 수분을 흡수해 스스로 녹는 성질(조해성)이 있어요. 빠르게 달고, 시약병 뚜껑은 바로 닫아요.','물에 녹을 때 열이 많이 나요(발열). 실온까지 식힌 다음 부피 플라스크로 옮겨요.']}},
  KNO3:{name:'질산 칼륨',f:'KNO₃',M:101.10,powder:'#f5f5f5',caution:{title:'질산 칼륨(KNO₃) 주의',items:['산화제예요. 종이, 알코올처럼 불에 탈 수 있는 물질과 멀리 두어요.','눈에 들어가면 자극을 주므로 보안경을 착용해요.']}},
- CuSO4:{name:'황산 구리(Ⅱ) 오수화물',f:'CuSO₄·5H₂O',M:249.69,color:[25,105,215],ref:0.45,powder:'#3d7fe0',caution:{title:'황산 구리(Ⅱ) 오수화물 주의',items:['삼키면 해롭고 피부와 눈을 자극해요.','물고기 같은 수생 생물에게 독성이 있어요. 하수구에 버리지 말고 폐액통에 모아요.','몰질량 249.69 g/mol에는 <b>결정수(5H₂O)</b>가 포함되어 있어요. 무수물 CuSO₄(159.61 g/mol)와 헷갈리지 마세요!']}},
+ CuSO4:{name:'황산 구리(Ⅱ) 오수화물',f:'CuSO₄·5H₂O',M:249.69,color:[25,105,215],ref:0.45,powder:'#3d7fe0',caution:{title:'황산 구리(Ⅱ) 오수화물 주의',items:['삼키면 해롭고 피부와 눈을 자극해요.','물고기 같은 수생 생물에게 독성이 있어요. 하수구에 버리지 말고 폐시약통에 모아요.','몰질량 249.69 g/mol에는 <b>결정수(5H₂O)</b>가 포함되어 있어요. 무수물 CuSO₄(159.61 g/mol)와 헷갈리지 마세요!']}},
  KMnO4:{name:'과망가니즈산 칼륨',f:'KMnO₄',M:158.03,color:[125,20,135],ref:0.006,powder:'#3b1446',brown:true,caution:{title:'과망가니즈산 칼륨(KMnO₄) 주의',items:['강한 산화제예요. 불에 탈 수 있는 물질과 멀리 두어요.','피부나 옷에 묻으면 갈색 얼룩이 생겨요. 장갑을 꼭 껴요.','빛을 받으면 분해되므로 만든 용액은 <b>갈색 시약병</b>에 보관해요.']}},
  X:{name:'물질 X',f:'X',M:72.00,powder:'#eceff3'},
  Y:{name:'물질 Y',f:'Y',M:135.00,color:[205,185,20],ref:0.25,powder:'#e8d64a'},
@@ -571,7 +577,10 @@ S.prepMissions=DEFAULT_PREP.map(([sub,M,V])=>({id:'p-'+sub,sub,M,V}));
 S.dilMissions=DEFAULT_DIL.map(([sub,M1,M2,V2])=>({id:'d-'+sub,sub,M1,M1act:M1,M2,V2}));
 const KEY='molarity-lab-v2';
 function save(){try{localStorage.setItem(KEY,JSON.stringify({shelf:S.shelf,best:S.best,bestSt:S.bestSt||{}}))}catch(e){}}
-function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(d){S.shelf=d.shelf||[];S.best=d.best||{};S.bestSt=d.bestSt||{};}}catch(e){}}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(d&&typeof d==='object'){
+  const num=o=>{const r={};if(o&&typeof o==='object'&&!Array.isArray(o))for(const k in o){const v=+o[k];if(typeof o[k]==='number'&&isFinite(v))r[k]=v;}return r;};
+  S.shelf=(Array.isArray(d.shelf)?d.shelf:[]).filter(it=>it&&typeof it==='object'&&SUBS[it.sub]&&isFinite(+it.actual)&&+it.target>0).map(it=>Object.assign({},it,{actual:+it.actual,target:+it.target,err:+it.err||0,errProc:+it.errProc||0,remain:Math.max(0,+it.remain||0),stars:Math.min(3,Math.max(0,Math.round(+it.stars||0))),hints:+it.hints||0})).slice(0,40);
+  S.best=num(d.best);const bs=num(d.bestSt);for(const k in bs)bs[k]=Math.min(3,Math.max(0,Math.round(bs[k])));S.bestSt=bs;}}catch(e){S.shelf=[];S.best={};S.bestSt={};}}
 load();
 
 /* =========================================================
@@ -595,7 +604,7 @@ function parseConc(t){
  let val=NaN,rest='';
  if(m){val=parseFloat(m[1]);const ex=m[2]??m[3];if(ex!=null)val*=Math.pow(10,+ex);rest=s.slice(m.index+m[0].length).trim();}
  const u=rest.replace(/\s+/g,'');
- const unit=!u?'none':/^(M|mol\/L|molL-1|mol·L-1|mol\/l|몰\/L|M\(mol\/L\))$/i.test(u)?'M':'bad';
+ const unit=!u?'none':(u==='M'||/^(mol\/l|moll-1|mol·l-1|몰\/l)$/i.test(u)||/^M\(mol\/l\)$/i.test(u))?'M':'bad';
  return {val,unit,rest};
 }
 
@@ -618,7 +627,7 @@ function calcSteps(j){
 }
 function calcStageStrictHTML(j){
  const st=calcSteps(j),s=SUBS[j.m.sub];
- const given=j.kind==='prep'?`주어진 값: 몰질량 <b>${s.M.toFixed(2)} g/mol</b> · 목표 몰농도 <b>${sig(j.m.M)} M</b> · 용액 부피 <b>${j.m.V} mL</b>`:`주어진 값: 원액 <b>${sig(j.m.M1)} M</b> · 목표 몰농도 <b>${sig(j.m.M2)} M</b> · 만들 부피 <b>${j.m.V2} mL</b>`;
+ const given=j.kind==='prep'?`주어진 값: 몰질량 <b>${s.M.toFixed(2)} g/mol</b> · 목표 몰농도 <b>${sig(j.m.M)} M</b> · 용액 부피 <b>${j.m.V} mL</b><br><span class="tiny">※ 이 실험실에서는 위에 주어진 몰질량(소수 둘째 자리)을 그대로 써요.</span>`:`주어진 값: 원액 <b>${sig(j.m.M1)} M</b> · 목표 몰농도 <b>${sig(j.m.M2)} M</b> · 만들 부피 <b>${j.m.V2} mL</b>`;
  let h=`<div class="calcgrid"><div class="card"><h3>① 계산하기</h3><div class="given">${given}</div>`;
  st.forEach((q,i)=>{if(i>j.calc.step)return;const ok=j.calc.ok[i]!=null;const hn=j.calc.hint[i];
   h+=`<div class="cstep ${ok?'ok':''}"><div class="q"><span class="num">${i+1}</span>${q.q}</div>
@@ -677,7 +686,7 @@ function calcToInput(){
 document.addEventListener('focusin',e=>{if(e.target.classList&&e.target.classList.contains('nextans'))e.target.classList.remove('nextans');});
 
 function holdAmount(ms,inc,max){if(ms<180)return inc;const x=Math.min(1,(ms-180)/2600);const v=inc+(max-inc)*x*x;return Math.max(inc,Math.round(v/inc)*inc);}
-function sig(x,n=3){if(!isFinite(x))return '-';if(x===0)return '0';const d=Math.floor(Math.log10(Math.abs(x)));const dec=Math.max(0,n-1-d);return x.toFixed(dec);}
+function sig(x,n=3){if(!isFinite(x))return '-';if(x===0)return '0';let d=Math.floor(Math.log10(Math.abs(x)));const r0=+x.toFixed(Math.max(0,n-1-d));if(r0!==0&&Math.floor(Math.log10(Math.abs(r0)))>d)d++;const dec=Math.max(0,n-1-d);return x.toFixed(dec);}
 function g2(cg){return (cg/100).toFixed(2);}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function today(){const d=new Date();return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;}
@@ -728,6 +737,7 @@ function pickFlask(v){
  if(v!==need&&S.mode==='strict'){modal({icon:'✋',title:'부피를 다시 확인해요',html:`이 미션은 용액 <b>${need} mL</b>를 만들어야 해요. 부피 플라스크는 정해진 한 가지 부피만 정확히 잴 수 있어요.`});return;}
  j.flask=v;j.stage='lab';render();
  toast(`${v} mL 부피 플라스크를 실험대에 올렸어요`);
+ if(!S.fs&&!S._fsAsked&&window.innerWidth<=700){S._fsAsked=true;modal({icon:'📱',title:'화면이 좁아요',html:'이 화면에서는 실험대 그림이 작게 보여요. <b>전체 화면(가로)</b>으로 바꾸면 기구가 크게 보여서 누르고 끌기 쉬워요.<br><span class="tiny">실험대 오른쪽 위의 ‘전체 화면’ 버튼으로 언제든 바꿀 수 있어요.</span>',buttons:[{t:'그냥 할게요',cls:'ghost'},{t:'전체 화면으로',fn:()=>fsEnter()}]});}
 }
 
 function markTip(){modal({icon:'👁',title:'눈높이 맞추는 법',html:'표선은 플라스크 목을 한 바퀴 두른 <b>고리</b>예요.<ul><li>위나 아래에서 보면 고리의 앞쪽(진한 선)과 뒤쪽(흐린 선)이 벌어져서 타원으로 보여요.</li><li>눈높이가 표선과 수평이면 앞뒤 선이 겹쳐서 <b>한 줄</b>로 보여요.</li><li>그 상태에서 메니스커스(오목한 액면)의 <b>가장 아랫부분</b>이 표선에 닿으면 정확해요.</li></ul>'});}
@@ -783,6 +793,7 @@ function modal({icon='',title='',html='',buttons=[{t:'확인'}]}){
  const m=$('#modal');
  m.innerHTML=`<div class="mbox"><div class="micon">${icon}</div><h3>${title}</h3><div class="mbody">${html}</div><div class="mbtns">${buttons.map((b,i)=>`<button class="${b.cls||'primary'}" data-i="${i}">${b.t}</button>`).join('')}</div></div>`;
  m.classList.add('show');
+ {const fb=m.querySelector('.mbtns button');if(fb)try{fb.focus({preventScroll:true});}catch(e){}}
  m.querySelectorAll('[data-i]').forEach(btn=>btn.onclick=()=>{const b=buttons[+btn.dataset.i];if(b.keep){if(b.fn&&b.fn()===false)return;m.classList.remove('show');return;}m.classList.remove('show');b.fn&&b.fn();});
 }
 /* =========================================================
@@ -856,27 +867,27 @@ function renderConcept(){
  const v=$('#v-concept');if(v.dataset.done)return;v.dataset.done=1;
  v.innerHTML=`
  <div class="chead"><h2>개념 정리</h2><p class="muted">실험 전에 몰수 변환, 몰농도, 부피 플라스크, 희석을 차근차근 정리해 봐요.</p>
- <div class="ctoc"><a href="#c1">① 몰과 몰수 변환</a><a href="#c2">② 몰농도</a><a href="#c3">③ 부피 플라스크</a><a href="#c4">④ 희석</a></div></div>
+ <div class="ctoc">${[["c1","① 몰과 몰수 변환"],["c2","② 몰농도"],["c3","③ 부피 플라스크"],["c4","④ 희석"]].map(([id,t])=>`<a href="#${id}" onclick="event.preventDefault();document.getElementById('${id}').scrollIntoView({behavior:'smooth',block:'start'})">${t}</a>`).join("")}</div></div>
 
  <div class="cgrid2">
  <section class="card concept" id="c1">
   <h3><span class="cno">1</span>몰(mol)과 몰수 변환</h3>
   <p>1 mol은 입자 <b>6.02×10²³개</b>(아보가드로수)의 묶음이에요. 물질 1 mol의 질량을 <b>몰질량(g/mol)</b>이라고 해요.</p>
-  <svg viewBox="0 0 360 214" class="cfig">
+  <svg viewBox="0 0 440 214" class="cfig">
    <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8z" fill="#2b7de9"/></marker><marker id="ar2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8z" fill="#7a5af0"/></marker><marker id="ar3" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8z" fill="#1f9d55"/></marker></defs>
-   <rect x="130" y="82" width="100" height="48" rx="12" fill="#1f3a5f"/><text x="180" y="104" fill="#fff" text-anchor="middle" font-weight="800" font-size="16">몰수</text><text x="180" y="122" fill="#cfe0f5" text-anchor="middle" font-size="12">n (mol)</text>
-   <rect x="4" y="82" width="86" height="48" rx="12" fill="#eaf2fc" stroke="#2b7de9"/><text x="47" y="104" text-anchor="middle" font-weight="800" font-size="15" fill="#1f3a5f">질량</text><text x="47" y="122" text-anchor="middle" font-size="12" fill="#5b6577">m (g)</text>
-   <rect x="270" y="82" width="86" height="48" rx="12" fill="#eaf2fc" stroke="#2b7de9"/><text x="313" y="104" text-anchor="middle" font-weight="800" font-size="15" fill="#1f3a5f">입자 수</text><text x="313" y="122" text-anchor="middle" font-size="12" fill="#5b6577">N (개)</text>
-   <rect x="130" y="4" width="100" height="44" rx="12" fill="#f3efff" stroke="#7a5af0"/><text x="180" y="24" text-anchor="middle" font-weight="800" font-size="14" fill="#4b2fb0">기체 부피</text><text x="180" y="40" text-anchor="middle" font-size="11" fill="#5b6577">0 ℃, 1 atm</text>
-   <rect x="130" y="164" width="100" height="44" rx="12" fill="#e9f7ef" stroke="#1f9d55"/><text x="180" y="184" text-anchor="middle" font-weight="800" font-size="14" fill="#11673a">용액 부피</text><text x="180" y="200" text-anchor="middle" font-size="11" fill="#5b6577">V (L)</text>
-   <path d="M92 98 L126 98" stroke="#2b7de9" stroke-width="2" marker-end="url(#ar)"/><path d="M128 115 L94 115" stroke="#2b7de9" stroke-width="2" marker-end="url(#ar)"/>
-   <text x="110" y="92" text-anchor="middle" font-size="10.5" fill="#2b7de9">÷ 몰질량</text><text x="110" y="130" text-anchor="middle" font-size="10.5" fill="#2b7de9">× 몰질량</text>
-   <path d="M232 98 L266 98" stroke="#2b7de9" stroke-width="2" marker-end="url(#ar)"/><path d="M268 115 L234 115" stroke="#2b7de9" stroke-width="2" marker-end="url(#ar)"/>
-   <text x="250" y="92" text-anchor="middle" font-size="10" fill="#2b7de9">× 6.02×10²³</text><text x="250" y="130" text-anchor="middle" font-size="10" fill="#2b7de9">÷ 6.02×10²³</text>
-   <path d="M170 80 L170 52" stroke="#7a5af0" stroke-width="2" marker-end="url(#ar2)"/><path d="M190 52 L190 78" stroke="#7a5af0" stroke-width="2" marker-end="url(#ar2)"/>
-   <text x="165" y="70" text-anchor="end" font-size="10.5" fill="#7a5af0">× 22.4 L</text><text x="195" y="70" font-size="10.5" fill="#7a5af0">÷ 22.4 L</text>
-   <path d="M170 132 L170 160" stroke="#1f9d55" stroke-width="2" marker-end="url(#ar3)"/><path d="M190 160 L190 134" stroke="#1f9d55" stroke-width="2" marker-end="url(#ar3)"/>
-   <text x="165" y="150" text-anchor="end" font-size="10.5" fill="#1f9d55">÷ 몰농도</text><text x="195" y="150" font-size="10.5" fill="#1f9d55">× 몰농도</text>
+   <rect x="170" y="82" width="100" height="48" rx="12" fill="#1f3a5f"/><text x="220" y="104" fill="#fff" text-anchor="middle" font-weight="800" font-size="16">몰수</text><text x="220" y="122" fill="#cfe0f5" text-anchor="middle" font-size="12.5">n (mol)</text>
+   <rect x="4" y="82" width="86" height="48" rx="12" fill="#eaf2fc" stroke="#2b7de9"/><text x="47" y="104" text-anchor="middle" font-weight="800" font-size="15" fill="#1f3a5f">질량</text><text x="47" y="122" text-anchor="middle" font-size="12.5" fill="#5b6577">m (g)</text>
+   <rect x="350" y="82" width="86" height="48" rx="12" fill="#eaf2fc" stroke="#2b7de9"/><text x="393" y="104" text-anchor="middle" font-weight="800" font-size="15" fill="#1f3a5f">입자 수</text><text x="393" y="122" text-anchor="middle" font-size="12.5" fill="#5b6577">N (개)</text>
+   <rect x="170" y="4" width="100" height="44" rx="12" fill="#f3efff" stroke="#7a5af0"/><text x="220" y="24" text-anchor="middle" font-weight="800" font-size="14" fill="#4b2fb0">기체 부피</text><text x="220" y="40" text-anchor="middle" font-size="12" fill="#5b6577">0 ℃, 1 atm</text>
+   <rect x="170" y="164" width="100" height="44" rx="12" fill="#e9f7ef" stroke="#1f9d55"/><text x="220" y="184" text-anchor="middle" font-weight="800" font-size="14" fill="#11673a">용액 부피</text><text x="220" y="200" text-anchor="middle" font-size="12" fill="#5b6577">V (L)</text>
+   <path d="M94 98 L166 98" stroke="#2b7de9" stroke-width="2" marker-end="url(#ar)"/><path d="M166 115 L94 115" stroke="#2b7de9" stroke-width="2" marker-end="url(#ar)"/>
+   <text x="130" y="91" text-anchor="middle" font-size="12" fill="#2b7de9">÷ 몰질량</text><text x="130" y="131" text-anchor="middle" font-size="12" fill="#2b7de9">× 몰질량</text>
+   <path d="M274 98 L346 98" stroke="#2b7de9" stroke-width="2" marker-end="url(#ar)"/><path d="M346 115 L274 115" stroke="#2b7de9" stroke-width="2" marker-end="url(#ar)"/>
+   <text x="310" y="91" text-anchor="middle" font-size="12" fill="#2b7de9">× 6.02×10²³</text><text x="310" y="131" text-anchor="middle" font-size="12" fill="#2b7de9">÷ 6.02×10²³</text>
+   <path d="M210 80 L210 52" stroke="#7a5af0" stroke-width="2" marker-end="url(#ar2)"/><path d="M230 52 L230 78" stroke="#7a5af0" stroke-width="2" marker-end="url(#ar2)"/>
+   <text x="198" y="70" text-anchor="end" font-size="12" fill="#7a5af0">× 22.4 L/mol</text><text x="242" y="70" font-size="12" fill="#7a5af0">÷ 22.4 L/mol</text>
+   <path d="M210 132 L210 160" stroke="#1f9d55" stroke-width="2" marker-end="url(#ar3)"/><path d="M230 160 L230 134" stroke="#1f9d55" stroke-width="2" marker-end="url(#ar3)"/>
+   <text x="198" y="151" text-anchor="end" font-size="12" fill="#1f9d55">÷ 몰농도</text><text x="242" y="151" font-size="12" fill="#1f9d55">× 몰농도</text>
   </svg>
   <div class="ex"><b>예)</b> NaCl(몰질량 58.44 g/mol) 5.844 g<br>→ 5.844 g ÷ 58.44 g/mol = <b>0.1000 mol</b><br>→ 0.1000 mol × 6.02×10²³ = 6.02×10²² 개</div>
  </section>
@@ -956,7 +967,7 @@ function renderConcept(){
     <h4>희석 배수</h4>
     <div class="formula sm">희석 배수 = ${frac('M₁','M₂')} = ${frac('V₂','V₁')}</div>
     <p>10배 희석은 <b>원액 1 : 전체 10</b>이에요. 원액 10 mL에 물 100 mL를 더하는 게 아니라, <b>전체가 100 mL</b>가 되게 하는 거예요.</p>
-    <div class="mis">❌ <b>흔한 실수</b>: “원액 10.0 mL + 물 100 mL” → 전체 110 mL가 되어 농도가 더 묽어져요.<br>➜ 부피 플라스크의 <b>표선까지</b> 채워 전체 부피를 정확히 V₂로 맞춰요.</div>
+    <div class="mis">❌ <b>흔한 실수</b>: “원액 10.0 mL + 물 100 mL” → 전체가 약 110 mL가 되어 농도가 더 묽어져요.<br>➜ 부피 플라스크의 <b>표선까지</b> 채워 전체 부피를 정확히 V₂로 맞춰요.</div>
    </div>
    <div>
     <h4>🚿 공세척이란?</h4>
@@ -1057,6 +1068,7 @@ function randDilTarget(){
   .map(v=>Number(sig(d.M1*v/d.V2))).filter(m=>m>=r.lo*0.999&&m<=r.hi*1.001);
  const cur=parseFloat($('#dTgt').value);let pool=cand.filter(m=>m!==cur);if(!pool.length)pool=cand;
  const m=pool[Math.floor(Math.random()*pool.length)];
+ if(m==null){$('#dErr').innerHTML='남은 원액이 적어 고를 수 있는 농도가 거의 없어요. 범위 안에서 직접 입력해요.';return;}
  $('#dTgt').value=sig(m);$('#dErr').innerHTML='';
  const b=$('#dRand');if(b){b.classList.remove('spin');void b.offsetWidth;b.classList.add('spin');}
 }
@@ -1070,7 +1082,7 @@ function startDilTarget(){
  if(M2>r.hi*1.001)return err(`원액을 너무 많이 옮겨야 해요. <b>${fmtM(r.hi)} 이하</b>로 정해요.`);
  if(M2<r.lo*0.999)return err(`너무 묽어요. 옮길 원액이 너무 적어서 정확하게 만들기 어려워요. <b>${fmtM(r.lo)} 이상</b>으로 정해요.`);
  $('#modal').classList.remove('show');
- if(d.preset){const m=Object.assign({},d.preset,{M2});cautionPopup(m.sub,()=>{S.job=newJob('dil',m);S.tab='dil';render();window.scrollTo(0,0);});return;}
+ if(d.preset){const m=Object.assign({},d.preset,{M2});const go=()=>cautionPopup(m.sub,()=>{S.job=newJob('dil',m);S.tab='dil';render();window.scrollTo(0,0);});if(S.job&&S.job.stage!=='result')return confirmQuit(go);go();return;}
  pickStock(d.it.id,M2);
 }
 function pickStock(id,M2){
@@ -1125,7 +1137,7 @@ const L=()=>{const b=LAY[S.job.kind],o=S.job.posOv;return o?Object.assign({},b,o
 function calcStageHTML(j){return S.mode==='free'?freeCalcHTML(j):calcStageStrictHTML(j);}
 function freeCalcHTML(j){
  const st=calcSteps(j),s=SUBS[j.m.sub],v=j.calc.free||[];
- const given=j.kind==='prep'?`주어진 값: 몰질량 <b>${s.M.toFixed(2)} g/mol</b> · 목표 몰농도 <b>${sig(j.m.M)} M</b> · 용액 부피 <b>${j.m.V} mL</b>`:`주어진 값: 원액 <b>${sig(j.m.M1)} M</b> · 목표 몰농도 <b>${sig(j.m.M2)} M</b> · 만들 부피 <b>${j.m.V2} mL</b>`;
+ const given=j.kind==='prep'?`주어진 값: 몰질량 <b>${s.M.toFixed(2)} g/mol</b> · 목표 몰농도 <b>${sig(j.m.M)} M</b> · 용액 부피 <b>${j.m.V} mL</b><br><span class="tiny">※ 이 실험실에서는 위에 주어진 몰질량(소수 둘째 자리)을 그대로 써요.</span>`:`주어진 값: 원액 <b>${sig(j.m.M1)} M</b> · 목표 몰농도 <b>${sig(j.m.M2)} M</b> · 만들 부피 <b>${j.m.V2} mL</b>`;
  let h=`<div class="calcgrid"><div class="card"><h3>① 계산하기</h3><div class="given">${given}</div>
  <div class="strict-note">⚖️ <b>오차 반영 모드</b>에서는 계산이 맞는지 알려주지 않고, 힌트도 없어요. 내가 계산한 값으로 실험하니 <b>계산 실수도 결과의 오차</b>가 돼요. 신중하게!</div>`;
  st.forEach((q,i)=>{h+=`<div class="cstep"><div class="q"><span class="num">${i+1}</span>${q.q}</div><div class="ansrow"><input id="ca${i}" inputmode="decimal" autocomplete="off" value="${v[i]??''}" onfocus="S.lastInput='ca${i}'" oninput="(S.job.calc.free=S.job.calc.free||[])[${i}]=this.value"><span>${q.unit}</span></div></div>`;});
@@ -1169,8 +1181,8 @@ function renderWorkspace(v){
  const names=['① 계산','② 부피 플라스크','③ 실험','④ 라벨 · 결과'];
  let h=`<div class="mhead"><div><div class="kicker">${j.kind==='prep'?'용액 만들기':'희석하기'} 미션${j.m.fromShelf?' · 내가 만든 원액':''}</div><h2>${missionTitle(j)}</h2>
  <div class="stages">${names.map((n,i)=>`<span class="${i===cur?'on':i<cur?'did':''}">${n}</span>`).join('')}</div>
- <span class="chip">${s.name}</span>${j.kind==='prep'?`<span class="chip">몰질량 ${s.M.toFixed(2)} g/mol</span>`:''}${s.caution?`<span class="chip warn" onclick="cautionPopup('${j.m.sub}')">⚠️ 주의사항 다시 보기</span>`:''}</div>
- <div class="btnrow" style="margin-top:0">${S.mode==='free'&&(j.stage==='calc'||j.stage==='flask')?'<button class="ghost sm" onclick="resetStage(\'calc\')">🔄 계산 다시 하기</button>':''}${S.mode==='free'&&(j.stage==='lab'||j.stage==='label')?'<button class="ghost sm" onclick="resetStage(\'lab\')">🔄 실험 다시 하기</button>':''}<button class="ghost sm" onclick="quitJob()">미션 나가기</button></div></div>`;
+ <span class="chip">${s.name}</span>${j.kind==='prep'?`<span class="chip">몰질량 ${s.M.toFixed(2)} g/mol</span>`:''}${s.caution?`<button type="button" class="chip warn" onclick="cautionPopup('${j.m.sub}')">⚠️ 주의사항 다시 보기</button>`:''}</div>
+ <div class="btnrow" style="margin-top:0">${S.mode==='free'&&(j.stage==='calc'||j.stage==='flask')?'<button class="ghost sm" onclick="resetStage(\'calc\')">🔄 계산 다시 하기</button>':''}${(j.stage==='lab'||j.stage==='label')?'<button class="ghost sm" onclick="resetStage(\'lab\')">🔄 실험 다시 하기</button>':''}<button class="ghost sm" onclick="quitJob()">미션 나가기</button></div></div>`;
  if(j.stage==='calc')h+=calcStageHTML(j);
  else if(j.stage==='flask')h+=flaskStageHTML(j);
  else if(j.stage==='lab'||j.stage==='label')h+=labHTML(j);
@@ -1189,7 +1201,7 @@ const STEP={
  stir:{label:'유리 막대로 저어 완전히 녹였어요',req:false,why:'툴바의 <b>유리 막대</b>를 눌러 비커에 넣고, 비커 안을 누른 채 <b>좌우로 끌어</b> 천천히 저어 고체를 모두 녹여요.',
   skip(j){const loss=(1-j.dissolve)*0.06;if(loss>0.0005)addEff(`고체가 다 녹지 않은 채 옮겨 비커 바닥에 일부가 남음 (−${(loss*100).toFixed(1)}%)`,1-loss);}},
  funnel:{label:'부피 플라스크에 깔때기를 꽂았어요',req:false,skip(){},why:'⚠️ <b>안전을 위해 깔때기는 꼭 써야 해요.</b> 부피 플라스크는 입구가 좁아서 그냥 부으면 용액이 넘쳐 손이나 실험대에 튈 수 있어요. 툴바의 <b>깔때기</b>를 눌러 실험대에 올리고, <b>끌어서 부피 플라스크 입구</b>에 꽂아요.'},
- rodMove:{label:'유리 막대를 부피 플라스크 입구에 걸쳤어요',req:false,why:'비커 속 <b>유리 막대를 끌어서 부피 플라스크(깔때기) 입구</b>에 걸쳐요. 용액이 막대를 타고 흘러 튀지 않아요.',
+ rodMove:{label:'유리 막대를 부피 플라스크 입구에 걸쳤어요',req:false,why:'비커 속(내려놓았다면 비커 앞에 눕혀 둔) <b>유리 막대를 끌어서 부피 플라스크(깔때기) 입구</b>에 걸쳐요. 용액이 막대를 타고 흘러 튀지 않아요.',
   skip(){addEff('유리 막대 없이 부어 용액이 튐 (−2%)',0.98);}},
  pour:{label:'비커의 용액을 부피 플라스크로 옮겼어요',req:true,why:'<b>비커를 끌어서 유리 막대 끝</b>에 대요. 비커가 기울어지면 <b>누른 채로 기다리면</b> 용액이 천천히 부어져요.'},
  rinse:{label:'세척병으로 비커·유리 막대를 헹궈 넣었어요',req:false,why:'툴바의 <b>세척병</b>을 실험대에 올리고, <b>끌어서 기울어진 비커</b>에 가져가요. 세척병을 <b>꾹 눌러</b> 2번 헹구면 헹군 물이 부피 플라스크로 들어가요.',
@@ -1226,16 +1238,18 @@ function gate(id){
  if(curId()!==id)return false;
  return true;
 }
+/* 이어 붓기를 끝내지 않고 다음으로 넘어갈 때: 지금까지 부은 만큼만 정산 */
+function settleResume(j){if(!j||!j.resume)return;const l2=1-j.pourB;j.pourLeft*=l2;j.bWater*=l2;j.pourB=0;j.poured=true;j.resume=false;j.pouring=false;j.bAnchor=false;}
 function onLeave(id){
  const j=S.job;
  if(id==='stir'){j.stirring=false;}
- if(id==='rinse'){j.bAnchor=false;j.lateAnchor=false;j.pourB=0;if(!(j.pourLeft>0.002))j.bWater=0;if(j.rodAt)j.rodAt='away';if(j.washDock==='rinse')j.washDock=null;}
+ if(id==='rinse'){settleResume(j);j.bAnchor=false;j.lateAnchor=false;j.pourB=0;if(!(j.pourLeft>0.002))j.bWater=0;if(j.rodAt)j.rodAt='away';if(j.washDock==='rinse')j.washDock=null;}
  if(id==='mark'||id==='rinseFunnel'){j.washDock=null;j.squeezing=false;}
  if(id==='mix'){j.mixAng=0;j.mixY=0;}
 }
 function done(){
  const j=S.job,id=curId();j.log.push({t:STEP[id].label,k:'ok'});onLeave(id);j.cur++;autoAdvance();j.panel=null;renderLab();
- if(id==='stir'&&j.m.sub==='NaOH')modal({icon:'🔥',title:'비커가 뜨거워졌어요!',html:'NaOH가 물에 녹을 때 열이 나요(<b>발열</b>). 뜨거운 용액은 부피가 커져 있어서, 그대로 표선을 맞추면 식은 뒤 부피가 줄어 농도가 달라져요.<br><br>실제 실험에서는 <b>실온까지 식힌 다음</b> 부피 플라스크로 옮겨요. (이 실험실에서는 식혔다고 가정할게요)',buttons:[{t:'식힌 뒤 진행할게요'}]});
+ if(id==='stir'&&j.m.sub==='NaOH')modal({icon:'🔥',title:'비커가 뜨거워졌어요!',html:'NaOH가 물에 녹을 때 열이 나요(<b>발열</b>). 뜨거운 용액은 부피가 커져 있어서, 그대로 표선을 맞추면 식은 뒤 부피가 줄어 목표보다 진해져요.<br><br>실제 실험에서는 <b>실온까지 식힌 다음</b> 부피 플라스크로 옮겨요. (이 실험실에서는 식혔다고 가정할게요)',buttons:[{t:'식힌 뒤 진행할게요'}]});
 }
 function autoAdvance(){
  const j=S.job;
@@ -1271,7 +1285,7 @@ function useTool(tool){
  if((tool==='dish'||tool==='spoon')&&j.kind==='prep'&&j.moved){startExtra();return;}
  if(tool==='dish'){if(gate('dish')){j.dishOn=true;done();}return;}
  if(tool==='spoon'){openWeigh();return;}
- if(tool==='rod'&&j.kind==='prep'&&j.steps.indexOf('stir')<j.cur){if(j.moved&&!j.poured&&!j.bAnchor&&j.bWater>0){j.rodAt='beaker';j.rodX=L().beaker.x+L().beaker.w/2;j.panel=j.dissolve<1?'stir':null;renderLab();toast(j.dissolve<1?'비커 안을 끌어서 저어요':'유리 막대를 비커에 넣었어요');}else toast('유리 막대는 실험대 위에 있어요. 끌어서 옮길 수 있어요');return;}
+ if(tool==='rod'&&j.kind==='prep'&&j.steps.indexOf('stir')<j.cur){if(j.rodAt==='flask'&&!j.poured){toast('유리 막대는 이미 부피 플라스크 입구에 걸쳐 있어요. 비커를 끌어서 막대 끝에 대요');return;}if(j.moved&&!j.poured&&!j.bAnchor&&j.bWater>0){j.rodAt='beaker';j.rodX=L().beaker.x+L().beaker.w/2;j.panel=j.dissolve<1?'stir':null;renderLab();toast(j.dissolve<1?'비커 안을 끌어서 저어요':'유리 막대를 비커에 넣었어요');}else toast('유리 막대는 실험대 위에 있어요. 끌어서 옮길 수 있어요');return;}
  if(tool==='rod'){if(gate('stir')){j.rodAt='beaker';j.rodX=L().beaker.x+L().beaker.w/2;j.panel='stir';renderLab();}return;}
  if(tool==='stopper'&&j.steps.indexOf('mix')<j.cur&&!j.anim){if(j.stopper){if(curId()==='openStopper'){openStopper();return;}j.stopper=false;renderScene();toast('마개를 열었어요');}else{j.stopper=true;renderScene();toast('마개를 닫았어요');}return;}
  if(tool==='stopper'){if(j.stopper){if(curId()==='mix'){if(j.panel!=='mix'){j.panel='mix';renderLab();}toast('마개는 닫혀 있어요. 부피 플라스크를 끌어서 섞은 다음에 열어요!');return;}openStopper();return;}if(gate('mix')){j.stopper=true;j.panel='mix';renderLab();toast('마개를 닫았어요. 부피 플라스크를 끌어서 섞어요!');}return;}
@@ -1301,8 +1315,8 @@ function openStopper(){
 function josa(w,a,b){const ch=w.charCodeAt(w.length-1);if(ch<0xAC00||ch>0xD7A3)return w+a+'('+b+')';return w+((ch-0xAC00)%28?a:b);}
 function startExtra(){
  const j=S.job;
+ if(j.poured||j.bAnchor||j.pourB>0){j.xOn=false;j.xs=0;toast('비커의 용액을 이미 붓기 시작해서 시료를 더 넣을 수 없어요');return;}
  if(j.xOn){j.panel='weigh';renderLab();return;}
- if(j.poured||j.bAnchor||j.pourB>0){toast('비커의 용액을 이미 붓기 시작해서 시료를 더 넣을 수 없어요');return;}
  if(S.mode==='strict'){toast('목표 질량을 정확히 달아 이미 비커에 넣었어요. 더 넣으면 농도가 달라져요');return;}
  j.xOn=true;j.xs=0;j.dishOn=true;j.panel='weigh';renderLab();toast('빈 계량접시를 저울에 올렸어요. 더 넣을 시료를 달아서 비커로 옮겨요');
 }
@@ -1484,6 +1498,7 @@ function choosePip(s){
  const j=S.job;closePop();
  if(j.transferred){if(S.mode==='strict'||j.fillDone){reusePip();return;}if(s*100<j.V1u&&false)return;if(j.pipSize!==s){j.pipSize=s;j.pip=0;j.pipRinsed=false;}j.panel='pipette';renderLab();return;}
  if(s*100<j.V1u){modal({icon:'🧪',title:'피펫이 너무 작아요',html:`${s} mL 피펫으로는 ${pipFmt(j.V1u,5)} mL를 한 번에 옮길 수 없어요. 더 큰 피펫을 골라요.`});return;}
+ if(j.V1u%10&&s!==1){modal({icon:'🧪',title:'눈금이 너무 굵어요',html:`${s} mL 피펫은 0.1 mL 단위로만 잴 수 있어요. ${(j.V1u/100).toFixed(2)} mL처럼 0.01 mL까지 맞추려면 <b>1 mL 피펫</b>을 골라요.`});return;}
  if(curId()!=='pipette'||j.panel!=='pipette'){if(!gate('pipette'))return;}
  if(j.pipSize!==s){j.pipSize=s;j.pip=0;j.pipRinsed=false;}
  if(s>=j.V1u/100*4)toast('이 피펫은 꽤 크네요. 필요한 부피에 가까운 피펫이 더 정밀해요.');
@@ -1555,7 +1570,7 @@ const WB_D='M15 0 L35 0 L35 8 Q50 14 50 28 L50 76 Q50 80 46 80 L4 80 Q0 80 0 76 
 const RB_D='M28 0 L52 0 L52 12 Q80 18 80 40 L80 98 Q80 104 74 104 L6 104 Q0 104 0 98 L0 40 Q0 18 28 12 Z';
 const SB_D='M34 0 L66 0 L66 14 Q100 22 100 46 L100 98 Q100 104 94 104 L6 104 Q0 104 0 98 L0 46 Q0 22 34 14 Z';
 const WASH_TIP=[54,-22];
-const lbl=(x,t)=>`<text x="${x}" y="319" text-anchor="middle" font-size="12.5" font-weight="700" fill="#fff">${t}</text>`;
+const lbl=(x,t)=>`<text x="${x}" y="320" text-anchor="middle" font-size="14.5" font-weight="700" fill="#fff">${t}</text>`;
 const neckTop=j=>BENCH-210*FSCALE[j.flask];
 const dragging=(j,k)=>j.drag&&j.drag.k===k;
 const animOf=(j,k)=>j.anim&&j.anim.k===k;
@@ -1583,7 +1598,7 @@ function sceneSVG(){
  let s=`<svg viewBox="0 -90 900 420" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bench" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9a77c"/><stop offset="1" stop-color="#9c7850"/></linearGradient><linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3edf8"/><stop offset="1" stop-color="#f6f9fc"/></linearGradient></defs>
  <rect y="-90" width="900" height="390" fill="url(#wall)"/><rect y="298" width="900" height="32" fill="url(#bench)"/>`;
  const parts=j.kind==='prep'
-  ?[['scale',drawScale],['jar',drawJar],['waste',drawWaste],['funnelB',drawFunnelBottle],['bottle',drawBottle],['funnelLow',drawFunnelLow],['rod',drawRodFlask],['funnel',drawFunnelHigh],['flask',drawFlask],['beaker',drawBeaker],['water',drawWater],['wash',drawWash],['spatula',drawSpatula],['dish',drawDishFloat]]
+  ?[['scale',drawScale],['jar',drawJar],['waste',drawWaste],['funnelB',drawFunnelBottle],['bottle',drawBottle],['funnelLow',drawFunnelLow],['rod',drawRodFlask],['funnel',drawFunnelHigh],['flask',drawFlask],['beaker',drawBeaker],['rodAway',drawRodAway],['water',drawWater],['wash',drawWash],['spatula',drawSpatula],['dish',drawDishFloat]]
   :[['stock',drawStock],['beaker',drawBeaker],['pip',drawPip],['funnelB',drawFunnelBottle],['bottle',drawBottle],['waste',drawWaste],['funnelLow',drawFunnelLow],['funnel',drawFunnelHigh],['flask',drawFlask],['water',drawWater],['wash',drawWash]];
  const topK=(j.drag&&j.drag.k)||(j.anim&&j.anim.k);let top='';
  for(const [k,fn] of parts){const out=fn(j);if(k===topK)top+=out;else s+=out;}
@@ -1677,7 +1692,7 @@ function drawBeaker(j){
  const canDragB=j.kind==='prep'&&j.moved&&!j.poured;
  const BD=`M-4 0 L0 4 L0 ${H-6} Q0 ${H} 6 ${H} L${w-6} ${H} Q${w} ${H} ${w} ${H-6} L${w} 4 L${w+4} 0`;
  s+=`<g data-k="beaker" class="${canDragB?'grab':''}"><path transform="${mstr(m)}" d="${BD}" fill="rgba(235,244,252,.6)" stroke="none"/>`;
- if(vol>0.05){const sy=surfY(m,ly,ang,(H-ly)/H,pts);s+=`<rect x="0" y="${sy.toFixed(1)}" width="900" height="${(332-sy).toFixed(1)}" fill="${liquidColor(j.m.sub,conc)}" clip-path="url(#cB)"/>`;}
+ if(vol>0.05){const sy=surfY(m,ly,ang,(H-ly)/H,pts);s+=`<rect x="0" y="${sy.toFixed(1)}" width="900" height="${Math.max(0,332-sy).toFixed(1)}" fill="${liquidColor(j.m.sub,conc)}" clip-path="url(#cB)"/>`;}
  s+=`<g transform="${mstr(m)}">`;
  if(j.kind==='prep'&&solid>0.5&&!ang)s+=powderPile(w/2,H-2.5,solid,sub,w-16,vol>0);
  if(j.kind==='prep'&&j.moved&&!j.poured&&vol>0&&j.dissolve>0&&j.dissolve<1&&!ang){
@@ -1702,10 +1717,13 @@ function rodFlaskPts(j){
  const cx=L().flask,nt=neckTop(j),sc=FSCALE[j.flask];
  return j.funnelAt==='flask'?[[cx-1,nt+4],[cx-20,nt-84]]:[[cx+1,nt+40*sc],[cx-24,nt-84]];
 }
+function drawRodAway(j){
+ if(j.rodAt==='away'&&!dragging(j,'rod')){const bk=L().beaker;return `<g data-k="rod" class="grab">${rodLine([bk.x-18,BENCH-4],[bk.x+bk.w+18,BENCH-7])}</g>`;}
+ return '';
+}
 function drawRodFlask(j){
  if(dragging(j,'rod')){const a=[j.drag.x,j.drag.y];let s='';if(hiZone(j,['rod'],zoneFlask))s+=glow(L().flask-70,neckTop(j)-90,140,BENCH-neckTop(j)+85);return s+`<g data-k="rod">${rodLine(a,[a[0]+32,a[1]-L().beaker.H-45])}</g>`;}
  if(j.rodAt==='flask'&&!(j.anim&&j.anim.k==='flask')){const [a,b]=rodFlaskPts(j);return `<g data-k="rod">${rodLine(a,b)}</g>`;}
- if(j.rodAt==='away'){const bk=L().beaker;return `<g data-k="rod" class="grab">${rodLine([bk.x-18,BENCH-4],[bk.x+bk.w+18,BENCH-7])}</g>`;}
  return '';
 }
 
@@ -1730,7 +1748,7 @@ function drawFlask(j){
  s+=`<path transform="${mstr(m)}" d="${FLASK_D}" fill="rgba(235,244,252,.7)" stroke="#5f7d99" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
  if(!j.fEmpty&&j.fVol>0&&left>0.01){
   const sy=surfY(m,ly,ang,(-ly/214)*left,FLASK_PTS);
-  s+=`<rect x="0" y="${sy.toFixed(1)}" width="900" height="${(332-sy).toFixed(1)}" fill="${col}" clip-path="url(#cF)"/>`;
+  s+=`<rect x="0" y="${sy.toFixed(1)}" width="900" height="${Math.max(0,332-sy).toFixed(1)}" fill="${col}" clip-path="url(#cF)"/>`;
   if(Math.abs(ang)<2&&ly<-102)s+=`<path transform="${mstr(m)}" d="M-11 ${ly-3} Q0 ${ly+4} 11 ${ly-3}" fill="none" stroke="rgba(40,80,120,.55)" stroke-width="1.2" vector-effect="non-scaling-stroke"/>`;
  }
  s+=`<g transform="${mstr(m)}"><ellipse cx="0" cy="-170" rx="11" ry="2.2" fill="none" stroke="#14202e" stroke-width="1.6" vector-effect="non-scaling-stroke"/>
@@ -1830,7 +1848,7 @@ function drawStock(j){
  let s=`<defs><clipPath id="cS"><path transform="${mstr(m)}" d="${SB_D}"/></clipPath></defs><g data-k="stock" class="grab"><path transform="${mstr(m)}" d="${SB_D}" fill="${brown?'rgba(120,64,20,.88)':'rgba(236,244,252,.9)'}" stroke="${brown?'#5a3311':'#6f8ca8'}" stroke-width="2"/>`;
  const ang=animOf(j,'stock')?j.anim.ang:0;
  const sy=surfY(m,46,ang,0.55,[[0,0],[100,0],[0,104],[100,104]]);
- s+=`<rect x="0" y="${sy.toFixed(1)}" width="900" height="${(332-sy).toFixed(1)}" fill="${liquidColor(j.m.sub,j.m.M1act)}" clip-path="url(#cS)" opacity="${brown?0.5:1}"/>`;
+ s+=`<rect x="0" y="${sy.toFixed(1)}" width="900" height="${Math.max(0,332-sy).toFixed(1)}" fill="${liquidColor(j.m.sub,j.m.M1act)}" clip-path="url(#cS)" opacity="${brown?0.5:1}"/>`;
  s+=`<g transform="${mstr(m)}"><rect x="14" y="54" width="72" height="38" rx="4" fill="#fffdf6" stroke="#c9b98f"/><text x="50" y="70" text-anchor="middle" font-size="${s0.f.length>6?9.5:12}" font-weight="800" fill="#1d2433">${s0.f}</text><text x="50" y="85" text-anchor="middle" font-size="10.5" font-weight="800" fill="#c0392b">${esc(lab)}</text>`;
  if(!j.lidOpen)s+=`<rect x="30" y="-14" width="40" height="16" rx="4" fill="${brown?'#3b2a1d':'#2f4f6f'}"/>`;
  s+=`</g></g>`;
@@ -1977,6 +1995,7 @@ function beakerDragCheck(){
   P.gateTried=true;
   if(!gate('pour')){j.drag=null;P.mode='none';renderScene();return;}
   if(j.funnelAt!=='flask'&&S.mode==='strict'){j.drag=null;P.mode='none';renderScene();modal({icon:'⚠️',title:'깔때기 없이는 옮길 수 없어요',html:'<b>안전을 위해</b> 부피 플라스크에 용액을 옮길 때는 꼭 깔때기를 써요. 입구가 좁아서 그냥 부으면 용액이 넘쳐 손이나 실험대에 튈 수 있어요.<br><br>깔때기를 끌어서 부피 플라스크 입구에 꽂아 주세요.'});return;}
+  if(j.rodAt!=='flask'&&S.mode==='strict'){j.drag=null;P.mode='none';renderScene();modal({icon:'✋',title:'유리 막대를 먼저 걸쳐요',html:STEP.rodMove.why});return;}
   if(j.rodAt==='beaker')j.rodAt='away';
   if(j.rodAt!=='flask'&&!j.eff.some(e=>e.text.startsWith('유리 막대 없이')))addEff('유리 막대 없이 부어 용액이 튐 (−2%)',0.98);
   if(!(j.pourB>0))j.fBase=j.fVol;
@@ -2037,7 +2056,7 @@ function stirTooFast(){
  modal({icon:'⚠️',title:'너무 빨리 젓고 있어요!',html:`유리 막대로 세게 저으면<ul><li>용액이 비커 밖으로 <b>튀어서</b> 용질이 빠져나가요.</li><li>막대가 비커 벽에 부딪혀 <b>비커가 깨질 수</b> 있어요.</li></ul>비커 벽에 닿지 않게, 천천히 저어요.${extra}`,buttons:[{t:'천천히 저을게요'}]});
 }
 function mixMove(pt){
- const j=S.job;if(pt.out){mixTooFast();return;}
+ const j=S.job;if(pt.out){P=null;j.mixAng=0;j.mixY=0;renderScene();toast('실험대 그림 안에서 끌어요');return;}
  const now=performance.now();P.samples.push({t:now,x:pt.x,y:pt.y});while(P.samples.length>2&&now-P.samples[0].t>160)P.samples.shift();
  let dist=0;for(let i=1;i<P.samples.length;i++)dist+=Math.hypot(P.samples[i].x-P.samples[i-1].x,P.samples[i].y-P.samples[i-1].y);
  const dt=(now-P.samples[0].t)/1000;const pxs=dist*(pt.w/900);
@@ -2080,8 +2099,8 @@ function tapAction(k){
  if(k==='pip'&&j.panel==='pipette'){toast(j.pip===j.V1u?'피펫을 끌어서 부피 플라스크에 넣어요':'오른쪽 패널에서 꾹 눌러 부피를 정확히 맞춰요');return;}
 }
 function runAnim(dur,step,end){
- const t0=performance.now();
- const f=now=>{const p=Math.min(1,(now-t0)/dur);step(p);renderScene();if(p<1)requestAnimationFrame(f);else end();};
+ const t0=performance.now(),j0=S.job,a0=j0&&j0.anim;
+ const f=now=>{if(S.job!==j0||(j0&&j0.anim!==a0))return;const p=Math.min(1,(now-t0)/dur);step(p);renderScene();if(p<1)requestAnimationFrame(f);else end();};
  requestAnimationFrame(f);
 }
 function animPour(k,to){
@@ -2092,7 +2111,8 @@ function animPour(k,to){
  const th0=k==='stock'?95:-95,th1=k==='stock'?122:-122,sp=k==='stock'?[50,-4]:[25,-8];
  const v0=j.bWater,f0=j.fVol,addB=Math.round(Math.min(j.flask*0.4,300)),lvl=-(18+rand(13)),fT=j.flask*(0.93+0.07*(72+0.9*lvl)/72);
  let stockAmt=0;
- if(k==='stock'){const it=j.m.fromShelf?S.shelf.find(x=>x.id===j.m.fromShelf):null;stockAmt=Math.round((j.V1+10)*10)/10;if(it)stockAmt=Math.min(stockAmt,it.remain);}
+ if(k==='stock'){const it=j.m.fromShelf?S.shelf.find(x=>x.id===j.m.fromShelf):null;stockAmt=Math.round((j.V1+10)*10)/10;if(it)stockAmt=Math.min(stockAmt,it.remain);
+  if(it&&it.remain<j.V1u/100+0.5){renderScene();modal({icon:'🧪',title:'원액이 부족해요',html:`시약장에 남은 원액(${Math.round(it.remain*10)/10} mL)이 필요한 양보다 적어요. 미션을 나가서 용액을 더 만들거나 다른 원액을 골라요.`});return;}}
  j.anim={k,p:0,T,end,m:null,ang:th0};
  runAnim(1300,p=>{
   const th=th0+(th1-th0)*Math.min(1,p/0.3);j.anim.ang=th;j.anim.p=p;j.anim.stream=p>0.22&&p<0.86;
@@ -2103,8 +2123,8 @@ function animPour(k,to){
   if(k==='stock')j.bStock=q*stockAmt;
  },()=>{
   j.anim=null;
-  if(k==='water'&&to==='beaker'){j.bWater=v0+addB;done();toast('비커에 증류수를 조금 넣었어요');}
-  else if(k==='water'){if(j.rodAt==='flask')j.rodAt='away';j.fVol=fT;j.level=lvl;j.fillDone=true;if(j.funnelAt==='flask'&&j.funnelDirty&&!j.funnelRinsed){j.funnelRinsed=true;j.log.push({t:'깔때기로 증류수를 부어 깔때기 안쪽도 함께 헹궜어요',k:'ok'});}done();toast('증류수로 표선 아래 가까이까지 채웠어요');}
+  if(k==='water'&&to==='beaker'){j.bWater=v0+addB;if(curId()==='water')done();else{j.log.push({t:'비커에 증류수를 더 넣었어요',k:'ok'});renderLab();}toast('비커에 증류수를 조금 넣었어요');}
+  else if(k==='water'){settleResume(j);if(j.rodAt==='flask')j.rodAt='away';j.fVol=fT;j.level=lvl;j.fillDone=true;if(j.funnelAt==='flask'&&j.funnelDirty&&!j.funnelRinsed){j.funnelRinsed=true;j.log.push({t:'깔때기로 증류수를 부어 깔때기 안쪽도 함께 헹궜어요',k:'ok'});}done();toast('증류수로 표선 아래 가까이까지 채웠어요');}
   else{j.bStock=stockAmt;if(j.m.fromShelf){const it=S.shelf.find(x=>x.id===j.m.fromShelf);if(it){it.remain=Math.max(0,it.remain-stockAmt);save();}}done();toast('원액을 비커에 덜었어요');}
  });
 }
@@ -2135,7 +2155,12 @@ function animFlaskPour(){
 function nearAnchoredBeaker(pt){const b=L().beaker,c=ap(beakerM(S.job),b.w/2,b.H/2);return Math.hypot(pt.x-c[0],pt.y-c[1])<95;}
 /* 증류수병·세척병은 실험대 위 빈 곳 어디에나 내려놓을 수 있어요 */
 function placeFree(k){const j=S.job,g=j._ld;if(!g||!['water','wash'].includes(k)||g.y<-60)return false;
- const x=clamp(g.x,30,860),y=L()[k].y;j.posOv=Object.assign({},j.posOv,{[k]:{x,y}});renderScene();return true;}
+ const x=clamp(g.x,30,860),y=L()[k].y;
+ {const l=L(),w=k==='water'?52:46,o=k==='water'?'wash':'water',zs=[[l.beaker.x-8,l.beaker.x+l.beaker.w+8],[l.flask-58,l.flask+58]];
+  if(l.scale!=null)zs.push([l.scale-4,l.scale+164]);if(l.jar!=null)zs.push([l.jar-6,l.jar+90]);if(l.stock)zs.push([l.stock.x-6,l.stock.x+96]);if(l.pip!=null)zs.push([l.pip-22,l.pip+22]);
+  if(j.placed.funnel&&j.funnelAt==='rest')zs.push([l.funnel-34,l.funnel+34]);if(j.placed.bottle)zs.push([l.bottle-6,l.bottle+88]);if(j.placed[o])zs.push([l[o].x-4,l[o].x+(o==='water'?52:46)]);
+  if(zs.some(([a,b])=>x+w>a&&x<b)){toast('다른 기구와 겹쳐서 제자리로 돌려놓았어요. 빈 자리에 내려놓아요');return false;}}
+j.posOv=Object.assign({},j.posOv,{[k]:{x,y}});renderScene();return true;}
 function dropAction(k,pt){
  const j=S.job;
  if(k==='pip'){
@@ -2166,10 +2191,10 @@ function dropAction(k,pt){
   j.wasAnchored=false;return;
  }
  if(k==='dish'){
-  if(j.xOn){if(zoneBeaker(pt)){j.panel=null;renderPanel();animDishExtra();return;}renderScene();updateWeigh();return;}
-  if(zoneBeaker(pt)){if(curId()==='weigh'&&S.mode==='free'&&j.sample>0){j.readAtWeigh=reading(j);j.log.push({t:`약숟가락으로 시료를 달았어요 (저울 ${g2(j.readAtWeigh)} g)`,k:'ok'});j.cur++;j.panel=null;}
+  if(j.xOn){if(zoneBeaker(pt)){if(j.poured||j.bAnchor||j.pourB>0){renderScene();updateWeigh();toast('비커의 용액을 이미 붓기 시작해서 시료를 더 넣을 수 없어요');return;}j.panel=null;renderPanel();animDishExtra();return;}renderScene();updateWeigh();return;}
+  if(zoneBeaker(pt)){if(curId()==='weigh'&&j.sample>0&&(S.mode==='free'||reading(j)===j.targetCg)){j.readAtWeigh=reading(j);j.log.push({t:`약숟가락으로 시료를 달았어요 (저울 ${g2(j.readAtWeigh)} g)`,k:'ok'});j.cur++;j.panel=null;}
    if(curId()!=='toBeaker'){renderScene();updateWeigh();modal({icon:'✋',title:'아직 비커에 옮길 차례가 아니에요',html:STEP[curId()].why});return;}j.panel=null;renderPanel();animDish();return;}
-  renderScene();updateWeigh();return;
+  renderScene();updateWeigh();setTimeout(autoWeigh,0);return;
  }
  if(k==='water'){
   if(zoneBeaker(pt)){if(j.kind==='dil'){renderScene();modal({icon:'🤔',title:'비커에는 원액을 덜어요',html:'희석 실험에서 비커는 원액을 잠깐 덜어 두는 용도예요. 증류수는 부피 플라스크에 넣어요.'});return;}if(curId()!=='water'&&j.steps.indexOf('water')<j.cur){if(j.poured||j.bAnchor){renderScene();toast('비커의 용액은 이미 부피 플라스크로 옮겼어요');return;}if(j.bWater+Math.min(j.flask*0.4,300)>j.flask*0.8){renderScene();toast('비커에 물을 더 넣으면 부피 플라스크에 다 담을 수 없어요');return;}animPour('water','beaker');return;}if(gate('water'))animPour('water','beaker');else renderScene();return;}
@@ -2230,14 +2255,15 @@ function dropAction(k,pt){
 /* =========================================================
    라벨 · 결과 · 시약장
    ========================================================= */
+function lbKeep(el){const j=S.job;if(!j)return;(j.labelDraft=j.labelDraft||{})[el.id]=el.value;}
 function labelPanelHTML(j){
- const s=SUBS[j.m.sub];
+ const s=SUBS[j.m.sub],d=j.labelDraft||{},dv=(id,def)=>esc(d[id]!=null?d[id]:def);
  return `<h3>🏷️ 라벨 붙이기</h3><p class="tiny" style="margin-top:0">${s.brown?'빛에 약한 물질이라 <b>갈색 시약병</b>에 담았어요. ':''}라벨에 들어갈 내용을 써요. 몰농도는 <b>숫자와 단위</b>를 함께 써요.</p>
- <div class="lbl">물질<input id="lbName" value="${esc(s.f+' ('+s.name+')')}"></div>
- <div class="lbl">몰농도<input id="lbConc" oninput="fixUnit(this)" placeholder="숫자와 단위를 함께 (예: 0.000 M)" autocomplete="off"></div>
- <div class="lbl">부피<input id="lbVol" value="${j.flask} mL"></div>
- <div class="lbl">날짜<input id="lbDate" value="${today()}"></div>
- <div class="lbl">만든 사람<input id="lbMaker" placeholder="이름"></div>
+ <div class="lbl">물질<input id="lbName" oninput="lbKeep(this)" value="${dv('lbName',s.f+' ('+s.name+')')}"></div>
+ <div class="lbl">몰농도<input id="lbConc" oninput="fixUnit(this);lbKeep(this)" value="${dv('lbConc','')}" placeholder="예: 0.100 M" autocomplete="off"></div>
+ <div class="lbl">부피<input id="lbVol" oninput="lbKeep(this)" value="${dv('lbVol',j.flask+' mL')}"></div>
+ <div class="lbl">날짜<input id="lbDate" oninput="lbKeep(this)" value="${dv('lbDate',today())}"></div>
+ <div class="lbl">만든 사람<input id="lbMaker" oninput="lbKeep(this)" value="${dv('lbMaker','')}" placeholder="이름"></div>
  <div class="msg" id="lbMsg"></div>
  <button class="primary full" onclick="attachLabel()">라벨 붙이고 결과 보기</button>`;
 }
@@ -2260,6 +2286,8 @@ function checkLabelConc(c,target,after){
  let why='';
  if(!(pc.val>0))why='라벨에 몰농도가 적혀 있지 않아요.';
  else if(pc.unit==='none')why=`농도의 <b>단위</b>가 없어요. “${esc(c)}”만으로는 무슨 농도인지 알 수 없어요.`;
+ else if(pc.unit==='bad'&&pc.rest.replace(/\s+/g,'')==='m')why='소문자 <b>m</b>은 몰랄 농도의 기호예요. 몰농도는 <b>대문자 M</b>(또는 mol/L)으로 써요.';
+ else if(pc.unit==='bad'&&/^(M|mol\/L)\s+\S/i.test(pc.rest))why=`농도 칸에는 <b>숫자와 단위만</b> 써요. “${esc(pc.rest.replace(/^(M|mol\/L)\s+/i,''))}” 같은 물질 이름은 ‘물질’ 칸에 적어요.`;
  else if(pc.unit==='bad')why=/[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(pc.rest)?`단위 자리에 한글 “${esc(pc.rest)}”가 들어갔어요. <b>한/영 키</b>를 눌러 영어로 바꾼 다음 <b>M</b>을 써요.`:`“${esc(pc.rest)}”는 몰농도의 단위가 아니에요. (M 또는 mol/L)`;
  else if(Math.abs(pc.val-target)/target>0.005)why=`라벨에 쓴 <b>${esc(c)}</b>는 이 용액의 몰농도가 아니에요. 어떤 농도로 만들었는지 다시 확인해 보세요.`;
  if(!why)return true;
@@ -2297,7 +2325,7 @@ function labelNotes(info,target){
  return n;
 }
 function computeResult(j){
- const s=SUBS[j.m.sub];
+ const s=SUBS[j.m.sub];settleResume(j);
  if(j.kind==='prep'&&j.poured&&!j.lazyDone){j.lazyDone=true;
   if(j.pourLeft>0.002)addEff(`비커의 용액을 덜 부어 약 ${Math.round(j.pourLeft*100)}%가 비커에 남음 (−${(j.pourLeft*100).toFixed(1)}%)`,1-j.pourLeft);
   if(!(j.rinses>0))addEff('비커·유리 막대를 헹구지 않아 묻어 있던 용질이 빠짐 (−3%)',0.97);else if(j.rinses===1)addEff('한 번만 헹궈 용질이 조금 남음 (−0.8%)',0.992);
@@ -2318,7 +2346,7 @@ function computeResult(j){
  if(j.flask!==need)notes.push(`${need} mL 대신 ${j.flask} mL 부피 플라스크를 사용함`);
  if(j.level>0)notes.push('⚠️ 표선을 넘겼어요. 넘친 용액은 덜어낼 수 없으니, 실제 실험이라면 처음부터 다시 만들어야 해요');
  if(j.level!==0)notes.push(`표선보다 ${Math.abs(j.level)}방울 ${j.level<0?'낮게':'높게'} 맞춤 → 실제 부피 ${Vact.toFixed(2)} mL`);
- if(Math.abs(j.eyeAtMark)>2)notes.push(`표선을 ${j.eyeAtMark>0?'위에서 내려다보며 맞춤 (실제보다 덜 채워지기 쉬워요)':'아래에서 올려다보며 맞춤 (실제보다 더 채워지기 쉬워요)'}`);
+ if(Math.abs(j.eyeAtMark)>2)notes.push(`표선을 ${j.eyeAtMark>0?'위에서 내려다보며 맞춤 (이렇게 보면 실제보다 덜 채우기 쉬워요)':'아래에서 올려다보며 맞춤 (이렇게 보면 실제보다 더 채우기 쉬워요)'}`);
  const C=n/(Vact/1000);let err=(C-target)/target*100;if(Math.abs(err)<0.005)err=0;
  const Cideal=j.kind==='prep'?(j.trueCg/100/s.M)/(need/1000):j.m.M1act*(j.trueV1u/100)/need;
  notes.unshift(...calcNotes(j));
@@ -2368,7 +2396,7 @@ function resultHTML(j){
  <div><h3>④ 실험 결과</h3><div class="stars">${starRow(st)}${hintBadge(r.hints)}</div><b>${msg}</b>
  <table class="restable"><tr><td>목표 몰농도</td><td>${sig(r.target)} M</td></tr><tr><td>실제로 만든 몰농도</td><td>${sig(r.C,4)} M</td></tr>
  <tr><td>오차율</td><td style="color:${aeT<=2?'#1f9d55':aeT<=5?'#d98200':'#d64545'}">${r.err>=0?'+':''}${r.err.toFixed(2)} %</td></tr></table>
- <p class="tiny">오차율 = (실제 농도 − 목표 농도) ÷ 목표 농도 × 100${Math.abs(r.err-r.errProc)>0.05?`<br>⭐ 별점은 피할 수 없는 오차(${j.kind==='prep'?'저울 눈금':'원액의 오차'})를 뺀 <b>실험 조작 오차 ${r.errProc>=0?'+':''}${r.errProc.toFixed(2)}%</b>로 매겼어요.`:''}</p>
+ <p class="tiny">※ 오차를 비교하려고 실제 농도를 한 자리 더 보여 줘요. ${j.kind==='prep'?'0.01 g 단위 저울로 달았으니 믿을 수 있는 자리는 그보다 적어요.':'피펫과 부피 플라스크의 눈금만큼만 믿을 수 있어요.'}<br>오차율 = (실제 농도 − 목표 농도) ÷ 목표 농도 × 100${Math.abs(r.err-r.errProc)>0.05?`<br>⭐ 별점은 피할 수 없는 오차(${j.kind==='prep'?'저울 눈금':'원액의 오차'})를 뺀 <b>실험 조작 오차 ${r.errProc>=0?'+':''}${r.errProc.toFixed(2)}%</b>로 매겼어요.`:''}</p>
  ${r.mode==='free'?`<div class="strict-note">⚖️ <b>오차 반영 모드</b> 별점: 실험 조작 오차 ★★★ 0.2% 이하 · ★★ 5% 이하 · ★ 10% 이하, 그리고 실수 ${r.mistakes}개${r.volBad?' · 요구 부피와 다름':''} → 최대 ${'★'.repeat(r.cap)||'0개'}</div>`:''}<h3 style="margin-top:12px">🔎 오차의 원인</h3>${r.notes.length?`<ul class="reasons">${r.notes.map(n=>`<li>${n}</li>`).join('')}</ul>`:'<p class="good">발견된 실수가 없어요. 모든 과정을 정확하게 해냈어요!</p>'}
  <div class="btnrow"><button class="primary" onclick="retryJob()">🔁 같은 미션 다시</button><button class="ghost" onclick="S.job=null;render()">미션 목록으로</button><button class="ghost" onclick="S.job=null;S.tab='shelf';render()">🗄️ 시약장 보기</button></div></div></div></div>`;
 }
@@ -2403,13 +2431,16 @@ function shelfDilute(id){
  if(!opts.length){modal({icon:'🧪',title:'남은 양이 부족해요',html:`남은 양(${Math.round(it.remain)} mL)으로는 희석 실험을 할 수 없어요.`});return;}
  modal({icon:'🧪',title:'희석 배수 고르기',html:`<b>${esc(it.labelName)}</b> (${esc(it.labelConc)})을 원액으로 ${DIL_V2} mL를 만들어요.`,buttons:[{t:'취소',cls:'ghost'},...opts.map(b)]});
 }
-function dumpBottle(id){modal({icon:'🗑️',title:'용액을 버릴까요?',html:'폐액통에 버린 용액은 되돌릴 수 없어요.',buttons:[{t:'취소',cls:'ghost'},{t:'버리기',fn:()=>{S.shelf=S.shelf.filter(x=>x.id!==id);save();renderShelf();}}]});}
+function dumpBottle(id){modal({icon:'🗑️',title:'용액을 버릴까요?',html:'폐시약통에 버린 용액은 되돌릴 수 없어요.',buttons:[{t:'취소',cls:'ghost'},{t:'버리기',fn:()=>{S.shelf=S.shelf.filter(x=>x.id!==id);save();renderShelf();}}]});}
 
+document.addEventListener('keydown',e=>{if(e.key!=='Escape'||!modalOpen())return;const bs=$('#modal').querySelectorAll('.mbtns button');const b=bs.length===1?bs[0]:$('#modal').querySelector('.mbtns button.ghost');if(b){e.preventDefault();b.click();}});
+function setHH(){const h=document.querySelector('header');if(h)document.documentElement.style.setProperty('--hh',h.offsetHeight+'px');}
+window.addEventListener('resize',setHH);window.addEventListener('load',setHH);setHH();
 /* 미니 계산기: 누를 때 반짝 + 키보드 입력 */
 function flashKey(el){if(!el)return;el.classList.remove('hit');void el.offsetWidth;el.classList.add('hit');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('hit'),170);const d=$('#cdisp');if(d){d.classList.remove('bump');void d.offsetWidth;d.classList.add('bump');}}
 document.addEventListener('pointerdown',e=>{const k=e.target.closest('.key');if(k)flashKey(k);});
 document.addEventListener('keydown',e=>{
- if(!$('#cdisp')||modalOpen())return;const a=document.activeElement;if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'))return;
+ if(!$('#cdisp')||modalOpen())return;const a=document.activeElement;if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'||a.tagName==='SELECT'||((e.key==='Enter'||e.key===' ')&&(a.tagName==='BUTTON'||a.tagName==='A'||a.tagName==='SUMMARY'))))return;
  const map={'*':'×','x':'×','/':'÷','-':'−','+':'+','Enter':'=','=':'=','Backspace':'⌫','Escape':'C','.':'.','(':'(',')':')'};
  const k=/^[0-9]$/.test(e.key)?e.key:map[e.key];if(!k)return;e.preventDefault();ck(k);
  flashKey([...document.querySelectorAll('.key')].find(b=>b.textContent===k));
@@ -2489,8 +2520,8 @@ function fsAttach(){
 function fsHead(){
  const j=S.job,s=SUBS[j.m.sub],d=document.createElement('div');d.className='card fshead';
  d.innerHTML=`<div class="kicker">${j.kind==='prep'?'용액 만들기':'희석하기'} 미션${j.m.fromShelf?' · 내가 만든 원액':''}</div><b class="fstitle">${missionTitle(j)}</b>
- <div class="fschips"><span class="chip">${s.name}</span>${j.kind==='prep'?`<span class="chip">몰질량 ${s.M.toFixed(2)} g/mol</span>`:''}${s.caution?`<span class="chip warn" onclick="cautionPopup('${j.m.sub}')">⚠️ 주의사항</span>`:''}</div>
- <div class="btnrow">${S.mode==='free'?'<button class="ghost sm" onclick="resetStage(\'lab\')">🔄 실험 다시 하기</button>':''}<button class="ghost sm" onclick="quitJob()">미션 나가기</button></div>`;
+ <div class="fschips"><span class="chip">${s.name}</span>${j.kind==='prep'?`<span class="chip">몰질량 ${s.M.toFixed(2)} g/mol</span>`:''}${s.caution?`<button type="button" class="chip warn" onclick="cautionPopup('${j.m.sub}')">⚠️ 주의사항</button>`:''}</div>
+ <div class="btnrow">${'<button class="ghost sm" onclick="resetStage(\'lab\')">🔄 실험 다시 하기</button>'}<button class="ghost sm" onclick="quitJob()">미션 나가기</button></div>`;
  return d;
 }
 function fsApply(){const r=$('#fsRoot');r.classList.toggle('sheet',S.fsSheet);r.classList.toggle('tools',S.fsTools);$('#fsSheetBtn').classList.toggle('on',S.fsSheet);}
@@ -2515,7 +2546,7 @@ function fsExit(){
 {const r=$('#fsRoot');r.addEventListener('scroll',()=>{if(r.scrollLeft||r.scrollTop){r.scrollLeft=0;r.scrollTop=0;}});}
 /* 세로 폰을 돌려 쓰는 중에 글자를 입력하면 키보드 방향이 어긋나서, 잠깐 전체 화면을 나가 입력해요 */
 document.addEventListener('focusin',e=>{
- const t=e.target;if(!S.fs||!$('#fsRoot').classList.contains('rot')||!t.matches||!t.matches('#fsRoot input,#fsRoot textarea'))return;
+ const t=e.target;if(!S.fs||!$('#fsRoot').classList.contains('rot')||!t.matches||!t.matches('#fsRoot input:not([type=range]):not([type=checkbox]),#fsRoot textarea'))return;
  const id=t.id;fsExit();toast('글자를 입력할 수 있게 전체 화면을 잠시 나왔어요');
  setTimeout(()=>{const n=id&&document.getElementById(id);if(n){n.scrollIntoView({block:'center'});n.focus();}},60);
 });

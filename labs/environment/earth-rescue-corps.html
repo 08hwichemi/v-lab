@@ -718,6 +718,11 @@ body.playing #game{-webkit-user-select:none;user-select:none;-webkit-touch-callo
   body.playing #game:has(>.catchwrap) #cr{grid-area:cr;justify-self:center;min-width:104px;min-height:64px}
   body.playing #game:has(>.catchwrap) #net{grid-area:net;justify-self:center;align-self:end;font-size:1rem;padding:8px 14px}
 }
+/* 대화 퀴즈 창: 휴대폰에서는 화면 위쪽에 붙인다 — 아래쪽 '대화하기' 버튼 자리와 겹치지 않게. 보기가 잠긴 동안은 흐리게 */
+.modal.qz .opt{transition:opacity .2s}
+.modal.qz.locked .opt,.modal.qz.locked #ff{opacity:.45;cursor:default}
+.build{font-size:.74rem;color:var(--muted);opacity:.8}
+@media (max-width:560px){.modal.qz{align-items:flex-start}.modal.qz .mbox{margin-top:4px}}
 </style>
 </head>
 <body>
@@ -1356,12 +1361,16 @@ function confetti(host,n=46){if(!host||calm())return;const box=document.createEl
    누름마다 번호(GEST.id)를 매겨, 창이 열릴 때 진행 중이던 누름에서 나온 클릭은 버린다.
    누르는 도중에 열린 창(대화하기·스페이스)은 연달아 두 번 누른 경우를 위해 열린 뒤 0.5초도 막는다.
    (버튼을 눌렀다 뗀 뒤 열리는 보통 창은 시간으로 막지 않는다 — 안내 창을 빠르게 넘길 수 있어야 하므로) */
-const GEST={id:0,down:0,key:0};
-window.addEventListener('pointerdown',()=>{GEST.id++;GEST.down=1},true);
-['pointerup','pointercancel'].forEach(t=>window.addEventListener(t,()=>{GEST.down=0},true));
-window.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){if(!e.repeat)GEST.id++;GEST.key=1}},true);
-window.addEventListener('keyup',e=>{if(e.key===' '||e.key==='Enter')GEST.key=0},true);
-window.addEventListener('blur',()=>{GEST.down=0;GEST.key=0});
+const BUILD='11.24-4';   /* 화면에 보이는 버전 표시 — 고칠 때마다 올린다 (설정 창·시작 화면 맨 아래) */
+const GEST={id:0,down:0,key:0,touch:0,at:0};   /* at = 마지막으로 누르거나 뗀 시각, touch = 닿아 있는 손가락 수 */
+const gnow=()=>{GEST.at=performance.now()};
+window.addEventListener('pointerdown',()=>{GEST.id++;GEST.down=1;gnow()},true);
+['pointerup','pointercancel'].forEach(t=>window.addEventListener(t,()=>{GEST.down=0;gnow()},true));
+['touchstart','touchend','touchcancel'].forEach(t=>window.addEventListener(t,e=>{GEST.touch=e.touches?e.touches.length:0;gnow()},{capture:true,passive:true}));
+window.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){if(!e.repeat)GEST.id++;GEST.key=1;gnow()}},true);
+window.addEventListener('keyup',e=>{if(e.key===' '||e.key==='Enter'){GEST.key=0;gnow()}},true);
+window.addEventListener('blur',()=>{GEST.down=0;GEST.key=0;GEST.touch=0});
+const pressing=()=>GEST.down||GEST.key||GEST.touch>0;
 function guardClicks(m){
   const born=performance.now(),g0=GEST.id,held=GEST.down||GEST.key;
   const stop=e=>{e.stopPropagation();e.preventDefault()};
@@ -1392,7 +1401,7 @@ function title(){
   <div class="slots">${SAVES.slots.map(card).join('')}
     ${SAVES.slots.length<MAX_SLOTS?`<button class="slot px new" id="newgame">${ic('➕','i2')}<span class="sinfo"><b>새 연구원으로 시작</b><small>캐릭터와 난이도를 고르고 처음부터 시작해요.</small></span></button>`:`<p class="hintline">저장 칸 ${MAX_SLOTS}개가 모두 찼어요. 새로 시작하려면 안 쓰는 기록을 지워 주세요.</p>`}
   </div>
-  <p class="hintline">기록은 이 컴퓨터의 이 브라우저에만 저장돼요 · 최대 ${MAX_SLOTS}명까지 따로 저장</p>`);
+  <p class="hintline">기록은 이 컴퓨터의 이 브라우저에만 저장돼요 · 최대 ${MAX_SLOTS}명까지 따로 저장<br><span class="build">버전 ${BUILD}</span></p>`);
   $$('[data-go]').forEach(b=>b.onclick=()=>{SAVES.cur=+b.dataset.go;S=SAVES.slots[SAVES.cur];sfx.ok();office()});
   $$('[data-del]').forEach(b=>b.onclick=()=>{const k=+b.dataset.del,s=SAVES.slots[k];modal(`<div class="mi">${ic('⚠️','i4')}</div><p style="text-align:center"><b>${esc(s.name)}</b> 연구원의 기록을 지울까요?<br>승진·보상·별이 모두 사라지고 되돌릴 수 없어요.</p>`,[{t:'취소'},{t:'기록 지우기',c:'pink',f:()=>{SAVES.slots.splice(k,1);persist();title()}}])});
   const ng=$('#newgame');if(ng)ng.onclick=()=>create();
@@ -1402,7 +1411,7 @@ function settings(){
     <div><h3 style="margin-bottom:6px">난이도</h3><div class="diffs">${DIFFS.map((d,k)=>`<button class="diff btn" aria-pressed="${S.diff===k}" data-d="${k}">${ic(d.i,'i2')}<b>${d.n}</b><small>${d.d}</small></button>`).join('')}</div><p class="diffdesc">${DIFFS[S.diff].d}</p>
     <p class="muted" style="font-size:.88rem;margin-top:6px">난이도는 언제든 바꿀 수 있어요. 다음에 시작하는 임무부터 적용돼요.</p></div>
     <div class="row" style="justify-content:space-between"><span>소리</span><button class="btn small" id="sMute">${S.mute?'꺼짐 — 켜기':'켜짐 — 끄기'}</button></div>
-    <div class="row" style="justify-content:space-between"><span>다른 사람이 하거나 처음부터 다시 하려면</span><button class="btn small" id="sTitle">시작 화면으로</button></div>`,[{t:'닫기',c:'primary'}]);
+    <div class="row" style="justify-content:space-between"><span>다른 사람이 하거나 처음부터 다시 하려면</span><button class="btn small" id="sTitle">시작 화면으로</button></div><p class="build" style="text-align:right">버전 ${BUILD}</p>`,[{t:'닫기',c:'primary'}]);
   $$('.diff',m).forEach(b=>b.onclick=()=>{S.diff=+b.dataset.d;save();sfx.tick();$$('.diff',m).forEach(x=>x.setAttribute('aria-pressed',x===b));$('.diffdesc',m).textContent=DIFFS[S.diff].d});
   $('#sMute',m).onclick=()=>{S.mute=!S.mute;save();renderTop();$('#sMute',m).textContent=S.mute?'꺼짐 — 켜기':'켜짐 — 끄기'};
   $('#sTitle',m).onclick=()=>{m.remove();save();title()};
@@ -1958,7 +1967,7 @@ ENG.field=(el,cfg,done)=>{
   function act(){
     if(paused||over)return;
     const near=nearest();
-    if(near&&near.kind==='npc'&&!(cfg.mode==='radar'&&near.o.got))return talk(near.o);
+    if(near&&near.kind==='npc'&&!(cfg.mode==='radar'&&near.o.got))return openTalk(near.o);
     if(near&&near.kind==='station'){refill(true);return}
     if(cfg.mode==='radar'){
       const t=targets.find(o=>!o.done&&Math.hypot(o.x-P.x,o.y-P.y)<14);
@@ -1975,6 +1984,22 @@ ENG.field=(el,cfg,done)=>{
     toast('가까이에 할 일이 없어요. 목표나 NPC에게 다가가세요.');
   }
   function refill(msg){if(!station)return;const k=station.refill,mx=cfg.res[k].max;if(res[k]<mx){res[k]=mx;sfx.tick();toast(`${station.n}에서 ${josa(cfg.res[k].n,'을','를')} 가득 채웠어요!`,true)}else if(msg)toast(`${josa(cfg.res[k].n,'이','가')} 이미 가득해요.`)}
+  /* 대화(퀴즈) 창은 버튼에서 손을 뗀 다음에 연다.
+     누르는 순간 열면 창이 손가락 밑에 떠서, 손을 뗄 때 생기는 클릭이 그 자리의 보기를 답으로 눌러 버렸다(휴대폰).
+     ① 손·키를 떼고 0.09초 뒤에 열고(최대 1.5초 대기) ② 연 뒤에도 보기는 0.7초 + 손을 뗀 채 0.35초가 지나야 켜진다(연타 대비). */
+  let talkWait=false;
+  function openTalk(n){
+    if(n.got)return talk(n);
+    if(talkWait)return;
+    talkWait=true;paused=true;keys={u:0,d:0,l:0,r:0};tap=null;
+    const t0=performance.now();
+    (function go(){
+      if(over||!el.isConnected){talkWait=false;return}
+      const now=performance.now();
+      if(now-t0<1500&&(pressing()||now-GEST.at<90)){setTimeout(go,30);return}
+      talkWait=false;talk(n);
+    })();
+  }
   function talk(n){
     if(n.got){toast(`${n.n}: "고마워! 힘내, 연구원!"`);return}
     paused=true;keys={u:0,d:0,l:0,r:0};tap=null;
@@ -1985,6 +2010,10 @@ ENG.field=(el,cfg,done)=>{
       ${fifty.left?`<div class="center" style="margin-top:6px"><button class="btn small warn" id="ff">${ic('🐧','i1')} 펭펭 찬스: 오답 2개 지우기</button></div>`:''}<div id="qfb"></div></div>`,[{t:'나중에 다시 올게요'}]);
     const close=()=>{m.remove();paused=false;last=performance.now()};
     $('.mact button',m).onclick=close;
+    {m.classList.add('qz','locked');const lockEls=[...$$('.opt',m),$('#ff',m)].filter(Boolean),t0=performance.now();lockEls.forEach(b=>b.disabled=true);
+      (function unlock(){if(!m.isConnected)return;const now=performance.now(),dt=now-t0;
+        if(dt<3000&&(dt<700||pressing()||now-GEST.at<350)){setTimeout(unlock,60);return}
+        m.classList.remove('locked');lockEls.forEach(b=>{if(!b.classList.contains('gone'))b.disabled=false})})()}
     if($('#ff',m))$('#ff',m).onclick=()=>{fifty.left=0;shuffle(n.q.o.map((_,k)=>k).filter(k=>k!==n.q.a)).slice(0,2).forEach(k=>{const b=$(`.opt[data-k="${k}"]`,m);b.classList.add('gone');b.disabled=true});$('#ff',m).remove()};
     $$('.opt',m).forEach(b=>b.onclick=()=>{
       const k=+b.dataset.k,ok=k===n.q.a;

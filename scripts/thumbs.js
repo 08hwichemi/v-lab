@@ -15,7 +15,7 @@ const PREP = {
     await p.click('#g-coat'); await p.click('#g-gloves'); await p.click('#g-goggles'); await p.click('#m-strict'); await p.click('#startBtn'); await p.waitForTimeout(2600);
     await p.evaluate(() => { startPrep(0); S.job.calc.step = 99; S.job.flask = S.job.m.V; S.job.stage = 'lab'; render(); });
     await p.waitForTimeout(400);
-    await p.evaluate(() => { const s = document.querySelector('.scenebox'); if (s) { s.scrollIntoView({ block: 'start' }); window.scrollBy(0, -62); } });
+    await p.evaluate(() => { const s = document.querySelector('.scenebox'); if (s) { document.querySelector('main').style.paddingBottom = '400px'; s.scrollIntoView({ block: 'start' }); window.scrollBy(0, -66); } });
   },
   'chemistry/buffer-solution-lab': async p => {   // 안내 닫고 ① pH 비교에서 HCl 6 mL 넣은 모습
     await p.click('#modalClose').catch(() => {}); await p.click('#cmpAdd1'); await p.click('#cmpAdd5'); await p.waitForTimeout(1600);

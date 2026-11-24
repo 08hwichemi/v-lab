@@ -522,6 +522,31 @@ input[type=range]{accent-color:var(--teal)}
 .radar .rb{border:0;background:#e2ddd1;height:10px}
 .radar .rb i{background:linear-gradient(90deg,var(--amber),var(--coral))}
 .toast{font-weight:600}
+.goldbadge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#ffe9a8,#e9a23b);color:#2b1c05;font-weight:700;border-radius:8px;padding:3px 12px;box-shadow:0 3px 10px rgba(0,0,0,.3)}
+.muted2{font-size:.86rem;color:#c7d3e0}
+.mc-tt .gold{color:#c98522;font-size:1rem}
+/* 시작 화면·저장 칸·난이도 */
+.titlehero.px{position:relative;overflow:hidden;border:0;color:#fff;min-height:250px;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;padding:26px 28px;background-size:cover;background-position:center bottom}
+.titlehero.px::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,13,31,.1),rgba(7,13,31,.66));pointer-events:none}
+.titlehero.px>*{position:relative;z-index:1}
+.titlehero .label{color:#ffe2a6}
+.titlehero .logo{font-size:clamp(2.6rem,9vw,4.4rem);line-height:1.05;letter-spacing:.02em;text-shadow:0 4px 0 rgba(7,13,31,.5),0 10px 30px rgba(0,0,0,.5)}
+.titlehero p{font-size:1.06rem;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.slots{display:grid;gap:10px}
+.slot{display:flex;align-items:center;gap:14px;padding:12px 16px;text-align:left;width:100%}
+.slot .sav{flex:none;width:54px;height:62px;border-radius:10px;background:linear-gradient(#cfe1ee,#e9f1f6);display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+.slot .sav img{width:88%;height:auto;display:block}
+.slot .sinfo{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.4}
+.slot .sinfo b{font-size:1.1rem}.slot .sinfo small{font-size:.88rem}
+.slot .sact{display:flex;gap:8px;align-items:center;flex:none}
+.slot.new{border-style:dashed;border-color:#b9b09c;background:transparent;box-shadow:none;cursor:pointer}
+.slot.new:hover{background:#fff;border-color:var(--navy)}
+.diffs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.diff{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:9px 11px;line-height:1.35}
+.diff small{font-weight:400;font-size:.8rem;color:var(--muted)}
+.diff[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy);box-shadow:0 2px 0 #0a1522}
+.diff[aria-pressed="true"] small{color:#b9c7d8}
+@media (max-width:560px){.diffs{grid-template-columns:1fr}.slot{flex-wrap:wrap}.slot .sact{width:100%;justify-content:flex-end}}
 
 /* ---- 미니게임별 ---- */
 .scangrid,.heat{border:0;border-radius:14px;box-shadow:var(--shadow);padding:10px}
@@ -1020,9 +1045,37 @@ const ISLANDS=[
 
 /* ================= 상태 ================= */
 let S=null;
-function load(){try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):null}catch(e){return null}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-function fresh(){return {name:'',avatar:0,major:MAJORS[0],items:['t_drone'],stars:{},promoted:0,read:{},mute:false,pledge:'',joined:new Date().toISOString().slice(0,10),ended:false}}
+/* 저장: 이 브라우저에 연구원(저장 칸)을 여러 명 둘 수 있다. 공용 PC 에서 학생마다 따로 이어 하고, 시작 화면에서 새로 만들거나 지울 수 있다.
+   예전 한 칸짜리 저장(KEY)은 첫 실행 때 첫 칸으로 옮긴다. 깨진 데이터는 norm() 이 걸러 낸다. */
+const KEY2='earthRescueCorps.v2',MAX_SLOTS=4;
+let SAVES={cur:-1,slots:[]};
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+function fresh(){return {name:'',avatar:0,major:MAJORS[0],items:['t_drone'],stars:{},gold:{},promoted:0,read:{},mute:false,pledge:'',joined:today(),last:today(),ended:false,diff:1}}
+function norm(o){
+  if(!o||typeof o!=='object'||Array.isArray(o)||typeof o.name!=='string'||!o.name.trim())return null;
+  const s=fresh(),int=(v,a,b,d)=>Number.isFinite(+v)?Math.max(a,Math.min(b,Math.round(+v))):d;
+  s.name=o.name.trim().slice(0,10);s.avatar=int(o.avatar,0,AVATARS.length-1,0);s.major=MAJORS.includes(o.major)?o.major:MAJORS[0];
+  s.items=[...new Set(['t_drone',...(Array.isArray(o.items)?o.items:[])])].filter(k=>ITEMS[k]);
+  const valid=k=>{const m=/^(\d)-(\d)$/.exec(k);return m&&ISLANDS[+m[1]]&&ISLANDS[+m[1]].missions[+m[2]]};
+  if(o.stars&&typeof o.stars==='object')for(const k in o.stars)if(valid(k)){const v=int(o.stars[k],0,3,0);if(v>0)s.stars[k]=v}
+  if(o.gold&&typeof o.gold==='object')for(const k in o.gold)if(valid(k)&&o.gold[k])s.gold[k]=1;
+  s.promoted=int(o.promoted,0,6,0);if(o.read&&typeof o.read==='object')for(const k in o.read)if(/^[0-6]$/.test(k)&&o.read[k])s.read[k]=1;
+  s.mute=!!o.mute;s.pledge=typeof o.pledge==='string'?o.pledge.slice(0,200):'';s.ended=!!o.ended&&s.promoted>=6;s.diff=int(o.diff,0,2,1);
+  const dt=v=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v)?v:today();s.joined=dt(o.joined);s.last=dt(o.last);
+  return s}
+function loadAll(){
+  let raw=null;try{raw=JSON.parse(localStorage.getItem(KEY2)||'null')}catch(e){}
+  if(raw&&Array.isArray(raw.slots)){SAVES={cur:-1,slots:raw.slots.map(norm).filter(Boolean).slice(0,MAX_SLOTS)};return}
+  let old=null;try{old=norm(JSON.parse(localStorage.getItem(KEY)||'null'))}catch(e){}
+  SAVES={cur:-1,slots:old?[old]:[]};if(old)persist()}
+function persist(){try{localStorage.setItem(KEY2,JSON.stringify({slots:SAVES.slots}))}catch(e){}}
+function save(){if(!S||!S.name)return;S.last=today();if(SAVES.cur<0){SAVES.slots.push(S);SAVES.cur=SAVES.slots.length-1}else SAVES.slots[SAVES.cur]=S;persist()}
+/* 난이도: 속도(spd)·시간 여유(time)·상대의 힘(foe)·여분 기회(extra) */
+const DIFFS=[
+  {n:'쉬움',i:'🌱',d:'천천히, 넉넉하게. 처음 해 보거나 내용을 익히고 싶을 때.',spd:.75,time:1.35,foe:.8,extra:2,goal:.8},
+  {n:'보통',i:'⛰️',d:'기본 난이도.',spd:1,time:1,foe:1,extra:0,goal:1},
+  {n:'어려움',i:'🔥',d:'빠르고 빡빡해요. 별 3개로 끝내면 금빛 훈장을 받아요.',spd:1.3,time:.8,foe:1.25,extra:-1,goal:1.2}];
+const DF=()=>DIFFS[S&&S.diff!=null?S.diff:1];
 const has=id=>S&&S.items.includes(id);
 const mk=(i,j)=>i+'-'+j;
 const islandDone=i=>ISLANDS[i].missions.every((m,j)=>S.stars[mk(i,j)]>0);
@@ -1160,10 +1213,10 @@ function renderTop(){
   t.innerHTML=`<div class="top px">
     <div class="who"><button class="avbtn" id="tAv" aria-label="승진 단계 보기">${avImg(S.avatar,'i3')}</button><div><div class="nm">${esc(S.name)}</div><div class="rk">지구구조단 ${RANKS[S.promoted]} · ${esc(S.major)}</div></div></div>
     <div class="gauge"><div class="lbl"><span>지구 회복도</span><span>${pct}% · ★${totalStars()}</span></div><div class="bar"><i style="width:${pct}%"></i></div></div>
-    <div class="row" style="gap:4px"><button class="btn small" id="tHome">${ic('🏠','i1')} 연구실</button><button class="btn small" id="tMute" aria-label="${S.mute?'소리 켜기':'소리 끄기'}">${ic(S.mute?'🔇':'🔊','i1')}</button></div>
+    <div class="row" style="gap:4px"><button class="btn small" id="tHome">${ic('🏠','i1')} 연구실</button><button class="btn small" id="tMute" aria-label="${S.mute?'소리 켜기':'소리 끄기'}">${ic(S.mute?'🔇':'🔊','i1')}</button><button class="btn small" id="tSet" aria-label="설정: 난이도·시작 화면">${ic('⚙️','i1')}</button></div>
   </div>`;
   $('#tHome').onclick=()=>office();$('#tAv').onclick=rankCard;
-  $('#tMute').onclick=()=>{S.mute=!S.mute;save();renderTop()};
+  $('#tMute').onclick=()=>{S.mute=!S.mute;save();renderTop()};$('#tSet').onclick=settings;
 }
 function modal(html,actions=[{t:'확인',c:'primary'}],opt={}){
   const m=document.createElement('div');m.className='modal';
@@ -1176,15 +1229,42 @@ function modal(html,actions=[{t:'확인',c:'primary'}],opt={}){
 function ladder(n){return `<div class="ladder">${RANKS.map((r,i)=>`<span class="${i<n?'on':i===n?'now':''}">${r}</span>`).join('')}</div>`}
 
 /* ================= 1. 캐릭터 만들기 ================= */
+/* 시작 화면: 이어하기 / 새로 시작 / 저장 칸 지우기 */
+function title(){
+  S=null;SAVES.cur=-1;
+  const card=(s,k)=>{const done=Object.values(s.stars).filter(x=>x>0).length,st=Object.values(s.stars).reduce((a,b)=>a+b,0);
+    return `<div class="slot px"><span class="sav">${avImg(s.avatar,'',s.promoted)}</span>
+      <span class="sinfo"><b>${esc(s.name)}</b><small>${RANKS[s.promoted]} · 임무 ${done}/18 · ★${st} · ${DIFFS[s.diff].n}</small><small class="muted">마지막 플레이 ${s.last.replace(/-/g,'.')}</small></span>
+      <span class="sact"><button class="btn primary" data-go="${k}">이어하기</button><button class="btn small" data-del="${k}" aria-label="${esc(s.name)} 기록 지우기">지우기</button></span></div>`};
+  show(`<div class="titlehero px" style="background-image:url('${sceneURL(5)}')"><span class="label">환경 탐사 어드벤처</span><h1 class="logo">지구구조단</h1><p>여섯 섬에서 온 구조 요청을 해결하고, 지구를 지켜라.</p></div>
+  <div class="slots">${SAVES.slots.map(card).join('')}
+    ${SAVES.slots.length<MAX_SLOTS?`<button class="slot px new" id="newgame">${ic('➕','i2')}<span class="sinfo"><b>새 연구원으로 시작</b><small>캐릭터와 난이도를 고르고 처음부터 시작해요.</small></span></button>`:`<p class="hintline">저장 칸 ${MAX_SLOTS}개가 모두 찼어요. 새로 시작하려면 안 쓰는 기록을 지워 주세요.</p>`}
+  </div>
+  <p class="hintline">기록은 이 컴퓨터의 이 브라우저에만 저장돼요 · 최대 ${MAX_SLOTS}명까지 따로 저장</p>`);
+  $$('[data-go]').forEach(b=>b.onclick=()=>{SAVES.cur=+b.dataset.go;S=SAVES.slots[SAVES.cur];sfx.ok();office()});
+  $$('[data-del]').forEach(b=>b.onclick=()=>{const k=+b.dataset.del,s=SAVES.slots[k];modal(`<div class="mi">${ic('⚠️','i4')}</div><p style="text-align:center"><b>${esc(s.name)}</b> 연구원의 기록을 지울까요?<br>승진·보상·별이 모두 사라지고 되돌릴 수 없어요.</p>`,[{t:'취소'},{t:'기록 지우기',c:'pink',f:()=>{SAVES.slots.splice(k,1);persist();title()}}])});
+  const ng=$('#newgame');if(ng)ng.onclick=()=>create();
+}
+function settings(){
+  const m=modal(`<h2>${ic('⚙️','i1')} 설정</h2>
+    <div><h3 style="margin-bottom:6px">난이도</h3><div class="diffs">${DIFFS.map((d,k)=>`<button class="diff btn" aria-pressed="${S.diff===k}" data-d="${k}">${ic(d.i,'i2')}<b>${d.n}</b><small>${d.d}</small></button>`).join('')}</div>
+    <p class="muted" style="font-size:.88rem;margin-top:6px">난이도는 언제든 바꿀 수 있어요. 다음에 시작하는 임무부터 적용돼요.</p></div>
+    <div class="row" style="justify-content:space-between"><span>소리</span><button class="btn small" id="sMute">${S.mute?'꺼짐 — 켜기':'켜짐 — 끄기'}</button></div>
+    <div class="row" style="justify-content:space-between"><span>다른 사람이 하거나 처음부터 다시 하려면</span><button class="btn small" id="sTitle">시작 화면으로</button></div>`,[{t:'닫기',c:'primary'}]);
+  $$('.diff',m).forEach(b=>b.onclick=()=>{S.diff=+b.dataset.d;save();sfx.tick();$$('.diff',m).forEach(x=>x.setAttribute('aria-pressed',x===b))});
+  $('#sMute',m).onclick=()=>{S.mute=!S.mute;save();renderTop();$('#sMute',m).textContent=S.mute?'꺼짐 — 켜기':'켜짐 — 끄기'};
+  $('#sTitle',m).onclick=()=>{m.remove();save();title()};
+}
 function create(){
-  S=fresh();
-  let av=0,major=MAJORS[0];
+  S=fresh();SAVES.cur=-1;
+  let av=0,major=MAJORS[0],diff=1;
   show(`<div><span class="label">지구구조단 · 신입 사원 등록</span><h1>지구를 구하는 첫 출근</h1><p class="muted">대학을 막 졸업하고 '지구구조단'에 합격했어요. 사원증에 들어갈 내 모습과 이름을 정해 주세요.</p></div>
   <div class="create">
     <div class="px stack">
       <div><h3>1. 캐릭터 고르기</h3><div class="avs" id="avs">${AVATARS.map((a,i)=>`<button class="av btn" aria-pressed="${i===0}" data-i="${i}" aria-label="${a.label}">${avImg(i)}<small>${a.label}</small></button>`).join('')}</div></div>
       <div><h3><label for="nick">2. 닉네임 정하기</label></h3><input type="text" id="nick" maxlength="10" placeholder="예: 초록별" autocomplete="off"></div>
       <div><h3>3. 대학 전공</h3><div class="chips" id="majors">${MAJORS.map((m,i)=>`<button class="chip" aria-pressed="${i===0}" data-m="${m}">${m}</button>`).join('')}</div></div>
+      <div><h3>4. 난이도</h3><div class="diffs" id="diffs">${DIFFS.map((d,k)=>`<button class="diff btn" aria-pressed="${k===1}" data-d="${k}">${ic(d.i,'i2')}<b>${d.n}</b><small>${d.d}</small></button>`).join('')}</div><p class="muted" style="font-size:.86rem;margin-top:4px">나중에 설정(⚙)에서 바꿀 수 있어요.</p></div>
     </div>
     <div class="stack">
       <div class="idcard px"><div class="hd"><span>지구구조단 사원증</span><span>EARTH RESCUE</span></div>
@@ -1192,15 +1272,19 @@ function create(){
         <dl><dt>이름</dt><dd id="idnm">-</dd><dt>직급</dt><dd>인턴</dd><dt>전공</dt><dd id="idmj">${MAJORS[0]}</dd><dt>입사일</dt><dd>${S.joined.replace(/-/g,'.')}</dd><dt>소속</dt><dd>생물 구조 1팀</dd></dl></div></div>
       <p id="err" class="muted" style="min-height:1.4em"></p>
       <button class="btn primary" id="join" style="font-size:1.2rem;padding:14px">입사하기</button>
+      ${SAVES.slots.length?'<button class="btn" id="toTitle">← 시작 화면으로</button>':''}
     </div>
   </div>`);
   $$('#avs .av').forEach(b=>b.onclick=()=>{av=+b.dataset.i;$$('#avs .av').forEach(x=>x.setAttribute('aria-pressed',x===b));$('#idph').innerHTML=avImg(av)});
   $$('#majors .chip').forEach(b=>b.onclick=()=>{major=b.dataset.m;$$('#majors .chip').forEach(x=>x.setAttribute('aria-pressed',x===b));$('#idmj').textContent=major});
   $('#nick').oninput=e=>{$('#idnm').textContent=e.target.value.trim()||'-'};
+  $$('#diffs .diff').forEach(b=>b.onclick=()=>{diff=+b.dataset.d;$$('#diffs .diff').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+  {const tt=$('#toTitle');if(tt)tt.onclick=()=>title()}
   $('#join').onclick=()=>{
     const n=$('#nick').value.trim();
     if(!n){$('#err').textContent='닉네임을 입력해야 사원증이 발급돼요.';$('#nick').focus();return}
-    S.name=n;S.avatar=av;S.major=major;save();sfx.win();office();intro(0);
+    if(SAVES.slots.length>=MAX_SLOTS){$('#err').textContent='저장 칸이 모두 찼어요. 시작 화면에서 안 쓰는 기록을 지워 주세요.';return}
+    S.name=n.slice(0,10);S.avatar=av;S.major=major;S.diff=diff;save();sfx.win();office();intro(0);
   };
 }
 function intro(k){
@@ -1474,7 +1558,7 @@ function island(i){
   </div>
   <div class="mcards">${is.missions.map((m,j)=>{const st=S.stars[mk(i,j)]||0;const it=ITEMS[m.reward];return `<button class="mcard px ${st?'done':''}" data-j="${j}">
     ${bub(m.from.e,'i3',is.color)}
-    <span class="mc-b"><span class="mc-tt"><span class="t">${m.title}</span><span class="stars">${st?starStr(st):'<span class="off">★★★</span>'}</span></span>
+    <span class="mc-b"><span class="mc-tt"><span class="t">${m.title}</span><span class="stars">${st?starStr(st):'<span class="off">★★★</span>'}</span>${S.gold[mk(i,j)]?'<span class="gold emo" title="어려움 난이도 별 3개">🏅</span>':''}</span>
     <span class="mc-tags"><span class="tag">${m.issue}</span><span class="tag ${m.focus}">${effName[m.focus]} 노력</span><span class="kind">${ENGINE_KIND[m.engine]}</span>${st?'':`<span class="muted">보상 ${ic(it.i,'i1')} ${kindName[it.k]}</span>`}</span></span>
   </button>`}).join('')}</div>`);
   topBtn('tMap',ic('🗺️','i1')+' 지도',()=>map());
@@ -1522,31 +1606,48 @@ function brief(i,j){
   <div class="center"><button class="btn" id="back">편지 다시 보기</button><button class="btn primary" id="go">작전 시작!</button></div>`);
   islandNav(i);$('#back').onclick=()=>mLetter(i,j);$('#go').onclick=()=>play(i,j);
 }
+/* 난이도에 따라 미션 설정값을 조정한 사본을 만든다 (보통은 원래 값 그대로) */
+function tune(c){const d=DF(),o=Object.assign({},c);if(d===DIFFS[1])return o;
+  const easy=d===DIFFS[0];
+  if(o.par)o.par=o.par.map(x=>Math.round(x*d.time));
+  if(o.hazards)o.hazards=o.hazards.map(h=>Object.assign({},h,{speed:h.speed*d.spd}));
+  if(o.light)o.light=Math.round(o.light*(easy?1.2:.88));
+  if(o.flood)o.flood=Object.assign({},o.flood,{every:Math.round(o.flood.every*d.time)});
+  if(o.scans!=null)o.scans=Math.max(2,o.scans+d.extra);
+  if(o.goal!=null)o.goal=Math.max(3,Math.round(o.goal*d.goal));
+  if(o.time!=null)o.time=Math.round(o.time*d.time);
+  if(o.energy!=null)o.energy=Math.round(o.energy*(easy?1.25:.85));
+  if(o.nets!=null)o.nets=Math.max(1,o.nets+(easy?1:-1));
+  if(o.budget!=null)o.budget=Math.round(o.budget*(easy?1.15:.9));
+  if(o.enemy)o.enemy=Object.assign({},o.enemy,{atk:o.enemy.atk.map(a=>Object.assign({},a,{dmg:a.dmg.map(x=>Math.max(1,Math.round(x*d.foe)))}))});
+  return o}
 function play(i,j){
-  const m=ISLANDS[i].missions[j];
+  const m=ISLANDS[i].missions[j];const diffAt=S.diff;
   show(`<div class="playhead ph"><h2>${ic(m.from.e,'i1')} <span class="tt">${m.title}</span></h2><div class="row"><button class="btn small" id="quit">작전 중단</button><button class="btn small" id="pHome" aria-label="연구실로">${ic('🏠','i1')}</button><button class="btn small" id="pMap" aria-label="출동 지도로">${ic('🗺️','i1')}</button></div></div>
   <div class="px" id="game"></div>`);
   document.body.classList.add('playing');
   $('#quit').onclick=()=>island(i);$('#pHome').onclick=office;$('#pMap').onclick=()=>map();
   const el=$('#game');el.style.setProperty('--scene',`url('${sceneURL(i)}')`);
-  ENG[m.engine](el,m.cfg,stars=>{
+  ENG[m.engine](el,tune(m.cfg),stars=>{
     clean();
-    if(stars>0){result(i,j,stars)}
+    if(stars>0){result(i,j,stars,diffAt)}
     else{sfx.bad();el.innerHTML=`<div class="res-top">${ic('😢','i4')}<h2>아쉽게 실패했어요</h2><p>${josa(m.from.n,'이','가')} 아직 기다리고 있어요. 다시 도전해 볼까요?</p><div class="center" style="margin-top:10px"><button class="btn" id="b1">섬으로</button><button class="btn primary" id="b2">다시 도전</button></div></div>`;$('#b1').onclick=()=>island(i);$('#b2').onclick=()=>play(i,j)}
   });
 }
-function result(i,j,stars){
+function result(i,j,stars,diffAt=S.diff){
   const m=ISLANDS[i].missions[j],k=mk(i,j);
   const first=!S.stars[k];
   S.stars[k]=Math.max(S.stars[k]||0,stars);
+  const newGold=diffAt===2&&stars===3&&!S.gold[k];if(newGold)S.gold[k]=1;
   const newItem=!has(m.reward);if(newItem)S.items.push(m.reward);
   save();sfx.win();
   const it=ITEMS[m.reward];
   const kind={tool:'새 장비',deco:'연구실 장식',pet:'도우미 펫'}[it.k];
   show(`<div class="px res-top scene" style="--scene:url('${sceneURL(i)}')">
     ${ic(m.from.e,'i4')}
-    <span class="label">구조 성공 · ${m.issue}</span>
+    <span class="label">구조 성공 · ${m.issue} · 난이도 ${DIFFS[diffAt].n}</span>
     <div class="bigstars">${starStr(stars)}</div>
+    ${newGold?`<span class="goldbadge">${ic('🏅','i1')} 금빛 훈장 획득 — 어려움 별 3개</span>`:(diffAt<2&&stars===3?`<span class="muted2">어려움 난이도에서 별 3개를 받으면 금빛 훈장을 받아요</span>`:'')}
     <h2>${josa(m.from.n,'을','를')} 도왔어요!</h2>
     <p>${m.cfg.after}</p>
   </div>
@@ -1846,7 +1947,7 @@ ENG.sort=(el,cfg,done)=>{
     ${binsHTML()}<div id="sfb" class="toast"></div>
     <div class="center" id="cst"><button class="btn primary" id="cgo">컨베이어 가동!</button></div>`;
     const it=$('#it',el);
-    const dur=()=>Math.max(3.4,7-idx*.4);
+    const dur=()=>Math.max(3.4,7-idx*.4)/DF().spd;
     function showItem(){const x=items[idx];it.innerHTML=`${ic(x.i,'i2')}<br>${x.t}`;pos=0;judging=false;$('#cn',el).textContent=idx+1}
     function next(){idx++;if(idx<items.length){showItem()}else{cancelAnimationFrame(raf);finish()}}
     function judge(b){if(judging||!started)return;judging=true;const x=items[idx],ok=b===x.b,bin=cfg.bins.find(z=>z.id===x.b);
@@ -1943,7 +2044,7 @@ ENG.catch=(el,cfg,done)=>{
   const cv=$('#cv',el),ctx=cv.getContext('2d');ctx.setTransform(RES,0,0,RES,0,0);
   let px=W/2,pw=has('p_turtle')?50:36,items=[],score=0,t0=0,last=0,acc=0,raf=0,keys={l:0,r:0},target=null,msgT=0,running=false;
   const hudf=(now)=>{const left=running?Math.max(0,Math.ceil((DUR-(now-t0))/1000)):30;$('#chud',el).innerHTML=`<span>⏱ <b>${left}</b>초</span><span>${ic('🥤','i1')} 수거 <b>${score}</b> / 목표 ${cfg.goal}</span>${now-msgT<1000?`<span style="background:var(--pink)">${cfg.badMsg}</span>`:''}`};
-  function spawn(now){const good=Math.random()<.68;const a=good?cfg.good:cfg.bad;const prog=(now-t0)/DUR;items.push({x:10+Math.random()*(W-20),y:-10,v:(46+Math.random()*40)*(1+prog*.7),e:a[Math.random()*a.length|0],good,w:Math.random()*6})}
+  function spawn(now){const good=Math.random()<.68;const a=good?cfg.good:cfg.bad;const prog=(now-t0)/DUR;items.push({x:10+Math.random()*(W-20),y:-10,v:(46+Math.random()*40)*(1+prog*.7)*DF().spd,e:a[Math.random()*a.length|0],good,w:Math.random()*6})}
   function draw(now){
     ctx.fillStyle='#bfe6fb';ctx.fillRect(0,0,W,H);
     for(let r=0;r<8;r++){ctx.fillStyle=r%2?'#b0dcf5':'#a5d4f0';ctx.fillRect(0,40+r*25,W,25)}
@@ -2068,7 +2169,7 @@ ENG.chase=(el,cfg,done)=>{
     if(dist<=32&&nets>0&&running){g.fillStyle='rgba(255,210,122,.9)';g.font='bold 9px sans-serif';g.textAlign='center';g.fillText('그물 사정거리!',W/2,H-6)}
   }
   function frame(now){const dt=Math.min(50,now-last)/1000;last=now;
-    if(running){t+=dt;scroll+=110*dt;stun=Math.max(0,stun-dt);
+    if(running){t+=dt;scroll+=110*DF().spd*dt;stun=Math.max(0,stun-dt);
       if(stun<=0){if(keys.l)px-=spd*dt;if(keys.r)px+=spd*dt;if(target!=null)px+=(target-px)*Math.min(1,dt*12)}px=Math.max(36,Math.min(W-36,px));
       dist=Math.min(100,dist+3.3*dt);
       thief.x=W/2+Math.sin(t*1.25)*42+Math.sin(t*.6)*12;
@@ -2207,9 +2308,9 @@ function archive(tab){
   show(`<div class="playhead"><h2>${ic('📚','i2')} 연구 기록실</h2></div>
   <div class="row" role="tablist">${[['items','장비·장식·펫'],['dex','구조한 생물 도감'],['eff','노력 카드']].map(([k,t])=>`<button class="chip" role="tab" aria-selected="${tab===k}" data-t="${k}">${t} (${cnt[k]})</button>`).join('')}</div>
   ${body}
-  <div class="px" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><span class="muted">처음부터 새 캐릭터로 다시 시작할 수 있어요. 지금까지의 기록은 사라져요.</span><button class="btn small" id="reset">처음부터 다시</button></div>`);
+  <div class="px" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><span class="muted">다른 사람이 하려면 설정(⚙)의 '시작 화면으로'를 누르세요. 이 연구원의 기록을 지우려면 오른쪽 버튼을 눌러요.</span><button class="btn small" id="reset">이 기록 지우기</button></div>`);
   $$('[data-t]').forEach(b=>b.onclick=()=>archive(b.dataset.t));
-  $('#reset').onclick=()=>modal(`<div class="mi">${ic('⚠️','i4')}</div><p style="text-align:center">정말 처음부터 다시 시작할까요?<br>모든 승진·보상·기록이 지워져요.</p>`,[{t:'취소'},{t:'처음부터 시작',c:'pink',f:()=>{try{localStorage.removeItem(KEY)}catch(e){}S=null;renderTop();create()}}]);
+  $('#reset').onclick=()=>modal(`<div class="mi">${ic('⚠️','i4')}</div><p style="text-align:center"><b>${esc(S.name)}</b> 연구원의 기록을 지울까요?<br>모든 승진·보상·기록이 지워지고 되돌릴 수 없어요.</p>`,[{t:'취소'},{t:'기록 지우기',c:'pink',f:()=>{if(SAVES.cur>=0)SAVES.slots.splice(SAVES.cur,1);persist();title()}}]);
 }
 
 /* ================= 8. 엔딩 ================= */
@@ -2239,9 +2340,9 @@ function ending(){
 }
 
 /* ================= 시작 ================= */
-S=load();
+loadAll();
 let booted=false;
-const boot=()=>{if(booted)return;booted=true;if(S&&S.name){office()}else{create()}};
+const boot=()=>{if(booted)return;booted=true;if(SAVES.slots.length)title();else create()};
 /* 캔버스에 쓰는 글자(한글 제목 글꼴)와 이모지를 먼저 받아 둔다. 2.5초 안에 못 받으면 그냥 시작하고, 나중에 도착하면 다시 그린다 */
 const redrawCanvases=()=>{for(const k in EC)delete EC[k];for(const k in AVI)delete AVI[k];const o=$('#ocv');if(o)drawOffice(o);const m=$('#mcv');if(m)drawMap(m)};
 (function(){

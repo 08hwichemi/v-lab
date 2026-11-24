@@ -20,6 +20,11 @@ const PREP = {
   'chemistry/buffer-solution-lab': async p => {   // 안내 닫고 ① pH 비교에서 HCl 6 mL 넣은 모습
     await p.click('#modalClose').catch(() => {}); await p.click('#cmpAdd1'); await p.click('#cmpAdd5'); await p.waitForTimeout(1600);
   },
+  'environment/earth-rescue-corps': async p => {   // 글꼴을 기다린 뒤, 진행 중인 연구원 상태를 만들어 연구실 화면을 잘라 낼 폭에 맞춤
+    await p.waitForTimeout(2600);
+    await p.evaluate(() => { const s = fresh(); s.name = '초록별'; s.promoted = 3; s.read = { 0: 1, 1: 1, 2: 1, 3: 1 }; ISLANDS.forEach((I, i) => I.missions.forEach((m, j) => { if (i < 3) { s.stars[i + '-' + j] = 3; if (!s.items.includes(m.reward)) s.items.push(m.reward); } })); SAVES.slots = [s]; SAVES.cur = 0; S = s; const a = document.getElementById('app'); a.style.maxWidth = '912px'; a.style.margin = '0'; office(); });
+    await p.waitForTimeout(900);
+  },
   'chemistry/chemical-cell': async p => { await p.click('[data-pickmode="daniel"]'); await p.click('[data-study="free"]'); await p.click('#startBtn'); },
   'physics/mechanics-energy': async p => {   // 실험 동작 한 번 실행하고 시뮬레이션 화면이 맨 위에 오도록 스크롤
     await p.evaluate(() => { const set = (id, v) => { const n = document.querySelector('.lab:not([hidden]) ' + id); if (n) { n.value = v; n.dispatchEvent(new Event('change')); } }; set('#s-v-n', '7.7'); set('#p-v-n', '30'); set('#p-a-n', '60'); });

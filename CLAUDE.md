@@ -42,6 +42,7 @@
 - 그 전 세션(2026-11-23, 세션 브랜치 `claude/trusting-hopper-q8etug`)은 모두 커밋·푸시·배포 완료 상태로 끝남(마지막 커밋 `f0bf20b`). 휘쌤에게 확인을 요청해 둔 것 2가지: ① 녹색 급식 챌린지의 단원('기후변화와 환경생태 · 기후위기에 대응하는 우리의 활동')·대상(고1~고3) 표기, ② 학번 5자리 검증(학교 학번 체계가 다르면 `labs/environment/green-lunch-challenge.html` 의 `/^\d{5}$/` 와 안내 문구 수정). 답이 오면 `data/labs.js`·해당 파일만 고치면 됨.
 - 사용자가 다음에 할 가능성이 큰 일: 다른 선생님 실험 HTML을 받아 올리기 (아래 절차대로), 송다혜·하영우 선생님 추가 요청 반영, 종분화 서식지 추가 연출(예: 포식자 등장 시 흩어지기) 요청 가능성.
 - 주의: 클라우드 컨테이너에서는 `08hwichemi.github.io` 접속이 막혀 있어 실제 사이트는 curl 로 확인 못 함. 배포 성공 여부는 `gh run list --repo 08hwichemi/v-lab --limit 2` 로 본다.
+- 배포가 `No artifacts named "github-pages" were found` 로 실패하는 일이 2026-11-24 에 두 번 있었다(올린 직후 목록에 아직 안 잡히는 GitHub 쪽 일시 오류 · 코드 문제 아님). `gh run rerun <실행 번호> --repo 08hwichemi/v-lab --failed` 로 다시 돌리면 성공한다. 푸시 뒤에는 꼭 결과가 success 인지 확인할 것.
 - 새 세션은 반드시 저장소 `08hwichemi/v-lab` + 브랜치 `claude/awesome-johnson-vp7823` 을 선택해서 연다 (저장소 없이 열면 add_repo 로 붙여야 하고 세션이 따로 묶임).
 
 ## 프로젝트

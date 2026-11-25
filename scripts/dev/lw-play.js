@@ -38,7 +38,9 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
         for (const c of s.clouds) { if (Math.hypot(c[0] - s.bx, c[1] - (s.by - 15)) < c[2] + 60) { ty = c[1] > s.by - 15 ? Math.max(o.H * .3, c[1] - c[2] - 90) : Math.min(o.H * .95, c[1] + c[2] + 90); tx = s.bx; } }
         await p.mouse.move(o.ox + tx, o.oy + ty); await sleep(60); }
       await p.mouse.up(); },
-    // 곰 달리기: 점프 = 왼쪽 탭, 2단 점프 = 공중에서 한 번 더, 미끄러지기 = 오른쪽을 누르고 있기(마우스 누름으로 흉내). 하트가 다 떨어지면 '다시 도전'을 눌러 이어 간다
+    // 곰 달리기: 점프 = 왼쪽 탭, 2단 점프 = 공중에서 한 번 더, 미끄러지기 = 오른쪽을 누르고 있기(마우스 누름으로 흉내).
+    //   장면의 _s 에서 앞의 장애물(objs: 올무·덫·통나무·바위·차·굴러오는 통나무·수로 pit·낮은 가지 branch)·발판(plats)·꿀과 큰 곰 기운(items)을 읽어 판단한다.
+    //   하트가 다 떨어지면 '다시 도전'을 눌러 이어 간다
     async snare() {
     const G = 26, J = 9.2, BW = .27;
     const o = await p.evaluate(() => { const r = document.getElementById('cv').getBoundingClientRect(); return { ox: r.left, oy: r.top, W: _dbg.W, H: _dbg.H }; });
@@ -50,7 +52,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       if (s.dead) { deaths++; await p.waitForSelector('#shB:not(.locked-ui) #fAgain', { timeout: 6000 }).catch(() => {}); await p.locator('#fAgain').tap().catch(() => {}); await sleep(600); if (deaths > 3) break; sliding = false; dbl = false; continue; }
       if (s.ready) { await sleep(40); continue; }
       const v = s.v, b = s.bear, now = Date.now();
-      const onPlat = s.plats.find(q => q.d0 <= .3 && q.d1 >= -.3 && b.y >= q.h - .05);
+      const onPlat = s.plats.find(q => q.d0 <= .3 && q.d1 >= -.3 && Math.abs(b.y - q.h) < .08);
       const under = x => s.plats.some(q => x >= q.d0 - .3 && x <= q.d1 + .4);
       // 미끄러지기
       const br = s.objs.find(q => q.t === 'branch' && q.dx + q.w / 2 + BW > -.05);
@@ -60,8 +62,9 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       let jump = false;
       if (dbl && !b.onG && b.airN === 1 && b.yv <= 1.2) { jump = true; dbl = false; }
       else if (b.onG && !wantSlide && now - lastJump > 120) {
-        const np = !onPlat && s.plats.find(q => q.d0 <= 1.25 && q.d0 > -.6 && q.d1 > 2);
-        if (np) jump = true;
+        const np = s.plats.find(q => q.h > b.y + .3 && q.h - b.y <= 1.45 && q.d0 <= 1.25 && q.d0 > -.6 && q.d1 > 2);   // 한 층 위 발판(땅→1층, 1층→2층)
+        const it = (s.items || []).find(q => (q.t === 'honey' || q.t === 'paw') && q.dx > .2 && q.dx <= v * .2 + .1 && q.y > .9 && q.y - b.y < 1.7);   // 꿀·큰 곰 기운은 뛰어서 먹는다
+        if (np || it) jump = true;
         else { const gs = s.objs.filter(q => q.t !== 'branch' && q.dx + q.w / 2 + BW > 0 && !(onPlat && under(q.dx))).sort((a, c) => a.dx - c.dx);
           if (gs[0]) { const f = gs[0], vr = v + (f.vx || 0); let last = f, hmax = f.h; for (const q of gs.slice(1)) { if (q.dx - q.w / 2 - (last.dx + last.w / 2) < 1.5 * v / 3.3) { last = q; hmax = Math.max(hmax, q.h); } else break; }
             const d = f.dx - f.w / 2 - BW, e = last.dx + last.w / 2 + BW, hh = hmax + .14, disc = Math.sqrt(Math.max(0, J * J - 2 * G * hh)), tUp = (J - disc) / G, avail = 2 * disc / G, need = (e - d) / vr;

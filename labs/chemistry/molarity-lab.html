@@ -1352,7 +1352,10 @@ function renderPanel(){
  if(j.panel==='pipette'){p.innerHTML=pipHTML(j);bindPip();updatePip();return;}
  const tgt=j.kind==='prep'?`${j.calc.freeMode?'내가 계산한 질량':'목표 질량'} <b>${g2(j.targetCg)} g</b> · ${j.flask} mL 부피 플라스크`:`옮길 원액 <b>${pipFmt(j.V1u,j.V1u%10?1:5)} mL</b> · ${j.flask} mL 부피 플라스크`;
  const extra=curId()==='rinse'&&j.rinses>0?(S.mode==='strict'?`<div class="msg">헹굼 ${j.rinses}/2 – 한 번 더 헹궈요!</div>`:''):curId()==='pour'&&j.bAnchor&&j.pourB>0?`<div class="msg">붓는 중 ${Math.round(j.pourB*100)}% – 비커를 꾹 누르고 있으면 계속 부어져요.</div>`:'';
- p.innerHTML=`<h3>🔬 실험 진행</h3><div class="given" style="margin-bottom:8px">${tgt}</div>${extra}
+ /* 남은 단계 수 (V-Lab 추가): 섞기까지 끝내면 다 된 것처럼 보여서 '왜 안 끝나지?' 하고 멈추는 일이 있었다 — 얼마나 남았는지, 끝은 시약병·라벨이라는 것을 늘 보여 준다 */
+ const rem=j.steps.slice(j.cur).filter(id=>!(id==='openStopper'&&!j.stopper)).length,afterMix=j.cur>j.steps.indexOf('mix');
+ const remHTML=`<div class="given" style="margin-bottom:8px">남은 단계 <b>${rem}개</b>${afterMix?' · 용액을 <b>시약병에 옮겨 담고 라벨</b>을 붙여야 끝나요':''}</div>`;
+ p.innerHTML=`<h3>🔬 실험 진행</h3><div class="given" style="margin-bottom:8px">${tgt}</div>${remHTML}${extra}
  <ul class="howto"><li>🧰 툴바의 도구를 누르면 사용하거나 실험대에 올라가요.</li><li>✋ 실험대 위 기구는 <b>끌어서(드래그)</b> 옮겨요.</li><li>👆 세척병·비커 등은 <b>꾹 눌러</b> 사용해요.</li></ul>
  <p class="tiny">진행 방식: <b>${S.mode==='strict'?'잘못된 순서면 멈추고 안내':'멈추지 않고 진행 (실수는 오차로 반영)'}</b></p>
  <div class="btnrow" style="margin-top:0">${j.kind==='prep'&&!j.moved?'<button class="ghost" onclick="pressZero()">⚖️ 저울 영점 누르기</button>':''}<button class="ghost" onclick="nextHint()">💡 다음에 할 일은?${S.mode==='free'?` (${Math.max(0,HINT_MAX-(j.hintsUsed||0))}번 남음)`:''}</button></div>`;

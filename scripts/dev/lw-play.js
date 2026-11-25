@@ -38,8 +38,40 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
         for (const c of s.clouds) { if (Math.hypot(c[0] - s.bx, c[1] - (s.by - 15)) < c[2] + 60) { ty = c[1] > s.by - 15 ? Math.max(o.H * .3, c[1] - c[2] - 90) : Math.min(o.H * .95, c[1] + c[2] + 90); tx = s.bx; } }
         await p.mouse.move(o.ox + tx, o.oy + ty); await sleep(60); }
       await p.mouse.up(); },
-    async snare() { for (let i = 0; i < 900; i++) { const s = await S(() => { const q = _dbg.scene._s; return q && { done: q.done, it: q.items.filter(i => i.k === 'snare').map(i => [i.x, i.y]) }; }); if (!s || s.done) break; const o = await st();
-        const t = s.it.filter(a => a[0] < o.W - 12).sort((a, c) => a[0] - c[0])[0]; if (t) await tap(t[0] + 6, t[1] - 12); await sleep(90); } },
+    // 곰 달리기: 점프 = 왼쪽 탭, 2단 점프 = 공중에서 한 번 더, 미끄러지기 = 오른쪽을 누르고 있기(마우스 누름으로 흉내). 하트가 다 떨어지면 '다시 도전'을 눌러 이어 간다
+    async snare() {
+    const G = 26, J = 9.2, BW = .27;
+    const o = await p.evaluate(() => { const r = document.getElementById('cv').getBoundingClientRect(); return { ox: r.left, oy: r.top, W: _dbg.W, H: _dbg.H }; });
+    const jx = o.ox + o.W * .2, sxp = o.ox + o.W * .8, yy = o.oy + o.H * .5;
+    let sliding = false, dbl = false, lastJump = 0, deaths = 0;
+    for (;;) {
+      const s = await p.evaluate(() => _dbg.scene && _dbg.scene._s && 'bear' in _dbg.scene._s ? _dbg.scene._s : null);
+      if (!s || s.done) break;
+      if (s.dead) { deaths++; await p.waitForSelector('#shB:not(.locked-ui) #fAgain', { timeout: 6000 }).catch(() => {}); await p.locator('#fAgain').tap().catch(() => {}); await sleep(600); if (deaths > 3) break; sliding = false; dbl = false; continue; }
+      if (s.ready) { await sleep(40); continue; }
+      const v = s.v, b = s.bear, now = Date.now();
+      const onPlat = s.plats.find(q => q.d0 <= .3 && q.d1 >= -.3 && b.y >= q.h - .05);
+      const under = x => s.plats.some(q => x >= q.d0 - .3 && x <= q.d1 + .4);
+      // 미끄러지기
+      const br = s.objs.find(q => q.t === 'branch' && q.dx + q.w / 2 + BW > -.05);
+      const wantSlide = !!br && br.dx - br.w / 2 - BW <= v * .14 && !onPlat;
+      if (wantSlide !== sliding) { sliding = wantSlide; if (sliding) { await p.mouse.move(sxp, yy); await p.mouse.down(); } else await p.mouse.up(); }
+      // 점프
+      let jump = false;
+      if (dbl && !b.onG && b.airN === 1 && b.yv <= 1.2) { jump = true; dbl = false; }
+      else if (b.onG && !wantSlide && now - lastJump > 120) {
+        const np = !onPlat && s.plats.find(q => q.d0 <= 1.25 && q.d0 > -.6 && q.d1 > 2);
+        if (np) jump = true;
+        else { const gs = s.objs.filter(q => q.t !== 'branch' && q.dx + q.w / 2 + BW > 0 && !(onPlat && under(q.dx))).sort((a, c) => a.dx - c.dx);
+          if (gs[0]) { const f = gs[0], vr = v + (f.vx || 0); let last = f, hmax = f.h; for (const q of gs.slice(1)) { if (q.dx - q.w / 2 - (last.dx + last.w / 2) < 1.5 * v / 3.3) { last = q; hmax = Math.max(hmax, q.h); } else break; }
+            const d = f.dx - f.w / 2 - BW, e = last.dx + last.w / 2 + BW, hh = hmax + .14, disc = Math.sqrt(Math.max(0, J * J - 2 * G * hh)), tUp = (J - disc) / G, avail = 2 * disc / G, need = (e - d) / vr;
+            if (d / vr <= tUp + .06) { jump = true; dbl = need > avail - .07 || hmax > .9; if (dbl && d / vr > .08) { /* 2단 점프는 조금 일찍 */ } } } }
+      }
+      if (jump) { lastJump = now; await p.touchscreen.tap(jx, yy); }
+      await sleep(10);
+    }
+    if (sliding) await p.mouse.up();
+    },
     async tide() { for (let i = 0; i < 900; i++) { const s = await S(() => { const q = _dbg.scene._s; return q && { done: q.done, tr: q.tr.filter(t => !t.c).map(t => [t.x, t.y]) }; }); if (!s || s.done) break; const o = await st();
         const t = s.tr.filter(a => a[0] < o.W - 10).sort((a, c) => a[0] - c[0])[0];
         if (t) { await p.mouse.move(o.ox + t[0] + 14, o.oy + t[1] - 26); await p.mouse.down(); await p.mouse.move(o.ox + t[0] - 22, o.oy + t[1] + 26, { steps: 3 }); await p.mouse.up(); } await sleep(70); } },

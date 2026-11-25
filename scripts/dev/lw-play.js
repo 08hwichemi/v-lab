@@ -1,6 +1,6 @@
 // [검증 도구] '이미 사라진 세계'를 진짜 입력(터치 탭·끌기)으로 처음부터 엔딩까지 완주한다.
 //   · 지도에서 구역을 '한 번 톡' 눌렀을 때 대사가 저절로 넘어가지 않는지(지구구조단에서 겪은 문제)도 같이 본다.
-//   · 구간별 걸린 시간·별·실수 수, 페이지 오류를 찍는다. 마지막 줄이 'FAIL 0' 이면 통과.
+//   · 구간별 걸린 시간·별·실수 수, 페이지 오류를 찍는다. 마지막 줄이 'FAIL 0' 이면 통과. (구조 놀이가 길어져 한 번에 12분쯤)
 // 준비: 저장소 루트에서 python3 -m http.server 8765
 // 실행: node scripts/dev/lw-play.js [난이도 0|1|2 = 1] [폭=412] [높이=780]
 //   게임 속 상태는 window._dbg 와 각 장면의 _s (검증용 getter)로 읽고, 조작은 전부 실제 입력으로 한다.
@@ -29,27 +29,76 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   if (!(await talking())) fails.push('시작 안내 대사가 안 뜸');
   await talkThrough();
 
-  const play = {
-    async pollinate() { const o = await st(); await p.mouse.move(o.ox + o.W / 2, o.oy + o.H * .6); await p.mouse.down();
-      for (let i = 0; i < 900; i++) { const s = await S(() => { const q = _dbg.scene._s; return q && { done: q.done, bx: q.bx, by: q.by, buds: q.buds.filter(b => !b.open).map(b => [b.x, b.y]), clouds: q.clouds.map(c => [c.x, c.y, c.r, c.vx]) }; });
-        if (!s || s.done) break; let best = null, bd = 1e9;
-        for (const [x, y] of s.buds) { const danger = s.clouds.some(c => Math.hypot(c[0] + c[3] * .5 - x, c[1] - (y - 18)) < c[2] + 46); const d = Math.hypot(x - s.bx, y - 6 - s.by) + (danger ? 600 : 0); if (d < bd) { bd = d; best = [x, y - 6]; } }
-        let [tx, ty] = best || [s.bx, s.by];
-        for (const c of s.clouds) { if (Math.hypot(c[0] - s.bx, c[1] - (s.by - 15)) < c[2] + 60) { ty = c[1] > s.by - 15 ? Math.max(o.H * .3, c[1] - c[2] - 90) : Math.min(o.H * .95, c[1] + c[2] + 90); tx = s.bx; } }
-        await p.mouse.move(o.ox + tx, o.oy + ty); await sleep(60); }
-      await p.mouse.up(); },
-    // 곰 달리기: 점프 = 왼쪽 탭, 2단 점프 = 공중에서 한 번 더, 미끄러지기 = 오른쪽을 누르고 있기(마우스 누름으로 흉내).
-    //   장면의 _s 에서 앞의 장애물(objs: 올무·덫·통나무·바위·차·굴러오는 통나무·수로 pit·낮은 가지 branch)·발판(plats)·꿀과 큰 곰 기운(items)을 읽어 판단한다.
-    //   하트가 다 떨어지면 '다시 도전'을 눌러 이어 간다
-    async snare() {
+  // ---- 구조 놀이 자동 조작 (진짜 입력). 장면의 _s(검증용 getter)에서 상태를 읽어 판단한다. 하트가 다 떨어지면 '다시 도전'을 눌러 이어 간다 ----
+  const B = {};
+  const geom = p => p.evaluate(() => { const r = document.getElementById('cv').getBoundingClientRect(); return { ox: r.left, oy: r.top, W: _dbg.W, H: _dbg.H }; });
+  const state = p => p.evaluate(() => _dbg.scene && _dbg.scene._s && 'miss' in _dbg.scene._s ? _dbg.scene._s : null);
+  // 하트가 다 떨어졌으면 '다시 도전'을 누른다. 세 번 넘게 실패하면 그만둔다
+  async function retry(p, st) { st.deaths = (st.deaths || 0) + 1; await p.waitForSelector('#shB:not(.locked-ui) #fAgain', { timeout: 6000 }).catch(() => {}); await p.locator('#fAgain').tap().catch(() => {}); await sleep(700); return st.deaths <= 3; }
+
+  // 바다거북: 마우스를 누른 채 좌우로 끈다. 그물 틈 > 배 피하기 > 가까운 해파리(비닐 옆은 피함)
+  B.swim = async (p, onTick) => { const o = await geom(p), st = {}; const yy = o.oy + o.H * .6; await p.mouse.move(o.ox + o.W / 2, yy); await p.mouse.down();
+    for (;;) { const s = await state(p); if (!s || s.done) break; if (s.dead) { await p.mouse.up(); if (!(await retry(p, st))) break; await p.mouse.down(); continue; } if (onTick) await onTick(s);
+      if (s.ready) { await sleep(40); continue; }
+      const bags = s.objs.filter(q => q.t === 'bag'), boats = s.objs.filter(q => q.t === 'boat'), hw = s.u * .5 / s.W; let tx = s.px;
+      const safe = (x, dd) => !bags.some(b => Math.abs(b.x - x) < hw * 2.3 && Math.abs(b.dd - dd) < 1.3) && !boats.some(b => Math.abs(b.x - x) < hw * 2.6 && b.dd - dd < 6 && b.dd > -1.5);
+      const net = s.nets.filter(n => n.dd > -.2).sort((a, b) => a.dd - b.dd)[0];
+      const food = s.objs.filter(q => (q.t === 'jelly' || q.t === 'gold' || q.t === 'ring' || q.t === 'crab') && q.dd > .2 && q.dd < 6.5 && safe(q.x, q.dd) && (!net || q.dd < net.dd - .4 || Math.abs(q.x - net.gx) < net.gw / 2 - hw)).sort((a, b) => (Math.abs(a.x - s.px) * 9 + a.dd) - (Math.abs(b.x - s.px) * 9 + b.dd))[0];
+      if (food) tx = food.x;
+      if (net && net.dd < 4.2 && (!food || Math.abs(tx - net.gx) > net.gw / 2 - hw * 1.2 || net.dd < 1.6)) tx = net.gx;
+      for (const b of [...bags.filter(b => b.dd > -.3 && b.dd < 1.9), ...boats.filter(b => b.dd > -1.6 && b.dd < 5.5)]) if (Math.abs(b.x - tx) < hw * 2.4) tx = b.x + (s.px >= b.x ? 1 : -1) * hw * (b.t === 'boat' ? 3.6 : 2.9);
+      if (net && net.dd < 1.2) tx = Math.max(net.gx - net.gw / 2 + hw, Math.min(net.gx + net.gw / 2 - hw, tx));
+      tx -= s.cur * .06;                                   // 해류에 밀리는 만큼 미리 버틴다
+      await p.mouse.move(o.ox + Math.max(.08, Math.min(.92, tx)) * o.W, yy); await sleep(25); }
+    await p.mouse.up(); };
+
+  // 북극곰: 다음 줄의 얼음이 착지 순간 발밑에 올 때 탭. 기름 얼음·쇄빙선은 피하고, 서 있는 얼음이 녹아 가면 서두른다
+  B.floe = async (p, onTick) => { const o = await geom(p), st = {};
+    for (;;) { const s = await state(p); if (!s || s.done) break; if (s.dead) { if (!(await retry(p, st))) break; continue; } if (onTick) await onTick(s);
+      if (s.ready || s.bear.state !== 'on' || !s.next) { await sleep(30); continue; }
+      const n = s.next, b = s.bear; let go = false;
+      if (n.type === 'safe') go = true;
+      else { const urgent = b.melt > .5 || b.idle > s.IDLE * .75 || b.x < 70 || b.x > s.W - 70, T = s.JT + .04;
+        const shipOk = !n.ship || (!n.ship.on && n.ship.cd > .8) || (n.ship.on && Math.abs(n.ship.x + n.ship.vx * T - b.x) > n.ship.w / 2 + 70 && Math.sign(n.ship.vx) * (b.x - n.ship.x) < 0);
+        const f = n.fl.find(f => !f.gone && (!f.oil || (urgent && b.melt > .75)) && (f.melt == null || f.melt < .5) && Math.abs(f.x + n.dir * n.sp * T - b.x) < f.w / 2 - (urgent ? 10 : 18));
+        go = !!f && (shipOk || b.melt > .8); }
+      if (go) { await p.touchscreen.tap(o.ox + o.W / 2, o.oy + o.H * .5); await sleep(s.JT * 1000 + 70); } else await sleep(18); } };
+
+  // 꿀벌: 마우스를 누른 채 끈다. 같은 종류 꽃을 먼저, 위험한 것(구름·드론·말벌) 근처는 피하고 가까우면 달아난다
+  B.pollinate = async (p, onTick) => { const o = await geom(p), st = {}; await p.mouse.move(o.ox + o.W * .3, o.oy + o.H * .55); await p.mouse.down();
+    for (;;) { const s = await state(p); if (!s || s.done) break; if (s.dead) { await p.mouse.up(); if (!(await retry(p, st))) break; await p.mouse.down(); continue; } if (onTick) await onTick(s);
+      if (s.ready) { await sleep(40); continue; }
+      const b = s.bee, u = s.u, near = (x, y, pad) => s.haz.some(h => Math.hypot(h.x - x, h.y - y) < h.r + pad);
+      let tx = b.x, ty = b.y; const danger = s.haz.filter(h => Math.hypot(h.x - b.x, h.y - b.y) < h.r + u * (h.t === 'hornet' ? 2.6 : 1.3));
+      if (danger.length && !s.power) { let ax = 0, ay = 0; for (const h of danger) { const d = Math.hypot(b.x - h.x, b.y - h.y) || 1; ax += (b.x - h.x) / d; ay += (b.y - h.y) / d; } const n = Math.hypot(ax, ay) || 1; tx = b.x + ax / n * u * 3; ty = b.y + ay / n * u * 3; if (tx < u || tx > s.W - u) ty += (b.y < s.H * .55 ? -1 : 1) * u * 2; }
+      else { const c = [...s.items.map(q => ({ ...q, bonus: u * 4 })), ...s.flowers.map(q => ({ ...q, bonus: q.c === s.pc ? u * 3.2 : 0 }))].filter(q => q.x > u * .6 && q.x < s.W - u * .5 && (s.power || !near(q.x, q.y, u * .9)))
+          .sort((a, c2) => (Math.hypot(a.x - b.x, a.y - b.y) - a.bonus) - (Math.hypot(c2.x - b.x, c2.y - b.y) - c2.bonus))[0];
+        if (c) { tx = c.x - s.v * u * .1; ty = c.y; } else { tx = s.W * .35; ty = s.H * .55; } }
+      await p.mouse.move(o.ox + Math.max(u * .5, Math.min(s.W - u * .5, tx)), o.oy + Math.max(s.H * .2, Math.min(s.H * .86, ty))); await sleep(25); }
+    await p.mouse.up(); };
+
+  // 저어새: 선에 가장 가까운 쓰레기부터 마우스로 그어 낸다. 선분 가까이에 먹이가 있으면 방향을 바꾸거나 다음 것으로
+  B.tide = async (p, onTick) => { const o = await geom(p), st = {};
+    const segFree = (s, a, b) => !s.food.some(f => { const fx = f.x + f.vx * .06, dx = b[0] - a[0], dy = b[1] - a[1], L = dx * dx + dy * dy || 1; let t = ((fx - a[0]) * dx + (f.y - a[1]) * dy) / L; t = Math.max(0, Math.min(1, t)); return Math.hypot(fx - (a[0] + t * dx), f.y - (a[1] + t * dy)) < 34; });
+    for (;;) { const s = await state(p); if (!s || s.done) break; if (s.dead) { if (!(await retry(p, st))) break; continue; } if (onTick) await onTick(s);
+      if (s.ready) { await sleep(40); continue; }
+      const targets = [...(s.reed && s.items.length >= 3 ? [{ ...s.reed, r: 24, vx: 0 }] : []), ...s.items.filter(q => q.x < s.W - 6).sort((a, b) => a.x - b.x), ...(s.boss && s.boss.x - s.boss.r < s.W - 10 ? [{ ...s.boss, r: s.boss.r * .5, vx: 0, x: Math.min(s.boss.x, s.W - 20) }] : [])];
+      let done = false;
+      for (const t of targets) { const x = t.x + (t.vx || 0) * .05, pad = t.r + 12; const cands = [[[x, t.y - pad], [x, t.y + pad]], [[x - pad, t.y], [x + pad, t.y]], [[x - pad * .7, t.y - pad * .7], [x + pad * .7, t.y + pad * .7]]];
+        const c = cands.find(c => segFree(s, c[0], c[1])); if (!c) continue;
+        await p.mouse.move(o.ox + c[0][0], o.oy + c[0][1]); await p.mouse.down(); await p.mouse.move(o.ox + c[1][0], o.oy + c[1][1], { steps: 2 }); await p.mouse.up(); done = true; break; }
+      await sleep(done ? 35 : 50); } };
+  // 곰 달리기: 점프 = 왼쪽 탭, 2단 점프 = 공중에서 한 번 더, 미끄러지기 = 오른쪽을 누르고 있기(마우스 누름으로 흉내)
+  B.snare = async (p, onTick) => {
     const G = 26, J = 9.2, BW = .27;
     const o = await p.evaluate(() => { const r = document.getElementById('cv').getBoundingClientRect(); return { ox: r.left, oy: r.top, W: _dbg.W, H: _dbg.H }; });
     const jx = o.ox + o.W * .2, sxp = o.ox + o.W * .8, yy = o.oy + o.H * .5;
-    let sliding = false, dbl = false, lastJump = 0, deaths = 0;
+    let sliding = false, dbl = false, lastJump = 0, n = 0, deaths = 0;
     for (;;) {
       const s = await p.evaluate(() => _dbg.scene && _dbg.scene._s && 'bear' in _dbg.scene._s ? _dbg.scene._s : null);
       if (!s || s.done) break;
-      if (s.dead) { deaths++; await p.waitForSelector('#shB:not(.locked-ui) #fAgain', { timeout: 6000 }).catch(() => {}); await p.locator('#fAgain').tap().catch(() => {}); await sleep(600); if (deaths > 3) break; sliding = false; dbl = false; continue; }
+      if (s.dead) { deaths++; if (sliding) { await p.mouse.up(); sliding = false; } await p.waitForSelector('#shB:not(.locked-ui) #fAgain', { timeout: 6000 }).catch(() => {}); await p.locator('#fAgain').tap().catch(() => {}); await sleep(700); if (deaths > 3) break; dbl = false; continue; }
+      if (onTick) await onTick(s, n++);
       if (s.ready) { await sleep(40); continue; }
       const v = s.v, b = s.bear, now = Date.now();
       const onPlat = s.plats.find(q => q.d0 <= .3 && q.d1 >= -.3 && Math.abs(b.y - q.h) < .08);
@@ -74,23 +123,8 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
       await sleep(10);
     }
     if (sliding) await p.mouse.up();
-    },
-    async tide() { for (let i = 0; i < 900; i++) { const s = await S(() => { const q = _dbg.scene._s; return q && { done: q.done, tr: q.tr.filter(t => !t.c).map(t => [t.x, t.y]) }; }); if (!s || s.done) break; const o = await st();
-        const t = s.tr.filter(a => a[0] < o.W - 10).sort((a, c) => a[0] - c[0])[0];
-        if (t) { await p.mouse.move(o.ox + t[0] + 14, o.oy + t[1] - 26); await p.mouse.down(); await p.mouse.move(o.ox + t[0] - 22, o.oy + t[1] + 26, { steps: 3 }); await p.mouse.up(); } await sleep(70); } },
-    async swim() { const o = await st(); await p.mouse.move(o.ox + o.W / 2, o.oy + o.H * .6); await p.mouse.down();
-      for (let i = 0; i < 1500; i++) { if (await talking()) { await p.mouse.up(); await talkThrough(); await p.mouse.down(); }
-        const s = await S(() => { const q = _dbg.scene._s; return q && { done: q.done, px: q.px, ty: q.ty, obj: q.obj.map(o => [o.k, o.x, o.y]) }; }); if (!s || s.done) break;
-        const ahead = s.obj.filter(a => a[2] < s.ty + 10).sort((a, c) => c[2] - a[2]); let tx = s.px; const j = ahead.find(a => a[0] === 'jelly'); if (j) tx = j[1];
-        for (const a of ahead) if (a[0] === 'bag' && s.ty - a[2] < 190 && Math.abs(a[1] - tx) < 58) tx = a[1] + (tx >= a[1] ? 64 : -64);
-        tx = Math.max(20, Math.min(o.W - 20, tx)); await p.mouse.move(o.ox + tx, o.oy + o.H * .6); await sleep(50); }
-      await p.mouse.up(); },
-    async floe() { for (let i = 0; i < 2500; i++) { const s = await S(() => { const q = _dbg.scene._s; return q && { done: q.done, top: q.top, bear: q.bear, rows: q.rows.map(r => ({ dir: r.dir, sp: r.sp, fl: r.fl.map(f => [f.x, f.w]) })) }; }); if (!s || s.done) break; const o = await st();
-        const br = s.bear; if (!(br.j > 0) && !br.swim && br.r < s.top) { const nr = br.r + 1; let ok = nr === s.top;
-          if (!ok) { const row = s.rows[nr - 1], cur = br.r > 0 ? s.rows[br.r - 1] : null; ok = row.fl.some(f => Math.abs(f[0] + row.dir * row.sp * .45 - br.x) < f[1] / 2 - 16); }
-          if (ok) await tap(o.W / 2, o.H * .5); }
-        await sleep(45); } },
   };
+  const play = { pollinate: () => B.pollinate(p), snare: () => B.snare(p), tide: () => B.tide(p), swim: () => B.swim(p), floe: () => B.floe(p) };
   const zones = await S(() => _dbg.ZONES.map(z => ({ id: z.id, name: z.name, game: z.game, pos: z.pos })));
   for (const z of zones) {
     const row = { 구역: z.name }; let t0 = Date.now(); const o = await st();

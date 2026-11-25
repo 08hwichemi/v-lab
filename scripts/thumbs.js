@@ -25,6 +25,12 @@ const PREP = {
     await p.evaluate(() => { const s = fresh(); s.name = '초록별'; s.promoted = 3; s.read = { 0: 1, 1: 1, 2: 1, 3: 1 }; ISLANDS.forEach((I, i) => I.missions.forEach((m, j) => { if (i < 3) { s.stars[i + '-' + j] = 3; if (!s.items.includes(m.reward)) s.items.push(m.reward); } })); SAVES.slots = [s]; SAVES.cur = 0; S = s; const a = document.getElementById('app'); a.style.maxWidth = '912px'; a.style.margin = '0'; office(); });
     await p.waitForTimeout(900);
   },
+  'environment/lost-world': async p => {   // 구역 세 곳을 되살리고 네 번째 친구를 온실에서 돌보는 중인 지도. 잘라 낼 크기(944×522)에 게임판을 맞춤
+    await p.waitForTimeout(1500);
+    await p.evaluate(() => { const a = document.getElementById('app'); a.style.maxWidth = '944px'; a.style.margin = '0'; a.style.height = '522px';
+      const s = _dbg.start('초록별', 1); _dbg.ZONES.forEach((z, i) => { if (i < 3) { s.z[z.id].st = 4; s.z[z.id].star = 3; s.met[z.en] = s.met[z.ex] = 1; } }); s.z.turtle.st = 3; s.z.turtle.star = 2; s.z.turtle.told = 1; s.seeds = 24; _dbg.go(_dbg.MapScene()); });
+    await p.waitForTimeout(1200);
+  },
   'chemistry/chemical-cell': async p => { await p.click('[data-pickmode="daniel"]'); await p.click('[data-study="free"]'); await p.click('#startBtn'); },
   'physics/mechanics-energy': async p => {   // 실험 동작 한 번 실행하고 시뮬레이션 화면이 맨 위에 오도록 스크롤
     await p.evaluate(() => { const set = (id, v) => { const n = document.querySelector('.lab:not([hidden]) ' + id); if (n) { n.value = v; n.dispatchEvent(new Event('change')); } }; set('#s-v-n', '7.7'); set('#p-v-n', '30'); set('#p-a-n', '60'); });

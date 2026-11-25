@@ -3,9 +3,10 @@
 //   · 구간별 걸린 시간·별·실수 수, 페이지 오류를 찍는다. 마지막 줄이 'FAIL 0' 이면 통과. (구조 놀이가 길어져 한 번에 12분쯤)
 // 준비: 저장소 루트에서 python3 -m http.server 8765
 // 실행: node scripts/dev/lw-play.js [난이도 0|1|2 = 1] [폭=412] [높이=780]
+//   놀이 하나만(1~2분): node scripts/dev/lw-play.js 1 412 780 snare   ← pollinate|snare|tide|swim|floe · 완주 대신 그 구조 놀이만 돌리고 결과를 찍는다
 //   게임 속 상태는 window._dbg 와 각 장면의 _s (검증용 getter)로 읽고, 조작은 전부 실제 입력으로 한다.
 const { chromium } = require('playwright');
-const [,, diff = '1', w = '412', h = '780'] = process.argv;
+const [,, diff = '1', w = '412', h = '780', only = ''] = process.argv;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 (async () => {
   const b = await chromium.launch();
@@ -126,6 +127,18 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   };
   const play = { pollinate: () => B.pollinate(p), snare: () => B.snare(p), tide: () => B.tide(p), swim: () => B.swim(p), floe: () => B.floe(p) };
   const zones = await S(() => _dbg.ZONES.map(z => ({ id: z.id, name: z.name, game: z.game, pos: z.pos })));
+  if (only) {   // ---- 놀이 하나만 ----
+    const z = zones.find(q => q.game === only || q.id === only); if (!z) { console.log('없는 놀이:', only, '· 쓸 수 있는 이름:', zones.map(q => q.game).join(' ')); await b.close(); process.exit(1); }
+    await S(([id, g]) => { const s = _dbg.S; s.z[id].st = 2; s.z[id].mem = 1; _dbg.go(_dbg.GAMES[g](id)); }, [z.id, z.game]);
+    await waitFor(() => _dbg.scene && _dbg.scene._s && 'miss' in _dbg.scene._s, 8000); const t0 = Date.now(); await sleep(300);
+    await play[z.game](); const sec = ((Date.now() - t0) / 1000).toFixed(1);
+    const r = await S(() => { const s = _dbg.scene._s; return s && { done: s.done, dead: s.dead, miss: s.miss }; });
+    await sleep(1600); const res = await S(() => (document.querySelector('#shB .result') || {}).innerText || '');
+    if (process.env.LW_SHOT) await p.screenshot({ path: process.env.LW_SHOT + '/lw-' + z.game + '.png' }).catch(() => {});
+    console.log(`${z.name}(${z.game}) 난이도 ${diff} ${w}x${h}: ${sec}s`, JSON.stringify(r), '|', res.replace(/\s+/g, ' ').slice(0, 120));
+    if (errs.length) console.log(errs.join('\n')); console.log('FAIL', errs.length + (r && r.done ? 0 : 1));
+    await b.close(); process.exit(errs.length || !(r && r.done) ? 1 : 0);
+  }
   for (const z of zones) {
     const row = { 구역: z.name }; let t0 = Date.now(); const o = await st();
     // (1) 지도에서 한 번 톡 — 대사가 그 탭으로 넘어가면 안 된다

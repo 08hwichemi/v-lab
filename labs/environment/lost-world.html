@@ -232,7 +232,7 @@ input{font:inherit;color:inherit;-webkit-user-select:text;user-select:text}
 </div>
 <script>
 // ================= core =================
-const BUILD='11.25-4';   /* 화면에 보이는 버전 표시 — 이 파일을 고칠 때마다 올린다 (시작 화면·설정 창 맨 아래) */
+const BUILD='11.25-5';   /* 화면에 보이는 버전 표시 — 이 파일을 고칠 때마다 올린다 (시작 화면·설정 창 맨 아래) */
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const cv=$('#cv'); let g=cv.getContext('2d');
 let W=320,H=560,DPR=1,T=0,scene=null,TALK=null,PD=false;
@@ -765,7 +765,7 @@ function settings(){
   sheet('설정',`<div class="field"><b>난이도</b>${diffButtons(S.diff)}<p class="note" style="margin:0">언제든 바꿀 수 있어요. 다음에 시작하는 놀이와 온실부터 적용돼요.</p></div>
     <div class="setrow"><span>소리</span><button class="btn small" id="sSnd"></button></div>
     <div class="setrow"><span>다른 사람이 하거나 처음부터 다시 하려면</span><button class="btn small" id="sTitle">시작 화면으로</button></div>
-    <p class="build" style="text-align:right;margin:6px 0 0;color:var(--ink2)">버전 ${BUILD}</p>`);
+    <p class="build" style="text-align:right;margin:6px 0 0;color:var(--ink2)">버전 ${BUILD} · 화면 ${Math.round(W)}×${Math.round(H)} (창 ${innerWidth}×${innerHeight})</p>`);   /* 화면 크기는 '아래가 잘린다' 같은 문의가 올 때 원인을 가리는 데 쓴다 */
   const lab=()=>$('#sSnd').textContent=S.snd?'켜짐 — 끄기':'꺼짐 — 켜기'; lab();
   bindDiff($('#shB'),k=>{ S.diff=k; save(); if(scene&&scene._map) bar('map'); });
   $('#sSnd').onclick=()=>{ S.snd=!S.snd; save(); lab(); sfx.tap(); };

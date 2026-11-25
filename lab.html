@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="assets/img/icons/apple-touch-icon.png">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="V-Lab">
-  <link rel="stylesheet" href="assets/css/site.css">
+  <link rel="stylesheet" href="assets/css/site.css?v=1125b">
   <script src="data/labs.js"></script>
   <script src="assets/js/site.js"></script>
   <script src="data/reference/chemistry.js"></script>
@@ -26,6 +26,14 @@
   </style>
 </head>
 <body class="viewer">
+  <script>
+    /* 휴대폰에서 아래가 잘리지 않게: 실제로 보이는 높이에 뷰어를 맞춘다 (주소창이 들어가고 나오거나 화면을 돌릴 때마다 다시). 확대(핀치) 중에는 건드리지 않는다 */
+    (function () {
+      var vv = window.visualViewport;
+      function fit() { if (vv && vv.scale > 1.02) return; var h = Math.round(vv ? vv.height : window.innerHeight); if (h > 120) { document.body.style.height = h + "px"; document.body.style.bottom = "auto"; } }
+      fit(); (vv || window).addEventListener("resize", fit); window.addEventListener("resize", fit); window.addEventListener("orientationchange", function () { setTimeout(fit, 300); }); window.addEventListener("pageshow", fit);
+    })();
+  </script>
   <div id="hdr"></div>
   <div id="app" style="display:contents"></div>
   <button class="ic fs-exit" id="fsExit" title="전체화면 종료"></button>

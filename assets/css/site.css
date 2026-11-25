@@ -111,7 +111,10 @@ svg { display: block; }
 .foot a { color: var(--text-2); }
 
 /* 뷰어 (lab.html) ----------------------------------------------------- */
-body.viewer { height: 100vh; height: 100dvh; overflow: hidden; }
+/* 뷰어는 '지금 보이는 화면'에 딱 맞아야 한다(아래가 잘리면 실험의 아래쪽 버튼·대사창이 안 보임).
+   100vh·100dvh 는 휴대폰 브라우저(주소창·아래 도구줄, 앱 안 브라우저)에 따라 보이는 높이보다 크게 잡히는 일이 있어서,
+   화면에 고정(위·아래 0)해 두고 lab.html 의 스크립트가 실제로 보이는 높이(visualViewport)로 한 번 더 맞춘다. */
+body.viewer { position: fixed; left: 0; top: 0; right: 0; bottom: 0; height: auto; min-height: 0; overflow: hidden; }
 .sub { height: var(--sub-h); flex: none; border-bottom: 1px solid var(--line); display: flex; align-items: center; padding: 0 var(--gutter); gap: 18px; background: var(--bg); }
 .sub .bc { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; white-space: nowrap; min-width: 0; flex: none; }   /* 줄어들지 않게: 줄어들면 제목 글자가 탭 줄 밑으로 겹쳐 보임 (탭 줄만 가로 스크롤) */
 .sub .bc a { color: var(--muted); font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }

@@ -1,5 +1,5 @@
-// [검증 도구] 지구구조단 액션 게임 세 개를 진짜 터치(CDP)로 눌러 본다: 컨베이어 통 누르기 · 추격 줄 바꾸기 · 수거선 끌기.
-// 준비: 저장소 루트에서 python3 -m http.server 8765   실행: node scripts/dev/er-arcade-touch.js   (세 줄 모두 "통과"면 됨)
+// [검증 도구] 지구구조단 액션 게임을 진짜 터치(CDP)로 눌러 본다: 컨베이어 통 누르기 · 추격 줄 바꾸기 · 수거선 끌기 · 정상회의 누르고 있기 · 건널목 누르기 · 산호 끌기.
+// 준비: 저장소 루트에서 python3 -m http.server 8765   실행: node scripts/dev/er-arcade-touch.js   (여섯 줄 모두 "통과"면 됨)
 const { chromium } = require('playwright');
 (async () => {
   const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 412, height: 780 }, hasTouch: true, isMobile: true });
@@ -31,5 +31,18 @@ const { chromium } = require('playwright');
   const s3 = await ev(() => { const s = document.querySelector('#game')._dbg.s; return [Math.round(s.bx), Math.round(s.by), Math.round(s.u)]; }); await touch('touchEnd');
   const want = [w * .2, h * .5 - 1.25 * s3[2]];
   console.log('수거 끌기: 수거선', s3.slice(0, 2), '목표', want.map(Math.round), Math.abs(s3[0] - want[0]) < 12 && Math.abs(s3[1] - want[1]) < 12 ? '통과' : '★실패', '| 스크롤', await ev(() => scrollY), '| errors', errs.length ? errs : 0);
+  // 4) 정상회의: 누르고 있으면 걷고, 떼면 멈춤
+  await open(5, 0); [ox, oy, w, h] = await org(); const px = () => ev(() => document.querySelector('#game')._dbg.s.px);
+  const a0 = await px(); await touch('touchStart', ox + w * .5, oy + h * .5); await p.waitForTimeout(600); const a1 = await px(); await touch('touchEnd'); await p.waitForTimeout(150); const a2 = await px(); await p.waitForTimeout(300); const a3 = await px();
+  console.log('정상회의 누르고 있기:', [a0, a1, a2, a3].map(v => +v.toFixed(2)).join(' → '), a1 > a0 + 1 && a3 === a2 ? '통과' : '★실패');
+  // 5) 건널목: 기다리는 고라니가 있는 줄을 누르면 출발
+  await open(0, 0); [ox, oy, w, h] = await org(); await p.waitForTimeout(900); const w0 = await ev(() => document.querySelector('#game')._dbg.s.wait);
+  for (const fx of [.2, .5, .8]) { await tap(ox + w * fx, oy + h * .8); await p.waitForTimeout(60); } const w1 = await ev(() => document.querySelector('#game')._dbg.s.wait);
+  console.log('건널목 터치: 기다리는 고라니', w0, '→', w1, w0 >= 1 && w1 === 0 ? '통과' : '★실패');
+  // 6) 산호: 조각을 끌어다 같은 모양 산호에 놓기 (터치는 조각이 손가락보다 위에 뜨므로 그만큼 아래를 누른다)
+  await open(1, 2); [ox, oy, w, h] = await org(); await p.waitForTimeout(700); const j = await ev(() => document.querySelector('#game')._dbg.s.job), off = .85 * Math.max(34, Math.min(58, Math.min(w, h) * .115));
+  if (j) { await touch('touchStart', ox + j.fx, oy + j.fy + 4); for (let i = 1; i <= 8; i++) { await touch('touchMove', ox + j.fx + (j.bx - j.fx) * i / 8, oy + j.fy + (j.by + off - j.fy) * i / 8); await p.waitForTimeout(25); } await touch('touchEnd'); await p.waitForTimeout(200); }
+  const pl = await ev(() => document.querySelector('#game')._dbg.s.planted);
+  console.log('산호 끌기: 붙인 조각', pl, pl >= 1 ? '통과' : '★실패', '| 스크롤', await ev(() => scrollY), '| errors', errs.length ? errs : 0);
   await b.close();
 })();

@@ -1,12 +1,13 @@
 // [검증 도구] 지구구조단의 액션 게임(ARC.run 으로 도는 것)을 자동으로 해 보고 화면을 캡처한다.
 // 준비: 저장소 루트에서 python3 -m http.server 8765
-// 실행: node scripts/dev/er-arcade.js <catch|belt|chase> <저장할 경로 앞머리> [폭=412] [높이=780] [난이도 0~2=1] [bot|idle|bad]
+// 게임 이름: catch belt chase cross drop lamps coral tide edna summit (무전 퀴즈는 정답을 진짜 클릭으로 누른다 · bad 는 오답)
+// 실행: node scripts/dev/er-arcade.js <게임 이름> <저장할 경로 앞머리> [폭=412] [높이=780] [난이도 0~2=1] [bot|idle|bad]
 //   bot = 잘하는 자동 조작(끝까지 가서 별 수 출력), idle = 가만히 두기, bad = 일부러 틀리기(실패 화면 확인)
 //   예: mkdir -p /tmp/er && node scripts/dev/er-arcade.js catch /tmp/er/c 412 780 1 bot
 // 마지막 줄에 결과(별·다친 횟수·오류)가 나온다. 장면 값은 #game._dbg.s (게임마다 _s getter) 로 읽는다.
 const { chromium } = require('playwright');
 const [,, game = 'catch', out = '/tmp/er-arc', w = '412', h = '780', diff = '1', mode = 'bot'] = process.argv;
-const WHERE = { catch: [1, 0], belt: [2, 2], chase: [4, 2] };
+const WHERE = { catch: [1, 0], belt: [2, 2], chase: [4, 2], cross: [0, 0], drop: [0, 1], lamps: [0, 2], coral: [1, 2], tide: [3, 2], edna: [4, 0], summit: [5, 0] };
 (async () => {
   const b = await chromium.launch();
   const touch = +w < 700;
@@ -52,8 +53,19 @@ const WHERE = { catch: [1, 0], belt: [2, 2], chase: [4, 2] };
     },
     belt: async s => { if (!s.front) return; const b = mode === 'bad' ? (s.front.b === 'pl' ? 'can' : 'pl') : s.front.b; if (s.ready) await p.keyboard.press(String(s.bins.indexOf(b) + 1)); },
     chase: async s => { const want = mode === 'bad' ? s.lane : s.safe; if (want < s.lane) await p.keyboard.press('ArrowLeft'); else if (want > s.lane) await p.keyboard.press('ArrowRight'); },
+    cross: async s => { for (const c of s.go) await p.keyboard.press(String(c + 1)); },
+    drop: async s => { if (s.tap) await p.keyboard.press(' '); },
+    lamps: async s => { const q = mode === 'bad' ? s.decoy : s.hot; if (q) await p.mouse.click(ox + q.x, oy + q.y); },
+    coral: async s => { const j = s.job; if (!j) return; await p.mouse.move(ox + j.fx, oy + j.fy); await p.mouse.down(); await p.mouse.move(ox + j.bx, oy + j.by, { steps: 5 }); await p.mouse.up(); },
+    tide: async s => { for (const l of s.need) await p.keyboard.press(String(l + 1)); },
+    edna: async s => { const q = mode === 'bad' ? s.badAt : s.tapAt; if (q) await p.mouse.click(ox + q.x, oy + q.y); },
+    summit: async s => { const go = mode === 'bad' ? true : s.safe; if (go && !held) { held = true; await p.keyboard.down(' '); } else if (!go && held) { held = false; await p.keyboard.up(' '); } },
   };
-  while (Date.now() - t0 < 150000) {
+  let held = false;
+  while (Date.now() - t0 < 170000) {
+    const q = await ev(bad => { const m = document.querySelector('.modal.qz'); if (!m) return null; const K = document.querySelector('#game')._dbg.K, btn = m.querySelector('.mact button');
+      const el = !btn.hidden ? btn : m.classList.contains('locked') ? null : [...m.querySelectorAll('.opt')].find(o => (+o.dataset.k === K.q.q.a) !== bad); if (!el) return 'wait'; const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }, mode === 'bad').catch(() => null);
+    if (q) { if (held) { held = false; await p.keyboard.up(' '); } if (q !== 'wait') { const fb = await fe.boundingBox(); await p.mouse.click(fb.x + q[0], fb.y + q[1]); } await p.waitForTimeout(200); continue; }
     const st = await ev(() => { const d = document.querySelector('#game') && document.querySelector('#game')._dbg; if (!d) return null; const K = d.K; return { done: K.done, dead: K.dead, hp: K.hp, hits: K.hits, score: K.score, best: K.best, ready: K.ready, s: d.s }; }).catch(() => null);
     if (!st) { res = 'screen changed'; break; }
     if (st.done || st.dead) { res = st; break; }

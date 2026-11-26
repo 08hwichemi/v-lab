@@ -2476,10 +2476,10 @@ ENG.dust=(el,cfg,done)=>run(el,done,{key:'dust',icon:'📡',unit:'집진',go:'�
   function lay(kx,ky){u=clamp(Math.min(W,H)*.115,34,58);if(!px)px=tx=W/2;for(const o of objs){o.x*=kx;o.y*=ky}}
   function step(dt){t+=dt;spin+=dt*26;const p=t/LT,s=p<SEG[0]?0:p<SEG[1]?1:2;if(s!==stage){K.stage(`${SRC[stage]}에 집진 설비 설치! · ${s+1}구간`);stage=s}
     K.music(dt,.4-.05*stage);if(wide>0)wide-=dt;const kx=(keys.r?1:0)-(keys.l?1:0);if(kx)tx=px+kx*2.4*u;tx=clamp(tx,.7*u,W-.7*u);px+=(tx-px)*Math.min(1,dt*13);
-    spT-=dt;if(spT<=0&&t<LT-2){spT=(.85-.27*p)/K.m;const r=Math.random(),k=r<.13+.05*stage?'bird':r<.19+.05*stage?'big':r<.23+.05*stage&&wide<=0?'filt':'dust';const d=Math.random()<.5?1:-1;
+    spT-=dt;if(spT<=0&&t<LT-2){spT=(.85-.27*p)/K.m;const r=Math.random(),k=r<.08+.03*stage?'bird':r<.15+.04*stage?'big':r<.2+.04*stage&&wide<=0?'filt':'dust';const d=Math.random()<.5?1:-1;
       objs.push({k,x:rand(.6*u,W-.6*u),y:-u,vy:(2.5+1.4*p+rand(0,.8))*K.m*(k==='bird'?1.2:1),vx:k==='bird'?d*rand(1,2):rand(-.4,.4)*(1+stage),ph:rand(0,6)});if(k==='dust'||k==='big')tot++}
     for(const o of objs){o.y+=o.vy*u*dt;o.x+=o.vx*u*dt+(o.k==='bird'?0:Math.sin(o.ph+t*2)*.4*u*dt);if(o.x<.4*u||o.x>W-.4*u)o.vx*=-1;o.ph+=dt;
-      if(!o.dead&&Math.abs(o.y-py())<.6*u&&Math.abs(o.x-px)<pw()){o.dead=1;if(o.k==='bird')K.lose('bird','앗, 참새를 빨아들일 뻔했어요! 새는 피해 가요.',o.x,o.y);else if(o.k==='filt'){wide=5;sfx.pick();K.popup('흡입구 넓어짐!',o.x,o.y-20,'#ffd77a')}else{got++;K.gain(o.k==='big'?2:1,o.x,o.y)}}
+      if(!o.dead&&Math.abs(o.y-py())<.6*u&&Math.abs(o.x-px)<(o.k==='bird'?.6*u:pw())){o.dead=1;if(o.k==='bird')K.lose('bird','앗, 참새를 빨아들일 뻔했어요! 새는 피해 가요.',o.x,o.y);else if(o.k==='filt'){wide=5;sfx.pick();K.popup('흡입구 넓어짐!',o.x,o.y-20,'#ffd77a')}else{got++;K.gain(o.k==='big'?2:1,o.x,o.y)}}
       else if(!o.dead&&o.y>H-.7*u){o.dead=1;if(o.k==='dust'||o.k==='big'){smog+=o.k==='big'?2:1;if(smog>=8){smog=0;K.lose('smog','놓친 먼지가 도시에 쌓였어요! 드론을 먼지 아래로 옮겨요.',o.x,H-u)}}}}
     objs=objs.filter(o=>!o.dead);if(t>=LT)K.finish('도시의 하늘이 맑아졌어요!',`미세먼지 ${got}덩이 집진 · 오염원 3곳에 설비 설치`,tot?got/tot:1)}
   function draw(){const p=t/LT,gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,stage>1?'#9fc4dd':'#aab9c2');gr.addColorStop(1,'#d9d2c2');g.fillStyle=gr;g.fillRect(-20,-20,W+40,H+40);g.fillStyle=`rgba(120,105,85,${.3*(1-p)+smog*.04})`;g.fillRect(-20,-20,W+40,H+40);
@@ -2491,8 +2491,8 @@ ENG.dust=(el,cfg,done)=>run(el,done,{key:'dust',icon:'📡',unit:'집진',go:'�
     const w=pw();P([px-w,py()-.55*u,px+w,py()-.55*u,px+.3*u,py()-.1*u,px-.3*u,py()-.1*u],'rgba(255,255,255,.22)');at(px,py()+.15*u,u*1.25,0,()=>roadDrone(spin));
     K.hud(p,SEG,smog/8,smog>=6?'#e2614b':'#ffd77a','먼지 농도')}
   let pd=0;return{lay,step,draw,progress:()=>t/LT,down:x=>{pd=1;tx=x},move:(x,y,e)=>{if(pd||e.pointerType==='mouse')tx=x},up:()=>{pd=0},blur:()=>{keys={}},key:(k,dn)=>{const m={ArrowLeft:'l',ArrowRight:'r',a:'l',d:'r'}[k];if(!m)return false;keys[m]=dn;return true},
-    get _s(){const below=o=>o.y<py()&&o.y>py()-6*u,d=objs.filter(o=>o.k!=='bird'&&below(o)).sort((a,b)=>b.y-a.y)[0],b=objs.find(o=>o.k==='bird'&&o.y<py()+u&&o.y>py()-2.5*u&&Math.abs(o.x-px)<pw()+u);
-      return{px,y:py(),want:b?clamp(b.x+(px>=b.x?1:-1)*(pw()+1.4*u),u,W-u):d?d.x:px,t,got}}}});
+    get _s(){const below=o=>o.y<py()&&o.y>py()-6*u,d=objs.filter(o=>o.k!=='bird'&&below(o)).sort((a,b)=>b.y-a.y)[0],b=objs.find(o=>o.k==='bird'&&o.y<py()+u&&o.y>py()-2.5*u&&Math.abs(o.x-px)<1.5*u);
+      return{px,y:py(),want:b?clamp(b.x+(px>=b.x?1:-1)*2.2*u,u,W-u):d?d.x:px,t,got}}}});
 
 /* ---------- 불타는 도시 열섬 식히기 = 바람길 한 붓 그리기 ----------
    도시 칸(COLS×ROWS). 산(start)에서 시작해 이웃 칸으로 손가락을 끌어 가로수 길을 잇는다(되돌아가면 지워짐, 건물 block 은 못 지남).

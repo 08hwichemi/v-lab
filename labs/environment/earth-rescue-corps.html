@@ -2476,11 +2476,11 @@ ENG.dust=(el,cfg,done)=>run(el,done,{key:'dust',icon:'📡',unit:'집진',go:'�
   function lay(kx,ky){u=clamp(Math.min(W,H)*.115,34,58);if(!px)px=tx=W/2;for(const o of objs){o.x*=kx;o.y*=ky}}
   function step(dt){t+=dt;spin+=dt*26;const p=t/LT,s=p<SEG[0]?0:p<SEG[1]?1:2;if(s!==stage){K.stage(`${SRC[stage]}에 집진 설비 설치! · ${s+1}구간`);stage=s}
     K.music(dt,.4-.05*stage);if(wide>0)wide-=dt;const kx=(keys.r?1:0)-(keys.l?1:0);if(kx)tx=px+kx*2.4*u;tx=clamp(tx,.7*u,W-.7*u);px+=(tx-px)*Math.min(1,dt*13);
-    spT-=dt;if(spT<=0&&t<LT-2){spT=(.62-.24*p)/K.m;const r=Math.random(),k=r<.13+.05*stage?'bird':r<.19+.05*stage?'big':r<.23+.05*stage&&wide<=0?'filt':'dust';const d=Math.random()<.5?1:-1;
+    spT-=dt;if(spT<=0&&t<LT-2){spT=(.85-.27*p)/K.m;const r=Math.random(),k=r<.13+.05*stage?'bird':r<.19+.05*stage?'big':r<.23+.05*stage&&wide<=0?'filt':'dust';const d=Math.random()<.5?1:-1;
       objs.push({k,x:rand(.6*u,W-.6*u),y:-u,vy:(2.5+1.4*p+rand(0,.8))*K.m*(k==='bird'?1.2:1),vx:k==='bird'?d*rand(1,2):rand(-.4,.4)*(1+stage),ph:rand(0,6)});if(k==='dust'||k==='big')tot++}
     for(const o of objs){o.y+=o.vy*u*dt;o.x+=o.vx*u*dt+(o.k==='bird'?0:Math.sin(o.ph+t*2)*.4*u*dt);if(o.x<.4*u||o.x>W-.4*u)o.vx*=-1;o.ph+=dt;
       if(!o.dead&&Math.abs(o.y-py())<.6*u&&Math.abs(o.x-px)<pw()){o.dead=1;if(o.k==='bird')K.lose('bird','앗, 참새를 빨아들일 뻔했어요! 새는 피해 가요.',o.x,o.y);else if(o.k==='filt'){wide=5;sfx.pick();K.popup('흡입구 넓어짐!',o.x,o.y-20,'#ffd77a')}else{got++;K.gain(o.k==='big'?2:1,o.x,o.y)}}
-      else if(!o.dead&&o.y>H-.7*u){o.dead=1;if(o.k==='dust'||o.k==='big'){smog+=o.k==='big'?2:1;if(smog>=6){smog=0;K.lose('smog','놓친 먼지가 도시에 쌓였어요! 드론을 먼지 아래로 옮겨요.',o.x,H-u)}}}}
+      else if(!o.dead&&o.y>H-.7*u){o.dead=1;if(o.k==='dust'||o.k==='big'){smog+=o.k==='big'?2:1;if(smog>=8){smog=0;K.lose('smog','놓친 먼지가 도시에 쌓였어요! 드론을 먼지 아래로 옮겨요.',o.x,H-u)}}}}
     objs=objs.filter(o=>!o.dead);if(t>=LT)K.finish('도시의 하늘이 맑아졌어요!',`미세먼지 ${got}덩이 집진 · 오염원 3곳에 설비 설치`,tot?got/tot:1)}
   function draw(){const p=t/LT,gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,stage>1?'#9fc4dd':'#aab9c2');gr.addColorStop(1,'#d9d2c2');g.fillStyle=gr;g.fillRect(-20,-20,W+40,H+40);g.fillStyle=`rgba(120,105,85,${.3*(1-p)+smog*.04})`;g.fillRect(-20,-20,W+40,H+40);
     for(let i=0;i<9;i++){const x=i*W/8-10,h=u*(1.1+((i*7)%5)*.3);RR(x,H-h,W/8-4,h,3,'#4a5361');g.fillStyle='rgba(255,226,166,.7)';for(let k=0;k<3;k++)if((i+k)%2)g.fillRect(x+8,H-h+10+k*16,8,8)}
@@ -2489,7 +2489,7 @@ ENG.dust=(el,cfg,done)=>run(el,done,{key:'dust',icon:'📡',unit:'집진',go:'�
       else if(o.k==='filt'){E(o.x,o.y,.42*u,.42*u,'#fffdf8');E(o.x,o.y,.26*u,.26*u,'#7fd3a2');text('+',o.x,o.y,.4*u,'#fff','center',0)}
       else{const s=(o.k==='big'?.5:.34)*u;for(let k=0;k<5;k++)E(o.x+Math.cos(k*1.3+o.ph)*s*.5,o.y+Math.sin(k*1.9+o.ph)*s*.4,s*.55,s*.5,k%2?'#6b6257':'#857a6c');if(o.k==='big')text('PM',o.x,o.y,.3*u,'#fff','center',0)}}
     const w=pw();P([px-w,py()-.55*u,px+w,py()-.55*u,px+.3*u,py()-.1*u,px-.3*u,py()-.1*u],'rgba(255,255,255,.22)');at(px,py()+.15*u,u*1.25,0,()=>roadDrone(spin));
-    K.hud(p,SEG,smog/6,smog>=4?'#e2614b':'#ffd77a','먼지 농도')}
+    K.hud(p,SEG,smog/8,smog>=6?'#e2614b':'#ffd77a','먼지 농도')}
   let pd=0;return{lay,step,draw,progress:()=>t/LT,down:x=>{pd=1;tx=x},move:(x,y,e)=>{if(pd||e.pointerType==='mouse')tx=x},up:()=>{pd=0},blur:()=>{keys={}},key:(k,dn)=>{const m={ArrowLeft:'l',ArrowRight:'r',a:'l',d:'r'}[k];if(!m)return false;keys[m]=dn;return true},
     get _s(){const below=o=>o.y<py()&&o.y>py()-6*u,d=objs.filter(o=>o.k!=='bird'&&below(o)).sort((a,b)=>b.y-a.y)[0],b=objs.find(o=>o.k==='bird'&&o.y<py()+u&&o.y>py()-2.5*u&&Math.abs(o.x-px)<pw()+u);
       return{px,y:py(),want:b?clamp(b.x+(px>=b.x?1:-1)*(pw()+1.4*u),u,W-u):d?d.x:px,t,got}}}});
@@ -2523,7 +2523,7 @@ ENG.wind=(el,cfg,done)=>run(el,done,{key:'wind',icon:'🌳',unit:'식힘',go:'�
 /* ---------- 공기에서 탄소를 꺼내라 = 계기판 세 개 지키기 ----------
    계기 세 개(DAC 설비 · 재생에너지 · 지하 저장정)의 바늘이 저마다 내려간다. 그 계기를 누르면 올라간다. 셋 다 초록 구간(LO~HI)에 있는 동안만 탄소가 포집된다(GOAL 까지).
    한 계기가 빨간 구간에 RED 초 넘게 머물면 하트를 잃는다. 구름이 끼면 재생에너지가 빨리 떨어지고, 저장정은 포집이 잘될수록 빨리 찬다(= 내려감). */
-ENG.plant=(el,cfg,done)=>run(el,done,{key:'plant',icon:'🌀',unit:'만 톤',go:'가동!',failMsg:'포집 단지가 멈췄어요',
+ENG.plant=(el,cfg,done)=>run(el,done,{key:'plant',icon:'🌀',unit:'점수',go:'가동!',failMsg:'포집 단지가 멈췄어요',
   intro:`계기 세 개의 바늘이 자꾸 내려가요. <b>그 계기를 눌러</b> 올려요.<br>셋 다 <b>초록 구간</b>에 있어야 탄소가 포집돼요. 너무 올려도 안 돼요!<br>구름이 끼면 재생에너지가 빨리 떨어져요.`,
   hint:'계기를 눌러 바늘을 올려요. 키보드는 1 · 2 · 3.'},K=>{
   const GOAL=[50,60,70][K.diff],LO=.4,HI=.78,RED=1.7,NM=cfg.levers.map(l=>l.n),TIP=['DAC 설비가 멈추면 공기에서 탄소를 꺼낼 수 없어요.','화석연료 전기로 돌리면 탄소가 다시 나와요. 재생에너지 비율을 지켜요.','저장할 곳이 모자라면 포집한 탄소가 다시 새어 나가요.'];

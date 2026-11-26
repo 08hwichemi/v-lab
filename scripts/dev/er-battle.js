@@ -14,7 +14,7 @@ const [,, out = '/tmp/er-battle', w = '412', h = '780'] = process.argv;
   const order = [1, 0, 2, 3, 1, 0, 1, 3, 0, 1, 3, 0, 0, 0, 0, 0, 0, 0];
   for (const k of order) {
     const st = await ev(() => document.querySelector('#game') && document.querySelector('#game')._dbg && document.querySelector('#game')._dbg.state); if (!st || st.over) break;
-    const kk = st.moves[k] > 0 ? k : 0; await ev(k => document.querySelector('#game')._dbg.use(k), kk);
+    const kk = st.moves[k] > 0 ? k : 0; await ev(k => { document.querySelector("#game")._dbg.use(k); }, kk);
     await p.waitForTimeout(550); if (n < 9) await shot('fx' + kk);
     for (let i = 0; i < 80; i++) { const q = await ev(() => { const o = document.querySelector('#tb .opt.right, #tb .opt:not([disabled])'); const d = document.querySelector('#game')._dbg; if (o && !o.disabled) { const all = [...document.querySelectorAll('#tb .opt')]; all[0].click(); } return d ? d.state : null; }).catch(() => null); if (!q || !q.busy || q.over) break; if (i === 12 && n < 12) await shot('turn'); await p.waitForTimeout(150); }
   }

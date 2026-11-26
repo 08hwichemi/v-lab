@@ -2559,7 +2559,7 @@ ENG.methane=(el,cfg,done)=>run(el,done,{key:'methane',icon:'🌀',unit:'명중',
   intro:`메탄몬이 뱉는 <b>가스 공</b>을 회수 진공기로 <b>되받아쳐</b> 메탄몬을 맞혀요.<br>공을 놓치면 안 돼요! 붉은 <b>뜨거운 트림</b>은 받지 말고 피해요.<br>도중의 퀴즈를 맞히면 과학 지식 공격!${has('p_bear')?'<br>반달이 덕분에 하트 +1':''}`,
   hint:'화면을 누른 채 좌우로 끌어요. 키보드는 ← →.'},K=>{
   const HP=100,DMG=7,QD=15,QAT=[.28,.56,.84];let u=40,px=0,tx=0,hp=HP,ball=null,wait=.3,hot=[],hotT=3,bx=0,hitT=0,cool=0,qi=0,stage=0,t=0,keys={},trail=[];
-  const by=()=>H*.22,py=()=>H*.86,hw=()=>1.25*u,prog=()=>1-hp/HP,sp=()=>(5.4+3.2*prog())*K.m*u;
+  const by=()=>H*.22,py=()=>H*.86,hw=()=>1.25*u,prog=()=>1-hp/HP,sp=()=>(5.2+2.8*prog())*K.m*u;
   function lay(kx,ky){u=clamp(Math.min(W,H)*.115,34,58);if(!px)px=tx=bx=W/2;if(ball){ball.x*=kx;ball.y*=ky}}
   function hurt(d,big){hp=Math.max(0,hp-d);hitT=.25;K.shake=big?.3:.12;fx('star',bx,by(),big?20:6,'#c9f0a8');if(big)K.popup('과학 지식 공격!',bx,by()+1.6*u,'#ffd77a');
     const s=prog()<.34?0:prog()<.67?1:2;if(s!==stage&&hp>0){stage=s;K.stage(s===1?'2구간 · 뜨거운 트림을 피해요':'3구간 · 메탄몬이 화났어요')}
@@ -2575,7 +2575,7 @@ ENG.methane=(el,cfg,done)=>run(el,done,{key:'methane',icon:'🌀',unit:'명중',
       if(b.y>H+r){ball=null;wait=.7;K.lose('miss','가스 공을 놓쳤어요! 진공기를 공 아래로 옮겨 되받아쳐요.',px,py())}}
     for(const q of trail)q.a-=dt*4;trail=trail.filter(q=>q.a>0);
     if(stage>0){hotT-=dt;if(hotT<=0){hotT=rand(2.2,3.4)/K.m;hot.push({x:bx,y:by()+u,vy:(3.6+stage*.6)*K.m});beep(160,.2,'sawtooth',.03)}}
-    for(const h of hot){h.y+=h.vy*u*dt;if(!h.dead&&Math.abs(h.y-py())<.45*u&&Math.abs(h.x-px)<hw()+.3*u){h.dead=1;K.lose('hot','앗 뜨거워! 붉은 트림은 받지 말고 피해요.',h.x,h.y)}}hot=hot.filter(h=>!h.dead&&h.y<H+u)}
+    for(const h of hot){h.y+=h.vy*u*dt;if(!h.dead&&Math.abs(h.y-py())<.45*u&&Math.abs(h.x-px)<hw()*.8){h.dead=1;K.lose('hot','앗 뜨거워! 붉은 트림은 받지 말고 피해요.',h.x,h.y)}}hot=hot.filter(h=>!h.dead&&h.y<H+u)}
   function draw(){const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#1d3a4f');gr.addColorStop(1,'#cfe4ec');g.fillStyle=gr;g.fillRect(-20,-20,W+40,H+40);
     for(let i=0;i<6;i++)P([i*W/5-W*.1,H,i*W/5,H-u*(1.2+(i%3)*.5),i*W/5+W*.14,H],i%2?'#eef6f9':'#dcebf1');for(let i=0;i<5;i++){const x=W*(.1+.2*i),q=(T*.25+i*.2)%1;E(x,H-q*H*.5,5+q*8,5+q*8,`rgba(180,230,150,${.25*(1-q)})`)}
     at(bx+(hitT>0?rand(-4,4):0),by()+Math.sin(T*2)*4,u*1.35,0,()=>methaneMon(hitT,T));RR(W/2-W*.3,64,W*.6,10,5,'rgba(22,40,61,.5)');RR(W/2-W*.3,64,Math.max(0,W*.6*hp/HP),10,5,hp<HP*.34?'#e2614b':'#7fd3a2');text('메탄몬',W/2,84,Math.max(12,u*.3),'#fff');
@@ -2594,9 +2594,9 @@ ENG.farm=(el,cfg,done)=>run(el,done,{key:'farm',icon:'🌸',unit:'씨앗',go:'�
   hint:'바늘이 초록에 오면 화면을 눌러요(스페이스바). 해충은 직접 눌러요.'},K=>{
   const GOAL=cfg.goal||12,ST=[['수분','#3d7fb8','물이'],['빛','#e9a23b','빛이'],['온도','#e2614b','온도가']];
   let u=40,seeds=0,stp=0,ph=0,zc=.5,zw=.3,pest=null,bloom=0,stage=0,flashT=0;
-  const prog=()=>seeds/GOAL,PER=()=>(1.55-.42*prog())/K.m,nx=(d=0)=>.5+.5*Math.sin(ph+d),bx0=()=>W*.1,bw=()=>W*.8,byy=()=>H*.8,pc=()=>[W/2,H*.56];
+  const prog=()=>seeds/GOAL,PER=()=>(1.75-.45*prog())/K.m,nx=(d=0)=>.5+.5*Math.sin(ph+d),bx0=()=>W*.1,bw=()=>W*.8,byy=()=>H*.8,pc=()=>[W/2,H*.56];
   function lay(){u=clamp(Math.min(W,H)*.115,34,58)}
-  function zone(){zw=Math.max(.2,.32-.11*prog());zc=rand(.16+zw/2,.84-zw/2)}zone();
+  function zone(){zw=Math.max(.24,.34-.1*prog());zc=rand(.16+zw/2,.84-zw/2)}zone();
   function hit(x,y){if(!K.live()||bloom>0)return;if(pest){if(x==null||Math.hypot(pest.x-x,pest.y-y)<1.2*u){fx('rect',pest.x,pest.y,8,'#6b4426');K.gain(1,pest.x,pest.y,3);pest=null}return}
     const d=nx()-zc;if(Math.abs(d)<=zw/2){K.gain(Math.abs(d)<zw/6?2:1,bx0()+bw()*nx(),byy(),3);flashT=.2;stp++;if(stp>=3){stp=0;bloom=.75;seeds++;sfx.win();const[x0,y0]=pc();fx('star',x0,y0-2*u,14,'#f6b0cc')}else if(stage>0&&Math.random()<.28){const[x0,y0]=pc();pest={x:x0,y:y0-1.2*u,t:(2.6-.5*prog())/K.m,ph:rand(0,6)}}zone()}
     else if(K.lose('bar'+stp,`${ST[stp][2]} ${d>0?'너무 많아요':'모자라요'}! 바늘이 초록 구간에 왔을 때 눌러요.`,bx0()+bw()*nx(),byy()))zone()}
@@ -2615,7 +2615,7 @@ ENG.farm=(el,cfg,done)=>run(el,done,{key:'farm',icon:'🌸',unit:'씨앗',go:'�
     if(!pest&&bloom<=0){const x=X+Wd*nx();RR(x-4,Y-.52*u,8,1.04*u,4,'#fffdf8');P([x-9,Y-.6*u,x+9,Y-.6*u,x,Y-.4*u],c)}
     K.hud(prog(),[.34,.67])}
   return{lay,step,draw,progress:prog,down:(x,y)=>hit(x,y),key:(k,dn)=>{if(k!==' '&&k!=='Enter')return false;if(dn)hit(null,null);return true},
-    get _s(){return{tap:!pest&&bloom<=0&&Math.abs(nx(.09*6.283/PER())-zc)<zw*.3,pest:pest?{x:pest.x,y:pest.y}:null,seeds,t:seeds}}}});
+    get _s(){return{tap:!pest&&bloom<=0&&Math.abs(nx()-zc)<zw*.4,pest:pest?{x:pest.x,y:pest.y}:null,seeds,t:seeds}}}});
 
 /* ---------- 지층 속 대멸종의 증거 = 솔질로 화석 드러내기 ----------
    지층 여섯 겹(cfg.finds, 위에서부터). 화면을 문질러 흙(칸 clr)을 걷어 낸다. 숨은 화석 둘레(R)의 흙을 NEED 넘게 걷으면 발견 → 해설 카드 → 다음 지층.
@@ -2670,9 +2670,9 @@ ENG.shadow=(el,cfg,done)=>run(el,done,{key:'shadow',icon:'🌍',unit:'명중',go
     if(qi<QAT.length&&prog()>=QAT[qi]&&hp>0){const q=cfg.quiz[qi++];if(q){K.quiz({e:'💡',n:'지구 생명 연합',q},`지식 공격! (그림자 체력 −${QD}, 탄환 지우기)`,ok=>{if(ok)hurt(QD,1)});return}}
     fireT-=dt;if(fireT<=0){fireT=.2;shots.push({x,y:y-.5*u});if(assist){shots.push({x:x-1.2*u,y:y-.1*u,a:1},{x:x+1.2*u,y:y-.1*u,a:1})}beep(1100,.02,'square',.008)}
     for(const s of shots){s.y-=14*u*dt;if(Math.abs(s.x-bx())<1.5*u&&Math.abs(s.y-by())<.9*u){s.dead=1;hurt(s.a?.5:1);if(!s.a)K.gain(1,null,null,2)}}shots=shots.filter(s=>!s.dead&&s.y>40);
-    patT-=dt;if(patT<=0&&hp>0){patT=(assist?1.25:1.7)/K.m;attack()}
+    patT-=dt;if(patT<=0&&hp>0){patT=(assist?1.4:1.85)/K.m;attack()}
     for(const b of bul){if(b.home>0){b.home-=dt;const a=Math.atan2(y-b.y,x-b.x);b.vx+=(Math.cos(a)*3.2-b.vx)*dt*2;b.vy+=(Math.sin(a)*3.2-b.vy)*dt*2}b.x+=b.vx*u*dt;b.y+=b.vy*u*dt;
-      if(Math.hypot(b.x-x,b.y-y)<(b.r+.26)*u){b.dead=1;K.lose('hit','공격에 맞았어요! 탄환 사이의 빈 곳으로 피해요.',x,y)}}bul=bul.filter(b=>!b.dead&&b.y<H+u&&b.y>-3*u&&b.x>-u&&b.x<W+u)}
+      if(Math.hypot(b.x-x,b.y-y)<(b.r+.18)*u){b.dead=1;K.lose('hit','공격에 맞았어요! 탄환 사이의 빈 곳으로 피해요.',x,y)}}bul=bul.filter(b=>!b.dead&&b.y<H+u&&b.y>-3*u&&b.x>-u&&b.x<W+u)}
   function draw(){const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,assist?'#1a1030':'#0e1a30');gr.addColorStop(1,'#1f4a55');g.fillStyle=gr;g.fillRect(-20,-20,W+40,H+40);for(let i=0;i<36;i++)E((i*139+17)%W,((i*71+T*20)%H),1.2,1.2,'rgba(255,255,255,.35)');
     E(W/2,H+H*.42,W*.75,H*.5,'#2f7d5b');E(W*.3,H+H*.3,W*.3,H*.36,'#3493b5');
     const X=bx(),Y=by(),sc=u*(assist?1.75:1.4),c=hitT>0?'#cfc4f2':cfg.enemy.color||'#c9bdf0';at(X+(hitT>0?rand(-3,3):0),Y+Math.sin(T*2)*4,sc,0,()=>{for(let k=0;k<8;k++){const a=k/8*6.283+T*.3;E(Math.cos(a)*.9,Math.sin(a)*.5,.5,.4,'rgba(60,40,110,.55)')}E(0,0,1,.62,'#2a1d4f');E(0,-.05,.8,.46,'#3a2a6a');P([-.5,-.2,-.2,-.06,-.5,.04],c);P([.5,-.2,.2,-.06,.5,.04],c);Q(-.3,.28,0,.14,.3,.28,c,.07)});

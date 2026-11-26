@@ -65,7 +65,7 @@ const WHERE = { catch: [1, 0], belt: [2, 2], chase: [4, 2], river: [1, 1], dust:
     wind: async s => { if (s.busy || s.round === lastRound || mode === 'bad') return; lastRound = s.round; await p.mouse.move(ox + s.pts[0][0], oy + s.pts[0][1]); await p.mouse.down(); for (const q of s.pts) await p.mouse.move(ox + q[0], oy + q[1], { steps: 3 }); await p.mouse.up(); },
     plant: async s => { for (const i of s.tap) await p.keyboard.press(String(i + 1)); },
     methane: async s => { await p.mouse.move(ox + s.want, oy + s.y); },
-    farm: async s => { if (s.pest) await p.mouse.click(ox + s.pest.x, oy + s.pest.y); else if (s.tap || mode === 'bad') await p.keyboard.press(' '); },
+    farm: async s => { if (s.pest) await p.mouse.click(ox + s.pest.x, oy + s.pest.y); else if (mode === 'bad') await p.keyboard.press(' '); else await ev(() => { const d = document.querySelector('#game')._dbg; if (d.s.tap) d.sc.key(' ', true); }); },
     dig: async s => { if (s.hold) { if (held) { held = false; await p.mouse.up(); } return; } const a = Date.now() / 90, r = s.R * (.15 + .85 * ((Date.now() / 700) % 1)); await p.mouse.move(ox + s.fx + Math.cos(a) * r, oy + s.fy + Math.sin(a) * r, { steps: 3 }); if (!held) { held = true; await p.mouse.down(); } },
     shadow: async s => { await p.mouse.move(ox + s.want.x, oy + s.want.y, { steps: 2 }); },
   };

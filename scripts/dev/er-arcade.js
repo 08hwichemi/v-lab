@@ -7,7 +7,7 @@
 // 마지막 줄에 결과(별·다친 횟수·오류)가 나온다. 장면 값은 #game._dbg.s (게임마다 _s getter) 로 읽는다.
 const { chromium } = require('playwright');
 const [,, game = 'catch', out = '/tmp/er-arc', w = '412', h = '780', diff = '1', mode = 'bot'] = process.argv;
-const WHERE = { catch: [1, 0], belt: [2, 2], chase: [4, 2], river: [1, 1], dust: [2, 0], wind: [2, 1], plant: [3, 0], methane: [3, 1], farm: [4, 1], dig: [5, 1], shadow: [5, 2], cross: [0, 0], drop: [0, 1], lamps: [0, 2], coral: [1, 2], tide: [3, 2], edna: [4, 0], summit: [5, 0] };
+const WHERE = { catch: [1, 0], belt: [2, 2], chase: [4, 2], river: [1, 1], dust: [2, 0], wind: [2, 1], plant: [3, 0], farm: [4, 1], dig: [5, 1], shadow: [5, 2], cross: [0, 0], drop: [0, 1], lamps: [0, 2], coral: [1, 2], tide: [3, 2], edna: [4, 0], summit: [5, 0] };
 (async () => {
   const b = await chromium.launch();
   const touch = +w < 700;

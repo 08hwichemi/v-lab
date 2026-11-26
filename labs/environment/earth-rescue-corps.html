@@ -664,6 +664,27 @@ body.playing #game{-webkit-user-select:none;user-select:none;-webkit-touch-callo
 .modal.qz.locked .opt,.modal.qz.locked #ff{opacity:.45;cursor:default}
 .build{font-size:.74rem;color:var(--muted);opacity:.8}
 @media (max-width:560px){.modal.qz{align-items:flex-start}.modal.qz .mbox{margin-top:4px}}
+/* 턴제 배틀 연출 */
+.bfx{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
+.bcall{position:absolute;left:50%;top:44%;z-index:4;transform:translate(-50%,-50%);padding:6px 18px;border-radius:10px;background:rgba(13,24,38,.88);color:#fff;font-family:var(--display);font-size:1.25rem;white-space:nowrap;pointer-events:none;opacity:0}
+.bcall.gold{color:#ffd77a}.bcall.foe{color:#ffb3a7}
+.bcall.go{animation:bcall 1s ease-out forwards}
+@keyframes bcall{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}25%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-80%) scale(1)}}
+.me img{animation:mebob 2.2s ease-in-out infinite}
+@keyframes mebob{50%{transform:translateY(-3px)}}
+.foe.enter{animation:foein 1.4s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes foein{0%{transform:translateY(120%) scale(.4);opacity:0}60%{opacity:1}100%{transform:none;opacity:1}}
+.me.enter{animation:mein .9s ease-out both}
+@keyframes mein{0%{transform:translateX(-160%)}100%{transform:none}}
+.blink{animation:shake .4s,blink .5s steps(2) 2}
+@keyframes blink{50%{opacity:.25}}
+.foe.angry svg{animation-duration:.7s;filter:drop-shadow(0 0 10px rgba(226,97,75,.8))}
+.foe.faint{animation:faint 1.1s ease-in forwards}
+.me.faint{animation:faint 1.1s ease-in forwards}
+@keyframes faint{30%{transform:translateY(-8px) rotate(-6deg)}100%{transform:translateY(90%) rotate(12deg) scale(.7);opacity:0}}
+.dmg{font-size:1.7rem;text-shadow:0 2px 0 rgba(0,0,0,.35)}
+.dmg.big{font-size:2.3rem;color:#ffd77a}
+@media (prefers-reduced-motion:reduce){.foe.enter,.me.enter,.me img,.bcall.go{animation:none}.bcall.go{opacity:1}}
 </style>
 </head>
 <body>
@@ -702,12 +723,12 @@ const ITEMS={
   p_peng:{n:'아기 펭귄 펭펭',i:'🐧',k:'pet',d:'아는 게 많은 꼬마 펭귄.',fx:'퀴즈에서 오답 2개를 한 번 지워 줘요'},
   t_edna:{n:'eDNA 분석기',i:'🧬',k:'tool',d:'물 한 컵만으로 그곳에 사는 생물을 알아내는 환경 DNA 분석 장치.'},
   d_seedcase:{n:'씨앗 금고 진열장',i:'🌰',k:'deco',d:'시드볼트에서 선물받은 토종 씨앗 표본.'},
-  p_bear:{n:'아기 반달곰 반달이',i:'🐻',k:'pet',d:'가슴의 하얀 반달 무늬가 자랑이에요.',fx:'메탄몬·최후의 결전에서 하트 +1'},
+  p_bear:{n:'아기 반달곰 반달이',i:'🐻',k:'pet',d:'가슴의 하얀 반달 무늬가 자랑이에요.',fx:'메탄몬 배틀에서 체력 +20, 최후의 결전에서 하트 +1'},
   d_flag:{n:'지구 정상회의 기념패',i:'🏅',k:'deco',d:'모든 나라가 함께한 지구 정상회의 기념패.'},
   d_fossil:{n:'공룡 화석 표본',i:'🦴',k:'deco',d:'지층 발굴에서 찾은 백악기 공룡 뼈 복제 표본.'},
   d_trophy:{n:'가이아 트로피',i:'🏆',k:'deco',d:'여섯 번째 대멸종을 막아 낸 영웅에게 주는 트로피.'}
 };
-const ENGINE_KIND={cross:'건널목 지키기',drop:'석회 살포',lamps:'불 끄기',catch:'그물 끌기',river:'갈림길 분류',coral:'산호 이식',dust:'먼지 받기',wind:'바람길 잇기',belt:'빨리 분류',plant:'계기 지키기',methane:'되받아치기',tide:'방파림 심기',edna:'eDNA 조사',farm:'타이밍 재배',chase:'추격',summit:'회의장 걷기',dig:'솔질 발굴',shadow:'최후의 결전'};
+const ENGINE_KIND={cross:'건널목 지키기',drop:'석회 살포',lamps:'불 끄기',catch:'그물 끌기',river:'갈림길 분류',coral:'산호 이식',dust:'먼지 받기',wind:'바람길 잇기',belt:'빨리 분류',plant:'계기 지키기',battle:'1대1 배틀',tide:'방파림 심기',edna:'eDNA 조사',farm:'타이밍 재배',chase:'추격',summit:'회의장 걷기',dig:'솔질 발굴',shadow:'최후의 결전'};
 
 /* ================= 섬과 미션 ================= */
 const ISLANDS=[
@@ -919,8 +940,8 @@ const ISLANDS=[
 그런데 그 구멍에서 거대한 가스 괴물 '메탄몬'이 깨어났어요!
 메탄몬이 트림할 때마다 지구가 더 뜨거워진대요. 첨단 장비로 메탄몬을 물리쳐 주세요!`,
     gear:[[`🛰️`,`메탄 감시 위성`,`우주에서 메탄이 새어 나오는 곳을 겨냥해요.`],[`🌀`,`메탄 회수 진공기`,`새어 나온 메탄을 모아 연료로 써요(실제로는 매립지·축사·가스관처럼 한곳에서 새는 메탄에 쓰는 기술이에요). 메탄몬의 약점이에요!`],[`🧊`,`동토층 냉각 커버`,`녹는 땅을 덮어 메탄몬의 공격을 약하게 만들어요.`]],
-    how:`메탄몬이 뱉는 가스 공을 회수 진공기로 되받아쳐 메탄몬을 맞히세요. 진공기의 가장자리로 받으면 공이 비스듬히 튀어요. 공을 놓치면 안 되고, 붉은 '뜨거운 트림'은 받지 말고 피하세요. 도중에 나오는 퀴즈를 맞히면 과학 지식 공격으로 큰 피해를 줘요.`,
-    engine:`methane`, cfg:{
+    how:`1대1 배틀! 장비 기술을 골라 메탄몬의 체력을 0으로 만드세요. 약점 기술은 피해 2배, 냉각 커버는 다음 피해를 절반으로 줄이고, 과학 지식 공격은 퀴즈를 맞히면 강력해요. 내 체력이 많이 남을수록 별이 많아요.`,
+    engine:`battle`, cfg:{
       enemy:{n:`메탄몬`,lv:12,hp:130,color:`#c4ecaa`,acc:`💨`,weak:`capture`,atk:[{n:`트림 가스 분출`,dmg:[10,16]},{n:`온실 담요 덮기`,dmg:[12,18]},{n:`동토층 녹이기`,dmg:[8,22]}]},
       moves:[{n:`위성 추적 레이저`,i:`🛰️`,type:`scan`,pow:16,pp:99,d:`누출 지점을 겨냥`},{n:`메탄 회수 진공기`,i:`🌀`,type:`capture`,pow:26,pp:4,d:`약점! 피해 2배`},{n:`동토층 냉각 커버`,i:`🧊`,type:`guard`,pp:2,d:`다음 피해 절반`},{n:`과학 지식 공격`,i:`💡`,type:`quiz`,pow:56,pp:3,d:`퀴즈 정답이면 강력한 일격`}],
       quiz:[
@@ -1271,7 +1292,7 @@ function confetti(host,n=46){if(!host||calm())return;const box=document.createEl
    누름마다 번호(GEST.id)를 매겨, 창이 열릴 때 진행 중이던 누름에서 나온 클릭은 버린다.
    누르는 도중에 열린 창(대화하기·스페이스)은 연달아 두 번 누른 경우를 위해 열린 뒤 0.5초도 막는다.
    (버튼을 눌렀다 뗀 뒤 열리는 보통 창은 시간으로 막지 않는다 — 안내 창을 빠르게 넘길 수 있어야 하므로) */
-const BUILD='11.26-1';   /* 화면에 보이는 버전 표시 — 고칠 때마다 올린다 (설정 창·시작 화면 맨 아래) */
+const BUILD='11.26-2';   /* 화면에 보이는 버전 표시 — 고칠 때마다 올린다 (설정 창·시작 화면 맨 아래) */
 const GEST={id:0,down:0,key:0,touch:0,at:0};   /* at = 마지막으로 누르거나 뗀 시각, touch = 닿아 있는 손가락 수 */
 const gnow=()=>{GEST.at=performance.now()};
 window.addEventListener('pointerdown',()=>{GEST.id++;GEST.down=1;gnow()},true);
@@ -1664,7 +1685,7 @@ function mLetter(i,j){
 }
 function brief(i,j){
   const m=ISLANDS[i].missions[j];
-  const petTip={catch:'p_turtle',coral:'p_turtle',river:'p_kkachi',belt:'p_kkachi',chase:'p_kkachi',methane:'p_bear',shadow:'p_bear'}[m.engine]||(m.cfg.npcs?'p_peng':null);
+  const petTip={catch:'p_turtle',coral:'p_turtle',river:'p_kkachi',belt:'p_kkachi',chase:'p_kkachi',battle:'p_bear',shadow:'p_bear'}[m.engine]||(m.cfg.npcs?'p_peng':null);
   const extra=m.engine==='coral'&&has('p_peng')?`<p class="fact">${ic(ITEMS.p_peng.i,'i1')} ${josa(ITEMS.p_peng.n,'이','가')} 함께해요: ${ITEMS.p_peng.fx}</p>`:'';
   show(`<div><span class="label">작전 브리핑 · ${ISLANDS[i].name} · ${ENGINE_KIND[m.engine]} 미션</span><h2>${ic(m.from.e,'i2')} ${m.title}</h2></div>
   <div class="px stack">
@@ -1732,6 +1753,97 @@ function result(i,j,stars,diffAt=S.diff){
 
 /* ================= 미니게임 엔진 ================= */
 const ENG={};
+
+/* BATTLE-BEGIN */
+/* ---------- 1대1 턴제 배틀 (11번 메탄몬) ----------
+   기술을 고르면: 내 기술 연출 → 상대가 맞는 연출 → 상대 공격 연출 → 내가 맞는 연출. 연출은 경기장 위에 겹친 캔버스(.bfx)에 그린다(FX.<기술 type>).
+   소리는 기술마다 다르고(SND), 배틀 동안 낮은 박자 가락이 흐른다(소리 끔이면 조용). 수치·퀴즈는 예전 그대로(cfg.enemy·cfg.moves·cfg.quiz, 난이도는 tune()). */
+ENG.battle=(el,cfg,done)=>{
+  const F=cfg.enemy;let eh=F.hp;const ehMax=F.hp;const pMax=100+(has('p_bear')?20:0);let ph=pMax;
+  let guard=false,busy=true,qi=0,fifty=has('p_peng')?1:0,over=false,turn=0;
+  const moves=cfg.moves.map(m=>({...m,left:m.pp}));
+  const pet=['p_bear','p_peng','p_kkachi','p_turtle','p_gorani'].find(has);
+  el.innerHTML=`<div class="arena" id="arena">
+    <div class="binfo foe-i"><b>${F.n}</b> <small>Lv.${F.lv}</small><div class="hpb"><i id="ehb" style="width:100%"></i></div></div>
+    <div class="foe enter" id="foe">${monSVG(F.color,F.acc)}</div>
+    <div class="me enter" id="me">${avImg(S.avatar)}${pet?ic(ITEMS[pet].i,'i3'):''}</div>
+    <div class="binfo me-i"><b>${esc(S.name)}</b> <small>${RANKS[S.promoted]}</small><div class="hpb"><i id="phb" style="width:100%"></i></div><small id="phn">${ph} / ${pMax}</small></div>
+    <canvas class="bfx" id="bfx"></canvas><div class="bcall" id="bcall" hidden></div>
+  </div>
+  <div class="tbox" id="tb" role="status"></div>
+  <div class="moves" id="mv"></div>`;
+  const tb=$('#tb',el),arena=$('#arena',el),cv=$('#bfx',el),foeEl=$('#foe',el),meEl=$('#me',el);let g=cv.getContext('2d'),CW=300,CH=200;
+  const say=t=>{tb.innerHTML=t};
+  const wait=ms=>new Promise(r=>{const t=setTimeout(r,ms);cleanups.push(()=>clearTimeout(t))});
+  const alive=()=>document.body.contains(tb);
+  const rnd=(a,b)=>a+Math.random()*(b-a);
+  /* --- 소리 --- */
+  const SND={scan:()=>{beep(900,.28,'sawtooth',.03,0,2.2);beep(1800,.12,'square',.02,.26)},capture:()=>{beep(520,.6,'sawtooth',.03,0,.25);beep(260,.6,'sine',.04,0,.5)},
+    guard:()=>[1319,1568,2093].forEach((f,k)=>note(f,.22,k*.07,.04)),quiz:()=>{[523,659,784,1047].forEach((f,k)=>note(f,.3,k*.05,.05));beep(120,.35,'square',.05,.2,.5)},
+    heal:()=>[659,784,988,1319].forEach((f,k)=>note(f,.2,k*.09,.04)),cry:()=>{beep(190,.5,'sawtooth',.05,0,.55);beep(140,.55,'square',.03,.08,.6)},
+    foe:k=>{beep([150,110,90][k%3],.4,'sawtooth',.045,0,k===2?1.8:.6);beep(70,.3,'triangle',.05,.12,.7)},super:()=>{note(1047,.12,0,.05);note(1568,.25,.1,.05)},
+    low:()=>{beep(880,.09,'square',.03);beep(880,.09,'square',.03,.18)},faint:()=>beep(400,.9,'sawtooth',.04,0,.12),pick:()=>beep(700,.04,'triangle',.04)};
+  /* 배틀 가락: 낮은 음 여덟 걸음 + 가벼운 박 */
+  {const BASS=[110,110,131,110,147,131,110,98],LEAD=[440,0,523,587,0,523,440,392];let k=0;const iv=setInterval(()=>{if(over||!alive())return;const fast=eh<ehMax*.34;beep(BASS[k%8]*(fast?1.12:1),.16,'triangle',.03);if(LEAD[k%8]&&k%16<12)beep(LEAD[k%8]*(fast?1.12:1),.1,'square',.008);if(k%2)beep(2600,.02,'square',.005);k++},230);cleanups.push(()=>clearInterval(iv))}
+  /* --- 연출 캔버스 --- */
+  function fit(){const r=arena.getBoundingClientRect(),d=Math.min(2,window.devicePixelRatio||1);CW=r.width;CH=r.height;cv.width=CW*d;cv.height=CH*d;g=cv.getContext('2d');g.setTransform(d,0,0,d,0,0)}
+  const pos=e=>{const a=arena.getBoundingClientRect(),r=e.getBoundingClientRect();return[r.left-a.left+r.width/2,r.top-a.top+r.height/2,Math.max(r.width,r.height)/2]};
+  /* play(길이초, 그리기(t 0~1)) — 끝나면 지운다 */
+  function playFx(dur,drawFn){return new Promise(res=>{fit();const t0=performance.now();let raf=0;(function fr(now){if(!alive()){res();return}const t=Math.min(1,(now-t0)/1000/dur);g.clearRect(0,0,CW,CH);try{drawFn(t)}catch(e){}if(t<1)raf=requestAnimationFrame(fr);else{g.clearRect(0,0,CW,CH);res()}})(t0);cleanups.push(()=>cancelAnimationFrame(raf))})}
+  const dot=(x,y,r,c)=>{g.beginPath();g.arc(x,y,Math.max(0,r),0,7);g.fillStyle=c;g.fill()};
+  const FX={
+    scan:()=>{const[mx,my]=pos(meEl),[fx,fy]=pos(foeEl);return playFx(.7,t=>{const k=Math.min(1,t/.45),ex=mx+(fx-mx)*k,ey=my-30+(fy-my+30)*k;g.lineCap='round';g.strokeStyle='rgba(255,226,166,.35)';g.lineWidth=14;g.beginPath();g.moveTo(mx+20,my-30);g.lineTo(ex,ey);g.stroke();g.strokeStyle='#ffe2a6';g.lineWidth=5;g.stroke();g.strokeStyle='#fff';g.lineWidth=2;g.stroke();
+      if(t>.45){const q=(t-.45)/.55;for(let i=0;i<10;i++){const a=i*.63;dot(fx+Math.cos(a)*q*50,fy+Math.sin(a)*q*50,5*(1-q),'#ffd77a')}g.strokeStyle=`rgba(255,255,255,${1-q})`;g.lineWidth=3;g.beginPath();g.arc(fx,fy,10+q*34,0,7);g.stroke()}})},
+    capture:()=>{const[mx,my]=pos(meEl),[fx,fy]=pos(foeEl);return playFx(1,t=>{for(let i=0;i<26;i++){const p=(t*1.6+i/26)%1,a=i*2.4+t*9,r=(1-p)*70,x=fx+(mx+30-fx)*p*p+Math.cos(a)*r*(1-p),y=fy+(my-20-fy)*p*p+Math.sin(a)*r*.6*(1-p);dot(x,y,4*(1-p)+1.5,i%3?'rgba(190,240,160,.85)':'rgba(255,255,255,.8)')}
+      for(let k=0;k<3;k++){g.strokeStyle=`rgba(159,211,230,${.55-k*.15})`;g.lineWidth=3;g.beginPath();g.ellipse(fx,fy,(60-k*16)*(1-t*.4),(34-k*9)*(1-t*.4),t*6+k,0,5);g.stroke()}})},
+    guard:()=>{const[mx,my,mr]=pos(meEl);return playFx(.8,t=>{const a=Math.min(1,t*2.5)*(t>.8?(1-t)*5:1);g.globalAlpha=a;g.strokeStyle='#cfeaf5';g.lineWidth=4;g.beginPath();g.arc(mx,my,mr+18,-2.2,.9);g.stroke();g.fillStyle='rgba(159,211,230,.25)';g.beginPath();g.arc(mx,my,mr+18,0,7);g.fill();for(let i=0;i<8;i++){const x=mx+Math.cos(i*1.9)*(mr+10),y=my-50+((t*120+i*31)%100);g.strokeStyle='#fff';g.lineWidth=1.5;for(let b=0;b<3;b++){g.beginPath();g.moveTo(x-5*Math.cos(b*1.05),y-5*Math.sin(b*1.05));g.lineTo(x+5*Math.cos(b*1.05),y+5*Math.sin(b*1.05));g.stroke()}}g.globalAlpha=1})},
+    quiz:()=>{const[fx,fy]=pos(foeEl);return playFx(.9,t=>{const q=Math.min(1,t/.5);g.fillStyle=`rgba(255,244,214,${t<.5?t*.9:(1-t)*.9})`;g.fillRect(0,0,CW,CH);for(let i=0;i<12;i++){const a=i*.524+t*1.5;g.strokeStyle=`rgba(255,215,122,${1-t})`;g.lineWidth=5;g.beginPath();g.moveTo(fx+Math.cos(a)*20,fy+Math.sin(a)*20);g.lineTo(fx+Math.cos(a)*(30+q*90),fy+Math.sin(a)*(30+q*90));g.stroke()}dot(fx,fy,22*(1-t)+6,'#fff')})},
+    heal:()=>{const[mx,my]=pos(meEl);return playFx(.8,t=>{for(let i=0;i<10;i++)dot(mx+Math.cos(i*2)*34,my+30-((t*90+i*17)%80),4,`rgba(127,224,176,${1-t})`)})},
+    foe:k=>{const[mx,my]=pos(meEl),[fx,fy]=pos(foeEl);return playFx(.85,t=>{
+      if(k===0)for(let i=0;i<7;i++){const p=Math.min(1,Math.max(0,t*1.5-i*.07)),x=fx+(mx-fx)*p,y=fy+(my-fy)*p+Math.sin(p*3.14)*-40+Math.sin(i*5)*14;if(p>0&&p<1)dot(x,y,9+i%3*4,`rgba(168,217,138,${.8-p*.3})`)}
+      else if(k===1){g.fillStyle=`rgba(226,97,75,${Math.sin(t*3.14)*.4})`;g.fillRect(0,0,CW,CH);for(let i=0;i<5;i++){g.strokeStyle=`rgba(255,160,120,${Math.sin(t*3.14)*.7})`;g.lineWidth=4;g.beginPath();const y=CH*(.1+i*.2)+Math.sin(t*8+i)*6;g.moveTo(0,y);g.bezierCurveTo(CW*.3,y-18,CW*.6,y+18,CW,y);g.stroke()}}
+      else for(let i=0;i<9;i++){const p=Math.min(1,t*1.3),x=mx-60+i*15,h=(20+((i*37)%30))*Math.sin(p*3.14);g.fillStyle='rgba(159,211,230,.85)';g.beginPath();g.moveTo(x-7,my+40);g.lineTo(x,my+40-h);g.lineTo(x+7,my+40);g.fill();dot(x,my+44+p*12,3,'rgba(120,180,220,.7)')}})}};
+  function call(txt,cls=''){const c=$('#bcall',el);if(!c)return;c.textContent=txt;c.className='bcall '+cls;c.hidden=false;void c.offsetWidth;c.classList.add('go');const t=setTimeout(()=>{c.hidden=true},1000);cleanups.push(()=>clearTimeout(t))}
+  function bars(){const e=$('#ehb',el),p=$('#phb',el);if(!e)return;const ep=Math.max(0,eh/ehMax),pp=Math.max(0,ph/pMax);e.style.width=ep*100+'%';p.style.width=pp*100+'%';e.className=ep<.25?'crit':ep<.5?'low':'';p.className=pp<.25?'crit':pp<.5?'low':'';$('#phn',el).textContent=`${Math.max(0,Math.round(ph))} / ${pMax}`;foeEl.classList.toggle('angry',ep<.34)}
+  function float(sel,txt,cls=''){const d=document.createElement('span');d.className='dmg '+cls;d.textContent=txt;const host=$(sel,el);host.appendChild(d);setTimeout(()=>{if(d.parentNode)d.parentNode.removeChild(d)},900)}
+  function renderMoves(){$('#mv',el).innerHTML=moves.map((m,k)=>`<button class="btn move" data-k="${k}" ${m.left<=0||busy?'disabled':''}><span>${ic(m.i,'i1')} ${m.n}</span><small>${m.d} · ${m.pp>=99?'계속 쓸 수 있어요':'남은 횟수 '+m.left}</small></button>`).join('');$$('.move',el).forEach(b=>b.onclick=()=>use(+b.dataset.k))}
+  function askQuiz(){return new Promise(res=>{const q=cfg.quiz[qi++%cfg.quiz.length];const order=shuffle(q.o.map((_,k)=>k));
+    say(`<b>${ic('💡','i1')} 과학 지식 공격! 정답을 고르세요.</b><br>${q.q}<div class="opts">${order.map(k=>`<button class="opt" data-k="${k}">${q.o[k]}</button>`).join('')}</div>${fifty?`<div class="center" style="margin-top:6px"><button class="btn small warn" id="ff">${ic('🐧','i1')} 펭펭 찬스: 오답 2개 지우기</button></div>`:''}`);
+    if($('#ff',tb))$('#ff',tb).onclick=()=>{fifty=0;shuffle(q.o.map((_,k)=>k).filter(k=>k!==q.a)).slice(0,2).forEach(k=>{const b=$(`.opt[data-k="${k}"]`,tb);b.classList.add('gone');b.disabled=true});$('#ff',tb).hidden=true};
+    $$('.opt',tb).forEach(b=>b.onclick=async()=>{const k=+b.dataset.k,ok=k===q.a;$$('.opt',tb).forEach(x=>{x.disabled=true;if(+x.dataset.k===q.a)x.classList.add('right');else if(+x.dataset.k===k)x.classList.add('wrong')});
+      if($('#ff',tb))$('#ff',tb).hidden=true;ok?sfx.ok():sfx.bad();
+      const fbd=document.createElement('div');fbd.className='fb '+(ok?'ok':'no');fbd.innerHTML=`<b>${ok?'정답!':'아쉬워요!'}</b> ${q.x}`;tb.appendChild(fbd);
+      await wait(2200);res(ok)})})}
+  async function hitFoe(m,pre=''){let mult=1;if(m.type===F.weak)mult=2;if((F.resist||[]).includes(m.type))mult=.5;
+    const crit=Math.random()<.12;const d=Math.round(m.pow*mult*(.85+Math.random()*.15)*(crit?1.5:1));
+    say(`${pre}${ic(m.i,'i1')} <b>${m.n}</b>!`);call(m.n);meEl.classList.add('lunge');(SND[m.type]||SND.scan)();await wait(260);if(!alive())return;meEl.classList.remove('lunge');
+    await (FX[m.type]||FX.scan)();if(!alive())return;
+    eh-=d;foeEl.classList.add('shake','blink');float('#foe','-'+d,mult>1||crit?'big':'');bars();sfx.hit();if(mult>1||crit){SND.super();shake(arena,true);flash(arena,'#fff4d6')}else shake(arena);
+    say(`${pre}${ic(m.i,'i1')} <b>${m.n}</b>! ${mult>1?'<b>효과가 굉장했다!</b> ':mult<1?'효과가 별로인 것 같다... ':''}${crit?'급소에 맞았다! ':''}${d}의 피해!`);if(mult>1)call('효과가 굉장했다!','gold');
+    await wait(1000);if(!alive())return;foeEl.classList.remove('shake','blink')}
+  async function foeTurn(){const ai=Math.random()*F.atk.length|0,a=F.atk[ai];let d=Math.round(a.dmg[0]+Math.random()*(a.dmg[1]-a.dmg[0]));
+    let guarded=false;if(guard){d=Math.round(d/2);guard=false;guarded=true}
+    say(`${F.n}의 <b>${a.n}</b>!`);call(a.n,'foe');foeEl.classList.add('lunge2');SND.foe(ai);await wait(280);if(!alive())return;foeEl.classList.remove('lunge2');
+    await FX.foe(ai);if(!alive())return;if(guarded){SND.guard();await FX.guard();if(!alive())return}
+    ph-=d;meEl.classList.add('shake','blink');float('#me','-'+d);bars();sfx.hit();shake(arena,d>=15);flash(arena);
+    say(`${F.n}의 <b>${a.n}</b>! ${a.msg||''} ${guarded?'냉각 커버 덕분에 피해가 줄었다. ':''}${d}의 피해를 입었다.`);await wait(1150);if(alive())meEl.classList.remove('shake','blink');
+    if(ph>0&&ph<pMax*.25){SND.low();say(`체력이 얼마 남지 않았어요! 신중하게 골라요.`);await wait(700)}}
+  async function use(k){if(busy||over)return;const m=moves[k];busy=true;m.left--;turn++;SND.pick();renderMoves();
+    if(m.type==='quiz'){const ok=await askQuiz();if(!alive())return;if(ok)await hitFoe(m,'정답의 힘! ');else{say(`${ic(m.i,'i1')} ${josa(m.n,'이','가')} 빗나갔다...`);await wait(1000)}}
+    else if(m.type==='guard'){guard=true;say(`${ic(m.i,'i1')} <b>${m.n}</b>! 다음 공격 피해가 절반으로 줄어요.`);call(m.n);SND.guard();await FX.guard();await wait(500)}
+    else if(m.type==='heal'){const h=Math.min(pMax-ph,40);ph+=h;bars();float('#me','+'+h,'heal');say(`${ic(m.i,'i1')} <b>${m.n}</b>! 체력을 ${h} 회복했어요.`);SND.heal();await FX.heal();await wait(500)}
+    else await hitFoe(m);
+    if(!alive())return;if(eh<=0)return end(true);
+    await foeTurn();if(!alive())return;if(ph<=0)return end(false);
+    busy=false;renderMoves();say('어떤 장비 기술을 쓸까요?');}
+  function end(win){over=true;bars();
+    if(win){foeEl.classList.add('faint');SND.faint();say(`<b>${josa(F.n,'을','를')}</b> 물리쳤다! ${cfg.winMsg||''}`);const tw=setTimeout(()=>{sfx.win();confetti(arena,40)},700);cleanups.push(()=>clearTimeout(tw));const r=ph/100;const t=setTimeout(()=>done(r>=.6?3:r>=.3?2:1),2400);cleanups.push(()=>clearTimeout(t))}
+    else{meEl.classList.add('faint');SND.faint();say('체력이 모두 떨어졌어요... 장비를 정비하고 다시 도전해요!');const t=setTimeout(()=>done(0),1900);cleanups.push(()=>clearTimeout(t))}}
+  renderMoves();say(cfg.intro);fit();
+  el._dbg={get state(){return{eh,ph,busy,over,moves:moves.map(m=>m.left)}},use};
+  (async()=>{await wait(500);if(!alive())return;SND.cry();shake(arena,true);await wait(1500);if(!alive())return;foeEl.classList.remove('enter');meEl.classList.remove('enter');busy=false;renderMoves();say('어떤 장비 기술을 쓸까요?')})();
+};
+/* BATTLE-END */
 
 /* ARC-BEGIN (액션 게임 공용 틀과 게임들) */
 /* ================= 액션 게임 공용 틀 =================
@@ -2549,42 +2661,6 @@ ENG.plant=(el,cfg,done)=>run(el,done,{key:'plant',icon:'🌀',unit:'점수',go:'
     K.hud(prog(),[.34,.67])}
   return{lay,step,draw,progress:prog,down:x=>tap(x<W*.35?0:x<W*.65?1:2),key:(k,dn)=>{const i='123'.indexOf(k);if(i<0)return false;if(dn)tap(i);return true},
     get _s(){return{tap:[0,1,2].filter(i=>v[i]<LO+.12),cap,t:cap}}}});
-
-/* ---------- 메탄몬과의 대결 = 가스 공 되받아치기 ----------
-   메탄몬(위)이 뱉은 가스 공을 회수 진공기(아래 받침, 좌우로 끌기)로 되받아쳐 메탄몬을 맞힌다(한 번에 DMG). 받침의 어디에 맞느냐로 튀는 방향이 바뀐다.
-   공을 놓치면 하트를 잃는다. 2구간부터 뜨거운 트림(붉은 덩어리)이 내려오는데 받침에 닿으면 하트를 잃는다. 체력이 줄 때마다 퀴즈 — 맞히면 '과학 지식 공격'(QD). */
-function methaneMon(hit,ph){const c=hit>0?'#e9f7dc':'#a8d98a';for(let k=0;k<7;k++){const a=k/7*6.283+ph*.4;E(Math.cos(a)*.95,Math.sin(a)*.62,.5,.42,c)}E(0,0,1.05,.72,c);E(-.4,.26,.2,.14,'rgba(90,150,70,.35)');E(.5,-.3,.16,.12,'rgba(90,150,70,.35)');
-  E(-.34,-.12,.2,.24,'#fff');E(.34,-.12,.2,.24,'#fff');E(-.3,-.06,.09,.12,'#16283d');E(.38,-.06,.09,.12,'#16283d');Ln(-.56,-.44,-.16,-.3,'#3f6a2c',.08);Ln(.56,-.44,.16,-.3,'#3f6a2c',.08);E(0,.32,.26,.14+.05*Math.sin(ph*5),'#3f6a2c')}
-ENG.methane=(el,cfg,done)=>run(el,done,{key:'methane',icon:'🌀',unit:'명중',go:'대결 시작!',failMsg:'메탄몬을 막지 못했어요',hpPlus:has('p_bear')?1:0,
-  intro:`메탄몬이 뱉는 <b>가스 공</b>을 회수 진공기로 <b>되받아쳐</b> 메탄몬을 맞혀요.<br>공을 놓치면 안 돼요! 붉은 <b>뜨거운 트림</b>은 받지 말고 피해요.<br>도중의 퀴즈를 맞히면 과학 지식 공격!${has('p_bear')?'<br>반달이 덕분에 하트 +1':''}`,
-  hint:'화면을 누른 채 좌우로 끌어요. 키보드는 ← →.'},K=>{
-  const HP=100,DMG=7,QD=15,QAT=[.28,.56,.84];let u=40,px=0,tx=0,hp=HP,ball=null,wait=.3,hot=[],hotT=3,bx=0,hitT=0,cool=0,qi=0,stage=0,t=0,keys={},trail=[];
-  const by=()=>H*.22,py=()=>H*.86,hw=()=>1.25*u,prog=()=>1-hp/HP,sp=()=>(5.2+2.8*prog())*K.m*u;
-  function lay(kx,ky){u=clamp(Math.min(W,H)*.115,34,58);if(!px)px=tx=bx=W/2;if(ball){ball.x*=kx;ball.y*=ky}}
-  function hurt(d,big){hp=Math.max(0,hp-d);hitT=.25;K.shake=big?.3:.12;fx('star',bx,by(),big?20:6,'#c9f0a8');if(big)K.popup('과학 지식 공격!',bx,by()+1.6*u,'#ffd77a');
-    const s=prog()<.34?0:prog()<.67?1:2;if(s!==stage&&hp>0){stage=s;K.stage(s===1?'2구간 · 뜨거운 트림을 피해요':'3구간 · 메탄몬이 화났어요')}
-    if(hp<=0){ball=null;K.finish('메탄몬을 가뒀어요!',`되받아치기 ${K.score}번 · 퀴즈 ${qi-K.qmiss}/${qi} 정답`)}}
-  function step(dt){t+=dt;K.music(dt,.4-.05*stage);if(hitT>0)hitT-=dt;if(cool>0)cool-=dt;bx=W/2+Math.sin(t*(.7+.3*stage))*W*.3;
-    const kx=(keys.r?1:0)-(keys.l?1:0);if(kx)tx=px+kx*2.6*u;tx=clamp(tx,hw(),W-hw());px+=(tx-px)*Math.min(1,dt*14);
-    if(qi<QAT.length&&prog()>=QAT[qi]&&hp>0){const q=cfg.quiz[qi++];if(q){K.quiz({e:'💡',n:'연구 본부',q},`과학 지식 공격! (메탄몬 체력 −${QD})`,ok=>{if(ok)hurt(QD,1)});return}}
-    if(!ball){wait-=dt;if(wait<=0){const a=rand(-.5,.5);ball={x:bx,y:by()+1.1*u,vx:Math.sin(a)*sp(),vy:Math.cos(a)*sp()};beep(300,.1,'sine',.04,0,.6)}}
-    else{const r=.3*u,b=ball,v=sp(),k=v/(Math.hypot(b.vx,b.vy)||1);b.vx*=k;b.vy*=k;b.x+=b.vx*dt;b.y+=b.vy*dt;trail.push({x:b.x,y:b.y,a:1});
-      if(b.x<r){b.x=r;b.vx=Math.abs(b.vx)}if(b.x>W-r){b.x=W-r;b.vx=-Math.abs(b.vx)}if(b.y<62+r){b.y=62+r;b.vy=Math.abs(b.vy)}
-      if(cool<=0&&Math.hypot((b.x-bx)/1.25,b.y-by())<1.05*u+r){cool=.35;b.vy=Math.abs(b.vy);b.vx+=rand(-.25,.25)*v;hurt(DMG);K.gain(1,b.x,b.y)}
-      if(b.vy>0&&b.y+r>=py()&&b.y<py()+.45*u&&Math.abs(b.x-px)<hw()+r){const a=clamp((b.x-px)/hw(),-1,1)*1.05;b.vx=Math.sin(a)*v;b.vy=-Math.cos(a)*v;b.y=py()-r;beep(700,.05,'triangle',.05)}
-      if(b.y>H+r){ball=null;wait=.7;K.lose('miss','가스 공을 놓쳤어요! 진공기를 공 아래로 옮겨 되받아쳐요.',px,py())}}
-    for(const q of trail)q.a-=dt*4;trail=trail.filter(q=>q.a>0);
-    if(stage>0){hotT-=dt;if(hotT<=0){hotT=rand(2.2,3.4)/K.m;hot.push({x:bx,y:by()+u,vy:(3.6+stage*.6)*K.m});beep(160,.2,'sawtooth',.03)}}
-    for(const h of hot){h.y+=h.vy*u*dt;if(!h.dead&&Math.abs(h.y-py())<.45*u&&Math.abs(h.x-px)<hw()*.8){h.dead=1;K.lose('hot','앗 뜨거워! 붉은 트림은 받지 말고 피해요.',h.x,h.y)}}hot=hot.filter(h=>!h.dead&&h.y<H+u)}
-  function draw(){const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#1d3a4f');gr.addColorStop(1,'#cfe4ec');g.fillStyle=gr;g.fillRect(-20,-20,W+40,H+40);
-    for(let i=0;i<6;i++)P([i*W/5-W*.1,H,i*W/5,H-u*(1.2+(i%3)*.5),i*W/5+W*.14,H],i%2?'#eef6f9':'#dcebf1');for(let i=0;i<5;i++){const x=W*(.1+.2*i),q=(T*.25+i*.2)%1;E(x,H-q*H*.5,5+q*8,5+q*8,`rgba(180,230,150,${.25*(1-q)})`)}
-    at(bx+(hitT>0?rand(-4,4):0),by()+Math.sin(T*2)*4,u*1.35,0,()=>methaneMon(hitT,T));RR(W/2-W*.3,64,W*.6,10,5,'rgba(22,40,61,.5)');RR(W/2-W*.3,64,Math.max(0,W*.6*hp/HP),10,5,hp<HP*.34?'#e2614b':'#7fd3a2');text('메탄몬',W/2,84,Math.max(12,u*.3),'#fff');
-    for(const q of trail)E(q.x,q.y,.22*u*q.a,.22*u*q.a,`rgba(200,240,170,${q.a*.4})`);if(ball){E(ball.x,ball.y,.3*u,.3*u,'#c9f0a8');E(ball.x-.08*u,ball.y-.08*u,.12*u,.12*u,'#eefbe0')}
-    for(const h of hot){E(h.x,h.y,.34*u,.4*u,'#e2614b');E(h.x,h.y+.05*u,.2*u,.24*u,'#ffd77a')}
-    const w=hw();RR(px-w,py(),2*w,.34*u,.17*u,'#16283d');RR(px-w+6,py()+4,2*w-12,.09*u,3,'#e9a23b');RR(px-.3*u,py()+.3*u,.6*u,.4*u,6,'#33465c');E(px,py()+.02*u,w*.6,.08*u,'rgba(159,211,230,.6)');
-    K.hud(prog(),QAT)}
-  let pd=0;return{lay,step,draw,progress:prog,down:x=>{pd=1;tx=x},move:(x,y,e)=>{if(pd||e.pointerType==='mouse')tx=x},up:()=>{pd=0},blur:()=>{keys={}},key:(k,dn)=>{const m={ArrowLeft:'l',ArrowRight:'r',a:'l',d:'r'}[k];if(!m)return false;keys[m]=dn;return true},
-    get _s(){let want=px;if(ball&&ball.vy>0){let x=ball.x+ball.vx*(py()-ball.y)/ball.vy;while(x<0||x>W)x=x<0?-x:2*W-x;want=x+(x<bx?.5:-.5)*hw()}const h=hot.find(h=>h.y>py()-3*u&&Math.abs(h.x-want)<hw()+.5*u);if(h&&!(ball&&ball.vy>0&&ball.y>py()-2.5*u))want=h.x+(want>=h.x?1:-1)*(hw()+.9*u);return{px,y:py(),want:clamp(want,hw(),W-hw()),hp,t:HP-hp}}}});
 
 /* ---------- 스마트팜에서 씨앗 키우기 = 바늘 멈추기 ----------
    한 포기마다 센서 세 가지(수분 → 빛 → 온도). 막대 위를 오가는 바늘이 초록 구간에 있을 때 눌러 멈춘다. 벗어나면 하트를 잃고 다시.

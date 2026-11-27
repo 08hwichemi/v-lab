@@ -3,7 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>반응 차수 찾기 실험실</title>
+<title>반응 차수 찾기 실험실 · V-Lab</title>
+<style>
+/* V-Lab 공용 글꼴·색 토큰만 가져옴 (공용 클래스는 이 파일의 클래스 이름과 겹치므로 lab-theme.css 전체는 쓰지 않음) */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+/* 위·아래첨자(₆ ⁺ ⁻ …)는 한글 글꼴에 ₁₂₃₄ 만 들어 있어 화학식 숫자 크기가 들쭉날쭉해진다. 같은 계열 라틴 글꼴에서 첨자만 가져와 맨 앞에 둔다 */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&text=%E2%81%B0%C2%B9%C2%B2%C2%B3%E2%81%B4%E2%81%B5%E2%81%B6%E2%81%B7%E2%81%B8%E2%81%B9%E2%81%BA%E2%81%BB%E2%82%80%E2%82%81%E2%82%82%E2%82%83%E2%82%84%E2%82%85%E2%82%86%E2%82%87%E2%82%88%E2%82%89%E2%82%8A%E2%82%8B&display=swap');
+:root{--font: 'IBM Plex Sans', 'IBM Plex Sans KR', 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; --bg: #ffffff; --panel: #ffffff; --panel-2: #F7F8FA; --line: #E6E8EC; --line-2: #F0F1F3; --text: #111111; --text-2: #3F4652; --muted: #6B7280; --accent: #3182F6; --accent-soft: #EAF2FF; --ok: #12A66B; --warn: #F5A623; --err: #E5484D; --radius: 12px; --radius-sm: 8px;}
+</style>
 <style>
 :root{
   --bg:#eef2f8; --panel:#ffffff; --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb;
@@ -312,9 +319,100 @@ td.del-cell{width:40px;padding:2px 4px!important}
 
 @media (min-width:1400px){#calcClose{display:none}}
 
+/* ===== V-Lab 공용 테마에 맞춘 덮어쓰기 ===== */
+:root{--bg:#fff;--panel:#fff;--ink:#111;--muted:#6B7280;--line:#E6E8EC;--accent:#3182F6;--accent-soft:#EAF2FF}
+body{font-family:var(--font);letter-spacing:-0.012em;-webkit-font-smoothing:antialiased}
+header{background:#fff;color:#111;border-bottom:1px solid var(--line);box-shadow:none;padding:8px 16px}
+header h1{font-size:18px;font-weight:600;letter-spacing:-.02em}
+header .sub{color:var(--muted);opacity:1;font-size:13.5px}
+body.vlab-embed header>div:first-child{display:none}
+body.vlab-embed header{padding:6px 12px}
+.tab-btn{background:#fff;color:#3F4652;border-radius:8px;font-weight:600;font-size:15.5px}
+.tab-btn:hover{background:#F7F8FA;color:#111}
+.tab-btn.active{background:#111;color:#fff}
+main{padding:12px 16px}
+.card{border:1px solid var(--line);border-radius:12px;box-shadow:none;margin-bottom:12px}
+.card h2{font-weight:700}
+.small,.chip,.rx-card .meta,.calc-hist,.prod-note,.legend,.ghost-legend{font-size:13.5px}
+.badge,.tag,.stat .l,.calc-raw{font-size:13px}
+.btn{border-radius:8px;color:#111}
+.btn:hover{border-color:var(--line);background:#F7F8FA}
+.btn.primary{color:#fff}
+.btn.primary:hover{background:#1B64DA;border-color:#1B64DA}
+.seg{border-radius:8px}
+.seg button.on{background:#111;color:#fff}
+.badge.virtual,.tag{background:#EAF2FF;color:#1B64DA}
+.rx-card{border-radius:12px}
+.rx-card:hover{box-shadow:none;transform:none;border-color:var(--accent)}
+table.data th{background:#F7F8FA;color:#3F4652}
+table.data tbody tr:hover{background:#F7F8FA}
+table.data tbody tr.sel,table.rec-table tr.rec-row.picked td{background:#EAF2FF}
+table.rec-table tbody tr.rec-row.open{background:#F7F8FA}
+table.data tr.fold-row td{color:#1B64DA}
+table.data tr.fold-row:hover td{background:#EAF2FF}
+.compare{border-radius:12px;background:#F7F8FA;border-color:#D5D9E0}
+.compare.good{background:#EAF2FF;border-color:#A9C8F7}
+.ratelaw,.formula{font-family:var(--font);border-radius:12px}
+.kbox input,.kbox select,.term-row select,.form-grid input,.modal textarea{border-color:#D5D9E0;border-radius:8px}
+.mode-btn{border-width:1px;border-radius:8px;font-weight:700}
+.mode-btn.on{background:#111;border-color:#111;color:#fff}
+.sub-btn{border-radius:8px;color:#3F4652}
+.sub-btn.on{background:#111;border-color:#111;color:#fff}
+.stat{background:#F7F8FA;border-color:var(--line);border-radius:8px}
+.note{background:#F7F8FA;border-left-width:3px;border-radius:8px}
+.cnav button{box-shadow:none;border:1px solid var(--line);border-radius:8px;color:#3F4652}
+.cnav button.on{background:#111;color:#fff;border-color:#111}
+.box{border-radius:12px}
+table.ctable th{background:#F7F8FA}
+.modal-bg{background:rgba(17,17,17,.45)}
+.modal{border-radius:12px;box-shadow:none;border:1px solid var(--line)}
+.term{color:#1B64DA}
+#tip{background:#111;box-shadow:none;border-radius:8px;font-size:14px}
+.calc-col .card{box-shadow:none}
+@media (max-width:1399px){.calc-col .card{box-shadow:0 8px 28px rgba(17,17,17,.18)}#calcFab{box-shadow:0 4px 14px rgba(17,17,17,.25)}}
+.calc-screen{background:#111;border-radius:8px}
+.calc-keys button{border-radius:8px}
+.calc-keys button:hover{background:#F7F8FA;border-color:var(--line)}
+.calc-keys button.fn{background:#F7F8FA;color:#1B64DA}
+.calc-keys button.op{background:#EAF2FF;color:#1B64DA}
+.calc-keys button.eq{color:#fff}
+.calc-hist span.r{color:#1B64DA}
+.term-row{background:#F7F8FA;border-radius:8px}
+#toast{background:#111;box-shadow:none;border-radius:8px;font-weight:700}
+.mission-head.in-header{border:1px solid var(--line);border-radius:8px;background:#fff}
+.preview-bar{background:#111}
+.zoom-bg{background:rgba(17,17,17,.55)}
+.zoom-box{border-radius:12px;box-shadow:none}
+.report{font-family:var(--font)}
+/* 좁은 화면: 개념 창의 표가 칸을 밀어 화면 밖으로 나가지 않게 */
+@media (max-width:1100px){.csplit{grid-template-columns:minmax(0,1fr)}.csplit table.ctable{display:block;overflow-x:auto}}
+/* 검토 반영: 휴대폰 배치·터치 대상 */
+.row-del{padding:9px 10px}
+.term-row .x{padding:8px 10px;min-width:40px;min-height:40px}
+.fmt-hint sup,.hint sup,table.data sup{font-size:.85em}
+@media (pointer:coarse){.seg button{min-height:40px}}
+@media (max-width:920px){
+  header{position:static}
+  header .sub{display:none}
+  #toast{left:4vw;right:4vw;top:12px;max-width:none;text-align:center;transform:translateY(-20px)}
+  #toast.show{transform:translateY(0)}
+  .calc-col{left:8px;right:8px;width:auto;bottom:8px;max-height:62vh;overflow:auto}
+  .calc-keys button{padding:7px 0}
+  .calc-hist{display:none}
+}
+@media (max-width:820px){
+  .concept-layout{grid-template-columns:minmax(0,1fr)}
+  .cnav{flex-wrap:wrap;overflow:visible}
+  .cnav button{flex:1 1 44%;text-align:center;white-space:normal}
+}
+@media (max-width:480px){
+  #concCtl .seg{display:grid;grid-template-columns:repeat(5,1fr);width:100%}
+  #concCtl .seg button{padding:10px 0;font-size:13.5px}
+}
 </style>
 </head>
 <body>
+<script>if(/embed/.test(location.hash))document.body.classList.add("vlab-embed");</script>
 <header>
   <div>
     <h1>🧪 반응 차수 찾기 실험실</h1>
@@ -331,10 +429,10 @@ td.del-cell{width:40px;padding:2px 4px!important}
 <section id="tab-order" class="tab active">
   <div id="missionSelect" class="card">
     <h2>🧪 반응 차수 찾기 미션</h2>
-    <p class="muted small" style="margin-top:0">반응을 하나 고르고, 반응물의 초기 농도를 바꿔 가며 실험해 <b>반응 속도식</b>을 완성하세요. 반응 차수는 0~2차, 전체 반응 차수는 3차까지예요.</p>
+    <p class="muted small" style="margin-top:0">반응을 하나 고르고, 반응물의 초기 농도를 바꿔 가며 실험해 <b>반응 속도식</b>을 완성하세요. 이 미션에서 각 반응물의 반응 차수는 0·1·2차 중 하나이고, 전체 반응 차수는 3차까지예요.</p>
     <h3>🎲 가상 반응 <span class="muted small">— 도전할 때마다 반응 차수가 바뀌어요</span></h3>
     <div class="rx-grid" id="rxVirtual"></div>
-    <h3>🌍 실제 반응 <span class="muted small">— 실제로 실험해서 밝혀진 반응 속도식이에요</span></h3>
+    <h3>🌍 실제 반응 <span class="muted small">— 반응 차수는 실제 실험으로 밝혀진 것과 같아요 (k 값과 농도는 연습용 값)</span></h3>
     <div class="rx-grid" id="rxReal"></div>
     <div class="row" style="margin-top:14px">
       <button class="btn primary" id="rxRandom">🎲 아무 반응이나 도전!</button>
@@ -364,7 +462,7 @@ td.del-cell{width:40px;padding:2px 4px!important}
           </div>
         </div>
         <div class="card ga-c3">
-          <h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">③ 실험 결과 표 <button class="btn" id="clearTable" style="padding:4px 10px;font-size:13px">🗑️ 표 전체 지우기</button> <span class="muted" style="font-size:13px;font-weight:500">실험 2개를 선택하면 두 실험의 그래프를 비교할 수 있어요.</span></h2>
+          <h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">③ 실험 결과 표 <button class="btn" id="clearTable" style="padding:7px 12px;font-size:14px">🗑️ 표 전체 지우기</button> <span class="muted" style="font-size:13px;font-weight:500">실험 2개를 선택하면 두 실험의 그래프를 비교할 수 있어요.</span></h2>
           <div class="table-wrap"><table class="data" id="dataTable"></table></div>
         </div>
         <div class="card ga-c2">
@@ -373,14 +471,14 @@ td.del-cell{width:40px;padding:2px 4px!important}
           <p class="muted small" id="expCaption" style="margin-bottom:0">실험을 하면 반응물의 농도 변화 그래프가 그려지고, t = 0에서 그은 접선의 기울기로 <span data-term-fill="초기 반응 속도"></span>를 구해요.</p>
         </div>
         <div class="card ga-c4">
-          <h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">④ 반응 속도식 완성하기 <span class="solved-badge" id="solvedBadge" hidden>✔ 해결 완료</span> <button class="btn" id="addTerm" style="padding:4px 10px;font-size:13px">＋ 속도식에 물질 넣기</button></h2>
+          <h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">④ 반응 속도식 완성하기 <span class="solved-badge" id="solvedBadge" hidden>✔ 해결 완료</span> <button class="btn" id="addTerm" style="padding:7px 12px;font-size:14px">＋ 반응 속도식에 물질 넣기</button></h2>
           <div class="ratelaw" id="rateLawPreview"></div>
           <div id="termList"></div>
           <div class="kbox" style="margin-top:12px">
             <b>k =</b>
-            <input id="kMant" type="number" step="any" inputmode="decimal" placeholder="2.5">
+            <input id="kMant" type="number" step="any" inputmode="decimal" placeholder="예 2.5">
             <span>× 10^</span>
-            <input id="kExp" class="exp" type="number" step="1" inputmode="numeric" placeholder="-2">
+            <input id="kExp" class="exp" type="number" step="1" inputmode="numeric" placeholder="예 -2">
             <select id="kUnit">
               <option value="">단위 선택</option>
               <option value="0">M·s⁻¹</option>
@@ -399,7 +497,7 @@ td.del-cell{width:40px;padding:2px 4px!important}
         </div>
       <div class="calc-col" id="calcCol">
         <div class="card calc" id="calc" tabindex="0">
-          <h2 style="display:flex;justify-content:space-between;align-items:center">🧮 미니 계산기 <button class="btn" id="calcClose" style="padding:3px 9px;font-size:13px">✕</button></h2>
+          <h2 style="display:flex;justify-content:space-between;align-items:center">🧮 미니 계산기 <button class="btn" id="calcClose" style="padding:7px 12px;font-size:14px">✕</button></h2>
           <div class="calc-screen"><div class="calc-expr" id="calcExpr"></div><div class="calc-res" id="calcRes">0</div><div class="calc-raw" id="calcRaw"></div></div>
           <div class="calc-keys" id="calcKeys"></div>
           <div class="calc-hist" id="calcHist"></div>
@@ -420,6 +518,7 @@ td.del-cell{width:40px;padding:2px 4px!important}
           <b>📈 그래프로 보는 반응 속도</b><br>
           • <b>평균 반응 속도</b>: 두 시점을 이은 직선의 기울기<br>
           • <b>순간 반응 속도</b>: 어느 한 시점에서 그은 접선의 기울기<br>
+          • 반응물 그래프는 오른쪽 아래로 내려가므로 기울기가 음(−)이에요. 반응 속도는 그 <b>크기(절댓값)</b>로 나타내요.<br>
           • <b>초기 반응 속도</b>: 반응이 시작하는 순간(t = 0)의 접선 기울기 → 반응 차수 미션에서 측정하는 값이에요.
         </div>
         <canvas id="cRateCanvas"></canvas>
@@ -459,7 +558,7 @@ td.del-cell{width:40px;padding:2px 4px!important}
           <tr><td>k의 단위</td><td>M·s⁻¹</td><td>s⁻¹</td><td>M⁻¹·s⁻¹</td><td>M⁻²·s⁻¹</td></tr>
         </table>
         <div class="box tip">💡 k의 단위 구하는 법: v(M/s) = k × M<sup>(전체 차수)</sup> 이므로 k의 단위 = M/s ÷ M<sup>(전체 차수)</sup></div>
-        <div class="box info"><b>더 알아보기 · 반감기</b><br>반응물의 농도가 처음의 절반이 되는 데 걸리는 시간을 반감기라고 해요. <b>1차 반응</b>은 농도와 관계없이 반감기가 일정해요.</div>
+        <div class="box info"><b>더 알아보기 · 반감기</b><br>반응물의 농도가 처음의 절반이 되는 데 걸리는 시간을 반감기라고 해요. <b>1차 반응</b>은 농도와 관계없이 반감기가 일정해요. (예: 0.40 M → 0.20 M → 0.10 M으로 줄어드는 데 걸리는 시간이 모두 같아요.)</div>
       </div>
 <div class="card csec" id="c3">
         <h2>3. 실험으로 반응 차수 구하기 (초기 속도법)</h2>
@@ -732,8 +831,8 @@ function showTip(el){
   tipEl.style.left=x+'px'; tipEl.style.top=y+'px';
 }
 function hideTip(){ tipEl.classList.remove('show'); tipFor=null; }
-document.addEventListener('mouseover',e=>{ const t=e.target.closest('.term'); if(t) showTip(t); });
-document.addEventListener('mouseout',e=>{ const t=e.target.closest('.term'); if(t&&!t.contains(e.relatedTarget)) hideTip(); });
+document.addEventListener('mouseover',e=>{ if(!matchMedia('(hover:hover)').matches) return; const t=e.target.closest('.term'); if(t) showTip(t); });
+document.addEventListener('mouseout',e=>{ if(!matchMedia('(hover:hover)').matches) return; const t=e.target.closest('.term'); if(t&&!t.contains(e.relatedTarget)) hideTip(); });
 document.addEventListener('click',e=>{ const t=e.target.closest('.term'); if(t&&t.tagName==='BUTTON'){ hideTip(); return; } if(t){ e.stopPropagation(); tipFor===t?hideTip():showTip(t); } else hideTip(); },true);
 window.addEventListener('scroll',hideTip,{passive:true});
 const term=(w,label)=>`<span class="term" tabindex="0" data-term="${w}">${label||w}</span>`;
@@ -778,11 +877,11 @@ const REACTIONS=[
   {id:'r8',kind:'real',title:'2-브로모-2-메틸프로페인 + OH⁻',eq:'(CH<sub>3</sub>)<sub>3</sub>CBr + OH<sup>−</sup> → (CH<sub>3</sub>)<sub>3</sub>COH + Br<sup>−</sup>',re:[{f:'(CH<sub>3</sub>)<sub>3</sub>CBr',c:1},{f:'OH<sup>−</sup>',c:1}],pr:['(CH<sub>3</sub>)<sub>3</sub>COH','Br<sup>−</sup>'],orders:[1,0],
     note:'OH<sup>−</sup>의 농도는 반응 속도에 영향을 주지 않아요(0차). 반응의 가장 느린 단계에 OH<sup>−</sup>가 참여하지 않기 때문이에요.'},
   {id:'r9',kind:'real',title:'브로모메테인 + OH⁻',eq:'CH<sub>3</sub>Br + OH<sup>−</sup> → CH<sub>3</sub>OH + Br<sup>−</sup>',re:[{f:'CH<sub>3</sub>Br',c:1},{f:'OH<sup>−</sup>',c:1}],pr:['CH<sub>3</sub>OH','Br<sup>−</sup>'],orders:[1,1],
-    note:'바로 옆 반응((CH<sub>3</sub>)<sub>3</sub>CBr + OH<sup>−</sup>)과 반응식 모양은 비슷하지만, 이 반응은 OH<sup>−</sup>에 대해서도 1차예요. 반응 속도식은 실험해 봐야 알 수 있어요!'}
+    note:'2-브로모-2-메틸프로페인의 반응((CH<sub>3</sub>)<sub>3</sub>CBr + OH<sup>−</sup>)과 반응식 모양은 비슷하지만, 이 반응은 OH<sup>−</sup>에 대해서도 1차예요. 반응 속도식은 실험해 봐야 알 수 있어요!'}
 ];
 const UNIT_TXT=['M·s⁻¹','s⁻¹','M⁻¹·s⁻¹','M⁻²·s⁻¹'];
 const MANT=[1.2,1.5,1.8,2.0,2.4,2.5,3.0,3.2,3.6,4.0,4.5,5.0,6.0,7.2,8.0];
-const solved=new Set(loadLS('rom-solved-v1',[]));
+const _sv=loadLS('rom-solved-v1',[]); const solved=new Set(Array.isArray(_sv)?_sv.filter(x=>typeof x==='string'):[]);
 let M=null;
 const SUBD='₀₁₂₃₄₅₆₇₈₉';
 function toUni(h){
@@ -818,7 +917,7 @@ function startMission(id){
   $('#kMant').value=''; $('#kExp').value=''; $('#kUnit').value='';
   $('#ansFeedback').innerHTML=''; $('#hintBox').classList.remove('show'); flashFmt(false);
   $('#expCount').textContent='실험 횟수: 0회 / 12회';
-  $('#graphWhat').innerHTML=`[${M.R.re[0].f}]의 농도 변화`;
+  $('#graphWhat').innerHTML=`[${M.R.re[0].f}]의 농도 변화 · 이 미션의 v = [${M.R.re[0].f}]가 줄어드는 빠르기`;
   lockAnswer(false);
   renderConcCtl(); renderTable(); renderTerms(); drawExp(); placeHead();
   window.scrollTo({top:0});
@@ -837,7 +936,8 @@ let expAnim=null;
 const EXP_COLORS=['#4f46e5','#e11d48'];
 $('#runExp').addEventListener('click',()=>{
   if(!M) return;
-  if(M.expDone>=12){ openModal(`<h2>실험은 12번까지 할 수 있어요</h2><p>지금까지 한 실험 결과로 반응 속도식을 완성해 보세요.</p><div class="actions"><button class="btn primary" data-close>확인</button></div>`); return; }
+  if(M.rows.length>=12){ openModal(`<h2>실험은 12번까지 할 수 있어요</h2><p>지금까지 한 실험 결과로 반응 속도식을 완성해 보세요. 표에서 필요 없는 실험을 지우면 그만큼 다시 실험할 수 있어요.</p><div class="actions"><button class="btn primary" data-close>확인</button></div>`); return; }
+  const runBtn=$('#runExp'); if(runBtn.dataset.busy) return; runBtn.dataset.busy='1'; setTimeout(()=>{ delete runBtn.dataset.busy; },700);
   const conc=M.conc.slice();
   const vTrue=rateAt(conc);
   const vMeas=vTrue*(1+(Math.random()*2-1)*0.02);
@@ -847,7 +947,7 @@ $('#runExp').addEventListener('click',()=>{
   M.expDone++;
   M.rows.push({n:M.nextN++,conc,v:vMeas,c0,a:1,tEnd}); M.showAll=false;
   M.sel=[M.rows.length-1];
-  $('#expCount').textContent=`실험 횟수: ${M.expDone}회 / 12회`;
+  $('#expCount').textContent=`실험 횟수: ${M.rows.length}회 / 12회`;
   renderTable();
   const t0=performance.now();
   cancelAnimationFrame(expAnim);
@@ -860,7 +960,7 @@ $('#runExp').addEventListener('click',()=>{
 const KS=0.01;
 const curveCache=new Map();
 function computeCurve(conc,tMax){
-  const key=conc.join(',')+'|'+tMax.toPrecision(6)+'|'+M.k;
+  const key=M.R.id+'|'+M.orders.join('')+'|'+conc.join(',')+'|'+tMax.toPrecision(6)+'|'+M.k;
   if(curveCache.has(key)) return curveCache.get(key);
   const pts=[[0,conc[0]]]; const c=conc.slice(); const N=600, dt=tMax/N;
   const rate=x=>{ let v=rateAt(x); M.orders.forEach((o,i)=>{ if(o===0) v*=(x[i]/(KS+x[i]))*((KS+conc[i])/conc[i]); }); return v; };
@@ -924,7 +1024,7 @@ function renderTable(){
   const fr=$('#dataTable tr.fold-row'); if(fr) fr.addEventListener('click',()=>{ M.showAll=!M.showAll; renderTable(); });
   $$('#dataTable .row-del').forEach(b=>b.addEventListener('click',e=>{
     e.stopPropagation(); const i=+b.dataset.del;
-    M.rows.splice(i,1);
+    M.rows.splice(i,1); $('#expCount').textContent=`실험 횟수: ${M.rows.length}회 / 12회`;
     M.sel=M.sel.filter(x=>x!==i).map(x=>x>i?x-1:x);
     cancelAnimationFrame(expAnim); renderTable(); drawExp();
   }));
@@ -938,7 +1038,7 @@ $('#clearTable').addEventListener('click',()=>{
   if(!M||!M.rows.length) return;
   openModal(`<h2>표 전체를 지울까요?</h2><p>지금까지 한 실험 ${M.rows.length}개의 결과가 모두 지워져요.<br>지운 결과는 되돌릴 수 없어요.</p>
     <div class="actions"><button class="btn" data-close>취소</button><button class="btn primary" id="clearTableOk" style="background:#dc2626;border-color:#dc2626">지우기</button></div>`);
-  $('#clearTableOk').addEventListener('click',()=>{ M.rows=[]; M.sel=[]; M.showAll=false; renderTable(); drawExp(); closeModal(); });
+  $('#clearTableOk').addEventListener('click',()=>{ M.rows=[]; M.sel=[]; M.showAll=false; $('#expCount').textContent='실험 횟수: 0회 / 12회'; renderTable(); drawExp(); closeModal(); });
 });
 
 /* ---------- 반응 속도식 만들기 ---------- */
@@ -961,14 +1061,14 @@ function renderRateLaw(){
   let s='v = k';
   const done=M.terms.filter(t=>t.s!==null);
   done.forEach(t=>{ if(t.o===0) return; const f=M.species[t.s].f; s+= t.o===1?`[${f}]`:`[${f}]<sup>${t.o===null?'?':t.o}</sup>`; });
-  if(!done.length) s+=`<span style="font-size:15px;color:#64748b;font-family:${FONT};font-weight:600"> &nbsp;← 물질을 넣어 완성하세요</span>`;
+  if(!done.length&&!M.solved) s+=`<span style="font-size:15px;color:#64748b;font-family:${FONT};font-weight:600"> &nbsp;← 물질을 넣어 완성하세요 (모두 0차라면 넣지 않아도 돼요)</span>`;
   const tot=done.length&&done.every(t=>t.o!==null)?done.reduce((a,t)=>a+t.o,0):null;
   $('#rateLawPreview').innerHTML=s+(tot!==null?`<div style="font-size:13px;font-family:${FONT};font-weight:600;color:#475569">전체 반응 차수: ${tot}차</div>`:'');
 }
 $('#hintBtn').addEventListener('click',()=>{
   if(!M) return;
   const first=M.R.re[0].f;
-  $('#hintBox').innerHTML=`<b>💡 힌트</b><br>1) 모든 농도를 0.10 M로 두고 기준 실험을 한 번 해요.<br>2) 다른 반응물의 농도는 그대로 두고 [${first}]만 0.20 M로 바꿔 실험해요.<br>3) 표에서 두 실험을 골라 ${term('초기 반응 속도')}가 몇 배가 되었는지 보세요. 2배 → 1차, 4배 → 2차, 그대로 → 0차<br>4) 나머지 반응물도 같은 방법으로! 차수를 찾으면 <b>＋ 속도식에 물질 넣기</b>로 속도식을 만들어요.<br>5) 실험 하나의 값을 속도식에 넣어 k를 계산하고, 단위는 M/s ÷ M<sup>(전체 반응 차수)</sup>로 구해요.`;
+  $('#hintBox').innerHTML=`<b>💡 힌트</b><br>1) 모든 농도를 0.10 M로 두고 기준 실험을 한 번 해요.<br>2) 다른 반응물의 농도는 그대로 두고 [${first}]만 0.20 M로 바꿔 실험해요.<br>3) 표에서 두 실험을 골라 ${term('초기 반응 속도')}가 몇 배가 되었는지 보세요. 2배 → 1차, 4배 → 2차, 그대로 → 0차<br>4) 나머지 반응물도 같은 방법으로! 차수를 찾으면 <b>＋ 반응 속도식에 물질 넣기</b>로 속도식을 만들어요.<br>5) 실험 하나의 값을 속도식에 넣어 k를 계산하고, 단위는 M/s ÷ M<sup>(전체 반응 차수)</sup>로 구해요.`;
   $('#hintBox').classList.toggle('show');
 });
 $('#checkAns').addEventListener('click',()=>{
@@ -986,14 +1086,16 @@ $('#checkAns').addEventListener('click',()=>{
   if(missing){ ok=false; lines.push('<span class="no">✘</span> 반응 속도에 영향을 주는 반응물 중 아직 속도식에 넣지 않은 물질이 있어요.'); }
   let kOk=false,uOk=false;
   if(ok){
-    const m=parseFloat($('#kMant').value), e=parseInt($('#kExp').value||'0',10);
+    const m=parseFloat($('#kMant').value), eRaw=$('#kExp').value, e=Number(eRaw||0);
     if(isNaN(m)) lines.push('<span class="no">✘</span> k 값을 입력해 주세요.');
+    else if(eRaw==='') lines.push('<span class="no">✘</span> 10의 지수(n)를 입력해 주세요. 10<sup>0</sup>이면 0을 적어요.');
+    else if(!Number.isInteger(e)) lines.push('<span class="no">✘</span> 10의 지수(n)는 정수로 적어 주세요.');
     else{
       const r=m*Math.pow(10,e)/M.k;
       // 학생이 적은 자릿수만큼 반올림한 차이는 인정해요 (0.1로 계산해 유효숫자가 줄어든 경우 포함)
       const mStr=String($('#kMant').value).trim().replace(/^[-+]/,''); const dec=(mStr.split('.')[1]||'').length;
       const halfUnit=0.5*Math.pow(10,e-dec)/M.k;
-      const valOk=Math.abs(r-1)<=Math.max(0.08,halfUnit+0.04); const fmtOk=Math.abs(m)>=1&&Math.abs(m)<10;
+      const valOk=Math.abs(r-1)<=Math.max(0.08,Math.min(0.2,halfUnit+0.04)); const fmtOk=Math.abs(m)>=1&&Math.abs(m)<10;
       flashFmt(valOk&&!fmtOk);
       kOk=valOk&&fmtOk;
       if(valOk&&!fmtOk){ lines.push('<span class="no">✘</span> k 값은 맞아요! 그런데 <b>(1 이상 10 미만의 수) × 10<sup>n</sup></b> 형식으로 적어 볼까요?'); }
@@ -1016,6 +1118,7 @@ function missionClear(){
   M.solved=true; lockAnswer(true);
   solved.add(M.R.id); saveLS('rom-solved-v1',[...solved]);
   showToast('🎉 정답! 반응 속도식과 반응 속도 상수를 정확히 맞췄어요!');
+  if(M.R.note) $('#ansFeedback').insertAdjacentHTML('beforeend',`<div class="note">📌 ${M.R.note}</div>`);
 }
 function showToast(msg){
   let t=$('#toast'); if(!t){ t=document.createElement('div'); t.id='toast'; document.body.appendChild(t); }
@@ -1036,7 +1139,7 @@ function showGuide(){
     <li><b>반응 고르기</b> — 가상 반응은 도전할 때마다 반응 차수가 바뀌어요.</li>
     <li><b>실험하기</b> — 반응물의 초기 농도를 정하고 <b>▶ 실험하기</b>를 눌러요. 그래프의 접선 기울기로 ${term('초기 반응 속도')}가 측정돼요.</li>
     <li><b>두 실험 비교하기</b> — 비교하는 두 실험에서는 <b>한 반응물의 농도만</b> 달라야 해요. (농도 배수)<sup>차수</sup> = (속도 배수)</li>
-    <li><b>반응 속도식 만들기</b> — <b>＋ 속도식에 물질 넣기</b>로 물질을 고르고 반응 차수를 정해요.</li>
+    <li><b>반응 속도식 만들기</b> — <b>＋ 반응 속도식에 물질 넣기</b>로 물질을 고르고 반응 차수를 정해요.</li>
     <li><b>k와 단위 구하기</b> — 실험값 하나를 속도식에 넣어 계산해요. 오른쪽 🧮 미니 계산기를 써 보세요.</li>
   </ol>
   <div class="actions"><button class="btn primary" data-close>시작하기</button></div>`);
@@ -1333,7 +1436,7 @@ const OX=[
   {q:'반응 차수를 구할 때 두 반응물의 농도를 동시에 바꿔도 된다.',a:false,e:'두 가지를 동시에 바꾸면 어떤 물질 때문에 속도가 변했는지 알 수 없어요. 조작 변인은 하나만!'},
   {q:'0차 반응에서는 반응물의 농도를 2배로 해도 반응 속도가 변하지 않는다.',a:true,e:'0차이면 (2)⁰ = 1 이므로 속도가 그대로예요.'},
   {q:'어떤 반응물에 대해 2차일 때, 그 반응물의 농도를 3배로 하면 반응 속도는 6배가 된다.',a:false,e:'3² = 9 이므로 9배가 돼요.'},
-  {q:'전체 반응 차수가 2차인 반응의 속도 상수 k의 단위는 M⁻¹·s⁻¹이다.',a:true,e:'k의 단위 = (M/s) ÷ M² = M⁻¹·s⁻¹'},
+  {q:'전체 반응 차수가 2차인 반응의 반응 속도 상수 k의 단위는 M⁻¹·s⁻¹이다.',a:true,e:'k의 단위 = (M/s) ÷ M² = M⁻¹·s⁻¹'},
   {q:'k의 단위는 반응 차수와 관계없이 항상 같다.',a:false,e:'전체 반응 차수에 따라 k의 단위가 달라져요. (0차 M·s⁻¹, 1차 s⁻¹, 2차 M⁻¹·s⁻¹ …)'}
 ];
 const oxAns={};

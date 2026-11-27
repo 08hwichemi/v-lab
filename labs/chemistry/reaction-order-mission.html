@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>반응 차수 찾기 실험실</title>
+<style>
+:root{
+  --bg:#eef2f8; --panel:#ffffff; --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+  --accent:#4f46e5; --accent-soft:#eef2ff; --A:#3b82f6; --B:#f97316; --C:#8b5cf6;
+  --ok:#059669; --bad:#dc2626; --warn:#d97706; --hot:#e11d48; --cat:#10b981;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+button{font-family:inherit}
+header{background:linear-gradient(120deg,#312e81,#4f46e5 55%,#0ea5e9);color:#fff;padding:12px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;justify-content:space-between;position:sticky;top:0;z-index:30;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+header h1{font-size:20px;margin:0;letter-spacing:-.3px}
+header .sub{font-size:12.5px;opacity:.85;margin-top:1px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab-btn{border:0;background:rgba(255,255,255,.16);color:#fff;padding:8px 14px;border-radius:999px;font-size:15px;cursor:pointer;font-weight:700}
+.tab-btn:hover{background:rgba(255,255,255,.28)}
+.tab-btn.active{background:#fff;color:#312e81}
+main{max-width:1280px;margin:0 auto;padding:16px}
+.tab{display:none}.tab.active{display:block}
+.grid2{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:920px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--panel);border-radius:14px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,23,42,.08);margin-bottom:16px}
+.card h2{font-size:17px;margin:0 0 10px;letter-spacing:-.3px}
+.card h3{font-size:15px;margin:14px 0 8px}
+.muted{color:var(--muted)}.small{font-size:13px}
+.btn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 14px;border-radius:10px;font-size:14px;cursor:pointer;font-weight:600}
+.btn:hover{border-color:#c7d2fe;background:#f8faff}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.primary:hover{background:#4338ca}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.seg{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.seg button{border:0;background:#fff;padding:7px 12px;font-size:14px;cursor:pointer;border-right:1px solid var(--line);color:var(--ink);font-weight:600}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--accent);color:#fff}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
+.chip{font-size:12.5px;padding:3px 10px;border-radius:999px;background:#f1f5f9;color:#334155;border:1px solid #e2e8f0}
+.chip.fix{background:#ecfdf5;border-color:#a7f3d0;color:#065f46}
+.chip.var{background:#fff7ed;border-color:#fed7aa;color:#9a3412}
+.badge{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;vertical-align:middle}
+.badge.real{background:#dcfce7;color:#166534}
+.badge.virtual{background:#e0e7ff;color:#3730a3}
+canvas{display:block;width:100%;touch-action:manipulation}
+.ctl{margin:10px 0}
+.ctl label{display:flex;justify-content:space-between;font-size:14px;font-weight:600;margin-bottom:4px;gap:8px}
+input[type=range]{width:100%;accent-color:var(--accent);height:28px}
+/* mission select */
+.rx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.rx-card{border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;background:#fff;text-align:left;font-size:14px;transition:.15s}
+.rx-card:hover{border-color:var(--accent);box-shadow:0 2px 10px rgba(79,70,229,.15);transform:translateY(-1px)}
+.rx-card .eq{font-size:15.5px;font-weight:700;margin:6px 0 2px}
+.rx-card .meta{font-size:12.5px;color:var(--muted)}
+.rx-card.done{border-color:#86efac;background:#f0fdf4}
+.mission-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.mission-head .eq{font-size:19px;font-weight:800;margin-left:6px}
+.conc-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0}
+.conc-row .nm{min-width:86px;font-weight:700}
+.table-wrap{overflow-x:auto}
+table.data{border-collapse:collapse;width:100%;font-size:14px;min-width:360px}
+table.data th,table.data td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:center;white-space:nowrap}
+table.data th{background:#f8fafc;font-size:13px;color:#475569}
+table.data tbody tr{cursor:pointer}
+table.data tbody tr:hover{background:#f8faff}
+table.data tbody tr.sel{background:#e0e7ff}
+table.data tr.hot td.tcell{color:var(--hot);font-weight:700}
+.compare{margin-top:12px;padding:12px;border-radius:12px;background:#f8fafc;border:1px dashed #cbd5e1;font-size:14.5px}
+.compare.warn{background:#fffbeb;border-color:#fcd34d}
+.compare.good{background:#eef2ff;border-color:#a5b4fc}
+.ratelaw{font-size:22px;font-weight:800;text-align:center;padding:10px;background:var(--accent-soft);border-radius:12px;margin:10px 0;font-family:"Times New Roman",serif}
+.ratelaw sup{font-size:.6em}
+.order-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0}
+.order-row .nm{min-width:96px;font-weight:700}
+.kbox{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0}
+.kbox input{width:84px;padding:7px 8px;border:1px solid #cbd5e1;border-radius:8px;font-size:15px}
+.kbox input.exp{width:62px}
+.kbox select{padding:7px 8px;border:1px solid #cbd5e1;border-radius:8px;font-size:15px;background:#fff}
+.fb{margin-top:10px;font-size:14.5px}
+.fb .ok{color:var(--ok);font-weight:700}.fb .no{color:var(--bad);font-weight:700}
+.hint{margin-top:10px;padding:10px 12px;background:#fffbeb;border-radius:10px;font-size:14px;display:none}
+.hint.show{display:block}
+/* factor tab */
+.mode-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.mode-btn{border:2px solid var(--line);background:#fff;border-radius:12px;padding:8px 16px;font-size:15.5px;font-weight:800;cursor:pointer;color:var(--ink)}
+.mode-btn.on{border-color:var(--accent);background:var(--accent-soft);color:#3730a3}
+.subtabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px;padding-left:4px}
+.subtabs[hidden]{display:none}
+.sub-btn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 14px;font-size:14px;cursor:pointer;font-weight:700;color:#475569}
+.sub-btn.on{background:#312e81;color:#fff;border-color:#312e81}
+.sim-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px;align-items:baseline;margin-bottom:8px}
+.sim-head b{font-size:16px}
+.sim-eq{font-size:15px;font-weight:700;color:#334155}
+.sim-wrap{position:relative;border-radius:12px;overflow:hidden;background:#0f172a}
+.sim-msg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(15,23,42,.82);color:#fff;padding:10px 16px;border-radius:10px;font-weight:700;font-size:15px;pointer-events:none;display:none;text-align:center}
+.sim-btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:13px;margin-top:8px;color:#334155}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:10px}
+.stat{background:#f8fafc;border-radius:10px;padding:8px 10px;text-align:center;border:1px solid #eef2f7}
+.stat .v{font-size:19px;font-weight:800}
+.stat .l{font-size:12px;color:var(--muted)}
+.stat.eff .v{color:#ca8a04}
+.note{font-size:14px;background:#f8fafc;border-left:4px solid var(--accent);padding:10px 12px;border-radius:8px;margin-top:10px}
+.real-card h2{display:flex;align-items:center;gap:8px}
+.real-list{margin:0;padding-left:18px;font-size:14.5px}
+.real-list li{margin:4px 0}
+.ghost-legend{display:flex;flex-wrap:wrap;gap:10px;font-size:13px;margin-top:6px}
+.ghost-legend span{display:inline-flex;align-items:center;gap:5px}
+.ghost-legend em{display:inline-block;width:20px;height:0;border-top:3px solid;font-style:normal}
+.ghost-legend em.d{border-top-style:dashed}
+/* concept */
+.concept-layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:820px){.concept-layout{grid-template-columns:1fr}}
+.cnav{position:sticky;top:84px;display:flex;flex-direction:column;gap:4px}
+@media (max-width:820px){.cnav{position:static;flex-direction:row;overflow-x:auto;padding-bottom:4px}}
+.cnav button{border:0;background:#fff;text-align:left;padding:10px 12px;border-radius:10px;font-size:14.5px;cursor:pointer;font-weight:700;color:#334155;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.cnav button.on{background:var(--accent);color:#fff}
+.csec{display:none}.csec.on{display:block}
+.csec p,.csec li{font-size:15px}
+.formula{font-family:"Times New Roman",serif;font-size:21px;text-align:center;background:var(--accent-soft);border-radius:12px;padding:12px;margin:12px 0;font-weight:700}
+.formula small{display:block;font-family:inherit;font-size:13px;font-weight:500;color:#475569;margin-top:4px}
+.box{border-radius:12px;padding:12px 14px;margin:12px 0;font-size:14.5px}
+.box.tip{background:#ecfdf5;border:1px solid #a7f3d0}
+.box.warn{background:#fff7ed;border:1px solid #fed7aa}
+.box.info{background:#eff6ff;border:1px solid #bfdbfe}
+table.ctable{border-collapse:collapse;width:100%;font-size:14px;margin:10px 0}
+table.ctable th,table.ctable td{border:1px solid var(--line);padding:7px 8px;text-align:center}
+table.ctable th{background:#f1f5f9}
+.up{color:var(--hot);font-weight:800}.down{color:#2563eb;font-weight:800}.same{color:#64748b}
+.ox-item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.ox-item .q{font-size:15px;flex:1 1 260px}
+.ox-item .seg button{min-width:46px;font-size:16px}
+.ox-exp{flex-basis:100%;font-size:14px;display:none;padding-top:4px}
+.ox-exp.show{display:block}
+/* modal */
+.modal-bg{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:16px}
+.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:16px;max-width:560px;width:100%;max-height:88vh;overflow:auto;padding:20px 22px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.modal h2{margin:0 0 10px;font-size:20px}
+.modal ol{padding-left:20px}.modal li{margin:6px 0;font-size:15px}
+.modal .stars{font-size:34px;color:#f59e0b;text-align:center;letter-spacing:4px}
+.modal .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;flex-wrap:wrap}
+sub,sup{line-height:0}
+/* ---------- 용어 풀이 툴팁 ---------- */
+.term{border-bottom:2px dotted var(--accent);cursor:help;font-weight:700;color:#3730a3;white-space:nowrap}
+#tip{position:fixed;z-index:200;max-width:290px;background:#1e1b4b;color:#fff;font-size:13.5px;line-height:1.55;padding:10px 12px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);pointer-events:none;opacity:0;transition:opacity .12s;font-weight:500}
+#tip.show{opacity:1}
+#tip b{color:#fde68a}
+/* ---------- 미션 페이지 레이아웃 ---------- */
+main.wide{max-width:1680px}
+.mission-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 280px;gap:16px;align-items:start}
+.calc-col{position:sticky;top:86px}
+#calcFab{display:none}
+@media (max-width:1399px){
+  .mission-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .calc-col{position:fixed;right:16px;bottom:84px;width:290px;z-index:40;display:none}
+  .calc-col.open{display:block}
+  .calc-col .card{box-shadow:0 12px 36px rgba(15,23,42,.28)}
+  #calcFab{display:flex;position:fixed;right:16px;bottom:16px;width:58px;height:58px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:26px;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(79,70,229,.45);cursor:pointer;z-index:41}
+}
+@media (max-width:920px){.mission-grid{grid-template-columns:1fr}}
+.seg button.fixed{cursor:default}
+/* ---------- 미니 계산기 ---------- */
+.calc{outline:none}
+.calc-screen{background:#0f172a;color:#e2e8f0;border-radius:12px;padding:10px 12px;margin-bottom:10px;min-height:74px;text-align:right;overflow:hidden}
+.calc-expr{font-size:14px;color:#94a3b8;word-break:break-all;min-height:20px;font-family:"Consolas","Menlo",monospace}
+.calc-res{font-size:24px;font-weight:800;color:#fff;word-break:break-all;margin-top:2px}
+.calc-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.calc-keys button{border:1px solid var(--line);background:#fff;border-radius:9px;padding:9px 0;font-size:15px;font-weight:700;cursor:pointer;color:var(--ink)}
+.calc-keys button:hover{background:#f1f5ff;border-color:#c7d2fe}
+.calc-keys button.fn{background:#f8fafc;color:#3730a3;font-size:13.5px}
+.calc-keys button.op{background:#eef2ff;color:#3730a3}
+.calc-keys button.eq{background:var(--accent);color:#fff;border-color:var(--accent)}
+.calc-keys button.clr{background:#fff1f2;color:#be123c}
+.calc-hist{margin-top:10px;font-size:12.5px}
+.calc-hist div{padding:5px 8px;border-radius:8px;cursor:pointer;color:#334155;display:flex;justify-content:space-between;gap:6px}
+.calc-hist div:hover{background:#f1f5f9}
+.calc-hist span.r{font-weight:800;color:#3730a3;white-space:nowrap}
+/* ---------- 속도식 만들기 ---------- */
+.term-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:#fafbff}
+.term-row select{padding:7px 8px;border:1px solid #cbd5e1;border-radius:8px;font-size:15px;background:#fff;min-width:130px}
+.term-row .x{border:0;background:transparent;font-size:17px;cursor:pointer;color:#94a3b8;margin-left:auto}
+.term-row .x:hover{color:var(--bad)}
+/* ---------- 요인 관찰 레이아웃 ---------- */
+main.full{max-width:1920px;padding:14px 18px}
+.factor-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+.factor-grid .card{margin-bottom:14px;padding:12px 14px}
+.factor-grid .card h2{font-size:16px;margin-bottom:8px}
+@media (max-width:1279px){
+  .factor-grid{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}
+  .factor-grid .col1{grid-row:span 2}
+}
+@media (max-width:920px){
+  .factor-grid{grid-template-columns:1fr}
+  .factor-grid .col1{grid-row:auto}
+}
+#simCanvas{margin:0 auto}
+.sim-wrap{display:flex;justify-content:center}
+.factor-grid .stats{grid-template-columns:repeat(auto-fit,minmax(78px,1fr))}
+.factor-grid .stat .v{font-size:17px}
+/* ---------- 실험 기록 ---------- */
+details.rec{padding:0}
+details.rec>summary{list-style:none;cursor:pointer;padding:14px 16px;font-size:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+details.rec>summary::-webkit-details-marker{display:none}
+details.rec>summary::before{content:'▶';font-size:12px;color:var(--accent);transition:transform .15s}
+details.rec[open]>summary::before{transform:rotate(90deg)}
+.rec-body{padding:0 16px 16px}
+table.rec-table td,table.rec-table th{font-size:13.5px}
+table.rec-table tbody tr.rec-row{cursor:pointer}
+table.rec-table tbody tr.rec-row.open{background:#f5f7ff}
+table.rec-table tr.rec-row.picked td{background:#e0e7ff}
+table.rec-table input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);cursor:pointer}
+tr.rec-detail td{background:#f8fafc;text-align:left;white-space:normal}
+.rec-detail-wrap{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:14px;align-items:center;padding:6px 4px}
+@media (max-width:820px){.rec-detail-wrap{grid-template-columns:1fr}}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:999px;background:#eef2ff;color:#3730a3}
+.tag.part{background:#fef3c7;color:#92400e}
+.form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:8px 0}
+@media (max-width:560px){.form-grid{grid-template-columns:1fr}}
+.form-grid label,.modal label.blk{font-size:13px;font-weight:700;color:#475569;display:block}
+.form-grid input,.modal textarea{width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:14.5px;font-family:inherit;margin-top:3px}
+.modal textarea{resize:vertical}
+/* ---------- 인쇄용 보고서 ---------- */
+#printArea{display:none}
+@media print{
+  @page{size:A4;margin:13mm}
+  body{background:#fff}
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block}
+}
+.report{font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;color:#111827;font-size:12.5px;line-height:1.55;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.report h1{font-size:22px;text-align:center;margin:0 0 2px;letter-spacing:-.5px}
+.report .rp-sub{text-align:center;color:#4b5563;font-size:13.5px;margin-bottom:10px}
+.report h2{font-size:14.5px;margin:14px 0 6px;padding-bottom:3px;border-bottom:2px solid #4f46e5;color:#312e81}
+.report table{border-collapse:collapse;width:100%}
+.report th,.report td{border:1px solid #cbd5e1;padding:5px 7px;text-align:center}
+.report th{background:#eef2ff;font-weight:700}
+.report .rp-info th{width:9%}
+.report .rp-var th{width:18%}
+.report .rp-var td{text-align:left}
+.report img{width:100%;display:block;border:1px solid #e5e7eb;border-radius:6px}
+.report .rp-legend{display:flex;gap:18px;justify-content:center;margin-top:5px;font-weight:700}
+.report .rp-legend i{display:inline-block;width:22px;height:0;border-top:3px solid;vertical-align:middle;margin-right:5px}
+.report .rp-box{border:1px solid #cbd5e1;border-radius:6px;min-height:70px;padding:8px 10px;white-space:pre-wrap}
+.report .rp-box.blank{background:repeating-linear-gradient(#fff 0 25px,#e5e7eb 25px 26px)}
+.report .rp-warn{background:#fff7ed;border:1px solid #fdba74;border-radius:6px;padding:6px 9px;margin:6px 0}
+.report .rp-foot{margin-top:14px;font-size:10.5px;color:#6b7280;text-align:center}
+.report ul{margin:4px 0;padding-left:18px}
+.report .avoid{break-inside:avoid;page-break-inside:avoid}
+
+/* 개념 그래프 가로 길이 제한 */
+#cRateCanvas,#cProfCanvas,#cDistCanvas,#cCollideCanvas{max-width:760px;margin-left:auto;margin-right:auto}
+#expCanvas{max-width:760px;margin:0 auto}
+
+table.data tr.fold-row td{background:#f8fafc;color:#4f46e5;font-weight:700;font-size:13px;cursor:pointer}
+table.data tr.fold-row:hover td{background:#eef2ff}
+.compare[hidden]{display:none}
+
+.calc-keys button.term{border-bottom:1px solid var(--line);white-space:nowrap}
+#toast{position:fixed;left:50%;top:86px;transform:translate(-50%,-20px);background:linear-gradient(120deg,#059669,#10b981);color:#fff;font-weight:800;font-size:17px;padding:14px 24px;border-radius:14px;box-shadow:0 12px 30px rgba(5,150,105,.35);z-index:150;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;max-width:92vw;text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+.calc-expr{cursor:text}
+.calc-expr span[data-i]{padding:0 .5px}
+.calc-expr .caret{display:inline-block;width:2px;height:1.05em;background:#fde047;vertical-align:-2px;animation:caretBlink 1s steps(1) infinite}
+@keyframes caretBlink{50%{opacity:0}}
+td.del-cell{width:40px;padding:2px 4px!important}
+.row-del{border:0;background:transparent;cursor:pointer;font-size:15px;padding:4px 6px;border-radius:8px;opacity:.55}
+.row-del:hover{opacity:1;background:#fee2e2}
+.fmt-hint{padding:6px 10px;border-radius:8px;color:#334155}
+@keyframes fmtPulse{0%,100%{background:#fff}50%{background:#fef08a}}
+.fmt-hint.flash{animation:fmtFlash 1.8s ease-in-out infinite}
+@keyframes fmtFlash{0%,100%{background:#fff}50%{background:#facc15}}
+
+/* 미션 카드 줄 맞춤 */
+.mission-grid{grid-template-areas:"c1 c3 calc" "c2 c4 calc";align-items:stretch}
+.mission-grid>.card{margin-bottom:0}
+.ga-c1{grid-area:c1}.ga-c2{grid-area:c2}.ga-c3{grid-area:c3}.ga-c4{grid-area:c4}
+.mission-grid>.calc-col{grid-area:calc;align-self:start}
+.mission-grid>.calc-col .card{margin-bottom:0}
+@media (max-width:1399px){.mission-grid{grid-template-areas:"c1 c3" "c2 c4"}}
+@media (max-width:920px){.mission-grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"c1" "c2" "c3" "c4"}
+  main.wide{padding-bottom:90px}}
+.temp-term{color:#c2410c;border-bottom-color:#fb923c}
+
+/* k 입력칸 위아래 버튼 숨기기 */
+.kbox input[type=number]{-moz-appearance:textfield;appearance:textfield}
+.kbox input[type=number]::-webkit-outer-spin-button,.kbox input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+/* 상단 반응식 줄 */
+#headSlot{flex:1 1 auto;justify-content:center;min-width:0}
+.mission-head.in-header{background:rgba(255,255,255,.96);color:var(--ink);margin:0;padding:6px 8px 6px 14px;border-radius:14px;box-shadow:none;gap:14px;flex-wrap:nowrap;max-width:100%}
+.mission-head.in-header .eq{font-size:17px;white-space:nowrap}
+.mission-head.in-header .btn{padding:6px 11px;font-size:13.5px;white-space:nowrap}
+.mission-head.in-header .row{flex-wrap:nowrap}
+
+.calc-raw{font-size:12px;color:#94a3b8;min-height:16px;margin-top:2px;font-family:"Consolas","Menlo",monospace}
+
+/* 분수 표기 */
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.25;margin:0 2px}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 4px 1px}
+.frac>span:last-child{padding:1px 4px 0}
+/* 정답 후 잠금 */
+.locked{opacity:.6;pointer-events:none}
+.solved-badge{display:inline-block;margin-left:6px;font-size:13px;font-weight:800;color:#fff;background:#059669;padding:3px 10px;border-radius:999px}
+.solved-badge[hidden]{display:none}
+
+@media (min-width:1400px){#calcClose{display:none}}
+
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>🧪 반응 차수 찾기 실험실</h1>
+    <div class="sub">초기 농도를 바꿔 가며 실험하고 반응 속도식을 완성해요</div>
+  </div>
+  <div id="headSlot" style="display:none"></div>
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="order">🧪 반응 차수 미션</button>
+    <button class="tab-btn" data-tab="concept">📖 개념</button>
+  </nav>
+</header>
+
+<main class="wide">
+<section id="tab-order" class="tab active">
+  <div id="missionSelect" class="card">
+    <h2>🧪 반응 차수 찾기 미션</h2>
+    <p class="muted small" style="margin-top:0">반응을 하나 고르고, 반응물의 초기 농도를 바꿔 가며 실험해 <b>반응 속도식</b>을 완성하세요. 반응 차수는 0~2차, 전체 반응 차수는 3차까지예요.</p>
+    <h3>🎲 가상 반응 <span class="muted small">— 도전할 때마다 반응 차수가 바뀌어요</span></h3>
+    <div class="rx-grid" id="rxVirtual"></div>
+    <h3>🌍 실제 반응 <span class="muted small">— 실제로 실험해서 밝혀진 반응 속도식이에요</span></h3>
+    <div class="rx-grid" id="rxReal"></div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn primary" id="rxRandom">🎲 아무 반응이나 도전!</button>
+      <button class="btn" id="guideBtn1">❓ 실험 방법 보기</button>
+      <button class="btn" id="resetSolved">🔄 기록 초기화하기</button>
+    </div>
+  </div>
+
+  <div id="missionWork" hidden>
+    <div class="card mission-head" id="missionHead">
+      <div><span id="mBadge" class="badge"></span><span class="eq" id="mEq"></span></div>
+      <div class="row">
+        <button class="btn" id="guideBtn2">❓ 방법</button>
+        <button class="btn" id="mBack">← 다른 반응 고르기</button>
+      </div>
+    </div>
+    <div class="mission-grid">
+        <div class="card ga-c1">
+          <h2>① 실험 조건(온도, 반응물의 농도) 정하기</h2>
+          <div class="conc-row"><span class="nm"><span class="term temp-term" tabindex="0" data-term="온도고정">🌡️ 온도</span></span>
+            <div class="seg"><button class="on fixed" tabindex="-1">T₁ (기준 온도)</button></div>
+          </div>
+          <div id="concCtl"></div>
+          <div class="row" style="margin-top:12px">
+            <button class="btn primary" id="runExp">▶ 실험하기</button>
+            <span class="muted small" id="expCount">실험 횟수: 0회</span>
+          </div>
+        </div>
+        <div class="card ga-c3">
+          <h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">③ 실험 결과 표 <button class="btn" id="clearTable" style="padding:4px 10px;font-size:13px">🗑️ 표 전체 지우기</button> <span class="muted" style="font-size:13px;font-weight:500">실험 2개를 선택하면 두 실험의 그래프를 비교할 수 있어요.</span></h2>
+          <div class="table-wrap"><table class="data" id="dataTable"></table></div>
+        </div>
+        <div class="card ga-c2">
+          <h2>② 측정 그래프 <span class="muted" id="graphWhat" style="font-size:14px;font-weight:600"></span></h2>
+          <canvas id="expCanvas"></canvas>
+          <p class="muted small" id="expCaption" style="margin-bottom:0">실험을 하면 반응물의 농도 변화 그래프가 그려지고, t = 0에서 그은 접선의 기울기로 <span data-term-fill="초기 반응 속도"></span>를 구해요.</p>
+        </div>
+        <div class="card ga-c4">
+          <h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">④ 반응 속도식 완성하기 <span class="solved-badge" id="solvedBadge" hidden>✔ 해결 완료</span> <button class="btn" id="addTerm" style="padding:4px 10px;font-size:13px">＋ 속도식에 물질 넣기</button></h2>
+          <div class="ratelaw" id="rateLawPreview"></div>
+          <div id="termList"></div>
+          <div class="kbox" style="margin-top:12px">
+            <b>k =</b>
+            <input id="kMant" type="number" step="any" inputmode="decimal" placeholder="2.5">
+            <span>× 10^</span>
+            <input id="kExp" class="exp" type="number" step="1" inputmode="numeric" placeholder="-2">
+            <select id="kUnit">
+              <option value="">단위 선택</option>
+              <option value="0">M·s⁻¹</option>
+              <option value="1">s⁻¹</option>
+              <option value="2">M⁻¹·s⁻¹</option>
+              <option value="3">M⁻²·s⁻¹</option>
+            </select>
+          </div>
+          <p class="small fmt-hint" id="kFmt" style="margin:0">✍️ k는 <b>(1 이상 10 미만의 수) × 10<sup>n</sup></b> 꼴로 써요. 예) 0.0472 → <b>4.72 × 10<sup>−2</sup></b> &nbsp;(M = mol/L)</p>
+          <div class="row" style="margin-top:10px">
+            <button class="btn primary" id="checkAns">✔ 정답 확인</button>
+            <button class="btn" id="hintBtn">💡 힌트</button>
+          </div>
+          <div class="hint" id="hintBox"></div>
+          <div class="fb" id="ansFeedback"></div>
+        </div>
+      <div class="calc-col" id="calcCol">
+        <div class="card calc" id="calc" tabindex="0">
+          <h2 style="display:flex;justify-content:space-between;align-items:center">🧮 미니 계산기 <button class="btn" id="calcClose" style="padding:3px 9px;font-size:13px">✕</button></h2>
+          <div class="calc-screen"><div class="calc-expr" id="calcExpr"></div><div class="calc-res" id="calcRes">0</div><div class="calc-raw" id="calcRaw"></div></div>
+          <div class="calc-keys" id="calcKeys"></div>
+          <div class="calc-hist" id="calcHist"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section id="tab-concept" class="tab">
+  <div class="concept-layout">
+    <nav class="cnav" id="cnav"><button data-c="c1" class="on">1. 반응 속도</button><button data-c="c2">2. 반응 속도식</button><button data-c="c3">3. 반응 차수 구하기</button><button data-c="c7">4. O / X 확인</button></nav>
+    <div>
+<div class="card csec on" id="c1">
+        <h2>1. 반응 속도란?</h2>
+        <p><b>반응 속도</b>는 단위 시간 동안 반응물의 농도가 줄어든 양, 또는 생성물의 농도가 늘어난 양이에요.<br>반응 속도는 항상 <b>양(+)의 값</b>으로 나타내요. 반응물은 농도가 줄어 Δ[반응물]이 음수이므로 앞에 <b>−</b>를 붙이고, 생성물은 농도가 늘어 Δ[생성물]이 양수이므로 그대로 써요.</p>
+        <div class="formula">v = − <span class="frac"><span>Δ[반응물]</span><span>Δt</span></span> = <span class="frac"><span>Δ[생성물]</span><span>Δt</span></span><small>단위: M/s (= mol/(L·s))</small></div>
+        <div class="box info">
+          <b>📈 그래프로 보는 반응 속도</b><br>
+          • <b>평균 반응 속도</b>: 두 시점을 이은 직선의 기울기<br>
+          • <b>순간 반응 속도</b>: 어느 한 시점에서 그은 접선의 기울기<br>
+          • <b>초기 반응 속도</b>: 반응이 시작하는 순간(t = 0)의 접선 기울기 → 반응 차수 미션에서 측정하는 값이에요.
+        </div>
+        <canvas id="cRateCanvas"></canvas>
+        <p class="muted small">대부분의 반응은 시간이 지날수록 반응물의 농도가 줄어 반응 속도가 느려져요. 그래서 접선의 기울기가 점점 완만해져요.</p>
+        <div class="box warn">
+          <b>🔍 심화: 반응식의 계수가 서로 다르면?</b><br>
+          2NO(g) + O<sub>2</sub>(g) → 2NO<sub>2</sub>(g) 에서는 O<sub>2</sub>가 1개 반응할 때 NO는 2개가 반응해요.<br>
+          그래서 같은 반응이라도 NO의 농도는 O<sub>2</sub>보다 <b>2배 빠르게</b> 줄어들고, 어떤 물질로 재느냐에 따라 반응 속도 값이 달라져요.<br>
+          이럴 때는 각 물질의 농도 변화를 <b>계수로 나누어</b> 하나의 반응 속도로 나타내기도 해요.
+          <div class="formula" style="font-size:18px;margin:10px 0 4px">v = − <span class="frac"><span>1</span><span>2</span></span> × <span class="frac"><span>Δ[NO]</span><span>Δt</span></span> = − <span class="frac"><span>Δ[O<sub>2</sub>]</span><span>Δt</span></span> = <span class="frac"><span>1</span><span>2</span></span> × <span class="frac"><span>Δ[NO<sub>2</sub>]</span><span>Δt</span></span></div>
+          <span class="small muted">※ 반응 차수 미션에서는 그래프에 나타낸 반응물의 농도가 줄어드는 빠르기를 반응 속도로 사용해요.</span>
+        </div>
+      </div>
+<div class="card csec" id="c2">
+        <h2>2. 반응 속도식</h2>
+        <p>반응 속도와 반응물 농도의 관계를 나타낸 식을 <b>반응 속도식</b>이라고 해요.</p>
+        <div class="formula">v = k [A]<sup>m</sup> [B]<sup>n</sup><small>k: 반응 속도 상수 · m, n: 반응 차수 · m + n: 전체 반응 차수</small></div>
+        <ul>
+          <li><b>반응 속도 상수 k</b>: 온도와 촉매에 따라 달라져요. 반응물의 농도를 바꿔도 k는 <b>변하지 않아요</b>.</li>
+          <li><b>반응 차수 m, n</b>: 반드시 <b>실험</b>으로 정해요.</li>
+        </ul>
+        <div class="box warn">
+          <b>⚠️ 반응 차수 ≠ 반응식의 계수</b><br>
+          NO<sub>2</sub>(g) + CO(g) → NO(g) + CO<sub>2</sub>(g) 의 반응 속도식은 실험으로 구하면 <b>v = k[NO<sub>2</sub>]<sup>2</sup></b> 예요.<br>
+          계수는 1, 1인데 반응 차수는 NO<sub>2</sub>에 대해 2차, CO에 대해 0차예요!
+        </div>
+        <h3>반응 차수의 의미</h3>
+        <table class="ctable">
+          <tr><th>어떤 반응물에 대한 차수</th><th>그 반응물의 농도를 2배로 하면</th><th>3배로 하면</th></tr>
+          <tr><td>0차</td><td>속도 변화 없음 (×1)</td><td>×1</td></tr>
+          <tr><td>1차</td><td>속도 ×2</td><td>×3</td></tr>
+          <tr><td>2차</td><td>속도 ×4</td><td>×9</td></tr>
+        </table>
+        <h3>k의 단위는 전체 반응 차수에 따라 달라요</h3>
+        <table class="ctable">
+          <tr><th>전체 반응 차수</th><th>0차</th><th>1차</th><th>2차</th><th>3차</th></tr>
+          <tr><td>k의 단위</td><td>M·s⁻¹</td><td>s⁻¹</td><td>M⁻¹·s⁻¹</td><td>M⁻²·s⁻¹</td></tr>
+        </table>
+        <div class="box tip">💡 k의 단위 구하는 법: v(M/s) = k × M<sup>(전체 차수)</sup> 이므로 k의 단위 = M/s ÷ M<sup>(전체 차수)</sup></div>
+        <div class="box info"><b>더 알아보기 · 반감기</b><br>반응물의 농도가 처음의 절반이 되는 데 걸리는 시간을 반감기라고 해요. <b>1차 반응</b>은 농도와 관계없이 반감기가 일정해요.</div>
+      </div>
+<div class="card csec" id="c3">
+        <h2>3. 실험으로 반응 차수 구하기 (초기 속도법)</h2>
+        <p>반응물의 초기 농도를 바꿔 가며 초기 반응 속도를 측정해요. 이때 <b>조작 변인은 한 가지</b>만 두고, 나머지는 모두 같게 유지해요.</p>
+        <div class="chips">
+          <span class="chip var">조작 변인: 농도를 바꿀 반응물 1가지</span>
+          <span class="chip fix">통제 변인: 다른 반응물의 농도</span>
+          <span class="chip fix">통제 변인: 온도</span>
+          <span class="chip fix">통제 변인: 촉매</span>
+          <span class="chip fix">통제 변인: 부피</span>
+        </div>
+        <h3>예제: A + B → C</h3>
+        <table class="ctable">
+          <tr><th>실험</th><th>[A] (M)</th><th>[B] (M)</th><th>초기 반응 속도 (M/s)</th></tr>
+          <tr><td>1</td><td>0.10</td><td>0.10</td><td>2.0 × 10⁻³</td></tr>
+          <tr><td>2</td><td><b>0.20</b></td><td>0.10</td><td>4.0 × 10⁻³</td></tr>
+          <tr><td>3</td><td>0.10</td><td><b>0.20</b></td><td>8.0 × 10⁻³</td></tr>
+        </table>
+        <ol>
+          <li><b>실험 1 → 2</b> ([B] 일정): [A]가 2배 → 속도 2배 → 2<sup>m</sup> = 2 → <b>m = 1</b></li>
+          <li><b>실험 1 → 3</b> ([A] 일정): [B]가 2배 → 속도 4배 → 2<sup>n</sup> = 4 → <b>n = 2</b></li>
+          <li>반응 속도식: <b>v = k[A][B]<sup>2</sup></b> (전체 반응 차수 3차)</li>
+          <li>실험 1의 값을 넣으면: 2.0 × 10⁻³ = k × 0.10 × (0.10)<sup>2</sup> → <b>k = 2.0 M⁻²·s⁻¹</b></li>
+        </ol>
+        <div class="formula">(농도 배수)<sup>차수</sup> = (속도 배수)</div>
+        <div class="box warn">⚠️ 두 반응물의 농도를 동시에 바꾸거나 온도가 다른 실험끼리 비교하면, 속도가 변한 원인이 무엇인지 알 수 없어요.</div>
+        <div class="box tip">💡 실제 실험값에는 오차가 있어서 배수가 2.03, 3.94처럼 나올 수 있어요. 가장 가까운 정수 차수를 찾으면 돼요.</div>
+      </div>
+<div class="card csec" id="c7">
+        <h2>4. O / X 확인</h2>
+        <p class="muted small" style="margin-top:0">맞으면 O, 틀리면 X를 누르세요.</p>
+        <div id="oxList"></div>
+        <p id="oxScore" style="font-weight:800"></p>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+<button id="calcFab" title="미니 계산기">🧮</button>
+<div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
+
+<script>
+/* =========================================================
+   공통 유틸
+   ========================================================= */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const SUP = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'};
+const supText = n => String(n).split('').map(c=>SUP[c]||c).join('');
+function sciParts(x, sig=3){
+  if(x===0) return {m:0,e:0};
+  let e = Math.floor(Math.log10(Math.abs(x)));
+  let m = x/Math.pow(10,e);
+  m = +m.toFixed(sig-1);
+  if(Math.abs(m)>=10){ m = +(m/10).toFixed(sig-1); e++; }
+  return {m,e};
+}
+function sciText(x, sig=3){
+  if(x===0) return '0';
+  const {m,e}=sciParts(x,sig);
+  if(e===0) return m.toFixed(sig-1);
+  return `${m.toFixed(sig-1)} × 10${supText(e)}`;
+}
+function sciHTML(x, sig=3){
+  if(x===0) return '0';
+  const {m,e}=sciParts(x,sig);
+  if(e===0) return m.toFixed(sig-1);
+  return `${m.toFixed(sig-1)} × 10<sup>${e}</sup>`;
+}
+const pick = a => a[Math.floor(Math.random()*a.length)];
+function setupCanvas(cv, aspect, minH=0, maxH=9999){
+  const w = cv.clientWidth || cv.parentElement.clientWidth || 300;
+  let h = Math.max(minH, Math.min(maxH, w/aspect));
+  const dpr = Math.min(window.devicePixelRatio||1, 2);
+  if(cv.width !== Math.round(w*dpr) || cv.height !== Math.round(h*dpr)){
+    cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+  }
+  cv.style.height = h+'px';
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx,w,h};
+}
+const FONT = '"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
+
+/* ---------- 모달 ---------- */
+function openModal(html){ $('#modal').innerHTML = html; $('#modalBg').classList.add('show'); }
+function closeModal(){ $('#modalBg').classList.remove('show'); }
+$('#modalBg').addEventListener('click', e=>{ if(e.target.id==='modalBg') closeModal(); });
+$('#modal').addEventListener('click', e=>{ const b=e.target.closest('[data-close]'); if(b) closeModal(); });
+
+/* ---------- 탭 ---------- */
+let currentTab=document.querySelector('.tab-btn.active').dataset.tab;
+$$('.tab-btn').forEach(b=>b.addEventListener('click',()=>{
+  $$('.tab-btn').forEach(x=>x.classList.toggle('active',x===b));
+  $$('.tab').forEach(t=>t.classList.remove('active'));
+  currentTab=b.dataset.tab;
+  $('#tab-'+currentTab).classList.add('active');
+  window.scrollTo({top:0});
+  redrawAll();
+}));
+
+/* =========================================================
+   그래프 그리기 함수
+   ========================================================= */
+function niceStep(range,count){
+  const raw=range/count; const p=Math.pow(10,Math.floor(Math.log10(raw))); const r=raw/p;
+  return (r<1.5?1:r<3?2:r<7?5:10)*p;
+}
+function fmtTick(v,step){
+  if(Math.abs(v)<step*1e-6) return '0';
+  const a=Math.abs(v);
+  if(a>=1e4||a<1e-2){ const {m,e}=sciParts(v,2); return `${+m.toFixed(1)}×10${supText(e)}`; }
+  const dec=Math.max(0,-Math.floor(Math.log10(step)+1e-9));
+  return v.toFixed(Math.min(dec,4));
+}
+function drawLineChart(ctx,w,h,o){
+  ctx.clearRect(0,0,w,h);
+  const L=o.padL||58, R=14, T=16, B=40;
+  const pw=w-L-R, ph=h-T-B;
+  const X=x=>L+x/o.xMax*pw, Y=y=>T+ph-(y/o.yMax)*ph;
+  ctx.font=`11px ${FONT}`; ctx.textBaseline='middle';
+  const xs=niceStep(o.xMax,w<420?4:6), ys=niceStep(o.yMax,4);
+  ctx.strokeStyle='#eef2f7'; ctx.lineWidth=1; ctx.fillStyle='#64748b';
+  ctx.textAlign='center';
+  for(let x=0;x<=o.xMax*1.0001;x+=xs){ ctx.beginPath(); ctx.moveTo(X(x),T); ctx.lineTo(X(x),T+ph); ctx.stroke(); ctx.fillText(fmtTick(x,xs),X(x),T+ph+12); }
+  ctx.textAlign='right';
+  for(let y=0;y<=o.yMax*1.0001;y+=ys){ ctx.beginPath(); ctx.moveTo(L,Y(y)); ctx.lineTo(L+pw,Y(y)); ctx.stroke(); ctx.fillText(fmtTick(y,ys),L-6,Y(y)); }
+  ctx.strokeStyle='#475569'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(L,T); ctx.lineTo(L,T+ph); ctx.lineTo(L+pw,T+ph); ctx.stroke();
+  ctx.fillStyle='#334155'; ctx.font=`600 12px ${FONT}`; ctx.textAlign='center';
+  ctx.fillText(o.xLabel||'',L+pw/2,h-10);
+  ctx.save(); ctx.translate(13,T+ph/2); ctx.rotate(-Math.PI/2); ctx.fillText(o.yLabel||'',0,0); ctx.restore();
+  ctx.save(); ctx.beginPath(); ctx.rect(L,T-2,pw+2,ph+4); ctx.clip();
+  (o.series||[]).forEach(s=>{
+    if(!s.pts||s.pts.length<2) return;
+    ctx.strokeStyle=s.color; ctx.lineWidth=s.width||2.5; ctx.setLineDash(s.dash||[]);
+    ctx.beginPath(); s.pts.forEach((p,i)=>{ i?ctx.lineTo(X(p[0]),Y(p[1])):ctx.moveTo(X(p[0]),Y(p[1])); }); ctx.stroke();
+  });
+  ctx.setLineDash([]);
+  if(o.after) o.after(ctx,X,Y,{L,T,pw,ph});
+  ctx.restore();
+}
+/* 운동 에너지 분포 (개념용 곡선) */
+const distF=(E,kT)=>2/Math.sqrt(Math.PI)*Math.sqrt(E)*Math.exp(-E/kT)/Math.pow(kT,1.5);
+function fracAbove(Ea,kT){ let s=0; const d=0.005; for(let E=Ea;E<Ea+40*kT;E+=d) s+=distF(E+d/2,kT)*d; return s; }
+function drawDist(ctx,w,h,o){
+  ctx.clearRect(0,0,w,h);
+  const L=34,R=14,T=14,B=34, pw=w-L-R, ph=h-T-B, xMax=o.xMax||6.5, yMax=0.62;
+  const X=E=>L+E/xMax*pw, Y=v=>T+ph-v/yMax*ph;
+  ctx.strokeStyle='#475569'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(L,T); ctx.lineTo(L,T+ph); ctx.lineTo(L+pw,T+ph); ctx.stroke();
+  ctx.fillStyle='#334155'; ctx.font=`600 12px ${FONT}`; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('운동 에너지 →',L+pw/2,h-12);
+  ctx.save(); ctx.translate(13,T+ph/2); ctx.rotate(-Math.PI/2); ctx.fillText('입자 수 비율 →',0,0); ctx.restore();
+  // shading
+  (o.shade||[]).forEach(sh=>{
+    ctx.fillStyle=sh.color; ctx.beginPath(); ctx.moveTo(X(sh.Ea),Y(0));
+    for(let E=sh.Ea;E<=xMax;E+=0.02) ctx.lineTo(X(E),Y(distF(E,sh.kT)));
+    ctx.lineTo(X(xMax),Y(0)); ctx.closePath(); ctx.fill();
+  });
+  (o.curves||[]).forEach(c=>{
+    ctx.strokeStyle=c.color; ctx.lineWidth=c.width||2.5; ctx.setLineDash(c.dash||[]);
+    ctx.beginPath(); for(let E=0;E<=xMax;E+=0.02){ const px=X(E),py=Y(distF(E,c.kT)); E?ctx.lineTo(px,py):ctx.moveTo(px,py);} ctx.stroke();
+    ctx.setLineDash([]);
+  });
+  (o.ea||[]).forEach((e,i)=>{
+    ctx.strokeStyle=e.color; ctx.lineWidth=2; ctx.setLineDash([6,4]);
+    ctx.beginPath(); ctx.moveTo(X(e.E),T+4); ctx.lineTo(X(e.E),T+ph); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle=e.color; ctx.font=`700 12px ${FONT}`; ctx.textAlign='left';
+    ctx.fillText(e.label,X(e.E)+5,T+10+i*16);
+  });
+  let ly=T+10; ctx.textAlign='right'; ctx.font=`700 12px ${FONT}`;
+  (o.curves||[]).forEach(c=>{ if(!c.label) return; ctx.fillStyle=c.color; ctx.fillText(c.label,L+pw-2,ly); ly+=16; });
+}
+/* 반응 경로(에너지) 그래프 */
+function drawProfile(ctx,w,h,o){
+  ctx.clearRect(0,0,w,h);
+  const L=34,R=14,T=16,B=30, pw=w-L-R, ph=h-T-B;
+  const Rr=0, P=o.dH, pk=o.Ea, pkC=o.EaCat;
+  const lo=Math.min(Rr,P)-0.6, hi=Math.max(pk, P+0.5)+0.7;
+  const X=x=>L+x*pw, Y=E=>T+ph-(E-lo)/(hi-lo)*ph;
+  const path=(peak,x)=>{
+    if(x<0.15) return Rr;
+    if(x<0.5) return Rr+(peak-Rr)*(1-Math.cos(Math.PI*(x-0.15)/0.35))/2;
+    if(x<0.85) return peak+(P-peak)*(1-Math.cos(Math.PI*(x-0.5)/0.35))/2;
+    return P;
+  };
+  ctx.strokeStyle='#475569'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(L,T); ctx.lineTo(L,T+ph); ctx.lineTo(L+pw,T+ph); ctx.stroke();
+  ctx.fillStyle='#334155'; ctx.font=`600 12px ${FONT}`; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('반응 경로 →',L+pw/2,h-10);
+  ctx.save(); ctx.translate(13,T+ph/2); ctx.rotate(-Math.PI/2); ctx.fillText('에너지 →',0,0); ctx.restore();
+  // guide lines
+  ctx.setLineDash([4,4]); ctx.strokeStyle='#94a3b8'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(X(0.15),Y(Rr)); ctx.lineTo(X(0.97),Y(Rr)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(X(0.42),Y(pk)); ctx.lineTo(X(0.58),Y(pk)); ctx.stroke();
+  ctx.setLineDash([]);
+  if(o.showCat){
+    ctx.strokeStyle='#10b981'; ctx.lineWidth=3; ctx.setLineDash([7,5]);
+    ctx.beginPath(); for(let x=0;x<=1.0001;x+=0.005){ const px=X(x),py=Y(path(pkC,x)); x?ctx.lineTo(px,py):ctx.moveTo(px,py);} ctx.stroke(); ctx.setLineDash([]);
+  }
+  ctx.strokeStyle='#4f46e5'; ctx.lineWidth=3;
+  ctx.beginPath(); for(let x=0;x<=1.0001;x+=0.005){ const px=X(x),py=Y(path(pk,x)); x?ctx.lineTo(px,py):ctx.moveTo(px,py);} ctx.stroke();
+  const arrow=(x,y1,y2,color,label,side)=>{
+    ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(x,y1); ctx.lineTo(x,y2); ctx.stroke();
+    const d=y2<y1?1:-1;
+    ctx.beginPath(); ctx.moveTo(x,y2); ctx.lineTo(x-5,y2+7*d); ctx.lineTo(x+5,y2+7*d); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x,y1); ctx.lineTo(x-5,y1-7*d); ctx.lineTo(x+5,y1-7*d); ctx.closePath(); ctx.fill();
+    ctx.font=`700 13px ${FONT}`; ctx.textAlign=side==='l'?'right':'left';
+    ctx.fillText(label,x+(side==='l'?-7:7),y1+(y2-y1)*(lp||0.5));
+  };
+  let lp;
+  lp=o.showCat?0.82:0.5; arrow(X(o.showCat?0.53:0.5),Y(Rr),Y(pk)+2,'#4f46e5','Ea','r');
+  if(o.showCat){ lp=0.4; arrow(X(0.47),Y(Rr),Y(pkC)+2,'#059669','Ea′(촉매)','l'); }
+  lp=0.5; arrow(X(0.93),Y(Rr),Y(P),'#e11d48','ΔH','l');
+  ctx.fillStyle='#1f2937'; ctx.font=`700 12.5px ${FONT}`; ctx.textAlign='center';
+  ctx.fillText('반응물',X(0.075),Y(Rr)-12);
+  ctx.fillText('생성물',X(0.86),Y(P)+(P<Rr?14:-12));
+  ctx.fillText('활성화 상태',X(0.5),Y(pk)-12);
+  if(o.showCat){ ctx.font=`700 11.5px ${FONT}`; ctx.textAlign='right';
+    ctx.fillStyle='#4f46e5'; ctx.fillText('── 촉매 없음',L+pw-4,T+8);
+    ctx.fillStyle='#059669'; ctx.fillText('- - 촉매 있음',L+pw-4,T+24); }
+}
+/* 막대 그래프 */
+function drawBars(ctx,w,h,items,yLabel){
+  ctx.clearRect(0,0,w,h);
+  const L=44,R=10,T=18,B=40,pw=w-L-R,ph=h-T-B;
+  const maxV=Math.max(1,...items.map(i=>i.value))*1.2;
+  const ys=niceStep(maxV,4);
+  ctx.font=`11px ${FONT}`; ctx.textBaseline='middle'; ctx.textAlign='right';
+  for(let y=0;y<=maxV;y+=ys){ const py=T+ph-y/maxV*ph; ctx.strokeStyle='#eef2f7'; ctx.beginPath(); ctx.moveTo(L,py); ctx.lineTo(L+pw,py); ctx.stroke(); ctx.fillStyle='#64748b'; ctx.fillText(fmtTick(y,ys),L-5,py); }
+  ctx.strokeStyle='#475569'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(L,T); ctx.lineTo(L,T+ph); ctx.lineTo(L+pw,T+ph); ctx.stroke();
+  const n=items.length, bw=Math.min(70,pw/n*0.55);
+  items.forEach((it,i)=>{
+    const cx=L+pw*(i+0.5)/n, bh=it.value/maxV*ph;
+    ctx.fillStyle=it.color; ctx.globalAlpha=it.dim?0.45:1;
+    ctx.fillRect(cx-bw/2,T+ph-bh,bw,bh); ctx.globalAlpha=1;
+    ctx.fillStyle='#1f2937'; ctx.textAlign='center'; ctx.font=`700 12px ${FONT}`;
+    ctx.fillText(it.text!=null?it.text:it.value,cx,T+ph-bh-9);
+    ctx.font=`600 11.5px ${FONT}`; ctx.fillStyle='#334155';
+    ctx.fillText(it.label,cx,T+ph+13);
+  });
+  ctx.save(); ctx.translate(12,T+ph/2); ctx.rotate(-Math.PI/2); ctx.font=`600 12px ${FONT}`; ctx.textAlign='center'; ctx.fillStyle='#334155'; ctx.fillText(yLabel,0,0); ctx.restore();
+}
+
+
+/* ---------- 저장소 (브라우저에 기록 보관) ---------- */
+function loadLS(key,def){ try{ const v=localStorage.getItem(key); return v?JSON.parse(v):def; }catch(e){ return def; } }
+function saveLS(key,val){ try{ localStorage.setItem(key,JSON.stringify(val)); return true; }catch(e){ return false; } }
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- 용어 풀이 툴팁 ---------- */
+const TERMS={
+  '초기 반응 속도':'반응이 <b>막 시작된 순간(t = 0)</b>의 반응 속도예요. 농도–시간 그래프에서 <b>t = 0일 때 그은 접선의 기울기</b>로 구해요. 반응이 진행되면 반응물 농도가 변하므로, 처음 넣은 농도와 속도의 관계를 정확히 보려고 초기 반응 속도를 비교해요.',
+  '유효 충돌':'반응을 일으키는 충돌이에요. <b>활성화 에너지 이상의 에너지</b>를 가지고 <b>알맞은 방향</b>으로 부딪혀야 해요.',
+  '활성화 에너지':'반응이 일어나기 위해 필요한 <b>최소한의 에너지</b>예요.',
+  '온도고정':'이 실험은 <b>반응물의 농도</b>가 반응 속도에 미치는 영향을 알아보는 실험이에요.<br>그래서 <b>온도는 바꾸지 않고</b> 모든 실험에서 같게 유지해요.',
+  '×10ⁿ':'<b>×10ⁿ</b>은 10의 거듭제곱을 곱한다는 뜻이에요.<br>×10ⁿ 키를 누르면 괄호가 열려요. <b>괄호 안에 지수 n</b>을 넣고 괄호를 닫아요.<br>예) 2.5 ×10ⁿ −3 ) → 2.5×10^(−3) = 0.0025',
+  '^':'<b>^</b>는 거듭제곱(○제곱)을 뜻해요.<br>제곱할 수(차수)는 <b>^ 뒤 괄호 안</b>에 넣어요.<br>예) 0.2^(2) = 0.2² = 0.04'
+};
+const tipEl=document.createElement('div'); tipEl.id='tip'; document.body.appendChild(tipEl);
+let tipFor=null;
+function showTip(el){
+  const key=el.dataset.term||el.textContent.trim(); const html=TERMS[key]; if(!html) return;
+  tipEl.innerHTML=html; tipEl.classList.add('show'); tipFor=el;
+  const r=el.getBoundingClientRect(), tw=tipEl.offsetWidth, th=tipEl.offsetHeight;
+  let x=r.left+r.width/2-tw/2; x=Math.max(8,Math.min(window.innerWidth-tw-8,x));
+  let y=r.top-th-8; if(y<8) y=r.bottom+8;
+  tipEl.style.left=x+'px'; tipEl.style.top=y+'px';
+}
+function hideTip(){ tipEl.classList.remove('show'); tipFor=null; }
+document.addEventListener('mouseover',e=>{ const t=e.target.closest('.term'); if(t) showTip(t); });
+document.addEventListener('mouseout',e=>{ const t=e.target.closest('.term'); if(t&&!t.contains(e.relatedTarget)) hideTip(); });
+document.addEventListener('click',e=>{ const t=e.target.closest('.term'); if(t&&t.tagName==='BUTTON'){ hideTip(); return; } if(t){ e.stopPropagation(); tipFor===t?hideTip():showTip(t); } else hideTip(); },true);
+window.addEventListener('scroll',hideTip,{passive:true});
+const term=(w,label)=>`<span class="term" tabindex="0" data-term="${w}">${label||w}</span>`;
+document.querySelectorAll('[data-term-fill]').forEach(el=>{ el.outerHTML=term(el.dataset.termFill); });
+
+/* ---------- 높이 제한이 있는 캔버스 ---------- */
+function fitCanvas(cv,aspect,maxH){
+  const box=cv.parentElement.clientWidth||300;
+  let w=box, h=w/aspect;
+  if(h>maxH){ h=maxH; w=h*aspect; }
+  cv.style.width=w+'px';
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){ cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr); }
+  cv.style.height=h+'px';
+  const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+  return {ctx,w,h};
+}
+const isWide=()=>window.innerWidth>=1280;
+
+
+/* =========================================================
+   반응 차수 미션
+   ========================================================= */
+const CONC_OPTS=[0.05,0.10,0.20,0.30,0.40];
+const REACTIONS=[
+  {id:'v1',kind:'virtual',title:'가상 반응 ①',eq:'A + B → C',re:[{f:'A',c:1},{f:'B',c:1}],pr:['C']},
+  {id:'v2',kind:'virtual',title:'가상 반응 ②',eq:'2X + Y → 2Z',re:[{f:'X',c:2},{f:'Y',c:1}],pr:['Z']},
+  {id:'v3',kind:'virtual',title:'가상 반응 ③ 도전',eq:'A + B + C → D',re:[{f:'A',c:1},{f:'B',c:1},{f:'C',c:1}],pr:['D']},
+  {id:'r1',kind:'real',title:'일산화 질소의 산화',eq:'2NO(g) + O<sub>2</sub>(g) → 2NO<sub>2</sub>(g)',re:[{f:'NO',c:2},{f:'O<sub>2</sub>',c:1}],pr:['NO<sub>2</sub>'],orders:[2,1],
+    note:'NO에 대해 2차, O<sub>2</sub>에 대해 1차인 전체 3차 반응이에요. 대기 중에서 NO가 적갈색의 NO<sub>2</sub>로 바뀌는 반응이에요.'},
+  {id:'r2',kind:'real',title:'일산화 질소와 수소',eq:'2NO(g) + 2H<sub>2</sub>(g) → N<sub>2</sub>(g) + 2H<sub>2</sub>O(g)',re:[{f:'NO',c:2},{f:'H<sub>2</sub>',c:2}],pr:['N<sub>2</sub>','H<sub>2</sub>O'],orders:[2,1]},
+  {id:'r3',kind:'real',title:'이산화 질소와 일산화 탄소',eq:'NO<sub>2</sub>(g) + CO(g) → NO(g) + CO<sub>2</sub>(g)',re:[{f:'NO<sub>2</sub>',c:1},{f:'CO',c:1}],pr:['NO','CO<sub>2</sub>'],orders:[2,0],
+    note:'CO의 농도를 바꿔도 반응 속도가 그대로예요(0차). 계수는 1, 1인데 반응 차수는 2, 0이에요. (비교적 낮은 온도에서의 결과)'},
+  {id:'r4',kind:'real',title:'오산화 이질소의 분해',eq:'2N<sub>2</sub>O<sub>5</sub>(g) → 4NO<sub>2</sub>(g) + O<sub>2</sub>(g)',re:[{f:'N<sub>2</sub>O<sub>5</sub>',c:2}],pr:['NO<sub>2</sub>','O<sub>2</sub>'],orders:[1],
+    note:'계수는 2이지만 1차 반응이에요. 1차 반응이라 반감기가 농도와 관계없이 일정해요.'},
+  {id:'r5',kind:'real',title:'아이오딘화 수소의 분해',eq:'2HI(g) → H<sub>2</sub>(g) + I<sub>2</sub>(g)',re:[{f:'HI',c:2}],pr:['H<sub>2</sub>','I<sub>2</sub>'],orders:[2],
+    note:'HI에 대해 2차 반응이에요. HI의 농도를 2배로 하면 반응 속도가 4배가 돼요.'},
+  {id:'r6',kind:'real',title:'수소와 아이오딘',eq:'H<sub>2</sub>(g) + I<sub>2</sub>(g) → 2HI(g)',re:[{f:'H<sub>2</sub>',c:1},{f:'I<sub>2</sub>',c:1}],pr:['HI'],orders:[1,1],
+    note:'H<sub>2</sub>와 I<sub>2</sub>에 대해 각각 1차, 전체 2차 반응이에요.'},
+  {id:'r7',kind:'real',title:'암모니아의 분해 (텅스텐 표면)',eq:'2NH<sub>3</sub>(g) → N<sub>2</sub>(g) + 3H<sub>2</sub>(g)',re:[{f:'NH<sub>3</sub>',c:2}],pr:['N<sub>2</sub>','H<sub>2</sub>'],orders:[0],
+    note:'뜨거운 텅스텐(W) 표면이 NH<sub>3</sub>로 꽉 차 있으면, NH<sub>3</sub>의 농도를 높여도 반응 속도가 일정한 0차 반응이 돼요.'},
+  {id:'r8',kind:'real',title:'2-브로모-2-메틸프로페인 + OH⁻',eq:'(CH<sub>3</sub>)<sub>3</sub>CBr + OH<sup>−</sup> → (CH<sub>3</sub>)<sub>3</sub>COH + Br<sup>−</sup>',re:[{f:'(CH<sub>3</sub>)<sub>3</sub>CBr',c:1},{f:'OH<sup>−</sup>',c:1}],pr:['(CH<sub>3</sub>)<sub>3</sub>COH','Br<sup>−</sup>'],orders:[1,0],
+    note:'OH<sup>−</sup>의 농도는 반응 속도에 영향을 주지 않아요(0차). 반응의 가장 느린 단계에 OH<sup>−</sup>가 참여하지 않기 때문이에요.'},
+  {id:'r9',kind:'real',title:'브로모메테인 + OH⁻',eq:'CH<sub>3</sub>Br + OH<sup>−</sup> → CH<sub>3</sub>OH + Br<sup>−</sup>',re:[{f:'CH<sub>3</sub>Br',c:1},{f:'OH<sup>−</sup>',c:1}],pr:['CH<sub>3</sub>OH','Br<sup>−</sup>'],orders:[1,1],
+    note:'바로 옆 반응((CH<sub>3</sub>)<sub>3</sub>CBr + OH<sup>−</sup>)과 반응식 모양은 비슷하지만, 이 반응은 OH<sup>−</sup>에 대해서도 1차예요. 반응 속도식은 실험해 봐야 알 수 있어요!'}
+];
+const UNIT_TXT=['M·s⁻¹','s⁻¹','M⁻¹·s⁻¹','M⁻²·s⁻¹'];
+const MANT=[1.2,1.5,1.8,2.0,2.4,2.5,3.0,3.2,3.6,4.0,4.5,5.0,6.0,7.2,8.0];
+const solved=new Set(loadLS('rom-solved-v1',[]));
+let M=null;
+const SUBD='₀₁₂₃₄₅₆₇₈₉';
+function toUni(h){
+  return h.replace(/<sub>(\d+)<\/sub>/g,(m,n)=>n.split('').map(x=>SUBD[x]).join(''))
+          .replace(/<sup>−<\/sup>/g,'⁻').replace(/<sup>\+<\/sup>/g,'⁺').replace(/<[^>]+>/g,'');
+}
+function randomOrders(n){
+  while(true){
+    const o=Array.from({length:n},()=>Math.floor(Math.random()*3));
+    const s=o.reduce((a,b)=>a+b,0);
+    if(s<=3) return o;
+  }
+}
+function makeK(total){ const target=5e-3/Math.pow(0.2,total); const e=Math.floor(Math.log10(target)); return pick(MANT)*Math.pow(10,e); }
+
+function renderRxList(){
+  const mk=r=>`<button class="rx-card ${solved.has(r.id)?'done':''}" data-id="${r.id}">
+    <span class="badge ${r.kind}">${r.kind==='real'?'실제 반응':'가상 반응'}</span>${solved.has(r.id)?' <span class="small" style="color:#059669;font-weight:700">✔ 해결</span>':''}
+    <div class="eq">${r.eq}</div>${r.kind==='real'?`<div class="meta">${r.title}</div>`:''}</button>`;
+  $('#rxVirtual').innerHTML=REACTIONS.filter(r=>r.kind==='virtual').map(mk).join('');
+  $('#rxReal').innerHTML=REACTIONS.filter(r=>r.kind==='real').map(mk).join('');
+  $$('.rx-card').forEach(b=>b.addEventListener('click',()=>startMission(b.dataset.id)));
+}
+function startMission(id){
+  const R=REACTIONS.find(r=>r.id===id);
+  const orders=R.orders?R.orders.slice():randomOrders(R.re.length);
+  const total=orders.reduce((a,b)=>a+b,0);
+  const species=[...R.re.map((r,i)=>({f:r.f,reactant:true,idx:i})),...R.pr.map(f=>({f,reactant:false}))];
+  M={R,orders,total,k:makeK(total),rows:[],sel:[],conc:R.re.map(()=>0.10),terms:[],species,last:null,nextN:1,expDone:0};
+  $('#missionSelect').hidden=true; $('#missionWork').hidden=false;
+  $('#mBadge').className='badge '+R.kind; $('#mBadge').textContent=R.kind==='real'?'실제 반응':'가상 반응';
+  $('#mEq').innerHTML=R.eq;
+  $('#kMant').value=''; $('#kExp').value=''; $('#kUnit').value='';
+  $('#ansFeedback').innerHTML=''; $('#hintBox').classList.remove('show'); flashFmt(false);
+  $('#expCount').textContent='실험 횟수: 0회 / 12회';
+  $('#graphWhat').innerHTML=`[${M.R.re[0].f}]의 농도 변화`;
+  lockAnswer(false);
+  renderConcCtl(); renderTable(); renderTerms(); drawExp(); placeHead();
+  window.scrollTo({top:0});
+}
+function renderConcCtl(){
+  $('#concCtl').innerHTML=M.R.re.map((r,i)=>`<div class="conc-row"><span class="nm">[${r.f}]</span>
+    <div class="seg" data-i="${i}">${CONC_OPTS.map(c=>`<button data-c="${c}" class="${M.conc[i]===c?'on':''}">${c.toFixed(2)} M</button>`).join('')}</div></div>`).join('');
+  $$('#concCtl .seg').forEach(seg=>seg.addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    M.conc[+seg.dataset.i]=+b.dataset.c;
+    seg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+  }));
+}
+function rateAt(c){ let v=M.k; M.orders.forEach((o,i)=>v*=Math.pow(Math.max(c[i],0),o)); return v; }
+let expAnim=null;
+const EXP_COLORS=['#4f46e5','#e11d48'];
+$('#runExp').addEventListener('click',()=>{
+  if(!M) return;
+  if(M.expDone>=12){ openModal(`<h2>실험은 12번까지 할 수 있어요</h2><p>지금까지 한 실험 결과로 반응 속도식을 완성해 보세요.</p><div class="actions"><button class="btn primary" data-close>확인</button></div>`); return; }
+  const conc=M.conc.slice();
+  const vTrue=rateAt(conc);
+  const vMeas=vTrue*(1+(Math.random()*2-1)*0.02);
+  // 반응 속도 = 그래프로 보여 주는 반응물(첫 번째 반응물)의 농도 감소 속도
+  const c0=conc[0];
+  const tEnd=(M.total===0?1.6:2.6)*c0/vTrue;
+  M.expDone++;
+  M.rows.push({n:M.nextN++,conc,v:vMeas,c0,a:1,tEnd}); M.showAll=false;
+  M.sel=[M.rows.length-1];
+  $('#expCount').textContent=`실험 횟수: ${M.expDone}회 / 12회`;
+  renderTable();
+  const t0=performance.now();
+  cancelAnimationFrame(expAnim);
+  const anim=now=>{ const f=Math.min(1,(now-t0)/900); drawExp(f); if(f<1) expAnim=requestAnimationFrame(anim); };
+  expAnim=requestAnimationFrame(anim);
+});
+// 농도-시간 곡선 계산
+// 0차인 반응물은 거의 바닥날 때 실제처럼 속도가 서서히 줄도록 c/(Ks+c) 보정을 넣어요.
+// (처음 농도에서는 보정값이 1이라 t = 0의 기울기는 측정한 초기 반응 속도와 같아요)
+const KS=0.01;
+const curveCache=new Map();
+function computeCurve(conc,tMax){
+  const key=conc.join(',')+'|'+tMax.toPrecision(6)+'|'+M.k;
+  if(curveCache.has(key)) return curveCache.get(key);
+  const pts=[[0,conc[0]]]; const c=conc.slice(); const N=600, dt=tMax/N;
+  const rate=x=>{ let v=rateAt(x); M.orders.forEach((o,i)=>{ if(o===0) v*=(x[i]/(KS+x[i]))*((KS+conc[i])/conc[i]); }); return v; };
+  for(let s=1;s<=N;s++){
+    for(let k=0;k<10;k++){
+      const v=c.some(x=>x<=0)?0:rate(c);
+      M.R.re.forEach((r,i)=>c[i]=Math.max(0,c[i]-(r.c/M.R.re[0].c)*v*dt/10));
+    }
+    pts.push([s*dt,c[0]]);
+  }
+  curveCache.set(key,pts); return pts;
+}
+function drawExp(frac=1){
+  const cv=$('#expCanvas'); const {ctx,w,h}=setupCanvas(cv,1.6,210,340);
+  const sel=M?M.sel.slice().sort((x,y)=>x-y).map(i=>M.rows[i]):[];
+  if(!sel.length){
+    drawLineChart(ctx,w,h,{xMax:10,yMax:0.4,xLabel:'시간 (s)',yLabel:'농도 (M)',series:[]});
+    ctx.fillStyle='#94a3b8'; ctx.font=`600 14px ${FONT}`; ctx.textAlign='center';
+    ctx.fillText(M&&M.rows.length?'표에서 실험을 눌러 그래프를 보세요':'▶ 실험하기를 눌러 보세요',w/2,h/2-10);
+    $('#expCaption').innerHTML='';
+    return;
+  }
+  const name=toUni(M.R.re[0].f);
+  const xMax=Math.max(...sel.map(d=>d.tEnd)), yMax=Math.max(...sel.map(d=>d.c0))*1.18;
+  const series=sel.map((d,j)=>{ const pts=computeCurve(d.conc,xMax); const n=Math.max(2,Math.floor(pts.length*frac)); return {pts:pts.slice(0,n),color:EXP_COLORS[j],width:3}; });
+  drawLineChart(ctx,w,h,{xMax,yMax,xLabel:'시간 (s)',yLabel:`[${name}] (M)`,series,
+    after:(ctx,X,Y,area)=>{
+      if(frac<1) return;
+      sel.forEach((d,j)=>{
+        const col=EXP_COLORS[j], slope=-d.a*d.v;
+        let xEnd=d.tEnd*0.45; if(d.c0+slope*xEnd<0) xEnd=-d.c0/slope;
+        const x2=X(xEnd), y2=Y(d.c0+slope*xEnd);
+        ctx.strokeStyle=col; ctx.globalAlpha=0.75; ctx.lineWidth=2; ctx.setLineDash([6,4]);
+        ctx.beginPath(); ctx.moveTo(X(0),Y(d.c0)); ctx.lineTo(x2,y2); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha=1;
+        ctx.fillStyle=col; ctx.beginPath(); ctx.arc(X(0),Y(d.c0),5,0,Math.PI*2); ctx.fill();
+      });
+      const note='t = 0 접선의 기울기 = 초기 반응 속도';
+      ctx.font=`700 12.5px ${FONT}`; ctx.textBaseline='middle'; ctx.textAlign='right';
+      const nw=ctx.measureText(note).width, nx=area.L+area.pw-8, ny=area.T+14;
+      ctx.fillStyle='rgba(255,255,255,0.92)'; ctx.fillRect(nx-nw-40,ny-11,nw+46,22);
+      ctx.strokeStyle='#64748b'; ctx.lineWidth=2; ctx.setLineDash([6,4]); ctx.beginPath(); ctx.moveTo(nx-nw-34,ny); ctx.lineTo(nx-nw-8,ny); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle='#334155'; ctx.fillText(note,nx,ny);
+    }});
+  $('#expCaption').innerHTML=frac<1?'측정 중…':sel.map((d,j)=>`<span style="white-space:nowrap"><span style="color:${EXP_COLORS[j]};font-weight:800">━ 실험 ${d.n}</span> (${M.R.re.map((r,k)=>`[${r.f}] ${d.conc[k].toFixed(2)} M`).join(', ')})</span>`).join(' &nbsp;&nbsp; ');
+}
+function renderTable(){
+  const R=M.R;
+  let html=`<thead><tr><th>실험</th>${R.re.map(r=>`<th>[${r.f}] (M)</th>`).join('')}<th>${term('초기 반응 속도')} (M/s)</th><th></th></tr></thead><tbody>`;
+  if(!M.rows.length) html+=`<tr><td colspan="${R.re.length+3}" class="muted">아직 실험 결과가 없어요.</td></tr>`;
+  const KEEP=3, hidden=Math.max(0,M.rows.length-KEEP);
+  const rowHTML=(row,i)=>`<tr data-i="${i}" class="${M.sel.includes(i)?'sel':''}"><td>${row.n}</td>${row.conc.map(c=>`<td>${c.toFixed(2)}</td>`).join('')}<td>${sciHTML(row.v)}</td><td class="del-cell"><button class="row-del" data-del="${i}" title="이 실험 삭제">🗑️</button></td></tr>`;
+  if(hidden&&!M.showAll){
+    html+=`<tr class="fold-row"><td colspan="${R.re.length+3}">▼ 이전 실험 ${hidden}개 펼치기${M.sel.some(i=>i<hidden)?' <span class="muted">(선택한 실험 포함)</span>':''}</td></tr>`;
+    M.sel.filter(i=>i<hidden).sort((a,b)=>a-b).forEach(i=>html+=rowHTML(M.rows[i],i));
+    M.rows.forEach((row,i)=>{ if(i>=hidden) html+=rowHTML(row,i); });
+  } else {
+    M.rows.forEach((row,i)=>html+=rowHTML(row,i));
+    if(hidden) html+=`<tr class="fold-row"><td colspan="${R.re.length+3}">▲ 최근 실험 ${KEEP}개만 보기</td></tr>`;
+  }
+  $('#dataTable').innerHTML=html+'</tbody>';
+  const fr=$('#dataTable tr.fold-row'); if(fr) fr.addEventListener('click',()=>{ M.showAll=!M.showAll; renderTable(); });
+  $$('#dataTable .row-del').forEach(b=>b.addEventListener('click',e=>{
+    e.stopPropagation(); const i=+b.dataset.del;
+    M.rows.splice(i,1);
+    M.sel=M.sel.filter(x=>x!==i).map(x=>x>i?x-1:x);
+    cancelAnimationFrame(expAnim); renderTable(); drawExp();
+  }));
+  $$('#dataTable tbody tr[data-i]').forEach(tr=>tr.addEventListener('click',()=>{
+    const i=+tr.dataset.i; const k=M.sel.indexOf(i);
+    if(k>=0) M.sel.splice(k,1); else { M.sel.push(i); if(M.sel.length>2) M.sel.shift(); }
+    cancelAnimationFrame(expAnim); renderTable(); drawExp();
+  }));
+}
+$('#clearTable').addEventListener('click',()=>{
+  if(!M||!M.rows.length) return;
+  openModal(`<h2>표 전체를 지울까요?</h2><p>지금까지 한 실험 ${M.rows.length}개의 결과가 모두 지워져요.<br>지운 결과는 되돌릴 수 없어요.</p>
+    <div class="actions"><button class="btn" data-close>취소</button><button class="btn primary" id="clearTableOk" style="background:#dc2626;border-color:#dc2626">지우기</button></div>`);
+  $('#clearTableOk').addEventListener('click',()=>{ M.rows=[]; M.sel=[]; M.showAll=false; renderTable(); drawExp(); closeModal(); });
+});
+
+/* ---------- 반응 속도식 만들기 ---------- */
+function renderTerms(){
+  const used=M.terms.map(t=>t.s);
+  $('#termList').innerHTML=M.terms.map((t,ti)=>`<div class="term-row" data-t="${ti}">
+    <select data-t="${ti}"><option value="">물질 선택 ▾</option>${M.species.map((sp,si)=>`<option value="${si}" ${t.s===si?'selected':''} ${used.includes(si)&&t.s!==si?'disabled':''}>${toUni(sp.f)}</option>`).join('')}</select>
+    <span>${t.s===null?'을(를) 고르면':'의 반응 차수는?'}</span>
+    ${t.s===null?'':`<div class="seg" data-t="${ti}">${[0,1,2].map(o=>`<button data-o="${o}" class="${t.o===o?'on':''}">${o}차</button>`).join('')}</div>`}
+    <button class="x" data-t="${ti}" title="빼기">✕</button></div>`).join('');
+  $$('#termList select').forEach(s=>s.addEventListener('change',()=>{ const t=M.terms[+s.dataset.t]; t.s=s.value===''?null:+s.value; t.o=null; renderTerms(); }));
+  $$('#termList .seg').forEach(seg=>seg.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; M.terms[+seg.dataset.t].o=+b.dataset.o; renderTerms(); }));
+  $$('#termList .x').forEach(b=>b.addEventListener('click',()=>{ M.terms.splice(+b.dataset.t,1); renderTerms(); }));
+  $('#addTerm').disabled=M.terms.length>=M.species.length;
+  if(M.solved) lockAnswer(true);
+  renderRateLaw();
+}
+$('#addTerm').addEventListener('click',()=>{ if(!M) return; M.terms.push({s:null,o:null}); renderTerms(); });
+function renderRateLaw(){
+  let s='v = k';
+  const done=M.terms.filter(t=>t.s!==null);
+  done.forEach(t=>{ if(t.o===0) return; const f=M.species[t.s].f; s+= t.o===1?`[${f}]`:`[${f}]<sup>${t.o===null?'?':t.o}</sup>`; });
+  if(!done.length) s+=`<span style="font-size:15px;color:#64748b;font-family:${FONT};font-weight:600"> &nbsp;← 물질을 넣어 완성하세요</span>`;
+  const tot=done.length&&done.every(t=>t.o!==null)?done.reduce((a,t)=>a+t.o,0):null;
+  $('#rateLawPreview').innerHTML=s+(tot!==null?`<div style="font-size:13px;font-family:${FONT};font-weight:600;color:#475569">전체 반응 차수: ${tot}차</div>`:'');
+}
+$('#hintBtn').addEventListener('click',()=>{
+  if(!M) return;
+  const first=M.R.re[0].f;
+  $('#hintBox').innerHTML=`<b>💡 힌트</b><br>1) 모든 농도를 0.10 M로 두고 기준 실험을 한 번 해요.<br>2) 다른 반응물의 농도는 그대로 두고 [${first}]만 0.20 M로 바꿔 실험해요.<br>3) 표에서 두 실험을 골라 ${term('초기 반응 속도')}가 몇 배가 되었는지 보세요. 2배 → 1차, 4배 → 2차, 그대로 → 0차<br>4) 나머지 반응물도 같은 방법으로! 차수를 찾으면 <b>＋ 속도식에 물질 넣기</b>로 속도식을 만들어요.<br>5) 실험 하나의 값을 속도식에 넣어 k를 계산하고, 단위는 M/s ÷ M<sup>(전체 반응 차수)</sup>로 구해요.`;
+  $('#hintBox').classList.toggle('show');
+});
+$('#checkAns').addEventListener('click',()=>{
+  if(!M) return;
+  const fb=$('#ansFeedback');
+  const done=M.terms.filter(t=>t.s!==null);
+  if(done.some(t=>t.o===null)){ fb.innerHTML='<span class="no">속도식에 넣은 물질의 반응 차수를 모두 골라 주세요.</span>'; return; }
+  const lines=[]; let ok=true;
+  done.forEach(t=>{ const sp=M.species[t.s];
+    if(!sp.reactant){ if(t.o!==0){ ok=false; lines.push(`<span class="no">✘</span> [${sp.f}]는 생성물이에요. 이 실험에서 생성물의 농도는 반응 속도식에 들어가지 않아요.`);} else lines.push(`<span class="ok">✔</span> [${sp.f}]는 0차 — 속도식에서 빼도 돼요.`); return; }
+    if(t.o===M.orders[sp.idx]) lines.push(`<span class="ok">✔</span> [${sp.f}]에 대한 차수 정답${t.o===0?' (0차라서 속도식에서 빼도 돼요)':''}`);
+    else { ok=false; lines.push(`<span class="no">✘</span> [${sp.f}]에 대한 차수를 다시 확인해 보세요.`); }
+  });
+  const missing=M.R.re.some((r,i)=>M.orders[i]>0&&!done.some(t=>M.species[t.s].reactant&&M.species[t.s].idx===i));
+  if(missing){ ok=false; lines.push('<span class="no">✘</span> 반응 속도에 영향을 주는 반응물 중 아직 속도식에 넣지 않은 물질이 있어요.'); }
+  let kOk=false,uOk=false;
+  if(ok){
+    const m=parseFloat($('#kMant').value), e=parseInt($('#kExp').value||'0',10);
+    if(isNaN(m)) lines.push('<span class="no">✘</span> k 값을 입력해 주세요.');
+    else{
+      const r=m*Math.pow(10,e)/M.k;
+      // 학생이 적은 자릿수만큼 반올림한 차이는 인정해요 (0.1로 계산해 유효숫자가 줄어든 경우 포함)
+      const mStr=String($('#kMant').value).trim().replace(/^[-+]/,''); const dec=(mStr.split('.')[1]||'').length;
+      const halfUnit=0.5*Math.pow(10,e-dec)/M.k;
+      const valOk=Math.abs(r-1)<=Math.max(0.08,halfUnit+0.04); const fmtOk=Math.abs(m)>=1&&Math.abs(m)<10;
+      flashFmt(valOk&&!fmtOk);
+      kOk=valOk&&fmtOk;
+      if(valOk&&!fmtOk){ lines.push('<span class="no">✘</span> k 값은 맞아요! 그런데 <b>(1 이상 10 미만의 수) × 10<sup>n</sup></b> 형식으로 적어 볼까요?'); }
+      else lines.push(kOk?'<span class="ok">✔</span> k 값 정답':`<span class="no">✘</span> k 값이 맞지 않아요. 실험값 하나를 속도식에 넣어 다시 계산해 보세요. ${r>1?'(너무 커요)':'(너무 작아요)'}`);
+    }
+    const u=$('#kUnit').value; uOk=u!==''&&+u===M.total;
+    lines.push(uOk?'<span class="ok">✔</span> k의 단위 정답':'<span class="no">✘</span> k의 단위를 확인해 보세요. (전체 반응 차수를 생각해요)');
+  } else lines.push('<span class="muted">반응 속도식이 맞으면 k 값과 단위를 확인해 줄게요.</span>');
+  fb.innerHTML=lines.join('<br>');
+  if(ok&&kOk&&uOk) missionClear();
+});
+function lockAnswer(on){
+  ['#termList','#addTerm','.kbox','#checkAns','#hintBtn'].forEach(sel=>$$(sel).forEach(el=>el.classList.toggle('locked',on)));
+  $$('#termList select, #termList button, .kbox input, .kbox select, #checkAns, #hintBtn').forEach(el=>el.disabled=on);
+  if(on) $('#addTerm').disabled=true;
+  $('#solvedBadge').hidden=!on;
+}
+function flashFmt(on=true){ $('#kFmt').classList.toggle('flash',on); }
+function missionClear(){
+  M.solved=true; lockAnswer(true);
+  solved.add(M.R.id); saveLS('rom-solved-v1',[...solved]);
+  showToast('🎉 정답! 반응 속도식과 반응 속도 상수를 정확히 맞췄어요!');
+}
+function showToast(msg){
+  let t=$('#toast'); if(!t){ t=document.createElement('div'); t.id='toast'; document.body.appendChild(t); }
+  t.textContent=msg; t.classList.remove('show'); void t.offsetWidth; t.classList.add('show');
+  clearTimeout(showToast.tm); showToast.tm=setTimeout(()=>t.classList.remove('show'),3200);
+}
+function backToSelect(){ $('#missionWork').hidden=true; $('#missionSelect').hidden=false; placeHead(); renderRxList(); window.scrollTo({top:0}); }
+$('#mBack').addEventListener('click',()=>{
+  if(!M||!M.expDone){ backToSelect(); return; }
+  openModal(`<h2>다른 반응을 고를까요?</h2><p>다른 반응을 고르면 지금까지의 실험값이 모두 사라져요.<br>이 반응에 다시 들어와도 처음부터 시작해요.</p>
+    <div class="actions"><button class="btn" data-close>취소</button><button class="btn primary" id="backOk">확인</button></div>`);
+  $('#backOk').addEventListener('click',()=>{ closeModal(); backToSelect(); });
+});
+$('#rxRandom').addEventListener('click',()=>startMission(pick(REACTIONS).id));
+function showGuide(){
+  openModal(`<h2>🧪 반응 차수 찾기 방법</h2>
+  <ol>
+    <li><b>반응 고르기</b> — 가상 반응은 도전할 때마다 반응 차수가 바뀌어요.</li>
+    <li><b>실험하기</b> — 반응물의 초기 농도를 정하고 <b>▶ 실험하기</b>를 눌러요. 그래프의 접선 기울기로 ${term('초기 반응 속도')}가 측정돼요.</li>
+    <li><b>두 실험 비교하기</b> — 비교하는 두 실험에서는 <b>한 반응물의 농도만</b> 달라야 해요. (농도 배수)<sup>차수</sup> = (속도 배수)</li>
+    <li><b>반응 속도식 만들기</b> — <b>＋ 속도식에 물질 넣기</b>로 물질을 고르고 반응 차수를 정해요.</li>
+    <li><b>k와 단위 구하기</b> — 실험값 하나를 속도식에 넣어 계산해요. 오른쪽 🧮 미니 계산기를 써 보세요.</li>
+  </ol>
+  <div class="actions"><button class="btn primary" data-close>시작하기</button></div>`);
+}
+$('#guideBtn1').addEventListener('click',showGuide);
+$('#resetSolved').addEventListener('click',()=>{
+  openModal(`<h2>해결 기록을 초기화할까요?</h2><p>반응 카드에 표시된 ✔ 해결 기록이 모두 지워져요.<br>지운 기록은 되돌릴 수 없어요.</p>
+    <div class="actions"><button class="btn" data-close>취소</button><button class="btn primary" id="resetOk" style="background:#dc2626;border-color:#dc2626">초기화</button></div>`);
+  $('#resetOk').addEventListener('click',()=>{ solved.clear(); saveLS('rom-solved-v1',[]); renderRxList(); closeModal(); });
+});
+$('#guideBtn2').addEventListener('click',showGuide);
+
+/* =========================================================
+   미니 계산기
+   ========================================================= */
+const CK=[
+  {l:'C',a:'clear',c:'clr'},{l:'⌫',a:'back',c:'clr'},{l:'(',v:'('},{l:')',v:')'},
+  {l:'log',v:'log(',c:'fn'},{l:'√',v:'√(',c:'fn'},{l:'x²',v:['^','(','2',')'],c:'fn',tip:'^'},{l:'xʸ',v:['^','('],c:'fn',tip:'^'},
+  {l:'7'},{l:'8'},{l:'9'},{l:'÷',v:'÷',c:'op'},
+  {l:'4'},{l:'5'},{l:'6'},{l:'×',v:'×',c:'op'},
+  {l:'1'},{l:'2'},{l:'3'},{l:'−',v:'−',c:'op'},
+  {l:'0'},{l:'.'},{l:'×10ⁿ',v:['E','('],c:'fn',tip:'×10ⁿ'},{l:'+',v:'+',c:'op'},
+  {l:'Ans',v:'Ans',c:'fn'},{l:'=',a:'eval',c:'eq',span:3}
+];
+const C={tok:[],cur:0,ans:0,ansQ:{v:0,s:Infinity,d:-Infinity},hist:[],fresh:false,err:'',res:null};
+$('#calcKeys').innerHTML=CK.map((k,i)=>`<button data-k="${i}" class="${k.c||''}${k.tip?' term':''}" ${k.tip?`data-term="${k.tip}"`:''} ${k.span?`style="grid-column:span ${k.span}"`:''}>${k.l}</button>`).join('');
+$('#calcKeys').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const k=CK[+b.dataset.k]; calcPress(k.a||null,k.v!=null?k.v:k.l); });
+function insertTok(arr){ C.tok.splice(C.cur,0,...arr); C.cur+=arr.length; }
+function calcPress(action,val){
+  C.err=''; C.res=null;
+  if(action==='clear'){ C.tok=[]; C.cur=0; C.fresh=false; }
+  else if(action==='back'){ if(C.fresh){ C.tok=[]; C.cur=0; C.fresh=false; } else if(C.cur>0){ C.tok.splice(C.cur-1,1); C.cur--; } }
+  else if(action==='del'){ if(!C.fresh&&C.cur<C.tok.length) C.tok.splice(C.cur,1); }
+  else if(action==='left'){ C.fresh=false; C.cur=Math.max(0,C.cur-1); }
+  else if(action==='right'){ C.fresh=false; C.cur=Math.min(C.tok.length,C.cur+1); }
+  else if(action==='eval'){ calcEval(); return; }
+  else {
+    const vals=Array.isArray(val)?val:[val];
+    if(C.fresh){ C.tok=/^[0-9.]$|^log\($|^√\($|^\($|^Ans$/.test(vals[0])?[]:['Ans']; C.cur=C.tok.length; C.fresh=false; }
+    insertTok(vals);
+  }
+  calcShow();
+}
+const dispTok=t=>t==='E'?'×10^':t;
+const showTok=t=>t.map(dispTok).join('');
+function calcShow(){
+  if(!C.fresh) $('#calcRaw').textContent='';
+  const caret='<span class="caret"></span>';
+  let h='';
+  C.tok.forEach((t,i)=>{ if(!C.fresh&&i===C.cur) h+=caret; h+=`<span data-i="${i}">${esc(dispTok(t))}</span>`; });
+  if(!C.fresh&&C.cur===C.tok.length&&C.tok.length) h+=caret;
+  if(C.fresh) h+=' =';
+  $('#calcExpr').innerHTML=h||'&nbsp;';
+  $('#calcRes').textContent=C.err?C.err:(C.res!=null?C.res:(C.tok.length?'':'0'));
+}
+$('#calcExpr').addEventListener('click',e=>{
+  if(!C.tok.length) return;
+  C.fresh=false;
+  const sp=e.target.closest('span[data-i]');
+  if(sp){ const r=sp.getBoundingClientRect(); const i=+sp.dataset.i; C.cur=e.clientX<r.left+r.width/2?i:i+1; }
+  else C.cur=C.tok.length;
+  calcShow(); $('#calc').focus({preventScroll:true});
+});
+// 10의 거듭제곱 표기
+function sciStr(m,e){ return `${m} × 10${supText(e)}`; }
+// 유효숫자 고려 없이: 불필요한 0 없이 보여 주기
+function fmtCalc(x){
+  if(!isFinite(x)) return '계산할 수 없어요';
+  if(x===0) return '0';
+  const e=Math.floor(Math.log10(Math.abs(x)));
+  if(e>=-3&&e<7) return String(+x.toPrecision(10));
+  let m=+(x/Math.pow(10,e)).toPrecision(10); let ee=e; if(Math.abs(m)>=10){ m=+(m/10).toPrecision(10); ee++; }
+  return sciStr(m,ee);
+}
+// 유효숫자 n자리로 나타내기
+function fmtSig(x,n){
+  if(!isFinite(x)) return '계산할 수 없어요';
+  if(x===0) return '0';
+  let e=Math.floor(Math.log10(Math.abs(x)));
+  let m=+(x/Math.pow(10,e)).toFixed(n-1); if(Math.abs(m)>=10){ m/=10; e++; }
+  if(e>=-3&&e<n) return (m*Math.pow(10,e)).toFixed(Math.max(0,n-1-e));
+  return sciStr(m.toFixed(n-1),e);
+}
+// 입력한 측정값(소수점이 있는 수) 중 가장 적은 유효숫자 자리수. 지수와 정수는 정확한 수로 봐요.
+function sigOf(tok){
+  let str=tok.join('');
+  // ^( ) 와 ×10^( ) 안의 지수는 빼요
+  let out='', depthSkip=0, i=0;
+  while(i<str.length){
+    if((str[i]==='^'||str[i]==='E')&&str[i+1]==='('){ let d=0, j=i+1; for(;j<str.length;j++){ if(str[j]==='(') d++; else if(str[j]===')'){ d--; if(d===0) break; } } i=j+1; out+=' '; continue; }
+    if(str[i]==='E'||str[i]==='^'){ i++; while(i<str.length&&/[−\-\d.]/.test(str[i])) i++; out+=' '; continue; }
+    out+=str[i]; i++;
+  }
+  out=out.replace(/Ans/g,' ').replace(/log/g,' ');
+  const nums=out.match(/\d*\.\d*/g)||[];
+  let n=Infinity;
+  nums.forEach(t=>{ if(t==='.') return; const d=t.replace('.','').replace(/^0+/,''); if(d.length) n=Math.min(n,d.length); });
+  return n===Infinity?null:n;
+}
+function calcEval(){
+  if(!C.tok.length) return;
+  // 닫지 않은 괄호는 자동으로 닫아요
+  const open=C.tok.join('').split('(').length-C.tok.join('').split(')').length;
+  for(let q=0;q<open;q++) C.tok.push(')');
+  C.cur=C.tok.length;
+  try{
+    const q=parseCalc(C.tok.join(''),C.ansQ); const v=q.v;
+    if(!isFinite(v)){ C.err=/÷\(?0(?![.\d])/.test(C.tok.join(''))?'0으로 나눌 수 없어요':'계산할 수 없는 값이에요'; calcShow(); return; }
+    const expr=showTok(C.tok);
+    C.ans=v; C.ansQ=q; C.hist.unshift({expr,v}); C.hist=C.hist.slice(0,5);
+    let n=null, vr=v;
+    if(isFinite(q.d)&&v!==0){ vr=+(Math.round(v/Math.pow(10,q.d))*Math.pow(10,q.d)).toPrecision(12); n=vr===0?null:Math.min(10,Math.floor(Math.log10(Math.abs(vr)))-q.d+1); }
+    const shown=isFinite(q.d)&&vr===0?(0).toFixed(Math.max(0,-q.d)):(n?fmtSig(vr,n):fmtCalc(v)); const raw=fmtCalc(v);
+    C.fresh=true; C.res=shown; calcShow();
+    const rounded=isFinite(q.d)?vr:v;
+    $('#calcRaw').textContent=isFinite(q.d)&&Math.abs(rounded-v)>Math.abs(v)*1e-12?`반올림 전: ${raw}`:'';
+    C.hist[0].shown=shown;
+    $('#calcHist').innerHTML=C.hist.map((h,i)=>`<div data-h="${i}" title="눌러서 이 값 넣기"><span>${esc(h.expr)}</span><span class="r">${h.shown||fmtCalc(h.v)}</span></div>`).join('');
+  }catch(e){ C.err='식을 확인해 주세요'; calcShow(); }
+}
+$('#calcHist').addEventListener('click',e=>{
+  const d=e.target.closest('[data-h]'); if(!d) return;
+  const v=C.hist[+d.dataset.h].v;
+  if(C.fresh){ C.tok=[]; C.cur=0; C.fresh=false; }
+  C.res=null; insertTok([String(+v.toPrecision(10)).replace('e+','E').replace('e','E')]); calcShow();
+});
+// 계산 결과와 함께 유효숫자 정보(s: 유효숫자 자리수, d: 마지막 유효 자리의 위치)를 넘겨요.
+// 정수와 지수는 정확한 수(s = ∞)로 봐요. 곱셈·나눗셈은 유효숫자 자리수, 덧셈·뺄셈은 소수 자리를 따라가요.
+const QX=v=>({v,s:Infinity,d:-Infinity});
+function QS(v,s){ if(!isFinite(s)) return QX(v); const d=v===0?-s:Math.floor(Math.log10(Math.abs(v)))-s+1; return {v,s,d}; }
+function QD(v,d){ if(d===-Infinity) return QX(v); const s=v===0?1:Math.max(1,Math.floor(Math.log10(Math.abs(v)))-d+1); return {v,s,d}; }
+function parseCalc(src,ansQ){
+  const s=src.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/√/g,'S').replace(/log/g,'L').replace(/Ans/g,'A');
+  let i=0;
+  const peek=()=>s[i];
+  const num=()=>{
+    const m=/^(\d+\.?\d*|\.\d+)(E(-?\d+))?/.exec(s.slice(i)); if(!m) throw 0; i+=m[0].length;
+    const v=parseFloat(m[0].replace('E','e'));
+    if(!m[1].includes('.')) return QX(v);
+    const dec=(m[1].split('.')[1]||'').length, ex=m[3]?+m[3]:0;
+    const dig=m[1].replace('.','').replace(/^0+/,'');
+    const sig=dig.length||Math.max(1,dec);
+    return {v,s:sig,d:-dec+ex};
+  };
+  const inParen=()=>{ if(peek()!=='(') throw 0; i++; const q=expr(); if(peek()!==')') throw 0; i++; return q; };
+  function primary(){
+    const c=peek();
+    if(c==='('){ return inParen(); }
+    if(c==='S'){ i++; const q=inParen(); return QS(Math.sqrt(q.v),q.s); }
+    if(c==='L'){ i++; const q=inParen(); return QD(Math.log10(q.v),isFinite(q.s)?-q.s:-Infinity); }
+    if(c==='A'){ i++; return ansQ; }
+    if(c==='E'){ i++; return QX(Math.pow(10,expo())); }
+    return num();
+  }
+  // ×10ⁿ 뒤의 지수: 숫자, −숫자, 괄호 식 모두 가능 (정확한 수)
+  function expo(){ let sg=1; while(peek()==='-'||peek()==='+'){ if(s[i]==='-') sg=-sg; i++; } if(peek()==='('){ return sg*inParen().v; } const m=/^(\d+\.?\d*|\.\d+)/.exec(s.slice(i)); if(!m) throw 0; i+=m[0].length; return sg*parseFloat(m[0]); }
+  function postfixE(q){ while(peek()==='E'){ i++; q=QS(q.v*Math.pow(10,expo()),q.s); } return q; }
+  function power(){ const b=postfixE(primary()); if(peek()==='^'){ i++; const e=unary(); return QS(Math.pow(b.v,e.v),b.s); } return b; }
+  function unary(){ if(peek()==='-'){ i++; const q=unary(); return {v:-q.v,s:q.s,d:q.d}; } if(peek()==='+'){ i++; return unary(); } return power(); }
+  const mul=(a,b,div)=>QS(div?a.v/b.v:a.v*b.v,Math.min(a.s,b.s));
+  function term_(){
+    let q=unary();
+    while(true){
+      const c=peek();
+      if(c==='*'){ i++; q=mul(q,unary()); }
+      else if(c==='/'){ i++; q=mul(q,unary(),true); }
+      else if(c==='('||c==='S'||c==='L'||c==='A'||(c&&/[\d.]/.test(c))){ q=mul(q,unary()); }
+      else break;
+    }
+    return q;
+  }
+  function expr(){ let q=term_(); while(peek()==='+'||peek()==='-'){ const op=s[i++]; const r=term_(); const v=op==='+'?q.v+r.v:q.v-r.v; q=QD(v,Math.max(q.d,r.d)); } return q; }
+  const q=expr(); if(i<s.length) throw 0; return q;
+}
+$('#calc').addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT') return;
+  const k=e.key; let used=true;
+  if(/^[0-9.]$/.test(k)) calcPress(null,k);
+  else if(k==='+') calcPress(null,'+');
+  else if(k==='-') calcPress(null,'−');
+  else if(k==='*') calcPress(null,'×');
+  else if(k==='/') calcPress(null,'÷');
+  else if(k==='^') calcPress(null,'^');
+  else if(k==='('||k===')') calcPress(null,k);
+  else if(k==='e'||k==='E') calcPress(null,['E','(']);
+  else if(k==='Enter'||k==='=') calcPress('eval');
+  else if(k==='Backspace') calcPress('back');
+  else if(k==='Escape') calcPress('clear');
+  else if(k==='ArrowLeft') calcPress('left');
+  else if(k==='ArrowRight') calcPress('right');
+  else if(k==='Delete') calcPress('del');
+  else used=false;
+  if(used) e.preventDefault();
+});
+$('#calc').addEventListener('click',e=>{ if(!e.target.closest('input')) $('#calc').focus({preventScroll:true}); });
+$('#calcFab').addEventListener('click',()=>{ $('#calcCol').classList.toggle('open'); if($('#calcCol').classList.contains('open')) $('#calc').focus({preventScroll:true}); });
+$('#calcClose').addEventListener('click',()=>$('#calcCol').classList.remove('open'));
+const syncFab=()=>{ $('#calcFab').style.visibility=$('#missionWork').hidden||currentTab!=='order'?'hidden':'visible'; };
+setInterval(syncFab,300);
+
+/* ---------- PC 가로 화면: 반응식 줄을 상단 제목 옆으로 ---------- */
+const headMQ=window.matchMedia('(min-width:1100px) and (orientation:landscape)');
+function placeHead(){
+  const head=$('#missionHead'), slot=$('#headSlot');
+  const inHeader=headMQ.matches;
+  if(inHeader&&head.parentElement!==slot){ slot.appendChild(head); head.classList.add('in-header'); }
+  if(!inHeader&&head.parentElement===slot){ $('#missionWork').prepend(head); head.classList.remove('in-header'); }
+  slot.style.display=inHeader&&!$('#missionWork').hidden&&currentTab==='order'?'flex':'none';
+}
+headMQ.addEventListener?headMQ.addEventListener('change',placeHead):headMQ.addListener(placeHead);
+$$('.tab-btn').forEach(b=>b.addEventListener('click',()=>{ const t=$('#toast'); if(t) t.classList.remove('show'); setTimeout(placeHead,0); }));
+
+/* =========================================================
+   3. 개념
+   ========================================================= */
+$$('#cnav button').forEach(b=>b.addEventListener('click',()=>{
+  $$('#cnav button').forEach(x=>x.classList.toggle('on',x===b));
+  $$('.csec').forEach(s=>s.classList.toggle('on',s.id===b.dataset.c));
+  drawConcept();
+}));
+let cProf={h:'exo',cat:false};
+$('#cProfSeg')&&$('#cProfSeg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; cProf.h=b.dataset.h; $$('#cProfSeg button').forEach(x=>x.classList.toggle('on',x===b)); drawConcept(); });
+$('#cProfCat')&&$('#cProfCat').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; cProf.cat=b.dataset.c==='1'; $$('#cProfCat button').forEach(x=>x.classList.toggle('on',x===b)); drawConcept(); });
+$('#cTslider')&&$('#cTslider').addEventListener('input',drawConcept);
+function drawConcept(){
+  const sec=($('.csec.on')||{}).id;
+  if(sec==='c1'){
+    const {ctx,w,h}=setupCanvas($('#cRateCanvas'),1.9,190,300);
+    const kk=0.08, pts=[]; for(let t=0;t<=40;t+=0.4) pts.push([t,0.4*Math.exp(-kk*t)]);
+    drawLineChart(ctx,w,h,{xMax:40,yMax:0.44,xLabel:'시간 (s)',yLabel:'[반응물] (M)',series:[{pts,color:'#4f46e5',width:3}],after:(ctx,X,Y)=>{
+      const tan=(t0,col,lab,len)=>{ const c=0.4*Math.exp(-kk*t0), s=-kk*c; ctx.strokeStyle=col; ctx.lineWidth=2; ctx.setLineDash([6,4]);
+        ctx.beginPath(); ctx.moveTo(X(t0-len*0.3),Y(c-s*len*0.3)); ctx.lineTo(X(t0+len),Y(c+s*len)); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle=col; ctx.beginPath(); ctx.arc(X(t0),Y(c),4.5,0,Math.PI*2); ctx.fill();
+        ctx.font=`700 12px ${FONT}`; ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillText(lab,X(t0)+8,Y(c)-14); };
+      tan(0,'#e11d48','초기 반응 속도 (t = 0 접선)',9);
+      tan(15,'#059669','t = 15 s의 순간 반응 속도',12);
+      // 평균
+      const c1=0.4*Math.exp(-kk*25), c2=0.4*Math.exp(-kk*35);
+      ctx.strokeStyle='#d97706'; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(X(25),Y(c1)); ctx.lineTo(X(35),Y(c2)); ctx.stroke();
+      ctx.fillStyle='#d97706'; [[25,c1],[35,c2]].forEach(p=>{ctx.beginPath(); ctx.arc(X(p[0]),Y(p[1]),4,0,Math.PI*2); ctx.fill();});
+      ctx.font=`700 12px ${FONT}`; ctx.textAlign='center'; ctx.fillText('25~35 s 평균 반응 속도',X(30),Y(c1)-20);
+    }});
+  } else if(sec==='c4'){
+    drawCollide();
+  } else if(sec==='c5'){
+    const {ctx,w,h}=setupCanvas($('#cProfCanvas'),1.8,200,330);
+    drawProfile(ctx,w,h,{Ea:3,EaCat:1.6,dH:cProf.h==='exo'?-1.3:1.0,showCat:cProf.cat});
+  } else if(sec==='c6'){
+    const T=+$('#cTslider').value; $('#cTval').textContent=`${T} °C`;
+    const {ctx,w,h}=setupCanvas($('#cDistCanvas'),1.8,200,320);
+    const k0=kTof(25),k1=kTof(T);
+    drawDist(ctx,w,h,{curves:[{kT:k0,color:'#94a3b8',dash:[6,4],label:'25 °C'},{kT:k1,color:'#e11d48',label:`${T} °C`}],
+      shade:[{kT:k1,Ea:EA_GAS,color:'rgba(225,29,72,0.22)'}],ea:[{E:EA_GAS,color:'#4f46e5',label:'Ea'}]});
+  }
+}
+function drawCollide(){
+  const {ctx,w,h}=setupCanvas($('#cCollideCanvas'),2.6,170,260);
+  ctx.clearRect(0,0,w,h);
+  const panels=[
+    {t:'① 에너지 부족',s:'느리게 충돌 → 튕겨 나감',ok:false,slow:true},
+    {t:'② 방향이 맞지 않음',s:'반응할 부분이 닿지 않음',ok:false,bad:true},
+    {t:'③ 유효 충돌',s:'충분한 에너지 + 알맞은 방향',ok:true}
+  ];
+  const pw=w/3;
+  panels.forEach((p,i)=>{
+    const x0=i*pw+6, cx=i*pw+pw/2, cy=h*0.46;
+    ctx.fillStyle=p.ok?'#fefce8':'#f8fafc'; ctx.strokeStyle=p.ok?'#facc15':'#e2e8f0'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.roundRect?ctx.roundRect(x0,6,pw-12,h-12,12):ctx.rect(x0,6,pw-12,h-12); ctx.fill(); ctx.stroke();
+    const r=Math.min(14,pw/14);
+    const mol=(x,y,flip,col1,col2)=>{ ctx.fillStyle=col1; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); ctx.fillStyle=col2; ctx.beginPath(); ctx.arc(x+(flip?-1:1)*r*1.3,y,r*0.8,0,Math.PI*2); ctx.fill(); };
+    if(p.ok){
+      mol(cx-r*2.2,cy,false,'#3b82f6','#1d4ed8'); ctx.fillStyle='#f97316'; ctx.beginPath(); ctx.arc(cx+r*1.2,cy,r,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='#eab308'; ctx.lineWidth=3; for(let a=0;a<8;a++){ const an=a*Math.PI/4; ctx.beginPath(); ctx.moveTo(cx-r*0.2+Math.cos(an)*r*1.0,cy+Math.sin(an)*r*1.0); ctx.lineTo(cx-r*0.2+Math.cos(an)*r*1.9,cy+Math.sin(an)*r*1.9); ctx.stroke(); }
+    } else if(p.bad){
+      mol(cx-r*1.4,cy,true,'#3b82f6','#1d4ed8'); ctx.fillStyle='#f97316'; ctx.beginPath(); ctx.arc(cx+r*1.4,cy,r,0,Math.PI*2); ctx.fill();
+    } else {
+      mol(cx-r*2.6,cy,false,'#3b82f6','#1d4ed8'); ctx.fillStyle='#f97316'; ctx.beginPath(); ctx.arc(cx+r*1.8,cy,r,0,Math.PI*2); ctx.fill();
+    }
+    // arrows
+    ctx.strokeStyle='#475569'; ctx.lineWidth=p.slow?1.5:3.5;
+    const ay=cy+r*2.2; ctx.beginPath(); ctx.moveTo(cx-r*4,ay); ctx.lineTo(cx-r*1.6,ay); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx+r*4,ay); ctx.lineTo(cx+r*1.6,ay); ctx.stroke();
+    ctx.fillStyle=p.ok?'#a16207':'#334155'; ctx.font=`800 ${Math.max(11,Math.min(14,pw/14))}px ${FONT}`; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(p.t,cx,22);
+    ctx.fillStyle='#64748b'; ctx.font=`600 ${Math.max(10,Math.min(12,pw/17))}px ${FONT}`;
+    ctx.fillText(p.s,cx,h-22);
+    ctx.font=`800 18px ${FONT}`; ctx.fillStyle=p.ok?'#16a34a':'#dc2626'; ctx.fillText(p.ok?'반응 ○':'반응 ✕',cx,ay+r*1.4);
+  });
+}
+const OX=[
+  {q:'반응 차수는 화학 반응식의 계수와 항상 같다.',a:false,e:'반응 차수는 실험으로 정해요. 예) NO₂ + CO → NO + CO₂ 의 반응 속도식은 v = k[NO₂]²'},
+  {q:'반응물의 농도를 높이면 반응 속도 상수 k가 커진다.',a:false,e:'농도를 바꾸면 반응 속도는 변하지만 k는 변하지 않아요. k는 온도와 촉매에 따라 달라져요.'},
+  {q:'초기 반응 속도는 농도–시간 그래프에서 t = 0일 때 그은 접선의 기울기로 구한다.',a:true,e:'반응이 시작되는 순간의 순간 반응 속도가 초기 반응 속도예요.'},
+  {q:'반응 차수를 구할 때 두 반응물의 농도를 동시에 바꿔도 된다.',a:false,e:'두 가지를 동시에 바꾸면 어떤 물질 때문에 속도가 변했는지 알 수 없어요. 조작 변인은 하나만!'},
+  {q:'0차 반응에서는 반응물의 농도를 2배로 해도 반응 속도가 변하지 않는다.',a:true,e:'0차이면 (2)⁰ = 1 이므로 속도가 그대로예요.'},
+  {q:'어떤 반응물에 대해 2차일 때, 그 반응물의 농도를 3배로 하면 반응 속도는 6배가 된다.',a:false,e:'3² = 9 이므로 9배가 돼요.'},
+  {q:'전체 반응 차수가 2차인 반응의 속도 상수 k의 단위는 M⁻¹·s⁻¹이다.',a:true,e:'k의 단위 = (M/s) ÷ M² = M⁻¹·s⁻¹'},
+  {q:'k의 단위는 반응 차수와 관계없이 항상 같다.',a:false,e:'전체 반응 차수에 따라 k의 단위가 달라져요. (0차 M·s⁻¹, 1차 s⁻¹, 2차 M⁻¹·s⁻¹ …)'}
+];
+const oxAns={};
+function renderOX(){
+  $('#oxList').innerHTML=OX.map((o,i)=>`<div class="ox-item"><div class="q"><b>${i+1}.</b> ${o.q}</div>
+    <div class="seg" data-i="${i}"><button data-a="1">O</button><button data-a="0">X</button></div>
+    <div class="ox-exp" id="oxe${i}"></div></div>`).join('');
+  $$('#oxList .seg').forEach(seg=>seg.addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b) return; const i=+seg.dataset.i;
+    const ans=b.dataset.a==='1'; const ok=ans===OX[i].a; oxAns[i]=ok;
+    seg.querySelectorAll('button').forEach(x=>{ x.classList.toggle('on',x===b); });
+    b.style.background=ok?'#059669':'#dc2626';
+    seg.querySelectorAll('button').forEach(x=>{ if(x!==b) x.style.background=''; });
+    const ex=$('#oxe'+i); ex.className='ox-exp show'; ex.innerHTML=`${ok?'<span style="color:#059669;font-weight:800">정답!</span>':'<span style="color:#dc2626;font-weight:800">아쉬워요.</span>'} 정답은 <b>${OX[i].a?'O':'X'}</b> — ${OX[i].e}`;
+    const n=Object.keys(oxAns).length, c=Object.values(oxAns).filter(Boolean).length;
+    $('#oxScore').textContent=`${n} / ${OX.length}문제 풀이 · ${c}문제 정답`;
+  }));
+}
+
+function redrawAll(){ if(currentTab==='order') drawExp(); else drawConcept(); }
+let rT; window.addEventListener('resize',()=>{ clearTimeout(rT); rT=setTimeout(redrawAll,120); });
+renderRxList(); renderOX(); drawExp();
+
+</script>
+</body>
+</html>

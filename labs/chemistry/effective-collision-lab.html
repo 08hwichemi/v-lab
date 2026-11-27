@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>유효 충돌 실험실 – 반응시키기!</title>
+<style>
+:root{--bg:#0a1120;--panel:#0f1a2d;--panel2:#15223a;--line:#253a5e;--text:#e9effc;--muted:#97a8c8;--accent:#4fd1ff;--accent2:#ffcc4d;--ok:#38d996;--bad:#ff6b6b;--r:14px}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+body{overflow:hidden}
+#app{height:100%}
+button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
+input{font:inherit}
+sub{font-size:.7em}
+.screen{display:none;height:100%}
+.screen.active{display:flex}
+/* ---------- home ---------- */
+#home{flex-direction:column;overflow-y:auto;background:radial-gradient(1100px 600px at 15% -10%,#1b3462 0,transparent 60%),radial-gradient(900px 520px at 110% 0%,#3b1d60 0,transparent 55%),var(--bg)}
+.home-wrap{max-width:1140px;width:100%;margin:auto;padding:18px 22px}
+.brand{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:4px}
+.brand h1{font-size:28px;letter-spacing:-.6px}
+.brand h1 em{font-style:normal;background:linear-gradient(90deg,#4fd1ff,#a98bff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tag{font-size:12px;padding:4px 10px;border-radius:99px;background:#ffffff10;color:var(--accent);border:1px solid #4fd1ff44}
+.sub{color:var(--muted);margin-bottom:14px;line-height:1.6;font-size:14.5px}
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:linear-gradient(180deg,#14213a,#0f192c);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.step{font-size:13px;color:var(--accent);font-weight:800;letter-spacing:.4px;margin-bottom:9px}
+.rx-list{display:flex;flex-direction:column;gap:8px}
+.rx{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#0c1527;text-align:left;transition:.15s}
+.rx:hover{border-color:#4fd1ff88}
+.rx.sel{border-color:var(--accent);background:#10304a;box-shadow:0 0 0 1px var(--accent) inset}
+.rx .num{width:28px;height:28px;border-radius:8px;background:#ffffff12;display:grid;place-items:center;font-weight:800;font-size:13px;flex:none}
+.rx .eq{font-size:17px;font-weight:700;flex:1}
+.rx .lv{font-size:12px;color:var(--accent2);white-space:nowrap}
+.preview{height:190px;border-radius:12px;background:#060c17;border:1px solid var(--line);position:relative;overflow:hidden;margin-top:12px}
+.preview canvas{width:100%;height:100%;display:block}
+.preview .pcap{position:absolute;left:12px;bottom:9px;font-size:12px;color:var(--muted)}
+.modes{display:grid;gap:8px}
+.mode{display:flex;gap:12px;align-items:flex-start;text-align:left;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#0c1527;transition:.15s}
+.mode:hover{border-color:#ffcc4d88}
+.mode.sel{border-color:var(--accent2);box-shadow:0 0 0 1px var(--accent2) inset;background:#262210}
+.mode .ic{font-size:24px;line-height:1.1}
+.mode b{display:block;font-size:16px;margin-bottom:3px}
+.mode span{font-size:13px;color:var(--muted);line-height:1.5}
+.start{margin-top:12px;width:100%;padding:14px;border-radius:12px;background:linear-gradient(90deg,#2bb7ff,#7c5cff);font-size:18px;font-weight:800;box-shadow:0 8px 24px #2bb7ff40}
+.start:active{transform:scale(.99)}
+.row-btns{display:flex;gap:8px;margin-top:9px}
+.ghost{flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0c1527;font-size:14px}
+/* PC: 첫 화면이 화면 전체를 채우도록 */
+@media (min-width:901px){
+ #home{overflow:hidden}
+ .home-wrap{max-width:none;height:100%;margin:0;padding:3.2vh 3.5vw;display:flex;flex-direction:column}
+ .brand h1{font-size:clamp(28px,3.4vw,52px)}
+ .tag{font-size:clamp(12px,1vw,16px);padding:5px 14px}
+ .sub{font-size:clamp(14.5px,1.25vw,20px);margin-bottom:2.4vh}
+ .home-grid{flex:1;min-height:0;gap:2vw}
+ .card{display:flex;flex-direction:column;padding:2.4vh 1.6vw;min-height:0}
+ .step{font-size:clamp(13px,1vw,17px);margin-bottom:1.4vh}
+ .rx-list{gap:1.2vh}
+ .rx{padding:1.8vh 1.2vw}
+ .rx .eq{font-size:clamp(17px,1.6vw,28px)}
+ .rx .num{width:clamp(28px,2.2vw,40px);height:clamp(28px,2.2vw,40px);font-size:clamp(13px,1vw,17px)}
+ .preview{flex:1;height:auto;min-height:150px;margin-top:1.8vh}
+ .preview .pcap{font-size:clamp(12px,.95vw,16px)}
+ .modes{flex:1;gap:1.2vh;grid-auto-rows:1fr}
+ .mode{padding:1.8vh 1.2vw;align-items:center}
+ .mode .ic{font-size:clamp(24px,2.2vw,38px)}
+ .mode b{font-size:clamp(16px,1.4vw,24px)}
+ .mode span{font-size:clamp(13px,1.05vw,17px)}
+ .start{padding:2vh;font-size:clamp(18px,1.6vw,26px);margin-top:1.8vh}
+ .ghost{padding:1.4vh;font-size:clamp(14px,1.05vw,17px)}
+}
+/* ---------- play ---------- */
+#play{flex-direction:column}
+.topbar{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#0c1527;border-bottom:1px solid var(--line);flex:none;min-height:56px;flex-wrap:wrap}
+.back{padding:8px 12px;border-radius:9px;background:#ffffff10;font-size:14px}
+.top-eq{font-weight:800;font-size:17px}
+.top-mode{font-size:12px;padding:3px 9px;border-radius:99px;background:#ffffff12;color:var(--accent2);white-space:nowrap}
+.stats{margin-left:auto;display:flex;gap:7px;align-items:center}
+.stats.near{margin-left:10px}
+@media (min-width:901px){.top-eq{font-size:clamp(24px,2vw,34px);letter-spacing:-.3px}.top-mode{font-size:14px;padding:5px 12px}}
+@media (min-width:901px){
+ .stats.near{gap:10px}
+ .stats.near .stat{padding:6px 18px;min-width:110px}
+ .stats.near .stat small{font-size:13px}
+ .stats.near .stat b{font-size:28px}
+ .stats.near #statReset{padding:10px 14px!important;font-size:14px!important}
+}
+.stat{background:#ffffff0c;border:1px solid var(--line);border-radius:10px;padding:4px 10px;text-align:center;min-width:64px}
+.stat small{display:block;font-size:10.5px;color:var(--muted)}
+.stat b{font-size:17px;font-variant-numeric:tabular-nums}
+.play-body{flex:1;display:flex;min-height:0}
+.stage{position:relative;flex:1;min-width:0;overflow:hidden;background:#040913;touch-action:none;user-select:none;-webkit-user-select:none}
+.stage canvas#view{position:absolute;inset:0;width:100%;height:100%;display:block}
+.side{width:360px;flex:none;border-left:1px solid var(--line);background:var(--panel);overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.panel{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
+.panel h4{font-size:14px;margin-bottom:8px}
+.small{font-size:12.5px;color:var(--muted);line-height:1.6}
+.small b{color:var(--text)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center}
+.kpis div{background:#ffffff0a;border-radius:9px;padding:7px 4px}
+.kpis b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.kpis small{font-size:11px;color:var(--muted)}
+.tbig{font-size:46px;font-weight:900;text-align:center;font-variant-numeric:tabular-nums;line-height:1.1}
+.tbig.warn{color:var(--bad)}
+canvas.diag{width:100%;height:180px;display:block;border-radius:8px;background:#0a1324}
+table.log{width:100%;border-collapse:collapse;font-size:12.5px}
+table.log th{color:var(--muted);font-weight:600;text-align:center;padding:4px 2px;border-bottom:1px solid var(--line);font-size:11.5px}
+table.log td{text-align:center;padding:5px 2px;border-bottom:1px solid #ffffff0d;font-variant-numeric:tabular-nums}
+table.log td.ok{color:var(--ok);font-weight:700}
+table.log td.no{color:#ffb3b3}
+table.log .rp{padding:3px 7px;border-radius:7px;background:#ffffff14;font-size:12px}
+.logwrap{max-height:250px;overflow-y:auto}
+.hint p{font-size:13px;line-height:1.6;margin-top:4px}
+.toggle{display:flex;align-items:center;gap:8px;font-size:13.5px;padding:10px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;cursor:pointer}
+.toggle input{width:18px;height:18px;accent-color:var(--accent)}
+.demo-btns{display:grid;gap:7px}
+.demo-btns button{padding:10px 12px;border-radius:10px;background:#0a1324;border:1px solid var(--line);text-align:left;font-size:14px;font-weight:600}
+.demo-btns button:hover{border-color:var(--accent)}
+.conc{display:grid;gap:6px}
+.conc div{display:flex;align-items:center;gap:8px;background:#0a1324;border-radius:9px;padding:6px 8px}
+.conc span{flex:1;font-weight:700}
+.conc .btn{padding:4px 12px;font-size:16px}
+.conc b{min-width:28px;text-align:center;font-size:17px}
+.cond{display:grid;gap:7px}
+.cond div{background:#0a1324;border-radius:9px;padding:9px 10px;font-size:13px;line-height:1.55}
+.cond b{color:var(--accent2)}
+ol.rank{padding-left:22px;font-size:13.5px;line-height:1.9}
+ol.rank li span{color:var(--muted);font-size:12px}
+/* stage overlays */
+.ov{position:absolute;pointer-events:none}
+#help{left:50%;top:10px;transform:translateX(-50%);background:#000a;padding:7px 14px;border-radius:99px;font-size:13px;color:#d6e6ff;white-space:nowrap;max-width:94%;overflow:hidden;text-overflow:ellipsis}
+#faceAsk{position:absolute;left:50%;top:118px;transform:translateX(-50%);background:#0a1324ee;border:1px solid var(--accent);border-radius:14px;padding:12px 14px;display:none;text-align:center;z-index:4;box-shadow:0 10px 30px #0009;width:max-content;max-width:94%}
+#faceAsk .t{font-size:15px;font-weight:800;margin-bottom:8px}
+#faceAsk .t small{display:block;font-size:12px;color:var(--muted);font-weight:500;margin-top:2px}
+#faceAsk .chip{font-size:15px;padding:10px 14px}
+#faceMini{position:absolute;left:10px;top:48px;background:#0a1324dd;border:1px solid var(--line);border-radius:12px;padding:9px 10px;display:none;z-index:3;max-width:230px}
+#faceMini .t{font-size:12px;color:var(--muted);margin-bottom:4px}
+#faceMini .chip kbd,#faceAsk .chip kbd,#keys kbd{display:inline-block;min-width:18px;padding:0 4px;border-radius:5px;background:#ffffff22;font:700 11px system-ui;text-align:center;margin-right:4px;color:inherit}
+#banner{left:50%;top:50px;transform:translate(-50%,-8px);max-width:92%;padding:10px 18px;border-radius:12px;background:#071326f0;border:1px solid var(--line);font-size:15.5px;font-weight:700;text-align:center;opacity:0;transition:opacity .3s,transform .3s;line-height:1.5;z-index:5}
+#banner.show{opacity:1;transform:translate(-50%,0)}
+#banner small{display:block;font-size:12.5px;font-weight:500;color:var(--muted)}
+#keys{position:absolute;left:10px;bottom:10px;background:#0a1324d8;border:1px solid var(--line);border-radius:12px;padding:9px 11px;font-size:12px;color:#c8d5ee;line-height:1.75;display:none;z-index:2;pointer-events:none}
+#keys b{color:var(--accent2);font-size:12.5px;display:block;margin-bottom:2px}
+.chip{padding:6px 10px;border-radius:8px;background:#ffffff14;font-size:13px;margin:3px 4px 0 0}
+.chip.on{background:var(--accent);color:#04121f;font-weight:800}
+.chip.rot{background:#ffffff0c}
+#reticle{left:0;top:0;width:48px;height:48px;border:2px solid #ffffff90;border-radius:50%;display:none;transition:border-color .15s;will-change:transform}
+#reticle::before,#reticle::after{content:"";position:absolute;background:#ffffffb0}
+#reticle::before{left:50%;top:-10px;bottom:-10px;width:2px;margin-left:-1px}
+#reticle::after{top:50%;left:-10px;right:-10px;height:2px;margin-top:-1px}
+#reticle.lock{border-color:#7cf3c6}
+#reticle.lock::before,#reticle.lock::after{background:#7cf3c6}
+#scope{inset:0;background:radial-gradient(circle at 50% 50%,transparent 36%,#000000c8 74%);opacity:0;transition:opacity .15s}
+#gauge{position:absolute;right:22px;top:26%;width:24px;height:40%;border-radius:12px;background:#ffffff12;border:1px solid #ffffff38;display:none;pointer-events:none}
+#gauge .fill{position:absolute;left:2px;right:2px;bottom:2px;border-radius:10px;background:linear-gradient(0deg,#38d996,#ffcc4d 60%,#ff6b6b)}
+#gauge .mark{position:absolute;left:-7px;right:-7px;height:3px;background:#fff;box-shadow:0 0 8px #fff}
+#gauge .gl{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:12px;color:var(--muted);white-space:nowrap}
+#gauge .ml{position:absolute;right:30px;transform:translateY(-50%);font-size:11px;color:#fff;white-space:nowrap}
+#fireBtn{position:absolute;right:16px;bottom:18px;width:92px;height:92px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe9a8,#e7a51c);box-shadow:0 6px 18px #000a,0 0 0 6px #ffcc4d33;display:none;place-items:center;touch-action:none;font-size:14px;font-weight:900;color:#3a2800;text-align:center;line-height:1.2;z-index:3;-webkit-user-select:none;user-select:none}
+#fireBtn.hold{transform:scale(.92);box-shadow:0 0 0 10px #ff9f6b55,0 0 30px #ffcc4d}
+#toast{left:50%;top:24%;transform:translate(-50%,-50%) scale(.9);font-size:26px;font-weight:900;padding:10px 22px;border-radius:14px;background:#000b;opacity:0;transition:.25s;white-space:nowrap}
+#toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#cap{left:50%;bottom:76px;transform:translateX(-50%);max-width:88%;background:#071326ee;border:1px solid #4fd1ff55;padding:9px 16px;border-radius:12px;font-size:15px;text-align:center;display:none;line-height:1.5}
+.btn{padding:10px 14px;border-radius:10px;background:#ffffff16;font-size:14px;font-weight:700}
+.btn.pri{background:var(--accent);color:#04121f}
+.btn.on{background:var(--accent2);color:#2a1d00}
+.bar{position:absolute;display:none;gap:6px;align-items:center;background:#0a1324e8;border:1px solid var(--line);border-radius:12px;padding:7px 8px;z-index:3}
+#rpBar{left:10px;right:10px;bottom:10px}
+#rpBar input[type=range]{flex:1;min-width:60px;accent-color:var(--accent)}
+#rpBar .btn,#spdBar .btn{padding:7px 10px;font-size:13px}
+#spdBar{left:10px;bottom:10px}
+#followBtn{position:absolute;right:12px;top:48px;display:none}
+#cd{left:50%;top:45%;transform:translate(-50%,-50%);font-size:110px;font-weight:900;color:#fff;text-shadow:0 0 30px #4fd1ff;display:none}
+#rpDiagBox{right:12px;bottom:74px;width:400px;background:#0a1324ee;border:1px solid #4fd1ff66;border-radius:14px;padding:8px 10px 10px;display:none;z-index:3;box-shadow:0 10px 30px #0008}
+#rpDiagBox .t{font-size:13px;font-weight:800;color:var(--accent);margin-bottom:4px}
+#rpDiagBox canvas{width:100%;height:220px;display:block}
+#rpTitle{left:12px;top:10px;background:#000a;padding:6px 12px;border-radius:10px;font-size:13px;display:none;color:var(--accent2);font-weight:700}
+/* 에너지 그래프 팝업 */
+#diagPop{position:fixed;left:60px;top:90px;width:560px;height:360px;min-width:320px;min-height:220px;background:#0a1324f4;border:1px solid var(--accent);border-radius:14px;box-shadow:0 20px 60px #000c;z-index:40;display:none;flex-direction:column;resize:both;overflow:hidden}
+#diagPop .hd{display:flex;align-items:center;gap:8px;padding:8px 10px 8px 14px;background:#12304a;cursor:move;user-select:none;-webkit-user-select:none;touch-action:none;font-weight:800;font-size:14px}
+#diagPop .hd span{flex:1}
+#diagPop .hd small{font-weight:500;color:var(--muted);font-size:11.5px}
+#diagPop .hd button{width:30px;height:30px;border-radius:8px;background:#ffffff18;font-size:15px}
+#diagPop canvas{flex:1;width:100%;min-height:0;display:block}
+/* modal */
+#modal{position:fixed;inset:0;background:#020610c0;display:none;place-items:center;z-index:50;padding:16px}
+#modal.show{display:grid}
+.mbox{background:#0f1a2e;border:1px solid var(--line);border-radius:18px;padding:22px;width:min(560px,100%);max-height:92vh;overflow-y:auto;box-shadow:0 30px 80px #000c}
+.mbox h2{font-size:22px;margin-bottom:10px}
+.mbox p{font-size:14.5px;line-height:1.7;color:#c8d5ee;margin-bottom:8px}
+.mbox ul{margin:6px 0 10px 20px;font-size:14px;line-height:1.8;color:#c8d5ee}
+.mbox .btns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.mbox .btns .btn{flex:1;padding:12px}
+.big3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.big3 div{background:#ffffff0c;border-radius:12px;padding:10px;text-align:center}
+.big3 b{display:block;font-size:26px}
+.big3 small{color:var(--muted);font-size:12px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tabs button{padding:6px 10px;border-radius:8px;background:#ffffff10;font-size:13px}
+.tabs button.on{background:var(--accent);color:#04121f;font-weight:800}
+table.rk{width:100%;border-collapse:collapse;font-size:14px}
+table.rk th,table.rk td{padding:7px 4px;border-bottom:1px solid #ffffff12;text-align:center}
+table.rk th{color:var(--muted);font-size:12px}
+table.rk tr.me td{color:var(--accent2);font-weight:800}
+.namein{display:flex;gap:6px;margin-top:8px}
+.namein input{flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0a1324;color:var(--text)}
+@media (max-width:900px){
+ body{overflow:auto}
+ #play{height:auto;min-height:100%}
+ .play-body{flex-direction:column}
+ .stage{flex:none;height:66vh;min-height:340px}
+ .side{width:auto;border-left:none;border-top:1px solid var(--line)}
+ .home-grid{grid-template-columns:1fr}
+ .stats{margin-left:0;width:100%}
+ .stat{flex:1;min-width:0}
+ .top-eq{font-size:19px}
+ #help{font-size:11.5px;top:8px}
+ #faceAsk{top:150px}
+ #faceAsk .t{font-size:14px}
+ #banner{top:44px;font-size:13.5px;padding:8px 12px}
+ #banner small{font-size:11.5px}
+ #faceMini{top:42px;max-width:190px;padding:7px 8px}
+ .chip{font-size:12px;padding:5px 8px}
+ #cap{font-size:13px;bottom:118px}
+ #rpDiagBox{left:8px;right:8px;width:auto;top:44px;bottom:auto;padding:6px 8px}
+ #rpDiagBox canvas{height:130px}
+ #toast{font-size:20px}
+ #fireBtn{width:84px;height:84px}
+ #gauge{right:18px;top:24%;height:34%}
+ .brand h1{font-size:23px}
+ .preview{height:150px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+<!-- ================= HOME ================= -->
+<section id="home" class="screen active">
+ <div class="home-wrap">
+  <div class="brand"><h1>⚛️ 유효 충돌 실험실 <em>반응시키기!</em></h1><span class="tag">방향 + 활성화 에너지</span></div>
+  <p class="sub">분자끼리 부딪힌다고 모두 반응하는 것은 아니에요. 미시 세계로 들어가 분자를 직접 쏘아 반응을 일으켜 보세요.</p>
+  <div class="home-grid">
+   <div class="card">
+    <div class="step">STEP 1 · 반응 고르기</div>
+    <div class="rx-list" id="rxList"></div>
+    <div class="preview"><canvas id="pv"></canvas><div class="pcap" id="pvCap"></div></div>
+   </div>
+   <div class="card">
+    <div class="step">STEP 2 · 모드 고르기</div>
+    <div class="modes" id="modeList">
+     <button class="mode" data-mode="observe"><div class="ic">🔬</div><div><b>관찰 모드</b><span>분자들의 충돌을 지켜보고, 슬로 모션으로 확대해 유효 충돌과 그렇지 않은 충돌을 비교해요.</span></div></button>
+     <button class="mode sel" data-mode="practice"><div class="ic">🎯</div><div><b>연습 모드</b><span>분자를 직접 쏘아 반응시켜 보고, 발사 기록과 슬로 모션 다시 보기로 반응한 까닭과 반응하지 않은 까닭을 살펴봐요.</span></div></button>
+     <button class="mode" data-mode="time"><div class="ic">⏱️</div><div><b>1분 챌린지</b><span>1분 동안 반응시켜 점수를 모아요. 성공 +10점, 실패 −3점! 점수는 랭킹에 기록돼요.</span></div></button>
+    </div>
+    <button class="start" id="startBtn">시작하기 ▶</button>
+    <div class="row-btns"><button class="ghost" id="rankBtn">🏆 랭킹 보기</button><button class="ghost" id="howBtn">❓ 조작 방법</button></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ================= PLAY ================= -->
+<section id="play" class="screen">
+ <div class="topbar">
+  <button class="back" id="backBtn">← 처음으로</button>
+  <span class="top-eq" id="topEq"></span>
+  <span class="top-mode" id="topMode"></span>
+  <div class="stats" id="stats"></div>
+ </div>
+ <div class="play-body">
+  <div class="stage" id="stage">
+   <canvas id="view"></canvas>
+   <div class="ov" id="scope"></div>
+   <div class="ov" id="reticle"></div>
+   <div class="ov" id="help"></div>
+   <div class="ov" id="rpTitle"></div>
+   <div class="ov" id="rpDiagBox"><div class="t">📈 에너지 그래프</div><canvas id="rpDiag"></canvas></div>
+   <div id="faceAsk"><div class="t" id="faceAskT"></div><div id="faceAskChips"></div></div>
+   <div id="faceMini"><div class="t">앞쪽으로 향할 원자 <span id="faceKeyHint"></span></div><div id="faceChips"></div></div>
+   <div class="ov" id="banner"></div>
+   <div id="keys"></div>
+   <button class="btn" id="followBtn">⤢ 전체 보기</button>
+   <div id="gauge"><div class="gl">힘</div><div class="fill"></div><div class="mark"></div><div class="ml">E<sub>a</sub></div></div>
+   <div id="fireBtn">꾹 눌러<br>발사</div>
+   <div class="ov" id="toast"></div>
+   <div class="ov" id="cap"></div>
+   <div class="ov" id="cd"></div>
+   <div class="bar" id="rpBar">
+    <button class="btn" id="rpRestart">⟲ 처음</button>
+    <button class="btn" id="rpPlay">⏸ 멈춤</button>
+    <button class="btn spd" data-s="1">1×</button><button class="btn spd on" data-s="0.5">0.5×</button><button class="btn spd" data-s="0.25">0.25×</button><button class="btn spd" data-s="0.1">0.1×</button>
+    <input type="range" id="rpSlider" min="0" max="1000" value="0">
+    <button class="btn" id="rpClose">✕ 닫기</button>
+   </div>
+   <div class="bar" id="spdBar">
+    <button class="btn" id="obBack" title="1초 전으로 (←)">⏪ 1초 전</button><button class="btn" id="obPause">⏸ 멈춤</button>
+    <button class="btn ospd" data-s="0.1">0.1×</button><button class="btn ospd" data-s="0.25">0.25×</button><button class="btn ospd" data-s="0.5">0.5×</button><button class="btn ospd on" data-s="1">1×</button><button class="btn ospd" data-s="2">2×</button><button class="btn ospd" data-s="4">4×</button>
+   </div>
+  </div>
+  <aside class="side" id="side"></aside>
+ </div>
+</section>
+</div>
+<div id="diagPop"><div class="hd" id="diagPopHd"><span>📈 에너지 그래프 <small>(제목 줄을 끌어서 옮기고, 오른쪽 아래 모서리로 크기를 바꿔요)</small></span><button id="diagPopX">✕</button></div><canvas id="diagPopCv"></canvas></div>
+<div id="modal"><div class="mbox" id="mbox"></div></div>
+
+<script>
+(()=>{
+'use strict';
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+
+/* ================= 수학 ================= */
+const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]];
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
+const mul=(a,s)=>[a[0]*s,a[1]*s,a[2]*s];
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const len=a=>Math.hypot(a[0],a[1],a[2]);
+const norm=a=>{const l=len(a)||1;return [a[0]/l,a[1]/l,a[2]/l]};
+const lerp=(a,b,t)=>a+(b-a)*t;
+const lerpV=(a,b,t)=>[lerp(a[0],b[0],t),lerp(a[1],b[1],t),lerp(a[2],b[2],t)];
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const rand=(a,b)=>a+Math.random()*(b-a);
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const randDir=()=>{let v;do{v=[rand(-1,1),rand(-1,1),rand(-1,1)]}while(len(v)<.1);return norm(v)};
+const centroid=ps=>{const c=[0,0,0];ps.forEach(p=>{c[0]+=p[0];c[1]+=p[1];c[2]+=p[2]});return mul(c,1/ps.length)};
+const dirYP=(y,p)=>[Math.sin(y)*Math.cos(p),Math.sin(p),Math.cos(y)*Math.cos(p)];
+const qMul=(a,b)=>[a[0]*b[0]-a[1]*b[1]-a[2]*b[2]-a[3]*b[3],a[0]*b[1]+a[1]*b[0]+a[2]*b[3]-a[3]*b[2],a[0]*b[2]-a[1]*b[3]+a[2]*b[0]+a[3]*b[1],a[0]*b[3]+a[1]*b[2]-a[2]*b[1]+a[3]*b[0]];
+const qNorm=q=>{const l=Math.hypot(q[0],q[1],q[2],q[3])||1;return [q[0]/l,q[1]/l,q[2]/l,q[3]/l]};
+const qAxis=(ax,ang)=>{const n=norm(ax),s=Math.sin(ang/2);return [Math.cos(ang/2),n[0]*s,n[1]*s,n[2]*s]};
+const qRand=()=>qNorm([rand(-1,1),rand(-1,1),rand(-1,1),rand(-1,1)]);
+function qRot(q,v){const w=q[0],x=q[1],y=q[2],z=q[3];
+ const ix=w*v[0]+y*v[2]-z*v[1],iy=w*v[1]+z*v[0]-x*v[2],iz=w*v[2]+x*v[1]-y*v[0],iw=-x*v[0]-y*v[1]-z*v[2];
+ return [ix*w+iw*-x+iy*-z-iz*-y,iy*w+iw*-y+iz*-x-ix*-z,iz*w+iw*-z+ix*-y-iy*-x];}
+function qFromTo(a,b){a=norm(a);b=norm(b);const d=dot(a,b);
+ if(d<-.9999){let ax=cross([1,0,0],a);if(len(ax)<1e-3)ax=cross([0,1,0],a);return qAxis(ax,Math.PI);}
+ const c=cross(a,b);return qNorm([1+d,c[0],c[1],c[2]]);}
+function qInt(q,w,dt){const a=len(w)*dt;if(a<1e-7)return q;return qNorm(qMul(qAxis(w,a),q));}
+function qFromMat(m){const [a,b,c,d,e,f,g,h,i]=m;const tr=a+e+i;let s;
+ if(tr>0){s=Math.sqrt(tr+1)*2;return qNorm([.25*s,(h-f)/s,(c-g)/s,(d-b)/s]);}
+ if(a>e&&a>i){s=Math.sqrt(1+a-e-i)*2;return qNorm([(h-f)/s,.25*s,(b+d)/s,(c+g)/s]);}
+ if(e>i){s=Math.sqrt(1+e-a-i)*2;return qNorm([(c-g)/s,(b+d)/s,.25*s,(f+h)/s]);}
+ s=Math.sqrt(1+i-a-e)*2;return qNorm([(d-b)/s,(c+g)/s,(f+h)/s,.25*s]);}
+function basis(a,b){const e1=norm(a);let t=sub(b,mul(e1,dot(b,e1)));
+ if(len(t)<1e-3){t=Math.abs(e1[1])<.9?[0,1,0]:[1,0,0];t=sub(t,mul(e1,dot(t,e1)));}
+ const e2=norm(t);return [e1,e2,cross(e1,e2)];}
+function matFrom(bw,bt){const m=[];for(let i=0;i<3;i++)for(let j=0;j<3;j++){let s=0;for(let k=0;k<3;k++)s+=bw[k][i]*bt[k][j];m.push(s);}return m;}
+const mApply=(m,v)=>[m[0]*v[0]+m[1]*v[1]+m[2]*v[2],m[3]*v[0]+m[4]*v[1]+m[5]*v[2],m[6]*v[0]+m[7]*v[1]+m[8]*v[2]];
+
+/* ================= 원소 · 분자 ================= */
+const EL={H:{c:'#f2f4f8',r:.36,t:'#334'},C:{c:'#5d636e',r:.55,t:'#fff'},N:{c:'#3f7bff',r:.55,t:'#fff'},O:{c:'#ff4a3d',r:.55,t:'#fff'},I:{c:'#9a52e0',r:.92,t:'#fff'}};
+const S=1.3;
+const SP_RAW={
+ NO:{f:'NO',atoms:[['N',-.58,0,0],['O',.58,0,0]],bonds:[[0,1]],
+  faces:[{id:'N',lab:'N 원자',at:0,dir:[-1,0,0]},{id:'O',lab:'O 원자',at:1,dir:[1,0,0]}]},
+ O3:{f:'O₃',atoms:[['O',0,.445,0],['O',-1.09,-.223,0],['O',1.09,-.223,0]],bonds:[[0,1],[0,2]],
+  faces:[{id:'end1',lab:'끝 O 원자',at:1},{id:'end2',lab:'끝 O 원자',at:2,hide:true},{id:'mid',lab:'가운데 O 원자',at:0,dir:[0,1,0]}]},
+ NO2:{f:'NO₂',atoms:[['N',0,.326,0],['O',-1.105,-.143,0],['O',1.105,-.143,0]],bonds:[[0,1],[0,2]],
+  faces:[{id:'O1',lab:'O 원자',at:1},{id:'O2',lab:'O 원자',at:2,hide:true},{id:'N',lab:'N 원자',at:0,dir:[0,1,0]}]},
+ O2:{f:'O₂',atoms:[['O',-.6,0,0],['O',.6,0,0]],bonds:[[0,1]]},
+ CO:{f:'CO',atoms:[['C',-.56,0,0],['O',.56,0,0]],bonds:[[0,1]],
+  faces:[{id:'C',lab:'C 원자',at:0,dir:[-1,0,0]},{id:'O',lab:'O 원자',at:1,dir:[1,0,0]}]},
+ CO2:{f:'CO₂',atoms:[['O',-1.16,0,0],['C',0,0,0],['O',1.16,0,0]],bonds:[[0,1],[1,2]]},
+ H2:{f:'H₂',atoms:[['H',-.37,0,0],['H',.37,0,0]],bonds:[[0,1]],
+  faces:[{id:'end1',lab:'H 원자 끝',at:0,dir:[-1,0,0]},{id:'end2',lab:'H 원자 끝',at:1,dir:[1,0,0],hide:true},{id:'side',lab:'옆면 (나란히)',type:'side'}]},
+ I2:{f:'I₂',atoms:[['I',-1.33,0,0],['I',1.33,0,0]],bonds:[[0,1]],
+  faces:[{id:'end1',lab:'I 원자 끝',at:0,dir:[-1,0,0]},{id:'end2',lab:'I 원자 끝',at:1,dir:[1,0,0],hide:true},{id:'side',lab:'옆면 (나란히)',type:'side'}]},
+ HI:{f:'HI',atoms:[['H',-1.0,0,0],['I',.61,0,0]],bonds:[[0,1]]}
+};
+const SP={};
+for(const k in SP_RAW){const r=SP_RAW[k];const P=r.atoms.map(a=>[a[1]*S,a[2]*S,a[3]*S]);const E=r.atoms.map(a=>a[0]);
+ const br=Math.max(...P.map((p,i)=>len(p)+EL[E[i]].r));
+ const faces=(r.faces||[]).map(f=>{const o={...f};if(f.type==='side'){o.axis=[1,0,0];}else{o.type='point';o.d=norm(f.dir||P[f.at]);}return o;});
+ SP[k]={...r,P,E,br,faces};}
+
+/* ================= 반응 =================
+   A = 쏘는 분자(고정), B = 상자 안을 채운 분자 */
+const RX=[
+ {id:'no-o3',eq:'NO + O<sub>3</sub> → NO<sub>2</sub> + O<sub>2</sub>',txt:'NO + O₃ → NO₂ + O₂',A:'NO',B:'O3',Ea:12.5,dH:-200,lv:1,cone:40,
+  correct:{NO:['N'],O3:['end1','end2']},
+  prod:(fa,fb)=>{const t=fb.at,o=t===1?2:1;return [{sp:'NO2',src:[0,1,2+t]},{sp:'O2',src:[2,2+o]}]},
+  hint1:'생성물 NO₂를 보세요. NO의 어느 원자가 O₃의 O 원자와 새로 결합할까요?',
+  hint2:'NO의 <b>N 원자</b>를 앞쪽으로 향하게 하고, O₃의 <b>끝 O 원자</b>가 이쪽을 볼 때 쏘세요.',
+  explain:'NO의 <b>N 원자</b>가 O₃의 <b>끝 O 원자</b>와 부딪혀야 N–O 결합이 새로 생기고, O₃의 O–O 결합 하나가 끊어져요. 활성화 에너지가 작아서 대기 중에서도 빠르게 일어나는 반응이에요.',
+  src:'약 12.5 kJ/mol'},
+ {id:'no2-co',eq:'NO<sub>2</sub> + CO → NO + CO<sub>2</sub>',txt:'NO₂ + CO → NO + CO₂',A:'NO2',B:'CO',Ea:132,dH:-226,lv:2,cone:40,
+  correct:{NO2:['O1','O2'],CO:['C']},
+  prod:(fa)=>{const t=fa.at,o=t===1?2:1;return [{sp:'NO',src:[0,o]},{sp:'CO2',src:[t,3,4]}]},
+  hint1:'O 원자 하나가 NO₂에서 CO로 옮겨 가 CO₂가 돼요. 옮겨 가는 O는 CO의 어느 원자와 결합해야 할까요?',
+  hint2:'NO₂의 <b>O 원자</b>를 앞쪽으로 향하게 하고, CO의 <b>C 원자</b>가 이쪽을 볼 때 쏘세요.',
+  explain:'NO₂의 <b>O 원자</b>가 CO의 <b>C 원자</b> 쪽에 부딪혀야 O가 C로 옮겨 가 CO₂가 만들어져요. 활성화 에너지가 커서 높은 온도에서 잘 일어나요.',
+  src:'약 132 kJ/mol'},
+ {id:'h2-i2',eq:'H<sub>2</sub> + I<sub>2</sub> → 2HI',txt:'H₂ + I₂ → 2HI',A:'H2',B:'I2',Ea:165,dH:-9,lv:3,cone:50,parallel:true,
+  correct:{H2:['side'],I2:['side']},
+  prod:(fa,fb,nA,pos)=>{const d=(i,j)=>len(sub(pos[i],pos[j]));return d(0,2)+d(1,3)<d(0,3)+d(1,2)?[{sp:'HI',src:[0,2]},{sp:'HI',src:[1,3]}]:[{sp:'HI',src:[0,3]},{sp:'HI',src:[1,2]}]},
+  hint1:'H–I 결합이 <b>두 개</b> 동시에 생겨야 해요. 끝과 끝이 만나면 결합 하나밖에 못 만들어요.',
+  hint2:'H₂를 <b>옆면</b>으로 고르면 조준한 I₂와 자동으로 나란해져요. I₂가 <b>옆모습</b>을 보일 때 쏘세요.',
+  explain:'H₂와 I₂가 <b>나란히(옆면끼리)</b> 만나야 H–I 결합 두 개가 동시에 생길 수 있어요. 유효 충돌을 설명할 때 자주 쓰는 예시예요. (실제로는 I 원자가 관여하는 더 복잡한 과정이라는 연구도 있어요.)',
+  src:'약 165 kJ/mol'}
+];
+const dispDH=R=>Math.sign(R.dH)*Math.min(Math.abs(R.dH),R.Ea*2.2);
+function curveY(x,Ea,dH){if(x<.28)return 0;if(x<.5){const s=(x-.28)/.22;return Ea*(.5-.5*Math.cos(Math.PI*s));}
+ if(x<.72){const s=(x-.5)/.22;return Ea+(dH-Ea)*(.5-.5*Math.cos(Math.PI*s));}return dH;}
+const xOnLeft=(h,Ea)=>.28+.22*Math.acos(1-2*clamp(h/Ea,0,1))/Math.PI;
+const fmtE=e=>e<30?e.toFixed(1):String(Math.round(e));
+
+/* ================= 월드 ================= */
+let NID=1;
+function newWorld(o){return {mols:[],cx:[],fx:[],t:0,R:o.R,bg:o.bg||'bounce',box:o.box||[34,18,26],rec:null,ev:null,diag:null,
+ spawn:o.spawn!==false,refill:o.refill!==false,prodCap:o.prodCap||60,follow:null,nA:o.nA||0,nB:o.nB||0,prodLife:o.prodLife||2.5,speed:o.speed||[1,2.2],eMean:o.eMean||.6,bgLabels:!!o.bgLabels,stats:{col:0,eff:0},avoid:null,
+ onEvent:null,onEventEnd:null,onMiss:null};}
+function makeMol(sp,pos,vel,q){return {id:NID++,sp,pos,vel:vel||[0,0,0],q:q||qRand(),w:randAng(),ph:rand(0,6.3),vib:.03,vb:0,st:'free',al:1,isProd:false,life:Infinity};}
+function randAng(s=.8){return mul(randDir(),rand(.35,1)*s);}
+function molAtoms(m){const s=SP[m.sp],a=m.vib+m.vb;return s.P.map((p,i)=>{const k=1+a*Math.sin(m.ph*(1+.11*i)+i*2.1);return add(m.pos,qRot(m.q,mul(p,k)));});}
+function walls(W,m){const br=SP[m.sp].br;for(let k=0;k<3;k++){const h=W.box[k]/2-br;if(m.pos[k]>h){m.pos[k]=h;m.vel[k]=-Math.abs(m.vel[k]);}else if(m.pos[k]<-h){m.pos[k]=-h;m.vel[k]=Math.abs(m.vel[k]);}}}
+function spawnMol(W,sp,fade){let p,ok=false;for(let tr=0;tr<40&&!ok;tr++){p=[rand(-1,1)*(W.box[0]/2-2.5),rand(-1,1)*(W.box[1]/2-2),rand(-1,1)*(W.box[2]/2-2.5)];
+  ok=W.mols.every(m=>len(sub(m.pos,p))>3.2)&&(!W.avoid||len(sub(W.avoid,p))>9);}
+ const m=makeMol(sp,p,mul(randDir(),rand(W.speed[0],W.speed[1])));if(fade)m.al=0;m.fadeIn=fade;W.mols.push(m);return m;}
+function populate(W){for(let i=0;i<W.nA;i++)spawnMol(W,W.R.A);for(let i=0;i<W.nB;i++)spawnMol(W,W.R.B);}
+const findMol=(W,id)=>W.mols.find(m=>m.id===id);
+function removeMol(W,m){const i=W.mols.indexOf(m);if(i>=0)W.mols.splice(i,1);}
+function touch(a,b,f=1.2){if(len(sub(a.pos,b.pos))>SP[a.sp].br+SP[b.sp].br+.5)return null;
+ const pa=molAtoms(a),pb=molAtoms(b),ea=SP[a.sp].E,eb=SP[b.sp].E;let best=null,bv=1e9;
+ for(let i=0;i<pa.length;i++)for(let j=0;j<pb.length;j++){const v=len(sub(pa[i],pb[j]))-(EL[ea[i]].r+EL[eb[j]].r)*f;if(v<0&&v<bv){bv=v;best={p:lerpV(pa[i],pb[j],.5),i,j};}}
+ return best;}
+// 발사한 분자: 맞혀야 하는 원자끼리 '충분히 가까이' 만났는지로 판정 (정확히 그 원자끼리 닿지 않아도 근처면 인정)
+const NEAR=.8;
+function orientHit(R,s,o,i,j,v){const c=R.cone*Math.PI/180,ps=molAtoms(s),po=molAtoms(o);
+ const cs=SP[s.sp].faces.filter(f=>R.correct[s.sp].includes(f.id)),co=SP[o.sp].faces.filter(f=>R.correct[o.sp].includes(f.id));
+ let f1=null,f2=null,ok=false;const s1=cs.find(f=>f.type==='side'),s2=co.find(f=>f.type==='side');
+ if(s1&&s2){if(Math.abs(dot(qRot(s.q,s1.axis),v))<=Math.sin(c))f1=s1;if(Math.abs(dot(qRot(o.q,s2.axis),v))<=Math.sin(c))f2=s2;ok=!!(f1&&f2);
+  if(ok&&R.parallel){const a1=qRot(s.q,[1,0,0]),a2=qRot(o.q,[1,0,0]);if(Math.abs(dot(a1,a2))<Math.cos(55*Math.PI/180))ok=false;}}
+ else{let best=1e9;for(const f of cs)for(const g of co){const gap=len(sub(ps[f.at],po[g.at]))-(EL[SP[s.sp].E[f.at]].r+EL[SP[o.sp].E[g.at]].r);if(gap<best){best=gap;f1=f;f2=g;}}
+  ok=best<NEAR;if(!ok){f1=null;f2=null;}}
+ return {ok,f1,f2};}
+function faceTest(R,m,toward){const cs=R.correct[m.sp];if(!cs)return null;const c=R.cone*Math.PI/180;
+ for(const f of SP[m.sp].faces){if(!cs.includes(f.id))continue;
+  if(f.type==='side'){const ax=qRot(m.q,f.axis);if(Math.abs(dot(ax,toward))<=Math.sin(c))return f;}
+  else{if(dot(qRot(m.q,f.d),toward)>=Math.cos(c))return f;}}
+ return null;}
+function orient(R,m1,m2){const u=norm(sub(m2.pos,m1.pos));const f1=faceTest(R,m1,u),f2=faceTest(R,m2,mul(u,-1));let ok=!!(f1&&f2);
+ if(ok&&R.parallel){const a1=qRot(m1.q,[1,0,0]),a2=qRot(m2.q,[1,0,0]);if(Math.abs(dot(a1,a2))<Math.cos(35*Math.PI/180))ok=false;}
+ return {ok,f1,f2};}
+const isReactant=(R,m)=>!m.isProd&&(m.sp===R.A||m.sp===R.B);
+function nearestAtom(m,o){const P=molAtoms(m);let bi=0,bd=1e9;P.forEach((p,i)=>{const d=len(sub(p,o.pos));if(d<bd){bd=d;bi=i;}});return bi;}
+function spend(m){if(m.isShooter){m.isProd=true;m.life=1.6;}}
+
+function startReaction(W,m1,m2,f1,f2){const R=W.R;let a=m1,b=m2,fa=f1,fb=f2;if(m1.sp!==R.A){a=m2;b=m1;fa=f2;fb=f1;}
+ const pa=molAtoms(a),pb=molAtoms(b),pos=pa.concat(pb),els=SP[a.sp].E.concat(SP[b.sp].E),nA=pa.length;
+ const defs=R.prod(fa,fb,nA,pos);const key=(i,j)=>i<j?i+'-'+j:j+'-'+i;
+ const old=new Set(),nw=new Set();
+ SP[a.sp].bonds.forEach(([i,j])=>old.add(key(i,j)));SP[b.sp].bonds.forEach(([i,j])=>old.add(key(i+nA,j+nA)));
+ const cents=defs.map(d=>centroid(d.src.map(i=>pos[i])));
+ let sep=defs.length>1?sub(cents[0],cents[1]):[0,0,0];sep=len(sep)<.05?norm(sub(a.pos,b.pos)):norm(sep);
+ const end=pos.map(p=>p.slice()),prods=[];
+ defs.forEach((d,k)=>{const sp=SP[d.sp],T=sp.P,Wp=d.src.map(i=>pos[i]);let Rm=[1,0,0,0,1,0,0,0,1];
+  if(T.length>=2){const bw=basis(sub(Wp[1],Wp[0]),T.length>=3?sub(Wp[2],Wp[0]):[0,1,0]);const bt=basis(sub(T[1],T[0]),T.length>=3?sub(T[2],T[0]):[0,1,0]);Rm=matFrom(bw,bt);}
+  const cT=centroid(T),dirk=defs.length>1?mul(sep,k===0?1:-1):randDir(),c=add(cents[k],mul(dirk,.75));
+  d.src.forEach((ai,ti)=>{end[ai]=add(c,mApply(Rm,sub(T[ti],cT)));});
+  sp.bonds.forEach(([i,j])=>nw.add(key(d.src[i],d.src[j])));
+  prods.push({sp:d.sp,pos:sub(c,mApply(Rm,cT)),q:qFromMat(Rm),dir:dirk});});
+ const c={id:NID++,els,start:pos,end,cur:pos.map(p=>p.slice()),old,nw,all:[...new Set([...old,...nw])],t:0,dur:1.0,
+  vel:mul(add(a.vel,b.vel),.15),prods,g:0,bd:[]};
+ if(W.follow===a.id||W.follow===b.id){W.follow=c.id;W.focus=new Set([c.id]);}removeMol(W,a);removeMol(W,b);W.cx.push(c);if(W.ev)W.ev.involved.add(c.id);return c;}
+function cxStep(W,c,dt){c.t+=dt;const s=Math.min(1,c.t/c.dur);let u;
+ if(s<.42)u=.5*ease(s/.42);else if(s<.58)u=.5;else u=.5+.5*ease((s-.58)/.42);
+ const drift=mul(c.vel,c.t),jig=(s>.3&&s<.7)?.05:0;
+ c.cur=c.start.map((p,i)=>{const q=add(lerpV(p,c.end[i],u),drift);if(jig){q[0]+=jig*Math.sin(c.t*45+i);q[1]+=jig*Math.cos(c.t*39+i*2);q[2]+=jig*Math.sin(c.t*41+i*3);}return q;});
+ c.g=Math.sin(Math.PI*clamp((s-.12)/.7,0,1));
+ const bd=[];for(const k of c.all){const ij=k.split('-').map(Number),inO=c.old.has(k),inN=c.nw.has(k);
+  if(inO&&inN)bd.push([ij[0],ij[1],0,1]);
+  else if(inO){if(s<.66)bd.push([ij[0],ij[1],s<.18?0:2,s<.18?1:1-(s-.18)/.48]);}
+  else{if(s>.14)bd.push([ij[0],ij[1],s<.62?1:0,s<.62?(s-.14)/.48:1]);}}
+ c.bd=bd;
+ if(s>=1){const i=W.cx.indexOf(c);if(i>=0)W.cx.splice(i,1);const R=W.R;const sv=R.dH<0?2.6+Math.min(3.5,Math.abs(R.dH)/70):1.8;
+  c.prods.forEach(p=>{const m=makeMol(p.sp,add(p.pos,drift),add(c.vel,mul(norm(p.dir),sv)),p.q);m.w=randAng(.7);m.vb=.1;m.isProd=true;m.life=W.prodLife;W.mols.push(m);if(W.focus&&W.focus.has(c.id)){W.focus.add(m.id);if(W.follow===c.id)W.follow=m.id;}if(W.ev)W.ev.involved.add(m.id);});
+  W.fx.push({k:'flash',p:centroid(c.cur),t:0,dur:.7,col:R.dH<0?'255,214,74':'120,210,255'});}}
+function startBounce(W,s,o,kind,ori){const dirIn=norm(sub(o.pos,s.pos)),ratio=clamp(s.E/W.R.Ea,0,1);
+ const d=kind==='energy'?.15+.6*ratio:.1;let dash=null;
+ if(kind==='energy'){const ia=ori.f1&&ori.f1.at!=null?ori.f1.at:nearestAtom(s,o),ib=ori.f2&&ori.f2.at!=null?ori.f2.at:nearestAtom(o,s);dash={ia,ib,str:ratio};}
+ s.st='bounce';s.bn={t:0,T:.5,dirIn,d,s0:s.pos.slice(),out:Math.max(2.5,len(s.vel)*.3),o,dash};o.st='hit';}
+function bounceStep(W,s,dt){const b=s.bn;b.t+=dt;const ph=Math.min(1,b.t/b.T);s.pos=add(b.s0,mul(b.dirIn,b.d*Math.sin(Math.PI*ph)));
+ if(ph>=1){s.pos=b.s0;s.st='free';s.vel=add(mul(b.dirIn,-b.out),mul(randDir(),.5));s.w=randAng(.7);s.vb=.09;spend(s);
+  const o=b.o;if(o.st==='hit'){o.st='free';o.vel=add(o.vel,mul(b.dirIn,Math.min(4,b.out*.6)));o.vb=.09;o.w=randAng();}s.bn=null;}}
+function hit(W,s,o,h){const R=W.R,cp=h.p;let kind,ori={ok:false};
+ const n=R.parallel?norm(sub(o.pos,s.pos)):norm(sub(molAtoms(o)[h.j],molAtoms(s)[h.i])),cth=Math.max(0,dot(n,norm(s.vel))),c50=Math.cos(50*Math.PI/180),c2=cth>=c50?1:Math.pow(cth/c50,2);s.Eshot=s.E;s.E=s.E*c2;
+ if(!isReactant(R,o))kind='other';else if(o.sp===s.sp)kind='same';
+ else{ori=orientHit(R,s,o,h.i,h.j,norm(s.vel));kind=!ori.ok?'orient':(s.E<R.Ea?'energy':'react');}
+ W.ev={kind,t:0,E:s.E,Eshot:s.Eshot,c2,c:cp,involved:new Set([s.id,o.id]),dur:kind==='react'?1:.5,after:kind==='react'?.7:.6,done:false};
+ if(kind==='react')startReaction(W,s,o,ori.f1,ori.f2);else startBounce(W,s,o,kind,ori);
+ W.diag=evDiag(W);if(W.onEvent)W.onEvent(W.ev);}
+function flyStep(W,s,dt){const n=Math.max(1,Math.ceil(len(s.vel)*dt/.2)),h=dt/n,B=W.box;
+ if(s.alignTo){const t=findMol(W,s.alignTo),v=norm(s.vel),f=SP[s.sp].faces.find(x=>x.type==='side');if(t&&t.st==='free'&&f){const a=sideAxis(t,v);if(a)orientMol(s,f,v,0,a);}}
+ for(let k=0;k<n;k++){s.pos=add(s.pos,mul(s.vel,h));s.flyT+=h;
+  for(const o of W.mols){if(o===s||o.st!=='free'||o.al<.5)continue;const h2=touch(s,o);if(h2){hit(W,s,o,h2);return;}}}
+ const inside=Math.abs(s.pos[0])<B[0]/2&&Math.abs(s.pos[1])<B[1]/2&&Math.abs(s.pos[2])<B[2]/2;if(inside)s.entered=true;
+ if(s.flyT>4||(s.entered&&!inside)){s.st='free';s.vel=mul(norm(s.vel),2);s.w=randAng();walls(W,s);spend(s);if(W.rec)W.rec.on=false;if(W.onMiss)W.onMiss(s);}}
+function bgCollide(W){const ms=W.mols;const R=W.R;
+ for(let i=0;i<ms.length;i++){const a=ms[i];if(a.st!=='free')continue;
+  for(let j=i+1;j<ms.length;j++){const b=ms[j];if(b.st!=='free'||a.st!=='free')continue;
+   const th=touch(a,b,1.05);if(!th)continue;const cp=th.p;const n=norm(sub(b.pos,a.pos)),rel=dot(sub(a.vel,b.vel),n);if(rel<=0)continue;
+   if(W.bg==='react'&&isReactant(R,a)&&isReactant(R,b)&&a.sp!==b.sp){W.stats.col++;
+    const E=-Math.log(1-Math.random()+1e-9)*R.Ea*W.eMean,ori=orient(R,a,b);
+    if(ori.ok&&E>=R.Ea){W.stats.eff++;W.fx.push({k:'text',p:cp,t:0,dur:1.6,txt:'✓ 유효 충돌',col:'56,217,150'});startReaction(W,a,b,ori.f1,ori.f2);break;}
+    if(W.bgLabels)W.fx.push({k:'text',p:cp,t:0,dur:1.1,txt:ori.ok?'✗ 에너지 부족':'✗ 방향',col:'200,210,230'});}
+   a.vel=sub(a.vel,mul(n,rel));b.vel=add(b.vel,mul(n,rel));a.vb=b.vb=.07;a.w=randAng();b.w=randAng();}}}
+function respawn(W,dt){W.rsT=(W.rsT||0)+dt;if(W.rsT<.3)return;W.rsT=0;const R=W.R;
+ for(const [sp,n0] of [[R.A,W.nA],[R.B,W.nB]]){const n=W.mols.filter(m=>m.sp===sp&&!m.isProd&&!m.isShooter).length;if(n<n0)spawnMol(W,sp,true);}}
+function evDiag(W){const ev=W.ev,R=W.R,t=ev.t,E=ev.E;
+ if(ev.kind==='react'){const s=clamp(t/ev.dur,0,1),x=s<.5?.28+.22*(s/.5):.5+.32*((s-.5)/.5);
+  const cap=s<.22?'충돌! 방향이 맞고, 에너지도 활성화 에너지 이상이에요':s<.62?'활성화 상태(활성화 착물): 기존 결합이 끊어지고 새 결합이 생기는 중':'새로운 물질(생성물)이 만들어졌어요!';
+  return {x,h:curveY(x,R.Ea,dispDH(R)),E,cap,kind:'react'};}
+ if(ev.kind==='energy'){const ph=clamp(t/.5,0,1),h=E*Math.sin(Math.PI*ph);
+  return {x:xOnLeft(h,R.Ea),h,E,cap:'방향은 맞았지만, 충돌 에너지가 활성화 에너지보다 작아서 넘지 못하고 되돌아가요',kind:'energy'};}
+ if(ev.kind==='orient'){const ph=clamp(t/.5,0,1);
+  return {x:.25,h:R.Ea*.06*Math.sin(Math.PI*ph),E,cap:'방향이 맞지 않아요. 새 결합을 만들 원자끼리 만나지 못해 그냥 튕겨 나가요',kind:'orient'};}
+ const c=ev.kind==='same'?'표적 분자가 아닌 분자와 부딪혔어요':'반응물이 아닌 분자(생성물)와 부딪혔어요';
+ return {x:.12,h:0,E,cap:c,kind:ev.kind};}
+function stepWorld(W,dt){W.t+=dt;
+ for(const m of W.mols.slice()){m.ph+=dt*13;m.vb*=Math.exp(-dt*1.5);
+  if(m.fadeIn&&m.al<1)m.al=Math.min(1,m.al+dt*1.6);
+  if(m.st==='free'){m.pos=add(m.pos,mul(m.vel,dt));m.q=qInt(m.q,m.w,dt);walls(W,m);
+   const v=len(m.vel);if(W.spawn&&!m.isProd&&v<W.speed[0]*.8)m.vel=mul(v<1e-3?randDir():norm(m.vel),W.speed[0]);}
+  else if(m.st==='fly')flyStep(W,m,dt);
+  else if(m.st==='bounce')bounceStep(W,m,dt);
+  else if(m.st==='ready')m.q=qInt(m.q,m.w,dt);
+  if(m.isProd){m.life-=dt;if(m.life<1)m.al=Math.min(m.al,Math.max(0,m.life));if(m.life<=0)removeMol(W,m);}}
+ for(const c of W.cx.slice())cxStep(W,c,dt);
+ if(W.bg!=='none')bgCollide(W);
+ W.fx=W.fx.filter(f=>(f.t+=dt)<f.dur);
+ if(W.ev&&!W.ev.done){W.ev.t+=dt;W.diag=evDiag(W);if(W.ev.t>W.ev.dur+W.ev.after){W.ev.done=true;if(W.rec)W.rec.on=false;if(W.onEventEnd)W.onEventEnd(W.ev);}}
+ else if(W.diag&&W.diag.kind==='fly'){W.diag.x=Math.min(.2,W.diag.x+dt*.1);}
+ if(W.spawn&&W.refill)respawn(W,dt);
+ {const pr=W.mols.filter(m=>m.isProd&&m.life===Infinity);for(let i=0;i<pr.length-W.prodCap;i++)pr[i].life=1;}
+ if(W.rec&&W.rec.on){W.rec.t+=dt;const fr=buildFrame(W,{shId:W.rec.shId,faceAt:W.rec.faceAt});fr.t=W.rec.t;W.rec.frames.push(fr);}}
+
+/* ================= 프레임(그리기 자료) ================= */
+function faceAtoms(m,face){if(!face)return [];if(face.type==='side')return SP[m.sp].P.map((_,i)=>i);return [face.at];}
+function buildFrame(W,o){const R=W.R,mols=[],lines=[];
+ for(const m of W.mols){const s=SP[m.sp],P=molAtoms(m);const hl=new Array(P.length).fill(0);
+  if(o.sites&&isReactant(R,m)&&!m.isShooter){for(const f of s.faces)if(R.correct[m.sp].includes(f.id))faceAtoms(m,f).forEach(i=>hl[i]=1);}
+  if(o.sh===m&&o.face)faceAtoms(m,o.face).forEach(i=>hl[i]=2);
+  else if(o.shId===m.id&&o.faceAt)o.faceAt.forEach(i=>hl[i]=2);
+  mols.push({id:m.id,at:P.map((p,i)=>[p[0],p[1],p[2],s.E[i],hl[i]]),bd:s.bonds.map(b=>[b[0],b[1],0,1]),al:m.al*(o.focus&&!o.focus.has(m.id)?.16:1),lab:o.sh===m?'':s.f,ring:0});
+  if(m.st==='bounce'&&m.bn&&m.bn.dash){const b=m.bn,ph=Math.min(1,b.t/b.T),al=.95*Math.sin(Math.PI*ph)*(.35+.65*b.dash.str);
+   if(al>.02){const pa=P[b.dash.ia],pb=molAtoms(b.o)[b.dash.ib];lines.push({a:pa,b:pb,al});}}}
+ for(const c of W.cx)mols.push({id:c.id,at:c.cur.map((p,i)=>[p[0],p[1],p[2],c.els[i],0]),bd:c.bd,al:o.focus&&!o.focus.has(c.id)?.16:1,glow:c.g,lab:''});
+ return {mols,lines,fx:W.fx.map(f=>({...f})),diag:W.diag?{...W.diag}:null};}
+
+/* ================= 렌더러 (외부 라이브러리 없이 캔버스로 3D) ================= */
+const SPR={};
+function sprites(){for(const k in EL){const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');
+ const g=x.createRadialGradient(46,40,6,64,64,64);g.addColorStop(0,'#ffffff');g.addColorStop(.18,shade(EL[k].c,.45));g.addColorStop(.62,EL[k].c);g.addColorStop(1,shade(EL[k].c,-.55));
+ x.fillStyle=g;x.beginPath();x.arc(64,64,62,0,Math.PI*2);x.fill();SPR[k]=c;}}
+function shade(hex,p){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;
+ if(p>0){r+=(255-r)*p;g+=(255-g)*p;b+=(255-b)*p;}else{r*=1+p;g*=1+p;b*=1+p;}return `rgb(${r|0},${g|0},${b|0})`;}
+const DUST=Array.from({length:70},()=>[rand(-45,45),rand(-28,28),rand(-45,45),rand(.6,1.6)]);
+function camBasis(cam){const f=norm(sub(cam.tgt,cam.pos));let r=cross([0,1,0],f);if(len(r)<1e-4)r=[1,0,0];r=norm(r);return {f,r,u:cross(f,r)};}
+function makeProj(cam,w,h){const B=camBasis(cam),foc=(h/2)/Math.tan(cam.fov*Math.PI/360);
+ return p=>{const d=sub(p,cam.pos),z=dot(d,B.f);if(z<.3)return null;const s=foc/z;return [w/2+dot(d,B.r)*s,h/2-dot(d,B.u)*s,z,s];};}
+function rayDir(cam,w,h,x,y){const B=camBasis(cam),foc=(h/2)/Math.tan(cam.fov*Math.PI/360);return norm(add(add(B.f,mul(B.r,(x-w/2)/foc)),mul(B.u,-(y-h/2)/foc)));}
+function render(ctx,w,h,cam,fr,o){
+ const g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,'#0a1830');g.addColorStop(1,'#03070f');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+ const pj=makeProj(cam,w,h);const t=performance.now()/1000;
+ for(const d of DUST){const p=pj(d);if(!p)continue;const a=clamp(1.1-p[2]/80,.08,.5);ctx.fillStyle=`rgba(150,190,255,${a})`;ctx.fillRect(p[0],p[1],d[3],d[3]);}
+ if(o.box){const B=o.box.map(v=>v/2);const C=[];for(let i=0;i<8;i++)C.push([i&1?B[0]:-B[0],i&2?B[1]:-B[1],i&4?B[2]:-B[2]]);
+  ctx.strokeStyle='rgba(79,209,255,.13)';ctx.lineWidth=1;ctx.beginPath();
+  [[0,1],[2,3],[4,5],[6,7],[0,2],[1,3],[4,6],[5,7],[0,4],[1,5],[2,6],[3,7]].forEach(([a,b])=>{const p=pj(C[a]),q=pj(C[b]);if(p&&q){ctx.moveTo(p[0],p[1]);ctx.lineTo(q[0],q[1]);}});ctx.stroke();}
+ const items=[],labels=[];
+ for(const m of fr.mols){const pr=m.at.map(a=>pj(a));
+  for(const b of m.bd){const pa=pr[b[0]],pb=pr[b[1]];if(!pa||!pb)continue;items.push({z:(pa[2]+pb[2])/2+.12,k:'b',a:pa,b:pb,ea:m.at[b[0]][3],eb:m.at[b[1]][3],st:b[2],al:b[3]*m.al});}
+  m.at.forEach((a,i)=>{if(pr[i])items.push({z:pr[i][2],k:'a',p:pr[i],el:a[3],hl:a[4],al:m.al,ring:m.ringAt===i?4:m.ring,glow:m.glow||0});});
+  if(o.labels&&m.lab&&m.al>.3){const c=centroid(m.at);const p=pj(c);if(p){let rmax=0;m.at.forEach(a=>{rmax=Math.max(rmax,len(sub(a,c))+EL[a[3]].r);});
+   labels.push({x:p[0],y:p[1]+rmax*p[3]+12,txt:m.lab,al:m.al*clamp(1.2-p[2]/75,.25,1)*clamp((p[2]-.6)/4.5,0,1),fs:clamp(p[3]*.42,10,16)});}}}
+ for(const l of fr.lines||[]){const pa=pj(l.a),pb=pj(l.b);if(pa&&pb)items.push({z:Math.min(pa[2],pb[2])-.2,k:'l',a:pa,b:pb,al:l.al});}
+ items.sort((a,b)=>b.z-a.z);
+ for(const it of items){const fog=clamp(1.3-it.z/75,.3,1)*clamp((it.z-.6)/4.5,0,1);
+  if(it.k==='a'){const r=EL[it.el].r*it.p[3];if(r<.6)continue;ctx.globalAlpha=it.al*fog;
+   if(it.glow>0){const gg=ctx.createRadialGradient(it.p[0],it.p[1],r*.5,it.p[0],it.p[1],r*2.6);gg.addColorStop(0,`rgba(255,230,120,${.45*it.glow})`);gg.addColorStop(1,'rgba(255,230,120,0)');ctx.fillStyle=gg;ctx.beginPath();ctx.arc(it.p[0],it.p[1],r*2.6,0,7);ctx.fill();}
+   if(it.hl){ctx.strokeStyle=it.hl===1?`rgba(255,214,74,${.65+.35*Math.sin(t*6)})`:'#4fd1ff';ctx.lineWidth=Math.max(2,r*.16);ctx.setLineDash(it.hl===1?[r*.35,r*.25]:[]);ctx.beginPath();ctx.arc(it.p[0],it.p[1],r*1.28,0,7);ctx.stroke();ctx.setLineDash([]);}
+   ctx.drawImage(SPR[it.el],it.p[0]-r,it.p[1]-r,r*2,r*2);
+   if(it.ring){ctx.strokeStyle=it.ring===4?'#ffffff':'#7cf3c6';ctx.lineWidth=it.ring===4?3:2;ctx.beginPath();ctx.arc(it.p[0],it.p[1],r+3,0,7);ctx.stroke();}
+   if(o.elText&&r>10){ctx.fillStyle=EL[it.el].t;ctx.font=`800 ${Math.min(r*.72,22)|0}px system-ui,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(it.el,it.p[0],it.p[1]+1);}
+  }else if(it.k==='b'){const wd=Math.max(1.4,.24*(it.a[3]+it.b[3])/2);ctx.globalAlpha=clamp(it.al,0,1)*fog;ctx.lineCap='round';
+   const mx=(it.a[0]+it.b[0])/2,my=(it.a[1]+it.b[1])/2;
+   if(it.st===1){ctx.strokeStyle='#ffd54a';ctx.lineWidth=wd*.75;ctx.setLineDash([wd*1.1,wd*.9]);ctx.beginPath();ctx.moveTo(it.a[0],it.a[1]);ctx.lineTo(it.b[0],it.b[1]);ctx.stroke();ctx.setLineDash([]);}
+   else{if(it.st===2)ctx.setLineDash([wd*1.1,wd*.9]);ctx.lineWidth=wd;
+    ctx.strokeStyle=shade(EL[it.ea].c,-.15);ctx.beginPath();ctx.moveTo(it.a[0],it.a[1]);ctx.lineTo(mx,my);ctx.stroke();
+    ctx.strokeStyle=shade(EL[it.eb].c,-.15);ctx.beginPath();ctx.moveTo(mx,my);ctx.lineTo(it.b[0],it.b[1]);ctx.stroke();
+    if(it.st!==2){ctx.strokeStyle='rgba(255,255,255,.28)';ctx.lineWidth=wd*.3;ctx.beginPath();ctx.moveTo(it.a[0],it.a[1]-wd*.2);ctx.lineTo(it.b[0],it.b[1]-wd*.2);ctx.stroke();}
+    ctx.setLineDash([]);}
+  }else if(it.k==='l'){ctx.globalAlpha=it.al;ctx.strokeStyle='#ffd54a';ctx.lineWidth=Math.max(2,.16*it.a[3]);ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(it.a[0],it.a[1]);ctx.lineTo(it.b[0],it.b[1]);ctx.stroke();ctx.setLineDash([]);}}
+ ctx.globalAlpha=1;ctx.textAlign='center';ctx.textBaseline='middle';
+ for(const l of labels){ctx.globalAlpha=l.al*.85;ctx.font=`700 ${l.fs|0}px system-ui,sans-serif`;ctx.fillStyle='#cfe0ff';ctx.fillText(l.txt,l.x,l.y);}
+ for(const f of fr.fx||[]){const p=pj(f.p);if(!p)continue;const s=f.t/f.dur;
+  if(f.k==='flash'){ctx.globalAlpha=1-s;const r=(.6+s*4)*p[3];const gg=ctx.createRadialGradient(p[0],p[1],0,p[0],p[1],r);gg.addColorStop(0,`rgba(${f.col},.9)`);gg.addColorStop(.5,`rgba(${f.col},.35)`);gg.addColorStop(1,`rgba(${f.col},0)`);ctx.fillStyle=gg;ctx.beginPath();ctx.arc(p[0],p[1],r,0,7);ctx.fill();}
+  else if(f.k==='text'){ctx.globalAlpha=Math.min(1,(1-s)*2);ctx.font='800 14px system-ui,sans-serif';ctx.fillStyle=`rgb(${f.col})`;ctx.strokeStyle='rgba(0,0,0,.7)';ctx.lineWidth=3;const y=p[1]-20-s*24;ctx.strokeText(f.txt,p[0],y);ctx.fillText(f.txt,p[0],y);}}
+ ctx.globalAlpha=1;}
+
+/* ================= 에너지 그래프 ================= */
+function drawDiag(cv,R,st,big){const F=big?1.3:1;if(!cv)return;const dpr=Math.min(2,window.devicePixelRatio||1);const w=cv.clientWidth,h=cv.clientHeight;if(!w)return;
+ if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);}
+ const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,w,h);
+ const dH=dispDH(R),cut=Math.abs(R.dH)>Math.abs(dH)+.1;const E=st&&st.E||0;
+ const top=Math.max(R.Ea*1.3,E*1.12),bot=Math.min(0,dH)-R.Ea*.25;
+ const L=40,Rr=10,T=12,B=22,X=x=>L+x*(w-L-Rr),Y=v=>T+(top-v)/(top-bot)*(h-T-B);
+ c.strokeStyle='#33507a';c.lineWidth=1;c.beginPath();c.moveTo(L,T);c.lineTo(L,h-B);c.lineTo(w-Rr,h-B);c.stroke();
+ c.fillStyle='#8aa0c6';c.font=`${11*F}px system-ui,sans-serif`;c.textAlign='center';c.fillText('반응 경로 →',(L+w)/2,h-7);
+ c.save();c.translate(12,(T+h-B)/2);c.rotate(-Math.PI/2);c.fillText('에너지',0,0);c.restore();
+ c.setLineDash([3,4]);c.strokeStyle='#ffffff30';c.beginPath();c.moveTo(X(0),Y(0));c.lineTo(X(1),Y(0));c.stroke();c.setLineDash([]);
+ c.strokeStyle='#4fd1ff';c.lineWidth=2.5*F;c.beginPath();for(let i=0;i<=120;i++){const x=i/120,y=curveY(x,R.Ea,dH);i?c.lineTo(X(x),Y(y)):c.moveTo(X(x),Y(y));}c.stroke();
+ c.fillStyle='#cfe0ff';c.font=`600 ${11*F}px system-ui,sans-serif`;c.textAlign='left';c.fillText('반응물',X(.02),Y(0)-8);c.textAlign='right';c.fillText('생성물',X(.99),Y(dH)+(dH<0?14:-8));
+ c.strokeStyle='#ffcc4d';c.fillStyle='#ffcc4d';c.lineWidth=1.5;const ax=X(.5);c.beginPath();c.moveTo(ax,Y(0));c.lineTo(ax,Y(R.Ea)+3);c.stroke();
+ c.beginPath();c.moveTo(ax,Y(R.Ea));c.lineTo(ax-4,Y(R.Ea)+7);c.lineTo(ax+4,Y(R.Ea)+7);c.fill();
+ c.font=`700 ${11.5*F}px system-ui,sans-serif`;c.textAlign='left';c.fillText(`Eₐ ≈ ${fmtE(R.Ea)} kJ/mol`,ax+6,Y(R.Ea*.55));
+ c.fillStyle='#a8b8d8';c.font=`${10.5*F}px system-ui,sans-serif`;c.textAlign='center';c.fillText('활성화 상태',ax,Y(R.Ea)-7);
+ const hx=X(.9);c.strokeStyle='#a98bff';c.fillStyle='#a98bff';c.lineWidth=1.5;c.beginPath();c.moveTo(hx,Y(0));c.lineTo(hx,Y(dH));c.stroke();
+ if(cut){const by=Y(dH*.72);c.fillStyle='#0a1324';c.fillRect(hx-6,by-5,12,10);c.strokeStyle='#a98bff';c.lineWidth=1.3;c.beginPath();c.moveTo(hx-6,by-5);c.lineTo(hx+6,by-1);c.moveTo(hx-6,by+1);c.lineTo(hx+6,by+5);c.stroke();c.fillStyle='#a98bff';}
+ c.textAlign='right';c.font=`700 ${11*F}px system-ui,sans-serif`;c.fillText(`ΔH ≈ ${R.dH>0?'+':''}${R.dH}`,hx-5,Y(dH/2));
+ if(E&&st&&st.kind!=='fly'){c.strokeStyle='#ff9f6b';c.setLineDash([4,4]);c.lineWidth=1.3;c.beginPath();c.moveTo(X(.05),Y(E));c.lineTo(X(.45),Y(E));c.stroke();c.setLineDash([]);c.fillStyle='#ff9f6b';c.textAlign='left';c.font=`700 ${10.5*F}px system-ui,sans-serif`;c.fillText(`충돌 에너지 ${fmtE(E)}`,X(.05),Y(E)-6);}
+ if(st&&st.x!=null){const bx=X(st.x),by=Y(st.h)-7;const gg=c.createRadialGradient(bx,by,0,bx,by,15);gg.addColorStop(0,'rgba(255,214,74,.8)');gg.addColorStop(1,'rgba(255,214,74,0)');c.fillStyle=gg;c.beginPath();c.arc(bx,by,15,0,7);c.fill();
+  c.fillStyle='#ffd54a';c.beginPath();c.arc(bx,by,6*F,0,7);c.fill();}}
+
+/* ================= 저장 (랭킹) ================= */
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+const RANK_KEY='effective-collision-lab-rank';
+
+/* ================= 게임 상태 =================
+   phase: face(처음 한 번 원자 고르기) → aim(슬로 모션 조준) → charge(힘 모으기) → fly → event → 다시 aim */
+const G={scr:'home',rIdx:0,mode:'practice',R:null,W:null,phase:'select',cam:{pos:[0,8,-40],tgt:[0,0,0],fov:55},
+ orbit:{yaw:0,pitch:-.22,dist:40,tgt:[0,0,0]},roll:0,faces:{},sh:null,home:null,station:null,
+ cursor:[0,0],hov:null,aimPt:null,charge:0,power:0,Emax:1,
+ follow:null,speed:1,paused:false,shots:0,succ:0,orientFails:0,energyFails:0,log:[],timeLeft:60,running:false,rp:null,
+ showSites:false,evCam:null,cur:null,last:null,lt:0,hudT:0,touchUI:matchMedia('(pointer:coarse)').matches,keysHidden:false};
+const cv=$('#view'),ctx=cv.getContext('2d'),stage=$('#stage');
+let VW=0,VH=0;
+function resize(){const dpr=Math.min(window.innerWidth<700?1.5:2,window.devicePixelRatio||1);const ow=VW,oh=VH;VW=stage.clientWidth;VH=stage.clientHeight;cv.width=Math.round(VW*dpr);cv.height=Math.round(VH*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
+ const pv=$('#pv');pv.width=pv.clientWidth*dpr;pv.height=pv.clientHeight*dpr;pv.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
+ if(G.scr==='play'&&G.W&&G.mode!=='observe'&&(ow!==VW||oh!==VH)){setupStation();if(G.sh&&['face','aim','charge'].includes(G.phase))G.sh.pos=G.home.slice();}}
+window.addEventListener('resize',resize);
+
+/* ---------- 홈 ---------- */
+function buildHome(){$('#rxList').innerHTML=RX.map((r,i)=>`<button class="rx${i===G.rIdx?' sel':''}" data-i="${i}"><span class="num">${i+1}</span><span class="eq">${r.eq}</span></button>`).join('');
+ $$('.rx').forEach(b=>b.onclick=()=>{G.rIdx=+b.dataset.i;buildHome();});
+ const R=RX[G.rIdx];$('#pvCap').textContent=`쏘는 분자: ${SP[R.A].f}  →  표적 분자: ${SP[R.B].f}`;}
+$$('.mode').forEach(b=>b.onclick=()=>{$$('.mode').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');G.mode=b.dataset.mode;});
+$('#startBtn').onclick=()=>startPlay();
+$('#rankBtn').onclick=()=>showRanking(G.rIdx);
+$('#howBtn').onclick=()=>showHow();
+const PV={t:0,qa:qRand(),qb:qRand()};
+function drawPreview(dt){const pv=$('#pv'),c=pv.getContext('2d'),w=pv.clientWidth,h=pv.clientHeight;if(!w)return;PV.t+=dt;
+ PV.qa=qInt(PV.qa,[.25,.6,.1],dt);PV.qb=qInt(PV.qb,[-.4,.35,.2],dt);const R=RX[G.rIdx];
+ const mk=(sp,x,q)=>{const s=SP[sp];return {at:s.P.map((p,i)=>{const v=add([x,0,0],qRot(q,mul(p,1+.03*Math.sin(PV.t*13+i*2))));return [v[0],v[1],v[2],s.E[i],0];}),bd:s.bonds.map(b=>[b[0],b[1],0,1]),al:1,lab:s.f};};
+ const pd=clamp(2400/h,7,12);render(c,w,h,{pos:[0,pd*.13,-pd],tgt:[0,0,0],fov:50},{mols:[mk(R.A,-3.4,PV.qa),mk(R.B,3.4,PV.qb)],lines:[],fx:[]},{labels:true,elText:true});}
+
+/* ---------- 시작 ---------- */
+function startPlay(){G.R=RX[G.rIdx];NID=1;const R=G.R,mob=window.innerWidth<700,ob=G.mode==='observe';
+ G.W=newWorld({R,bg:'react',bgLabels:ob,eMean:ob?1:.6,nA:ob?(mob?7:10):(mob?3:6),nB:ob?(mob?7:10):(mob?10:17),prodLife:Infinity,prodCap:ob?80:14,refill:!ob,speed:ob?[4,7]:[.9,1.7],
+  box:ob?[30,16,22]:(mob?[16,20,18]:[34,18,24])});
+ G.W.onEvent=onContact;G.W.onEventEnd=onEventEnd;G.W.onMiss=onMiss;populate(G.W);
+ Object.assign(G,{phase:ob?'select':'wait',sh:null,charge:0,power:0,hov:null,aimPt:null,follow:null,speed:1,paused:false,
+  shots:0,succ:0,orientFails:0,energyFails:0,log:[],timeLeft:60,running:false,rp:null,evCam:null,cur:null,last:null,roll:0,faces:{}});
+ G.orbit={yaw:0,pitch:-.22,dist:mob?46:40,tgt:[0,0,0]};G.cam={pos:[0,10,-44],tgt:[0,0,0],fov:55};
+ G.Emax=R.Ea*1.6;G.showSites=false;
+ $('#topEq').innerHTML=R.eq;$('#topMode').textContent={observe:'🔬 관찰 모드',practice:'🎯 연습 모드',time:'⏱️ 1분 챌린지'}[G.mode];
+ show('play');resize();if(!ob){setupStation();G.cam={pos:G.station.pos.slice(),tgt:G.station.tgt.slice(),fov:55};}
+ $('#cd').style.display='none';if(G.diagPop)closeDiagPop();buildSide();setAimUI(false);hideFaceAsk();closeReplayUI();$('#banner').classList.remove('show');
+ $('#spdBar').style.display=ob?'flex':'none';$$('.ospd').forEach(b=>b.classList.toggle('on',b.dataset.s==='1'));$('#obPause').textContent='⏸ 멈춤';$('#followBtn').style.display='none';
+ setHelp();
+ if(G.mode==='practice')showIntroPractice();else if(G.mode==='time')startCountdown();}
+function show(id){if(id!=='play'&&G.diagPop)closeDiagPop();$$('.screen').forEach(s=>s.classList.toggle('active',s.id===id));G.scr=id;if(id==='home'){buildHome();resize();}}
+$('#backBtn').onclick=()=>{$('#cd').style.display='none';G.running=false;G.onModalClose=null;closeModal();show('home');};
+
+/* ---------- 발사대(카메라 고정 위치): 상자 전체가 화면에 들어오도록 ---------- */
+function setupStation(){const asp=(VW/VH)||1.5,B0=G.W.box,vh=27.5*Math.PI/180,hh=Math.atan(Math.tan(vh)*asp);
+ const D=Math.max((B0[0]/2+1)/Math.tan(hh),(B0[1]/2+1)/Math.tan(vh))+B0[2]/2+1.5;
+ G.station={pos:[0,2.5,-D],tgt:[0,0,0]};
+ const B=camBasis({pos:G.station.pos,tgt:G.station.tgt});G.home=add(add(G.station.pos,mul(B.f,7.8)),mul(B.u,-2.3));G.cursor=[VW/2,VH/2];}
+
+/* ---------- 사이드 패널 ---------- */
+function buildSide(){const R=G.R,sd=$('#side');let h='';
+ if(G.mode==='observe'){
+  h+=`<div class="panel"><h4>🔬 미시 세계 확대 장면</h4>   <div class="demo-btns"><button data-demo="orient">① 방향이 맞지 않는 충돌</button><button data-demo="energy">② 에너지가 부족한 충돌</button><button data-demo="react">③ 유효 충돌 (반응!)</button></div></div>
+   <div class="panel"><h4>🧪 농도 조절 (분자 수)</h4>
+    <div class="conc">${[R.A,R.B].map(sp=>`<div><span>${SP[sp].f}</span><button class="btn" data-c="${sp}" data-d="-2">−</button><b id="cn_${sp}">${sp===R.A?G.W.nA:G.W.nB}</b><button class="btn" data-c="${sp}" data-d="2">+</button></div>`).join('')}</div>
+    <div style="display:flex;gap:6px;margin-top:8px"><button class="btn" style="flex:1" id="concUp">둘 다 높이기 ▲</button><button class="btn" style="flex:1" id="concDown">둘 다 낮추기 ▼</button></div>
+    <button class="btn" style="width:100%;margin-top:6px" id="concReset">↺ 처음 상태로</button></div>
+   <div class="panel" style="display:none"><h4>📊</h4><div class="kpis"><div><b id="kCol">0</b><small>반응물끼리 충돌</small></div><div><b id="kEff">0</b><small>유효 충돌</small></div><div><b id="kRate">0%</b><small>비율</small></div></div>
+   <p class="small" style="margin-top:8px">충돌은 많아도 유효 충돌은 드물어요. 관찰하기 쉽도록 실제보다 반응이 잘 일어나게 조정했어요.</p></div>
+   <div class="panel"><h4>📈 에너지 그래프 <button class="btn" id="popDiagBtn" style="float:right;padding:3px 10px;font-size:12px">⧉ 크게 띄우기</button></h4><canvas class="diag" id="diag"></canvas></div>
+   <div class="panel"><h4>유효 충돌의 두 조건</h4><div class="cond"><div><b>① 방향</b> — ${R.explain}</div><div><b>② 에너지</b> — 충돌 에너지가 활성화 에너지(${R.src}) 이상이어야 해요.</div></div></div>`;}
+ else if(G.mode==='practice'){
+  h+=`<div class="panel"><h4>🎯 연습</h4><p class="small">쏘는 분자 <b>${SP[R.A].f}</b>가 계속 주어져요. 상자 안의 표적 <b>${SP[R.B].f}</b>를 맞혀 반응시켜 보세요.<br>앞쪽 원자와 힘을 바꿔 가며 쏘아 보고, 반응하지 않았다면 기록표의 ▶로 까닭을 슬로 모션으로 확인해 보세요.</p></div>
+   <div class="panel"><h4>🕹️ 조작 방법</h4><div class="cond">
+    <div><b>① 원자 고르기</b> — 분자가 나올 때마다 앞으로 향할 원자를 골라요. 쏘기 전까지 ${G.touchUI?'왼쪽 위 버튼':'숫자 키 1·2'}로 바꿀 수 있어요.</div>
+    <div><b>② 조준</b> — ${G.touchUI?'화면을 문지르거나 원자를 톡 눌러':'마우스를 움직여'} 조준 고리를 맞힐 원자 위에 대요. 흰 테두리가 생긴 원자를 맞혀요.</div>
+    <div><b>③ 힘 · 발사</b> — ${G.touchUI?'오른쪽 아래 버튼을':'마우스나 Space를'} 꾹 누르면 힘 게이지가 오르내려요. 흰 선(활성화 에너지) 위에서 떼면 발사!</div>
+    <div><b>④ 다시 보기</b> — 기록표의 ▶${G.touchUI?'':' 또는 R 키'}로 충돌 장면을 슬로 모션으로 볼 수 있어요.</div></div>
+    <p class="small" style="margin-top:6px">원자의 가장자리를 아주 비스듬하게 스치면 충돌 에너지가 줄어요.</p></div>
+   <div class="panel"><h4>📋 발사 기록표</h4><div class="logwrap"><table class="log"><thead><tr><th>#</th><th>앞쪽 원자</th><th>충돌 에너지<br>(kJ/mol)</th><th>결과</th><th>까닭</th><th></th></tr></thead><tbody id="logBody"><tr><td colspan="6" class="small" style="padding:12px">아직 발사 기록이 없어요</td></tr></tbody></table></div></div>
+   <div class="panel"><h4>📈 에너지 그래프</h4><canvas class="diag" id="diag"></canvas><p class="small" style="margin-top:6px">힘 게이지의 흰 선이 활성화 에너지예요.</p></div>`;}
+ else{h+=`<div class="panel"><div class="tbig" id="tLeft">60.0</div><p class="small" style="text-align:center">남은 시간 (초)</p></div>
+   <div class="panel" style="text-align:center"><div class="tbig" id="kScore" style="color:var(--accent2)">0</div><p class="small">점수 · 성공 +10점, 실패 −3점</p><p class="small" style="margin-top:4px">등급(점수) ${GRADES.slice(0,7).map(g=>`<b style="color:${g[2]}">${g[1]}</b> ${g[0]}`).join(' · ')} · <b style="color:#ff6b6b">F</b> 40 미만</p></div>
+   <div class="panel"><div class="kpis"><div><b id="kSucc">0</b><small>반응 성공</small></div><div><b id="kFail">0</b><small>실패</small></div><div><b id="kRate">0%</b><small>성공률</small></div></div></div>
+   <div class="panel"><h4>📈 에너지 그래프</h4><canvas class="diag" id="diag"></canvas><p class="small" style="margin-top:6px">힘 게이지의 흰 선이 활성화 에너지예요. 방향도 꼭 맞춰야 해요!</p></div>
+   <div class="panel"><h4>🏆 이 반응 랭킹 TOP 5</h4><div id="rankMini"></div></div>`;}
+ sd.innerHTML=h;
+ $$('[data-demo]').forEach(b=>b.onclick=()=>runDemo(b.dataset.demo));
+ if($('#popDiagBtn'))$('#popDiagBtn').onclick=()=>openDiagPop();
+ $$('[data-c]').forEach(b=>b.onclick=()=>setConc(b.dataset.c,+b.dataset.d));
+ if($('#concUp')){$('#concUp').onclick=()=>{setConc(R.A,4);setConc(R.B,4);};$('#concDown').onclick=()=>{setConc(R.A,-4);setConc(R.B,-4);};$('#concReset').onclick=()=>startPlay();}
+ if($('#rankMini'))renderRankMini();
+ buildStats();}
+const liveCount=sp=>G.W.mols.filter(m=>m.sp===sp&&!m.isProd).length;
+function setConc(sp,d){const W=G.W,cur=liveCount(sp),n=clamp(cur+d,0,30),diff=n-cur;
+ if(diff>0)for(let i=0;i<diff;i++)spawnMol(W,sp,true);
+ else{const live=W.mols.filter(m=>m.sp===sp&&!m.isProd&&m.st==='free');for(let i=0;i<-diff&&i<live.length;i++){live[i].isProd=true;live[i].life=.8;}}
+ setText('cn_'+sp,liveCount(sp));}
+function buildStats(){const m=G.mode;let h='';
+ if(m==='practice')h=`<div class="stat"><small>시도</small><b id="sShot">0</b></div><div class="stat"><small>반응 성공</small><b id="sSucc">0</b></div><div class="stat"><small>성공률</small><b id="sRate">0%</b></div>`;
+ else if(m==='time')h=`<div class="stat"><small>남은 시간</small><b id="sLeft">60</b></div><div class="stat"><small>점수</small><b id="sScore" style="color:var(--accent2)">0</b></div><div class="stat"><small>반응 성공</small><b id="sSucc">0</b></div><div class="stat"><small>시도</small><b id="sShot">0</b></div>`;
+ else h=`<div class="stat"><small>반응물끼리 충돌</small><b id="sCol">0</b></div><div class="stat"><small>유효 충돌</small><b id="sEff" style="color:var(--ok)">0</b></div><div class="stat"><small>유효 충돌 비율</small><b id="sRate2">0%</b></div><button class="btn" id="statReset" style="padding:6px 10px;font-size:12px">0으로</button>`;
+ $('#stats').innerHTML=h;$('#stats').classList.toggle('near',m==='observe');if($('#statReset'))$('#statReset').onclick=()=>{G.W.stats={col:0,eff:0};};}
+function setText(id,v){const e=document.getElementById(id);if(e&&e.textContent!==String(v))e.textContent=v;}
+function hud(){const m=G.mode,rate=G.shots?Math.round(G.succ/G.shots*100)+'%':'0%';
+ if(m==='practice'){setText('sShot',G.shots);setText('sSucc',G.succ);setText('sRate',rate);}
+ else if(m==='time'){const tl=Math.max(0,G.timeLeft);setText('sLeft',Math.ceil(tl));setText('tLeft',tl.toFixed(1));const e=$('#tLeft');if(e)e.classList.toggle('warn',tl<10);
+  setText('sSucc',G.succ);setText('sShot',G.shots);setText('kSucc',G.succ);setText('kFail',G.shots-G.succ);setText('kRate',rate);const sc=score(G.succ,G.shots);setText('sScore',sc);setText('kScore',sc);}
+ else{const s=G.W.stats;setText('sCol',s.col);setText('sEff',s.eff);setText('sRate2',s.col?(s.eff/s.col*100).toFixed(1)+'%':'0%');for(const sp of [G.R.A,G.R.B])setText('cn_'+sp,liveCount(sp));setText('kCol',s.col);setText('kEff',s.eff);setText('kRate',s.col?(s.eff/s.col*100).toFixed(1)+'%':'0%');}}
+
+/* ---------- 안내 문구 · 알림 ---------- */
+function setHelp(){const tu=G.touchUI;let t='';
+ if(G.phase==='replay')t=tu?'드래그: 시점 회전':'드래그: 시점 회전 · 휠: 확대 · Space: 재생/멈춤 · Esc: 닫기';
+ else if(G.mode==='observe')t=G.follow?'분자를 따라가며 보는 중 · 드래그: 시점 회전':(tu?'분자를 누르면 따라가며 확대 · 드래그: 시점 회전':'분자를 클릭하면 따라가며 확대 · 드래그: 시점 회전 · 휠: 확대 · Space: 멈춤 · ←: 1초 전');
+ else if(G.phase==='face')t='🐢 슬로 모션 · 쏠 분자의 어느 원자를 앞으로 향하게 할지 고르세요';
+ else if(G.phase==='aim'&&G.R.parallel&&G.sh&&curFace()&&curFace().type==='side')t='🐢 옆면: H₂가 조준한 I₂와 자동으로 나란해져요. I₂가 끝을 이쪽으로 향하지 않을 때(옆모습일 때) 쏘세요';
+ else if(G.phase==='aim')t=tu?'🐢 화면을 문질러 조준 · 원하는 원자를 톡 · 발사 버튼을 꾹 눌렀다 떼기':'🐢 조준 고리를 맞힐 원자에 대고, 마우스(또는 Space)를 꾹 눌렀다 떼면 발사';
+ else if(G.phase==='charge')t='힘 게이지가 오르내려요. 흰 선(활성화 에너지) 위에서 떼세요!';
+ else t='';
+ const h=$('#help');h.textContent=t;h.style.display=t?'block':'none';
+ const k=$('#keys');const showK=!tu&&G.mode!=='observe'&&['face','aim','charge'].includes(G.phase)&&!G.keysHidden;k.style.display=showK?'block':'none';
+ if(showK&&G.sh){const n=SP[G.sh.sp].faces.filter(f=>!f.hide).length;
+  k.innerHTML=`<b>⌨️ 단축키 (H: 숨기기)</b>마우스 이동 — 조준<br>마우스 꾹 / <kbd>Space</kbd> — 힘 모으기, 떼면 발사<br>${Array.from({length:n},(_,i)=>`<kbd>${i+1}</kbd>`).join('')}— 앞쪽 원자 바꾸기<br>${G.mode==='practice'?'<kbd>R</kbd>— 방금 발사 다시 보기<br>':''}<kbd>Esc</kbd>— 힘 모으기 취소`;}}
+let bannerT=0;
+function banner(main,sub,ms,col){const b=$('#banner');b.innerHTML=`<span style="color:${col||'#fff'}">${main}</span>${sub?`<small>${sub}</small>`:''}`;b.classList.add('show');clearTimeout(bannerT);bannerT=setTimeout(()=>b.classList.remove('show'),ms||2600);}
+
+/* ---------- 쏠 분자 공급 · 원자 고르기 ---------- */
+function newShooter(){const R=G.R;const m=makeMol(R.A,G.home.slice());m.st='ready';m.isShooter=true;m.w=[.2,.9,.15];m.al=0;m.fadeIn=true;
+ G.W.mols.push(m);G.sh=m;G.charge=0;G.power=0;G.hov=null;
+ G.faces[R.A]=null;
+ if(false){m.st='aim';m.w=[0,0,0];G.phase='aim';setAimUI(true);}else{G.phase='face';setAimUI(false);showFaceAsk();}
+ setHelp();}
+function showFaceAsk(){const sp=G.sh.sp;const vis=SP[sp].faces.filter(f=>!f.hide);
+ $('#faceAskT').innerHTML=`쏘는 분자 ${SP[sp].f} · 어느 원자를 앞으로 향하게 해서 쏠까요?<small>${G.touchUI?'쏘기 전까지는 언제든 바꿀 수 있어요':'숫자 키 '+vis.map((_,i)=>i+1).join(' · ')+'로 고르고, 쏘기 전까지 언제든 바꿀 수 있어요'}</small>`;
+ $('#faceAskChips').innerHTML=vis.map((f,i)=>`<button class="chip${G.faces[sp]===f.id?' on':''}" data-f="${f.id}">${G.touchUI?'':`<kbd>${i+1}</kbd>`}${f.lab}</button>`).join('');
+ $$('#faceAskChips .chip').forEach(b=>{b.onclick=e=>{e.stopPropagation();chooseFace(b.dataset.f);};b.onmouseenter=()=>G.faceHover=b.dataset.f;b.onmouseleave=()=>G.faceHover=null;});
+ $('#faceAsk').style.display='block';$('#faceMini').style.display='none';}
+function hideFaceAsk(){$('#faceAsk').style.display='none';G.faceHover=null;}
+function chooseFace(id){if(!G.sh)return;G.faces[G.sh.sp]=id;setTimeout(setHelp,0);
+ if(G.phase==='face'){hideFaceAsk();G.sh.st='aim';G.sh.w=[0,0,0];G.phase='aim';setAimUI(true);setHelp();}
+ else buildFaceChips();}
+function chooseFaceN(n){if(!G.sh)return;const vis=SP[G.sh.sp].faces.filter(f=>!f.hide);if(n>=1&&n<=vis.length){chooseFace(vis[n-1].id);}}
+const curFace=()=>{const sp=G.sh.sp,id=G.phase==='face'?(G.faceHover||G.faces[sp]):G.faces[sp];return SP[sp].faces.find(f=>f.id===id)||null;};
+function buildFaceChips(){if(!G.sh)return;const sp=G.sh.sp,vis=SP[sp].faces.filter(f=>!f.hide);
+ $('#faceKeyHint').textContent=G.touchUI?'':`(${vis.map((_,i)=>i+1).join('·')})`;
+ $('#faceChips').innerHTML=vis.map((f,i)=>`<button class="chip${G.faces[sp]===f.id?' on':''}" data-f="${f.id}">${G.touchUI?'':`<kbd>${i+1}</kbd>`}${f.lab}</button>`).join('');
+ $$('#faceChips .chip').forEach(b=>b.onclick=e=>{e.stopPropagation();chooseFace(b.dataset.f);});}
+function setAimUI(on){$('#faceMini').style.display=on?'block':'none';$('#fireBtn').style.display=on&&G.touchUI?'grid':'none';$('#gauge').style.display=on?'block':'none';$('#reticle').style.display=on?'block':'none';
+ if(on){buildFaceChips();const f=G.R.Ea/G.Emax;$('#gauge .mark').style.bottom=`calc(${f*100}% - 1px)`;$('#gauge .ml').style.top=`${(1-f)*100}%`;}
+ else{$('#fireBtn').classList.remove('hold');}}
+
+/* ---------- 조준 · 힘 · 발사 ----------
+   조준 고리 아래의 '원자 표면 한 점'을 노려요(자동으로 분자 중심에 붙지 않음).
+   발사하면 분자가 카메라 시선(조준 고리) 방향 그대로 날아가므로, 화면 가장자리 분자도 정확히 맞힐 수 있어요. */
+function orientMol(m,face,d,roll,axHint){let q1;if(face.type==='side'){let ax=axHint||cross(d,[0,1,0]);if(len(ax)<1e-3)ax=[1,0,0];q1=qFromTo([1,0,0],norm(ax));}else q1=qFromTo(face.d,d);m.q=qMul(qAxis(d,roll),q1);}
+function cursorHit(){const o=G.cam.pos,d=rayDir(G.cam,VW,VH,G.cursor[0],G.cursor[1]);let bt=1e9,hm=null,hi=-1;
+ // 옆면(H₂ + I₂)으로 쏠 때는 원자가 아니라 분자 전체를 겨눠요: 분자 중심을 향해 날아감
+ if(G.sh&&curFace()&&curFace().type==='side'){for(const m of G.W.mols){if(m===G.sh||m.al<.5||m.st==='fly')continue;const oc=sub(m.pos,o),tc=dot(oc,d);if(tc<1)continue;
+   const dd=Math.sqrt(Math.max(0,dot(oc,oc)-tc*tc));if(dd<SP[m.sp].br*.85&&tc<bt){bt=tc;hm=m;}}
+  if(hm)return {d:norm(sub(hm.pos,o)),m:hm,i:0,pt:hm.pos.slice()};}
+ for(const m of G.W.mols){if(m===G.sh||m.al<.5||m.st==='fly')continue;if(len(sub(m.pos,o))>200)continue;
+  const P=molAtoms(m),E=SP[m.sp].E;P.forEach((p,i)=>{const oc=sub(p,o),tc=dot(oc,d);if(tc<1)return;const r=EL[E[i]].r*1.05,d2=dot(oc,oc)-tc*tc;if(d2>r*r)return;const t=tc-Math.sqrt(r*r-d2);if(t<bt){bt=t;hm=m;hi=i;}});}
+ return {d,m:hm,i:hi,pt:add(o,mul(d,hm?bt:40))};}
+// 옆면으로 쏠 때: 겨눈 분자의 막대 방향을 시선에 수직인 면에 투영해서 그 방향과 나란하게
+function sideAxis(t,d){if(!t)return null;const ax=qRot(t.q,[1,0,0]),pr=sub(ax,mul(d,dot(ax,d)));return len(pr)>.15?norm(pr):null;}
+function startCharge(){if(G.phase!=='aim')return;G.charge=0;G.power=0;G.phase='charge';$('#fireBtn').classList.add('hold');setHelp();}
+function cancelCharge(){if(G.phase!=='charge')return;G.phase='aim';G.charge=0;G.power=0;$('#fireBtn').classList.remove('hold');setHelp();}
+function aimUpdate(dt){const m=G.sh;if(!m)return;
+ if(G.phase==='face'){m.pos=G.home.slice();const f=curFace();if(f&&G.faceHover)orientMol(m,f,norm(sub(G.station.tgt,G.home)),0);return;}
+ const r=cursorHit(),side=curFace().type==='side';G.hov=r.m?{id:r.m.id,i:r.i,all:side}:null;G.aimPt=r.pt;
+ if(G.phase==='charge'){G.charge+=dt;const p=(G.charge%1.8)/.9;G.power=p<=1?p:2-p;}
+ const d=norm(sub(r.pt,G.home));orientMol(m,curFace(),d,G.roll,side&&r.m?sideAxis(r.m,d):null);m.pos=sub(G.home,mul(d,G.phase==='charge'?G.power*1.1:0));
+ $('#gauge .fill').style.height=`calc(${(G.phase==='charge'?G.power:0)*100}% - 4px)`;$('#reticle').classList.toggle('lock',!!r.m);}
+function placeReticle(){if(!['aim','charge'].includes(G.phase))return;$('#reticle').style.transform=`translate(${G.cursor[0]-24}px,${G.cursor[1]-24}px)`;}
+function fire(){if(G.phase!=='charge')return;const m=G.sh;if(!m)return;
+ const p=Math.max(.03,G.power),E=p*G.Emax,r=cursorHit(),d=r.d;
+ m.pos=add(G.cam.pos,mul(d,6.5));const side=curFace().type==='side';orientMol(m,curFace(),d,G.roll,side&&r.m?sideAxis(r.m,d):null);m.alignTo=side&&r.m?r.m.id:null;m.E=E;m.vel=mul(d,42+26*Math.sqrt(p));m.st='fly';m.flyT=0;m.entered=false;m.w=[0,0,0];
+ const f=curFace();G.cur={n:G.shots+1,sp:m.sp,face:f.lab,E,dir:d,kind:null};G.shots++;
+ const W=G.W;W.ev=null;W.rec=G.mode==='time'?null:{frames:[],t:0,on:true,shId:m.id,faceAt:faceAtoms(m,f)};W.diag={x:.06,h:0,E,cap:'분자가 날아가는 중…',kind:'fly'};
+ G.phase='fly';G.hov=null;setAimUI(false);setHelp();}
+function onContact(ev){if(G.W.ev!==ev)return;
+ if(G.mode==='time'){if(ev.kind==='react')G.succ++;ev.quick=true;if(G.cur){G.cur.E=ev.E;G.cur.Eshot=ev.Eshot;G.cur.c2=ev.c2;}finalizeShot(ev.kind,[],ev.c);return;}
+ G.phase='event';const c=ev.c,d=norm(sub(c,G.cam.pos));
+ G.evCam={c,yaw:Math.atan2(d[0],d[2]),pitch:Math.asin(clamp(d[1],-.9,.9)),dist:len(sub(c,G.cam.pos))};
+ setHelp();}
+function trimRec(W,inv){if(!W.rec)return [];W.rec.on=false;return W.rec.frames.map(f=>({...f,mols:f.mols.filter(m=>inv.has(m.id))}));}
+function onEventEnd(ev){if(ev.quick)return;if(G.cur){G.cur.E=ev.E;G.cur.Eshot=ev.Eshot;G.cur.c2=ev.c2;}finalizeShot(ev.kind,trimRec(G.W,ev.involved),ev.c);}
+function onMiss(s){finalizeShot('miss',trimRec(G.W,new Set([s.id])),s.pos.slice());}
+const WHY={react:'방향 ✓ 에너지 ✓',orient:'방향 ✗',energy:'에너지 부족',same:'표적 아님',other:'생성물과 충돌',miss:'빗나감'};
+function resultMsg(sh){const R=G.R,A=SP[R.A].f;return {
+ react:['🎉 반응 성공!',`방향 ✓ · 충돌 에너지 ${fmtE(sh.E)} ≥ 활성화 에너지 ${fmtE(R.Ea)} kJ/mol`,'#38d996'],
+ orient:['✖ 방향이 맞지 않았어요','새 결합을 만들 원자끼리 부딪히지 못했어요','#ff9f9f'],
+ energy:['✖ 에너지가 부족했어요',`방향은 맞았지만 충돌 에너지 ${fmtE(sh.E)} < 활성화 에너지 ${fmtE(R.Ea)} kJ/mol`+(sh.c2!=null&&sh.c2<.85?` (비스듬히 부딪혀 발사 에너지 ${fmtE(sh.Eshot)} 중 ${Math.round(sh.c2*100)}%만 충돌에 쓰였어요)`:''),'#ffcc4d'],
+ same:['✖ 표적 분자가 아니에요',`${SP[R.B].f}를 노려 보세요`,'#cfe0ff'],
+ other:['✖ 생성물과 부딪혔어요','반응물을 노려 보세요','#cfe0ff'],
+ miss:['빗나갔어요','조준 고리가 초록색일 때 쏘면 분자에 맞아요','#cfe0ff']}[sh.kind];}
+function finalizeShot(kind,frames,c){const sh=G.cur;if(!sh)return;sh.kind=kind;sh.frames=frames;sh.c=c;G.sh=null;G.last=sh;
+ const [t,s,col]=resultMsg(sh);
+ if(G.mode==='practice'){if(kind==='react')G.succ++;if(kind==='orient')G.orientFails++;if(kind==='energy')G.energyFails++;G.log.push(sh);renderLog();
+  banner(t,s+(G.touchUI?'':' · R: 슬로 모션 다시 보기'),2800,col);newShooter();}
+ else if(G.running){banner(t+(kind==='react'?'  +10점':'  −3점'),s,1600,col);newShooter();}
+ setHelp();}
+function openGameReplay(sh){if(!sh||!sh.frames||sh.frames.length<3)return;const d=sh.dir||[0,0,1];
+ openReplay(sh.frames,sh.c,{yaw:Math.atan2(d[0],d[2])+Math.PI/2,title:`#${sh.n} 다시 보기 · 충돌 에너지 ${fmtE(sh.E)} kJ/mol`});}
+function renderLog(){const b=$('#logBody');if(!b)return;
+ b.innerHTML=G.log.slice().reverse().map((s,ri)=>{const i=G.log.length-1-ri;const ok=s.kind==='react';
+  return `<tr><td>${s.n}</td><td class="small">${s.face}</td><td>${fmtE(s.E)}</td><td class="${ok?'ok':'no'}">${ok?'✔ 반응':s.kind==='miss'?'빗나감':'✖ 반응 안 함'}</td><td class="small">${WHY[s.kind]}</td><td>${s.frames&&s.frames.length>2?`<button class="rp" data-i="${i}">▶</button>`:''}</td></tr>`;}).join('');
+ $$('#logBody .rp').forEach(x=>x.onclick=()=>{if(['fly','event','charge'].includes(G.phase))return;openGameReplay(G.log[+x.dataset.i]);});}
+
+/* ---------- 1분 챌린지 ---------- */
+const score=(succ,shots)=>succ*10-(shots-succ)*3;
+const entScore=e=>e.score!=null?e.score:score(e.count,e.shots);
+// 등급 기준 (점수): 성공 10점, 실패 −3점
+// 등급: 성공 횟수를 점수로 환산한 기준 (LEGEND 25번 성공 = 250점, SS 23번 = 230점, S 20번 = 200점 …)
+const GRADES=[[250,'LEGEND','#ff5ad8'],[230,'SS','#ffcc4d'],[200,'S','#ffb347'],[160,'A','#38d996'],[120,'B','#4fd1ff'],[80,'C','#a98bff'],[40,'D','#c8d5ee'],[-1e9,'F','#ff6b6b']];
+const gradeOf=sc=>GRADES.find(g=>sc>=g[0]);
+function startCountdown(){G.phase='countdown';G.cd=3.2;$('#cd').style.display='block';}
+function timeOver(){G.running=false;if(G.sh&&['face','aim','charge'].includes(G.phase)){removeMol(G.W,G.sh);G.sh=null;}G.phase='over';setAimUI(false);hideFaceAsk();setHelp();
+ const rate=G.shots?Math.round(G.succ/G.shots*100):0,sc=score(G.succ,G.shots),rb=rankBadge(G.R.id,sc,G.succ,G.shots),gr=gradeOf(sc);
+ openModal(`<h2>⏱️ 시간 종료!</h2><p>${G.R.eq}</p>
+  <div style="text-align:center;margin:6px 0 4px"><small style="color:var(--muted)">최종 점수</small><div style="display:flex;align-items:center;justify-content:center;gap:18px"><div style="font-size:56px;font-weight:900;color:var(--accent2);line-height:1.1">${sc}점</div><div title="등급" style="font-size:${gr[1]==='LEGEND'?30:50}px;font-weight:900;color:${gr[2]};border:3px solid ${gr[2]};border-radius:14px;padding:2px 14px;line-height:1.15;text-shadow:0 0 18px ${gr[2]}88">${gr[1]}</div></div>${rb}</div>
+  <div class="big3"><div><small>반응 성공 (+10)</small><b style="color:var(--ok)">${G.succ}</b></div><div><small>실패 (−3)</small><b style="color:#ffb3b3">${G.shots-G.succ}</b></div><div><small>성공률</small><b>${rate}%</b></div></div>
+  <p class="small">이름을 입력하면 이 기기의 랭킹에 기록돼요.</p><div class="namein"><input id="nmIn" maxlength="12" placeholder="이름 또는 모둠명"><button class="btn pri" id="nmSave">기록하기</button></div>
+  <div id="rkArea" style="margin-top:12px"></div>
+  <div class="btns"><button class="btn" id="tRetry">다시 도전</button><button class="btn" id="tHome">처음으로</button></div>`,true);
+ const rid=G.R.id;showRankIn($('#rkArea'),rid);
+ $('#nmSave').onclick=()=>{const nm=$('#nmIn').value.trim().slice(0,12)||'이름 없음';const id=saveRank(rid,{name:nm,score:sc,count:G.succ,shots:G.shots,rate,date:Date.now()});
+  $('#nmSave').disabled=true;$('#nmSave').textContent='저장됨';renderRankMini();showRankIn($('#rkArea'),rid,id);};
+ $('#nmIn').onkeydown=ev=>{if(ev.key==='Enter'&&!$('#nmSave').disabled)$('#nmSave').click();};
+ $('#tRetry').onclick=()=>{closeModal();startPlay();};$('#tHome').onclick=()=>{closeModal();show('home');};}
+/* ---------- 랭킹: 이 기기(브라우저)에만 저장, 반응마다 상위 20개 보관 ---------- */
+// 이번 점수가 이 기기 랭킹에서 몇 위가 되는지 (같은 점수면 성공이 많은 쪽, 그다음 시도가 적은 쪽이 위)
+function rankBadge(rid,sc,succ,shots){const l=LS.get(RANK_KEY,{})[rid]||[];const better=e=>entScore(e)>sc||(entScore(e)===sc&&(e.count>succ||(e.count===succ&&e.shots<=shots)));
+ const rank=l.filter(better).length+1,best=l.length?Math.max(...l.map(entScore)):null;
+ const box=(t,c,sub)=>`<div style="display:inline-block;margin-top:8px;padding:7px 16px;border-radius:99px;background:${c}22;border:1px solid ${c};color:${c};font-weight:900;font-size:17px">${t}</div>${sub?`<div class="small" style="margin-top:4px">${sub}</div>`:''}`;
+ if(!l.length)return '';
+ if(rank===1)return box('🏆 신기록! 1위','#ffcc4d',`이전 최고 ${best}점`);
+ if(rank===2)return box('🥈 2위 기록','#d9e2f2',`1위 ${best}점까지 ${best-sc}점`);
+ if(rank===3)return box('🥉 3위 기록','#e0a36b',`1위 ${best}점까지 ${best-sc}점`);
+ if(rank<=20)return box(`${rank}위 기록`,'#4fd1ff',`1위 ${best}점까지 ${best-sc}점`);
+ return box('20위 밖','#97a8c8',`20위 안에 들어야 랭킹에 남아요 · 1위 ${best}점`);}
+function saveRank(rid,e){const all=LS.get(RANK_KEY,{});const l=all[rid]||[];e.id=Date.now()+Math.random();l.push(e);
+ l.sort((a,b)=>entScore(b)-entScore(a)||b.count-a.count||a.shots-b.shots);all[rid]=l.slice(0,20);LS.set(RANK_KEY,all);return e.id;}
+const localRows=rid=>(LS.get(RANK_KEY,{})[rid]||[]).map(e=>({id:e.id,name:e.name,score:entScore(e),succ:e.count,fail:e.shots-e.count,rate:e.rate}));
+function rowsTable(l,isMe,n=10){l=l.slice(0,n);if(!l.length)return '<p class="small">아직 기록이 없어요. 첫 번째 기록의 주인공이 되어 보세요!</p>';
+ return `<table class="rk"><tr><th>순위</th><th>이름</th><th>등급</th><th>점수</th><th>성공</th><th>실패</th><th>성공률</th></tr>${l.map((e,i)=>`<tr class="${isMe&&isMe(e)?'me':''}"><td>${i+1}</td><td>${esc(e.name)}</td><td style="color:${gradeOf(e.score)[2]};font-weight:900">${gradeOf(e.score)[1]}</td><td><b>${e.score}</b></td><td>${e.succ}</td><td>${e.fail}</td><td>${e.rate}%</td></tr>`).join('')}</table>`;}
+function showRankIn(el,rid,me){if(el)el.innerHTML=rowsTable(localRows(rid),me?e=>e.id===me:null);}
+function renderRankMini(){const el=$('#rankMini');if(!el)return;const l=localRows(G.R.id).slice(0,5);
+ el.innerHTML=l.length?'<ol class="rank">'+l.map(e=>`<li>${esc(e.name)} — <b style="color:${gradeOf(e.score)[2]}">${gradeOf(e.score)[1]}</b> <b>${e.score}점</b> <span>(성공 ${e.succ} · 실패 ${e.fail})</span></li>`).join('')+'</ol>':'<p class="small">아직 기록이 없어요</p>';}
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function showRanking(ri){
+ openModal(`<h2>🏆 1분 챌린지 랭킹</h2><p class="small">이 기기에 저장된 기록이에요.</p><div class="tabs" id="rkRx">${RX.map((r,i)=>`<button data-r="${i}" class="${i===ri?'on':''}">${i+1}. ${r.txt}</button>`).join('')}</div><div id="rkBody"></div><div class="btns"><button class="btn" data-close>닫기</button></div>`);
+ showRankIn($('#rkBody'),RX[ri].id);
+ $$('#rkRx button').forEach(b=>b.onclick=()=>showRanking(+b.dataset.r));}
+
+/* ---------- 모달 · 안내 ---------- */
+function openModal(html,lock){$('#mbox').innerHTML=html;$('#modal').classList.add('show');$('#modal').dataset.lock=lock?'1':'';$$('#mbox [data-close]').forEach(b=>b.onclick=closeModal);}
+function closeModal(){$('#modal').classList.remove('show');const f=G.onModalClose;G.onModalClose=null;if(f)f();}
+$('#modal').onclick=e=>{if(e.target.id==='modal'&&!$('#modal').dataset.lock)closeModal();};
+const HOW=`<ul>
+ <li><b>원자 고르기</b> — 처음에 쏘는 분자의 어느 원자를 앞으로 향하게 할지 골라요. 쏘기 전까지는 숫자 키(1, 2)나 왼쪽 위 버튼으로 언제든 바꿀 수 있어요.</li>
+ <li><b>조준</b> — 조준 고리를 <b>맞히고 싶은 원자</b> 위에 대요. 고리 아래 원자에 하얀 테두리가 생기고 고리가 초록색으로 바뀌면 그 원자를 맞힐 수 있어요. 조준하는 동안 주변 분자는 슬로 모션으로 움직여요.</li>
+ <li><b>힘 · 발사</b> — PC: 마우스(또는 Space)를 꾹 누르고 있다가 떼요. 휴대폰·태블릿: 오른쪽 아래 <b>꾹 눌러 발사</b> 버튼. 누르는 동안 힘 게이지가 빠르게 오르내리고, 흰 선이 활성화 에너지예요.</li>
+ <li><b>충돌 에너지</b> — 원자의 가장자리를 아주 비스듬하게 스치면 충돌 에너지가 줄어서, 흰 선을 넘겨 쏴도 반응하지 않을 수 있어요.</li>
+ <li><b>휴대폰·태블릿 조준</b> — 화면을 문지르면 조준 고리가 따라 움직이고(손가락이 표적을 가리지 않아요), 원자를 톡 누르면 고리가 그 자리로 가요.</li></ul>`;
+function showHow(){openModal(`<h2>❓ 조작 방법</h2>${HOW}<div class="btns"><button class="btn pri" data-close>확인</button></div>`);}
+function showIntroPractice(){openModal(`<h2>🎯 연습 모드</h2><p style="font-size:18px;font-weight:800;color:#fff">${G.R.eq}</p>
+ <p>쏘는 분자 <b>${SP[G.R.A].f}</b>가 계속 주어져요. 상자 안의 <b>${SP[G.R.B].f}</b>를 맞혀 반응시켜 보세요. 반응하려면 <b>알맞은 방향</b>과 <b>활성화 에너지 이상의 에너지</b>가 모두 필요해요.</p>${HOW}
+ <div class="btns"><button class="btn pri" data-close>연습 시작!</button></div>`,true);G.onModalClose=()=>newShooter();}
+function showIntroTime(){openModal(`<h2>⏱️ 1분 챌린지</h2><p style="font-size:18px;font-weight:800;color:#fff">${G.R.eq}</p><p>1분 동안 최대한 많이 반응시키세요! 힘 게이지가 <b>흰 선(활성화 에너지)</b>보다 높을 때 떼고, <b>방향</b>을 맞추는 게 핵심이에요.</p>${HOW}<div class="btns"><button class="btn pri" data-close>준비 완료!</button></div>`,true);
+ G.onModalClose=startCountdown;}
+
+/* ---------- 관찰 모드: 확대 장면 만들기 ---------- */
+function runDemo(kind){const R=G.R;const W=newWorld({R,bg:'none',spawn:false});const fB=SP[R.B].faces,fA=SP[R.A].faces;
+ const corrB=fB.find(f=>R.correct[R.B].includes(f.id)),corrA=fA.find(f=>R.correct[R.A].includes(f.id));
+ let faceA=corrA,faceB=corrB;if(kind==='orient'){const wb=fB.find(f=>!R.correct[R.B].includes(f.id)&&!f.hide);if(wb)faceB=wb;else faceA=fA.find(f=>!R.correct[R.A].includes(f.id));}
+ const E=kind==='energy'?R.Ea*.6:R.Ea*1.5,d=[1,0,0];
+ const t=makeMol(R.B,[0,0,0]);t.w=[0,0,0];orientMol(t,faceB,mul(d,-1),0);
+ const s=makeMol(R.A,[-10,0,0]);s.w=[0,0,0];orientMol(s,faceA,d,0);s.E=E;s.vel=mul(d,6+5*Math.sqrt(E/(R.Ea*2)));s.st='fly';s.flyT=0;s.entered=true;
+ W.mols.push(t,s);W.rec={frames:[],t:0,on:true,shId:s.id,faceAt:[]};W.diag={x:.06,h:0,E,cap:'분자가 다가가는 중…',kind:'fly'};
+ let ended=false;W.onEventEnd=()=>{ended=true;};W.onMiss=()=>{ended=true;};
+ for(let i=0;i<600&&!ended;i++)stepWorld(W,1/60);
+ const title={orient:'① 방향이 맞지 않는 충돌',energy:'② 에너지가 부족한 충돌',react:'③ 유효 충돌'}[kind];
+ if(G.phase==='replay')closeReplay();openReplay(W.rec.frames,W.ev?W.ev.c:[0,0,0],{yaw:.6,pitch:-.42,dist:13,title:`${title} · 충돌 에너지 ${fmtE(E)} kJ/mol`,speed:.5});}
+
+/* ---------- 다시 보기 ---------- */
+function openReplay(frames,c,o){if(!frames||!frames.length)return;if(G.phase==='charge')cancelCharge();
+ G.rp={frames,t:0,T:frames[frames.length-1].t,speed:o.speed||.5,playing:true,c:c||[0,0,0],yaw:o.yaw||0,pitch:o.pitch!=null?o.pitch:-.22,dist:o.dist||11,prev:G.phase==='replay'?(G.rp?G.rp.prev:'select'):G.phase};
+ G.phase='replay';hideFaceAsk();setAimUI(false);
+ $('#rpBar').style.display='flex';$('#rpTitle').style.display='block';$('#rpDiagBox').style.display=G.diagPop?'none':'block';$('#rpTitle').textContent='🎬 '+(o.title||'다시 보기');
+ $('#spdBar').style.display='none';$('#followBtn').style.display='none';$$('.spd').forEach(b=>b.classList.toggle('on',+b.dataset.s===G.rp.speed));$('#rpPlay').textContent='⏸ 멈춤';setHelp();}
+function openDiagPop(){const p=$('#diagPop');p.style.display='flex';G.diagPop=true;$('#rpDiagBox').style.display='none';
+ const r=p.getBoundingClientRect();p.style.left=clamp(r.left,0,innerWidth-r.width)+'px';p.style.top=clamp(r.top,0,innerHeight-60)+'px';}
+function closeDiagPop(){$('#diagPop').style.display='none';G.diagPop=false;if(G.phase==='replay')$('#rpDiagBox').style.display='block';}
+$('#diagPopX').onclick=closeDiagPop;
+{const hd=$('#diagPopHd'),p=$('#diagPop');let d=null;
+ hd.addEventListener('pointerdown',e=>{if(e.target.id==='diagPopX')return;const r=p.getBoundingClientRect();d={dx:e.clientX-r.left,dy:e.clientY-r.top};try{hd.setPointerCapture(e.pointerId);}catch(_){}});
+ hd.addEventListener('pointermove',e=>{if(!d)return;const w=p.offsetWidth;p.style.left=clamp(e.clientX-d.dx,-w+80,innerWidth-80)+'px';p.style.top=clamp(e.clientY-d.dy,0,innerHeight-40)+'px';});
+ hd.addEventListener('pointerup',()=>{d=null;});hd.addEventListener('pointercancel',()=>{d=null;});}
+function closeReplayUI(){$('#rpDiagBox').style.display='none';$('#rpBar').style.display='none';$('#rpTitle').style.display='none';$('#cap').style.display='none';}
+function closeReplay(){const r=G.rp;closeReplayUI();G.rp=null;let ph=r&&r.prev;
+ if(G.mode==='observe')ph='select';else if(!['face','aim'].includes(ph))ph=G.sh?(G.faces[G.sh.sp]?'aim':'face'):'aim';
+ G.phase=ph;if(ph==='face')showFaceAsk();else if(ph==='aim'&&G.sh)setAimUI(true);
+ if(G.mode==='observe')$('#spdBar').style.display='flex';if(G.follow)$('#followBtn').style.display='block';setHelp();}
+function rpFrame(){const r=G.rp,f=r.frames;let lo=0,hi=f.length-1;while(lo<hi){const m=(lo+hi+1)>>1;if(f[m].t<=r.t)lo=m;else hi=m-1;}return f[lo];}
+function rpStep(dt){const r=G.rp;if(r.playing){r.t+=dt*r.speed;r.yaw+=dt*.1;if(r.t>=r.T){r.t=r.T;r.playing=false;$('#rpPlay').textContent='▶ 재생';}}
+ const sl=$('#rpSlider');if(!sl.dragging)sl.value=Math.round(r.t/(r.T||1)*1000);}
+function rpToggle(){const r=G.rp;if(!r)return;if(!r.playing&&r.t>=r.T)r.t=0;r.playing=!r.playing;$('#rpPlay').textContent=r.playing?'⏸ 멈춤':'▶ 재생';}
+function rpSpeed(v){if(!G.rp)return;G.rp.speed=v;$$('.spd').forEach(x=>x.classList.toggle('on',+x.dataset.s===v));}
+$('#rpPlay').onclick=rpToggle;
+$('#rpRestart').onclick=()=>{const r=G.rp;if(!r)return;r.t=0;r.playing=true;$('#rpPlay').textContent='⏸ 멈춤';};
+$('#rpClose').onclick=()=>closeReplay();
+$$('.spd').forEach(b=>b.onclick=()=>rpSpeed(+b.dataset.s));
+const sl=$('#rpSlider');sl.oninput=()=>{if(!G.rp)return;sl.dragging=true;G.rp.t=sl.value/1000*G.rp.T;G.rp.playing=false;$('#rpPlay').textContent='▶ 재생';};sl.onchange=()=>{sl.dragging=false;};
+$$('.ospd').forEach(b=>b.onclick=()=>{G.speed=+b.dataset.s;G.paused=false;$('#obPause').textContent='⏸ 멈춤';$$('.ospd').forEach(x=>x.classList.toggle('on',x===b));});
+function snapWorld(W){W.hist=W.hist||[];const last=W.hist[W.hist.length-1];if(last&&W.t-last.t<.04*Math.max(1,G.speed))return;
+ W.hist.push({t:W.t,d:structuredClone({mols:W.mols,cx:W.cx,stats:W.stats})});while(W.hist.length&&W.t-W.hist[0].t>30)W.hist.shift();}
+function rewind(sec){const W=G.W;if(!W||!W.hist||!W.hist.length)return;const tgt=W.t-sec;let k=-1;for(let i=W.hist.length-1;i>=0;i--){if(W.hist[i].t<=tgt){k=i;break;}}if(k<0)k=0;
+ const h=W.hist[k],d=structuredClone(h.d);W.mols=d.mols;W.cx=d.cx;W.stats=d.stats;W.fx=[];W.t=h.t;W.hist=W.hist.slice(0,k+1);
+ G.paused=true;$('#obPause').textContent='▶ 재생';banner('⏪ 1초 전으로 돌아갔어요','▶ 재생을 누르거나 느린 배속으로 다시 살펴보세요',1600);}
+$('#obBack').onclick=()=>rewind(G.speed);
+$('#obPause').onclick=()=>{G.paused=!G.paused;$('#obPause').textContent=G.paused?'▶ 재생':'⏸ 멈춤';};
+$('#followBtn').onclick=e=>{e.stopPropagation();stopFollow();};
+function stopFollow(){G.follow=null;if(G.W){G.W.follow=null;G.W.focus=null;}G.orbit.dist=G.orbitSave||40;G.orbit.tgt=[0,0,0];$('#followBtn').style.display='none';setHelp();}
+
+/* ---------- 입력 ---------- */
+const PTR=new Map();let pinch=null;
+const local=e=>{const b=stage.getBoundingClientRect();return [e.clientX-b.left,e.clientY-b.top];};
+const shooting=()=>G.mode!=='observe'&&['face','aim','charge'].includes(G.phase);
+function pickObserve(x,y){const pj=makeProj(G.cam,VW,VH);let best=null,bz=1e9;
+ for(const m of G.W.mols){if(m.st!=='free'||m.al<.8)continue;molAtoms(m).forEach((p,i)=>{const q=pj(p);if(!q)return;const r=EL[SP[m.sp].E[i]].r*q[3]+6;if(Math.hypot(q[0]-x,q[1]-y)<r&&q[2]<bz){bz=q[2];best=m;}});}
+ return best;}
+// 버튼을 누른 뒤 포커스가 남아 단축키(특히 Space)가 버튼을 눌러 버리지 않도록
+document.addEventListener('pointerup',()=>{const a=document.activeElement;if(a&&(a.tagName==='BUTTON'||(a.tagName==='INPUT'&&a.type==='checkbox')))a.blur();},true);
+stage.addEventListener('contextmenu',e=>e.preventDefault());
+stage.addEventListener('pointerdown',e=>{if(e.target.closest('#fireBtn,#faceAsk,#faceMini,#rpBar,#spdBar,#followBtn'))return;
+ const tu=e.pointerType!=='mouse';if(tu!==G.touchUI){G.touchUI=tu;setHelp();if(G.phase==='aim'||G.phase==='charge')setAimUI(true);}
+ try{stage.setPointerCapture(e.pointerId);}catch(_){}const [x,y]=local(e);PTR.set(e.pointerId,{x,y,sx:x,sy:y,moved:false,type:e.pointerType});
+ if(PTR.size===2){const a=[...PTR.values()];pinch={d:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)};}
+ if(shooting()&&e.pointerType==='mouse'){G.cursor=[x,y];if(e.button===0&&G.phase==='aim')startCharge();}});
+stage.addEventListener('pointermove',e=>{const [x,y]=local(e);const p=PTR.get(e.pointerId);
+ if(shooting()&&e.pointerType==='mouse'){G.cursor=[x,y];if(p){p.x=x;p.y=y;}return;}
+ if(!p)return;
+ const dx=x-p.x,dy=y-p.y;p.x=x;p.y=y;if(Math.hypot(x-p.sx,y-p.sy)>8)p.moved=true;
+ if(shooting()){if(PTR.size===1)G.cursor=[clamp(G.cursor[0]+dx*1.25,4,VW-4),clamp(G.cursor[1]+dy*1.25,4,VH-4)];return;}
+ if(PTR.size===2&&pinch){const a=[...PTR.values()],d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y),k=pinch.d/d;pinch.d=d;
+  if(G.phase==='replay')G.rp.dist=clamp(G.rp.dist*k,4,30);else G.orbit.dist=clamp(G.orbit.dist*k,G.follow?5:16,64);return;}
+ if(G.phase==='replay'){G.rp.yaw-=dx*.008;G.rp.pitch=clamp(G.rp.pitch+dy*.006,-1.3,1.3);}
+ else if(G.mode==='observe'){G.orbit.yaw-=dx*.006;G.orbit.pitch=clamp(G.orbit.pitch+dy*.005,-1.2,1.2);}});
+function ptrEnd(e){const p=PTR.get(e.pointerId);PTR.delete(e.pointerId);if(PTR.size<2)pinch=null;if(!p)return;
+ if(shooting()){if(p.type==='mouse'){if(G.phase==='charge'&&!G.kbCharge)fire();}else if(!p.moved)G.cursor=[p.sx,p.sy];return;}
+ if(p.moved)return;
+ if(G.mode==='observe'&&G.phase==='select'&&G.W){const m=pickObserve(p.x,p.y);if(m){G.follow=m.id;G.W.follow=m.id;G.W.focus=new Set([m.id]);G.orbitSave=G.orbitSave||G.orbit.dist;G.orbit.dist=11;$('#followBtn').style.display='block';setHelp();}}}
+stage.addEventListener('pointerup',ptrEnd);stage.addEventListener('pointercancel',e=>{PTR.delete(e.pointerId);pinch=null;if(G.phase==='charge')cancelCharge();});
+stage.addEventListener('wheel',e=>{e.preventDefault();const k=Math.exp(e.deltaY*.001);if(G.phase==='replay')G.rp.dist=clamp(G.rp.dist*k,4,30);else if(G.mode==='observe')G.orbit.dist=clamp(G.orbit.dist*k,G.follow?5:16,64);},{passive:false});
+// 발사 버튼 (휴대폰·태블릿)
+const fb=$('#fireBtn');
+fb.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();if(G.phase!=='aim')return;try{fb.setPointerCapture(e.pointerId);}catch(_){}startCharge();});
+fb.addEventListener('pointerup',e=>{e.stopPropagation();if(G.phase==='charge')fire();});
+fb.addEventListener('pointercancel',()=>cancelCharge());
+fb.addEventListener('contextmenu',e=>e.preventDefault());
+// 단축키 (한글 입력 상태에서도 되도록 e.code 사용)
+window.addEventListener('keydown',e=>{if(G.scr!=='play'||(e.target.tagName==='INPUT'&&e.target.type!=='checkbox'))return;if($('#modal').classList.contains('show'))return;
+ const c=e.code,num=/^(Digit|Numpad)([1-9])$/.exec(c);
+ if(c==='Space'||c.startsWith('Arrow'))e.preventDefault();
+ if(G.phase==='replay'){if(c==='Space')rpToggle();else if(c==='Escape')closeReplay();else if(c==='ArrowLeft'){G.rp.t=Math.max(0,G.rp.t-.05);G.rp.playing=false;}else if(c==='ArrowRight'){G.rp.t=Math.min(G.rp.T,G.rp.t+.05);G.rp.playing=false;}
+  else if(num){const v=[1,.5,.25,.1][+num[2]-1];if(v)rpSpeed(v);}return;}
+ if(G.mode==='observe'){if(c==='ArrowLeft')rewind(G.speed);else if(c==='Space')$('#obPause').click();else if(c==='Escape'&&G.follow)stopFollow();return;}
+ if(c==='KeyH'){G.keysHidden=!G.keysHidden;setHelp();}
+ if(c==='KeyR'&&G.mode==='practice'&&G.last&&['face','aim'].includes(G.phase)){openGameReplay(G.last);return;}
+ if(num&&['face','aim','charge'].includes(G.phase)){chooseFaceN(+num[2]);return;}
+ if(G.phase==='aim'||G.phase==='charge'){
+  if(c==='Space'&&!e.repeat&&G.phase==='aim'){G.kbCharge=true;startCharge();}
+  if(c==='Escape')cancelCharge();
+  const st=e.shiftKey?40:14;if(c==='ArrowLeft')G.cursor[0]-=st;if(c==='ArrowRight')G.cursor[0]+=st;if(c==='ArrowUp')G.cursor[1]-=st;if(c==='ArrowDown')G.cursor[1]+=st;
+  G.cursor=[clamp(G.cursor[0],4,VW-4),clamp(G.cursor[1],4,VH-4)];}},true);
+window.addEventListener('keyup',e=>{if(e.code==='Space'&&G.kbCharge){e.preventDefault();G.kbCharge=false;if(G.phase==='charge')fire();}},true);
+
+/* ---------- 카메라 ---------- */
+function camUpdate(dt){let pos,tgt,fov=55,k=6;
+ if(G.mode!=='observe'&&(['face','aim','charge','wait','countdown','over'].includes(G.phase)||(G.mode==='time'&&G.phase==='fly'))&&G.station){pos=G.station.pos;tgt=G.station.tgt;k=5;}
+ else if(G.phase==='fly'&&G.sh&&G.mode!=='time'){const s=G.sh,d=norm(s.vel);pos=add(sub(s.pos,mul(d,6.5)),[0,1.8,0]);tgt=add(s.pos,mul(d,6));fov=50;k=10;}
+ else if(G.phase==='event'&&G.evCam){const e=G.evCam;e.yaw+=dt*.3;e.dist=lerp(e.dist,10,1-Math.exp(-dt*2));pos=sub(e.c,mul(dirYP(e.yaw,e.pitch),e.dist));tgt=e.c;fov=50;k=5;}
+ else if(G.phase==='replay'){const r=G.rp;pos=sub(r.c,mul(dirYP(r.yaw,r.pitch),r.dist));tgt=r.c;fov=50;k=10;}
+ else{const o=G.orbit;if(G.follow){G.follow=G.W.follow||G.follow;const m=findMol(G.W,G.follow),cx=G.W.cx.find(c=>c.id===G.follow);const fp=m?m.pos:cx?centroid(cx.cur):null;if(fp){o.tgt=lerpV(o.tgt,fp,1-Math.exp(-dt*6));G.followLost=0;}else if(!fp){G.followLost=(G.followLost||0)+dt;if(G.followLost>2.5){G.followLost=0;stopFollow();}}}
+  else if(!PTR.size)o.yaw+=dt*.015;pos=sub(o.tgt,mul(dirYP(o.yaw,o.pitch),o.dist));tgt=o.tgt;k=G.follow?8:5;}
+ const a=1-Math.exp(-dt*k);G.cam.pos=lerpV(G.cam.pos,pos,a);G.cam.tgt=lerpV(G.cam.tgt,tgt,a);G.cam.fov=lerp(G.cam.fov,fov,a);}
+// 발사 화면으로 돌아온 직후에는 카메라가 제자리에 오도록 바로 맞춤
+function snapStation(){if(G.station&&['face','aim'].includes(G.phase)){G.cam.pos=lerpV(G.cam.pos,G.station.pos,.25);G.cam.tgt=lerpV(G.cam.tgt,G.station.tgt,.25);}}
+
+/* ---------- 매 프레임 ---------- */
+const sdt0=ts=>ts>0;
+const TS={face:.3,aim:.22,charge:.1,fly:.4,over:.2,wait:.4,countdown:.6};
+function frame(dt){const W=G.W;if(!W)return;
+ if(G.phase==='replay')rpStep(dt);
+ else if(!$('#modal').classList.contains('show')||G.phase==='over'||G.phase==='wait'){let ts=1;
+  if(G.mode==='observe')ts=G.paused?0:G.speed;else if(G.phase==='event')ts=G.mode==='time'?.8:.55;else if(TS[G.phase]!=null)ts=TS[G.phase];
+  if(G.mode==='observe'&&sdt0(ts))snapWorld(W);const sdt=dt*ts;W.avoid=G.station?G.station.pos:G.cam.pos;const n=Math.ceil(sdt/(1/60));for(let i=0;i<n;i++)stepWorld(W,sdt/n);
+  if(['face','aim','charge'].includes(G.phase))aimUpdate(dt);}
+ if(G.mode==='time'){if(G.phase==='countdown'){G.cd-=dt;const cdv=$('#cd');cdv.textContent=G.cd>.2?Math.ceil(G.cd-.2):'시작!';
+   if(G.cd<=-.4){cdv.style.display='none';G.running=true;newShooter();}}
+  else if(G.running){G.timeLeft-=dt;if(G.timeLeft<=0){G.timeLeft=0;timeOver();}}}
+ camUpdate(dt);snapStation();draw();placeReticle();
+ G.hudT+=dt;if(G.hudT>.08){G.hudT=0;hud();}}
+function draw(){const W=G.W;let fr;
+ if(G.phase==='replay')fr=rpFrame();
+ else{const aiming=['face','aim','charge'].includes(G.phase);
+  fr=buildFrame(W,{focus:G.mode==='observe'&&W.follow?W.focus:null,sites:G.showSites,sh:aiming?G.sh:null,face:aiming&&G.sh&&(G.phase!=='face'||G.faceHover)?curFace():null});
+  if(aiming&&G.hov){const mm=fr.mols.find(x=>x.id===G.hov.id);if(mm){if(G.hov.all)mm.ring=4;else mm.ringAt=G.hov.i;}}}
+ render(ctx,VW,VH,G.cam,fr,{box:W.box,labels:true,elText:true});
+ const cap=$('#cap');let ds=null,ct='';
+ if(G.phase==='replay'){ds=fr.diag;if(ds)ct=ds.cap;}
+ else if((G.phase==='fly'||G.phase==='event')&&W.diag){ds=W.diag;ct=ds.cap;}
+ if(ct){cap.style.display='block';if(cap.textContent!==ct)cap.textContent=ct;}else cap.style.display='none';
+ const dc=$('#diag');if(dc)drawDiag(dc,G.R,ds&&ds.kind?ds:null);
+ if(G.phase==='replay'&&!G.diagPop)drawDiag($('#rpDiag'),G.R,ds&&ds.kind?ds:null,true);
+ if(G.diagPop)drawDiag($('#diagPopCv'),G.R,ds&&ds.kind?ds:null,true);}
+
+function loop(ts){const dt=Math.min(.05,(ts-(G.lt||ts))/1000);G.lt=ts;
+ try{if(G.scr==='home')drawPreview(dt);else if(G.scr==='play')frame(dt);}catch(err){console.error(err);}
+ requestAnimationFrame(loop);}
+sprites();buildHome();resize();requestAnimationFrame(loop);
+window.__ECL={G,RX,SP,startPlay,runDemo,fire,startCharge,chooseFace,newShooter,cursorHit};
+})();
+</script>
+</body>
+</html>

@@ -226,6 +226,45 @@ window.VLAB = {
       added: "2026-11-24"
     },
     {
+      id: "effective-collision-lab",
+      subject: "chemistry",
+      title: "유효 충돌 실험실",
+      summary: "미시 세계로 들어가 분자를 직접 쏘아 반응을 일으켜 봅니다. 어느 원자를 앞으로 향하게 할지(충돌 방향)와 얼마나 세게 쏠지(활성화 에너지 이상의 에너지)를 정해 NO + O₃, NO₂ + CO, H₂ + I₂ 반응을 성공시키고, 슬로 모션 다시 보기와 에너지 그래프로 반응한 까닭·반응하지 않은 까닭을 확인합니다. 저절로 일어나는 충돌을 지켜보는 관찰 모드, 발사 기록표가 남는 연습 모드, 점수와 랭킹이 있는 1분 챌린지가 있습니다.",
+      file: "labs/chemistry/effective-collision-lab.html",
+      author: "홍채린",
+      grade: ["고2", "고3"],
+      unit: "물질과 에너지 · 반응 속도",
+      tags: ["유효 충돌", "충돌 방향", "활성화 에너지", "활성화 상태", "충돌 이론", "반응 속도"],
+      thumbnail: "assets/img/thumbs/effective-collision-lab/0.png",
+      added: "2026-11-27"
+    },
+    {
+      id: "reaction-rate-factors",
+      subject: "chemistry",
+      title: "반응 속도 요인 관찰실",
+      summary: "온도, 농도(압력·표면적), 촉매를 하나씩 바꿔 가며 입자 모형에서 충돌과 유효 충돌이 어떻게 달라지는지 관찰합니다. 생성물의 양–시간 그래프, 반응의 진행에 따른 에너지 그림, 입자의 운동 에너지 분포가 함께 바뀌고, 이전 조건의 그래프와 겹쳐 비교할 수 있습니다. 실험 기록을 모아 두 조건을 비교하는 보고서를 인쇄할 수 있고, 유효 충돌·활성화 에너지·반응 속도의 요인 개념 정리와 O/X 확인 문제가 들어 있습니다.",
+      file: "labs/chemistry/reaction-rate-factors.html",
+      author: "홍채린",
+      grade: ["고2", "고3"],
+      unit: "물질과 에너지 · 반응 속도",
+      tags: ["반응 속도", "온도", "농도", "압력", "표면적", "촉매", "유효 충돌", "활성화 에너지", "운동 에너지 분포"],
+      thumbnail: "assets/img/thumbs/reaction-rate-factors/0.png",
+      added: "2026-11-27"
+    },
+    {
+      id: "reaction-order-mission",
+      subject: "chemistry",
+      title: "반응 차수 찾기 실험실",
+      summary: "반응물의 초기 농도를 바꿔 가며 실험하고, 농도–시간 그래프에서 구한 초기 반응 속도를 비교해 반응 차수와 반응 속도 상수 k(값과 단위)를 찾아 반응 속도식을 완성하는 미션입니다. 도전할 때마다 차수가 바뀌는 가상 반응 3개와 실제 실험으로 차수가 밝혀진 반응 9개가 있고, 실험은 12번까지 할 수 있습니다. 미니 계산기와 힌트, 반응 속도·반응 속도식·반응 차수 구하기 개념 정리와 O/X 확인 문제가 들어 있습니다.",
+      file: "labs/chemistry/reaction-order-mission.html",
+      author: "홍채린",
+      grade: ["고2", "고3"],
+      unit: "물질과 에너지 · 반응 속도",
+      tags: ["반응 속도식", "반응 차수", "반응 속도 상수", "초기 반응 속도", "반감기", "농도–시간 그래프"],
+      thumbnail: "assets/img/thumbs/reaction-order-mission/0.png",
+      added: "2026-11-27"
+    },
+    {
       id: "monster-designer",
       subject: "biology",
       title: "몬스터 디자이너",

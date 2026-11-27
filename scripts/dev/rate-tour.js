@@ -11,7 +11,7 @@ const out=process.argv[2], port=process.argv[3]||8765, hash=process.argv[4]===un
     p.on('pageerror',e=>errs.push(String(e))); p.on('console',x=>{if(x.type()==='error')errs.push(x.text())});
     const shot=async n=>{await p.waitForTimeout(500);await p.screenshot({path:`${out}/${n}-${w}.png`});
       const sw=await p.evaluate(()=>document.documentElement.scrollWidth); if(sw>w){const who=await p.evaluate(W=>[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>W+1&&e.offsetParent).slice(0,4).map(e=>e.tagName+'#'+e.id+'.'+e.className),w);console.log('가로 넘침',n,w,sw,who.join(' | '));}};
-    const go=async f=>{await p.goto(`http://localhost:${port}/labs/chemistry/${f}.html${hash}`);await p.waitForTimeout(900);};
+    const go=async f=>{await p.goto('about:blank');await p.goto(`http://localhost:${port}/labs/chemistry/${f}.html${hash}`);await p.waitForTimeout(900);};
     const tap=async s=>{const e=p.locator(s).first(); if(await e.count()&&await e.isVisible()){await e.click();await p.waitForTimeout(300);return true;} return false;};
     // 유효 충돌
     for(const mode of ['observe','practice','time']){

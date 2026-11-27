@@ -20,6 +20,16 @@ const PREP = {
   'chemistry/buffer-solution-lab': async p => {   // 안내 닫고 ① pH 비교에서 HCl 6 mL 넣은 모습
     await p.click('#modalClose').catch(() => {}); await p.click('#cmpAdd1'); await p.click('#cmpAdd5'); await p.waitForTimeout(1600);
   },
+  'chemistry/effective-collision-lab': async p => {   // 연습 모드로 들어가 안내를 닫은 모습
+    await p.click('.mode[data-mode=practice]'); await p.click('#startBtn'); await p.waitForTimeout(600); await p.click('#mbox [data-close]').catch(() => {}); await p.waitForTimeout(1500);
+  },
+  'chemistry/reaction-rate-factors': async p => {   // 온도 실험을 몇 초 돌린 모습
+    await p.click('#simPlay'); await p.waitForTimeout(5000);
+  },
+  'chemistry/reaction-order-mission': async p => {   // 첫 실제 반응을 골라 농도를 바꿔 두 번 실험한 모습
+    await p.click('.rx-card[data-id="r1"]'); await p.waitForTimeout(400); await p.click('.modal-bg.show [data-close]').catch(() => {});
+    await p.click('#runExp'); await p.waitForTimeout(1500); await p.click('#concCtl .seg[data-i="0"] button[data-c="0.2"]'); await p.click('#runExp'); await p.waitForTimeout(2500);
+  },
   'environment/earth-rescue-corps': async p => {   // 글꼴을 기다린 뒤, 진행 중인 연구원 상태를 만들어 연구실 화면을 잘라 낼 폭에 맞춤
     await p.waitForTimeout(2600);
     await p.evaluate(() => { const s = fresh(); s.name = '초록별'; s.promoted = 3; s.read = { 0: 1, 1: 1, 2: 1, 3: 1 }; ISLANDS.forEach((I, i) => I.missions.forEach((m, j) => { if (i < 3) { s.stars[i + '-' + j] = 3; if (!s.items.includes(m.reward)) s.items.push(m.reward); } })); SAVES.slots = [s]; SAVES.cur = 0; S = s; const a = document.getElementById('app'); a.style.maxWidth = '912px'; a.style.margin = '0'; office(); });

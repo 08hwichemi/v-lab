@@ -3,7 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>유효 충돌 실험실 – 반응시키기!</title>
+<title>유효 충돌 실험실 · V-Lab</title>
+<style>
+/* V-Lab 공용 글꼴·색 토큰만 가져옴 (공용 클래스는 이 파일의 클래스 이름과 겹치므로 lab-theme.css 전체는 쓰지 않음) */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+/* 위·아래첨자(₆ ⁺ ⁻ …)는 한글 글꼴에 ₁₂₃₄ 만 들어 있어 화학식 숫자 크기가 들쭉날쭉해진다. 같은 계열 라틴 글꼴에서 첨자만 가져와 맨 앞에 둔다 */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&text=%E2%81%B0%C2%B9%C2%B2%C2%B3%E2%81%B4%E2%81%B5%E2%81%B6%E2%81%B7%E2%81%B8%E2%81%B9%E2%81%BA%E2%81%BB%E2%82%80%E2%82%81%E2%82%82%E2%82%83%E2%82%84%E2%82%85%E2%82%86%E2%82%87%E2%82%88%E2%82%89%E2%82%8A%E2%82%8B&display=swap');
+:root{--font: 'IBM Plex Sans', 'IBM Plex Sans KR', 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; --bg: #ffffff; --panel: #ffffff; --panel-2: #F7F8FA; --line: #E6E8EC; --line-2: #F0F1F3; --text: #111111; --text-2: #3F4652; --muted: #6B7280; --accent: #3182F6; --accent-soft: #EAF2FF; --ok: #12A66B; --warn: #F5A623; --err: #E5484D; --radius: 12px; --radius-sm: 8px;}
+</style>
 <style>
 :root{--bg:#0a1120;--panel:#0f1a2d;--panel2:#15223a;--line:#253a5e;--text:#e9effc;--muted:#97a8c8;--accent:#4fd1ff;--accent2:#ffcc4d;--ok:#38d996;--bad:#ff6b6b;--r:14px}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -48,7 +55,7 @@ sub{font-size:.7em}
 .row-btns{display:flex;gap:8px;margin-top:9px}
 .ghost{flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0c1527;font-size:14px}
 /* PC: 첫 화면이 화면 전체를 채우도록 */
-@media (min-width:901px){
+@media (min-width:901px) and (min-height:600px){
  #home{overflow:hidden}
  .home-wrap{max-width:none;height:100%;margin:0;padding:3.2vh 3.5vw;display:flex;flex-direction:column}
  .brand h1{font-size:clamp(28px,3.4vw,52px)}
@@ -131,7 +138,7 @@ ol.rank li span{color:var(--muted);font-size:12px}
 /* stage overlays */
 .ov{position:absolute;pointer-events:none}
 #help{left:50%;top:10px;transform:translateX(-50%);background:#000a;padding:7px 14px;border-radius:99px;font-size:13px;color:#d6e6ff;white-space:nowrap;max-width:94%;overflow:hidden;text-overflow:ellipsis}
-#faceAsk{position:absolute;left:50%;top:118px;transform:translateX(-50%);background:#0a1324ee;border:1px solid var(--accent);border-radius:14px;padding:12px 14px;display:none;text-align:center;z-index:4;box-shadow:0 10px 30px #0009;width:max-content;max-width:94%}
+#faceAsk{position:absolute;left:50%;top:150px;transform:translateX(-50%);background:#0a1324ee;border:1px solid var(--accent);border-radius:14px;padding:12px 14px;display:none;text-align:center;z-index:4;box-shadow:0 10px 30px #0009;width:max-content;max-width:94%}
 #faceAsk .t{font-size:15px;font-weight:800;margin-bottom:8px}
 #faceAsk .t small{display:block;font-size:12px;color:var(--muted);font-weight:500;margin-top:2px}
 #faceAsk .chip{font-size:15px;padding:10px 14px}
@@ -173,7 +180,7 @@ ol.rank li span{color:var(--muted);font-size:12px}
 #spdBar{left:10px;bottom:10px}
 #followBtn{position:absolute;right:12px;top:48px;display:none}
 #cd{left:50%;top:45%;transform:translate(-50%,-50%);font-size:110px;font-weight:900;color:#fff;text-shadow:0 0 30px #4fd1ff;display:none}
-#rpDiagBox{right:12px;bottom:74px;width:400px;background:#0a1324ee;border:1px solid #4fd1ff66;border-radius:14px;padding:8px 10px 10px;display:none;z-index:3;box-shadow:0 10px 30px #0008}
+#rpDiagBox{right:12px;top:48px;width:400px;background:#0a1324ee;border:1px solid #4fd1ff66;border-radius:14px;padding:8px 10px 10px;display:none;z-index:3;box-shadow:0 10px 30px #0008}
 #rpDiagBox .t{font-size:13px;font-weight:800;color:var(--accent);margin-bottom:4px}
 #rpDiagBox canvas{width:100%;height:220px;display:block}
 #rpTitle{left:12px;top:10px;background:#000a;padding:6px 12px;border-radius:10px;font-size:13px;display:none;color:var(--accent2);font-weight:700}
@@ -232,9 +239,92 @@ table.rk tr.me td{color:var(--accent2);font-weight:800}
  .brand h1{font-size:23px}
  .preview{height:150px}
 }
+/* ===== V-Lab 공용 테마에 맞춘 덮어쓰기 ===== */
+/* 바깥 화면(첫 화면·옆 패널·창)은 흰 바탕, 분자가 움직이는 무대와 그래프 캔버스는 원래의 어두운 색을 그대로 둔다 */
+:root{--bg:#fff;--panel:#fff;--panel2:#fff;--line:#E6E8EC;--text:#111;--muted:#6B7280;--accent:#3182F6;--accent2:#B45309;--ok:#0E9F6E;--bad:#E5484D;--r:12px}
+.stage,.preview,#diagPop{--bg:#0a1120;--panel:#0f1a2d;--panel2:#15223a;--line:#253a5e;--text:#e9effc;--muted:#97a8c8;--accent:#4fd1ff;--accent2:#ffcc4d;--ok:#38d996;--bad:#ff6b6b;color:#e9effc}
+html,body{font-family:var(--font);letter-spacing:-0.012em;-webkit-font-smoothing:antialiased}
+#home{background:#fff}
+body.vlab-embed .brand{display:none}
+.brand h1{font-weight:700}
+.brand h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--accent)}
+.tag{background:#EAF2FF;color:#1B64DA;border-color:#C9DDFB;font-size:13px}
+.sub{font-size:15px}
+.card{background:#fff}
+.step{color:#1B64DA;font-size:14px;font-weight:700;letter-spacing:0}
+.rx,.mode,.ghost{background:#fff;border-radius:8px}
+.rx:hover,.mode:hover{border-color:#111}
+.rx.sel,.mode.sel{background:#111;border-color:#111;color:#fff;box-shadow:none}
+.rx .num{background:#F0F1F3}
+.rx.sel .num{background:rgba(255,255,255,.18)}
+.rx .lv{font-size:13px}
+.rx.sel .lv{color:#FFD57A}
+.mode span{font-size:13.5px}
+.mode.sel span{color:#D1D5DB}
+.preview{border-radius:8px}
+.preview .pcap{font-size:13px}
+.start{background:var(--accent);color:#fff;box-shadow:none;border-radius:8px;font-weight:700}
+.start:hover{background:#1B64DA}
+.ghost:hover{background:#F7F8FA}
+.topbar{background:#fff}
+.back{background:#F7F8FA;border:1px solid var(--line);border-radius:8px}
+.top-mode{background:#F7F8FA;border:1px solid var(--line);font-size:13px}
+.stat{background:#F7F8FA;border-radius:8px}
+.stat small{font-size:12.5px}
+.side{background:#fff}
+.panel{border-radius:12px}
+.panel h4{font-size:15px}
+.small{font-size:13.5px}
+.kpis div{background:#F7F8FA;border-radius:8px}
+.kpis small{font-size:12.5px}
+table.log{font-size:13px}
+table.log th{font-size:12.5px}
+table.log td{border-bottom-color:var(--line)}
+table.log td.no{color:#C2410C}
+table.log .rp{background:#F0F1F3;font-size:12.5px}
+.hint p{font-size:14px}
+.toggle{font-size:14px}
+.demo-btns button{background:#fff;border-radius:8px}
+.conc div,.cond div{background:#F7F8FA;border-radius:8px}
+.cond div{font-size:13.5px}
+ol.rank li span{font-size:13px}
+.side .btn,.mbox .btn{background:#fff;border:1px solid var(--line);border-radius:8px;font-weight:600}
+.side .btn:hover,.mbox .btn:hover{background:#F7F8FA}
+.side .btn.pri,.mbox .btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+#modal{background:rgba(17,17,17,.45)}
+.mbox{background:#fff;border-radius:12px;box-shadow:none}
+.mbox p,.mbox ul{color:#3F4652}
+.mbox p[style*="color:#fff"]{color:#111!important}
+.mbox b[style*="#ffb3b3"],.side b[style*="#ffb3b3"]{color:#C2410C!important}
+.big3 div{background:#F7F8FA;border-radius:8px}
+.big3 small{font-size:13px}
+.tabs button{background:#F7F8FA;border:1px solid var(--line);font-size:13.5px}
+.tabs button.on{background:#111;border-color:#111;color:#fff;font-weight:700}
+table.rk th,table.rk td{border-bottom-color:var(--line)}
+table.rk th{font-size:13px}
+.namein input{background:#fff;border-radius:8px}
+#diagPop{border-radius:12px;box-shadow:0 12px 36px rgba(17,17,17,.3)}
+/* 검토 반영: 글자 크기·휴대폰 배치·터치 대상 */
+.stage .stat small,#gauge .ml,#gauge .gl{font-size:12.5px}
+#banner small{font-size:13px}
+@media (max-width:900px){
+  #help{font-size:12.5px}
+  #banner small{font-size:12.5px}
+  #diagPop{left:8px!important;right:8px;top:auto!important;bottom:8px;width:auto!important;height:260px!important;min-width:0;resize:none}
+  #diagPop .hd small{display:none}
+  table.log .rp{padding:9px 13px;font-size:15px}
+  .conc .btn{padding:8px 16px}
+  #faceMini .chip{padding:9px 10px;font-size:13px}
+  #rpBar{flex-wrap:wrap}
+  #rpBar .btn,#spdBar .btn{padding:9px 9px;white-space:nowrap}
+  #rpBar input[type=range]{flex-basis:100%;height:28px}
+  #spdBar{right:10px;flex-wrap:wrap}
+  .side .btn{min-height:40px}
+}
 </style>
 </head>
 <body>
+<script>if(/embed/.test(location.hash))document.body.classList.add("vlab-embed");</script>
 <div id="app">
 <!-- ================= HOME ================= -->
 <section id="home" class="screen active">
@@ -282,7 +372,7 @@ table.rk tr.me td{color:var(--accent2);font-weight:800}
    <div class="ov" id="banner"></div>
    <div id="keys"></div>
    <button class="btn" id="followBtn">⤢ 전체 보기</button>
-   <div id="gauge"><div class="gl">힘</div><div class="fill"></div><div class="mark"></div><div class="ml">E<sub>a</sub></div></div>
+   <div id="gauge"><div class="gl">에너지</div><div class="fill"></div><div class="mark"></div><div class="ml">E<sub>a</sub></div></div>
    <div id="fireBtn">꾹 눌러<br>발사</div>
    <div class="ov" id="toast"></div>
    <div class="ov" id="cap"></div>
@@ -511,7 +601,7 @@ function respawn(W,dt){W.rsT=(W.rsT||0)+dt;if(W.rsT<.3)return;W.rsT=0;const R=W.
  for(const [sp,n0] of [[R.A,W.nA],[R.B,W.nB]]){const n=W.mols.filter(m=>m.sp===sp&&!m.isProd&&!m.isShooter).length;if(n<n0)spawnMol(W,sp,true);}}
 function evDiag(W){const ev=W.ev,R=W.R,t=ev.t,E=ev.E;
  if(ev.kind==='react'){const s=clamp(t/ev.dur,0,1),x=s<.5?.28+.22*(s/.5):.5+.32*((s-.5)/.5);
-  const cap=s<.22?'충돌! 방향이 맞고, 에너지도 활성화 에너지 이상이에요':s<.62?'활성화 상태(활성화 착물): 기존 결합이 끊어지고 새 결합이 생기는 중':'새로운 물질(생성물)이 만들어졌어요!';
+  const cap=s<.22?'충돌! 방향이 맞고, 에너지도 활성화 에너지 이상이에요':s<.62?'활성화 상태(활성화물): 기존 결합이 끊어지고 새 결합이 생기는 중':'새로운 물질(생성물)이 만들어졌어요!';
   return {x,h:curveY(x,R.Ea,dispDH(R)),E,cap,kind:'react'};}
  if(ev.kind==='energy'){const ph=clamp(t/.5,0,1),h=E*Math.sin(Math.PI*ph);
   return {x:xOnLeft(h,R.Ea),h,E,cap:'방향은 맞았지만, 충돌 에너지가 활성화 에너지보다 작아서 넘지 못하고 되돌아가요',kind:'energy'};}
@@ -601,14 +691,14 @@ function render(ctx,w,h,cam,fr,o){
  ctx.globalAlpha=1;}
 
 /* ================= 에너지 그래프 ================= */
-function drawDiag(cv,R,st,big){const F=big?1.3:1;if(!cv)return;const dpr=Math.min(2,window.devicePixelRatio||1);const w=cv.clientWidth,h=cv.clientHeight;if(!w)return;
+function drawDiag(cv,R,st,big){const F=big?1.3:1.15;if(!cv)return;const dpr=Math.min(2,window.devicePixelRatio||1);const w=cv.clientWidth,h=cv.clientHeight;if(!w)return;
  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);}
  const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,w,h);
  const dH=dispDH(R),cut=Math.abs(R.dH)>Math.abs(dH)+.1;const E=st&&st.E||0;
  const top=Math.max(R.Ea*1.3,E*1.12),bot=Math.min(0,dH)-R.Ea*.25;
  const L=40,Rr=10,T=12,B=22,X=x=>L+x*(w-L-Rr),Y=v=>T+(top-v)/(top-bot)*(h-T-B);
  c.strokeStyle='#33507a';c.lineWidth=1;c.beginPath();c.moveTo(L,T);c.lineTo(L,h-B);c.lineTo(w-Rr,h-B);c.stroke();
- c.fillStyle='#8aa0c6';c.font=`${11*F}px system-ui,sans-serif`;c.textAlign='center';c.fillText('반응 경로 →',(L+w)/2,h-7);
+ c.fillStyle='#8aa0c6';c.font=`${11*F}px system-ui,sans-serif`;c.textAlign='center';c.fillText('반응의 진행 →',(L+w)/2,h-7);
  c.save();c.translate(12,(T+h-B)/2);c.rotate(-Math.PI/2);c.fillText('에너지',0,0);c.restore();
  c.setLineDash([3,4]);c.strokeStyle='#ffffff30';c.beginPath();c.moveTo(X(0),Y(0));c.lineTo(X(1),Y(0));c.stroke();c.setLineDash([]);
  c.strokeStyle='#4fd1ff';c.lineWidth=2.5*F;c.beginPath();for(let i=0;i<=120;i++){const x=i/120,y=curveY(x,R.Ea,dH);i?c.lineTo(X(x),Y(y)):c.moveTo(X(x),Y(y));}c.stroke();
@@ -619,7 +709,7 @@ function drawDiag(cv,R,st,big){const F=big?1.3:1;if(!cv)return;const dpr=Math.mi
  c.fillStyle='#a8b8d8';c.font=`${10.5*F}px system-ui,sans-serif`;c.textAlign='center';c.fillText('활성화 상태',ax,Y(R.Ea)-7);
  const hx=X(.9);c.strokeStyle='#a98bff';c.fillStyle='#a98bff';c.lineWidth=1.5;c.beginPath();c.moveTo(hx,Y(0));c.lineTo(hx,Y(dH));c.stroke();
  if(cut){const by=Y(dH*.72);c.fillStyle='#0a1324';c.fillRect(hx-6,by-5,12,10);c.strokeStyle='#a98bff';c.lineWidth=1.3;c.beginPath();c.moveTo(hx-6,by-5);c.lineTo(hx+6,by-1);c.moveTo(hx-6,by+1);c.lineTo(hx+6,by+5);c.stroke();c.fillStyle='#a98bff';}
- c.textAlign='right';c.font=`700 ${11*F}px system-ui,sans-serif`;c.fillText(`ΔH ≈ ${R.dH>0?'+':''}${R.dH}`,hx-5,Y(dH/2));
+ c.textAlign='right';c.font=`700 ${11*F}px system-ui,sans-serif`;c.fillText(`ΔH ≈ ${R.dH>0?'+':'−'}${Math.abs(R.dH)} kJ`,hx-5,Math.abs(Y(dH)-Y(0))<34?Y(dH)+(dH<0?30:-24):Y(dH/2));
  if(E&&st&&st.kind!=='fly'){c.strokeStyle='#ff9f6b';c.setLineDash([4,4]);c.lineWidth=1.3;c.beginPath();c.moveTo(X(.05),Y(E));c.lineTo(X(.45),Y(E));c.stroke();c.setLineDash([]);c.fillStyle='#ff9f6b';c.textAlign='left';c.font=`700 ${10.5*F}px system-ui,sans-serif`;c.fillText(`충돌 에너지 ${fmtE(E)}`,X(.05),Y(E)-6);}
  if(st&&st.x!=null){const bx=X(st.x),by=Y(st.h)-7;const gg=c.createRadialGradient(bx,by,0,bx,by,15);gg.addColorStop(0,'rgba(255,214,74,.8)');gg.addColorStop(1,'rgba(255,214,74,0)');c.fillStyle=gg;c.beginPath();c.arc(bx,by,15,0,7);c.fill();
   c.fillStyle='#ffd54a';c.beginPath();c.arc(bx,by,6*F,0,7);c.fill();}}
@@ -639,7 +729,7 @@ const cv=$('#view'),ctx=cv.getContext('2d'),stage=$('#stage');
 let VW=0,VH=0;
 function resize(){const dpr=Math.min(window.innerWidth<700?1.5:2,window.devicePixelRatio||1);const ow=VW,oh=VH;VW=stage.clientWidth;VH=stage.clientHeight;cv.width=Math.round(VW*dpr);cv.height=Math.round(VH*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
  const pv=$('#pv');pv.width=pv.clientWidth*dpr;pv.height=pv.clientHeight*dpr;pv.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
- if(G.scr==='play'&&G.W&&G.mode!=='observe'&&(ow!==VW||oh!==VH)){setupStation();if(G.sh&&['face','aim','charge'].includes(G.phase))G.sh.pos=G.home.slice();}}
+ if(G.scr==='play'&&G.W&&G.mode!=='observe'&&(ow!==VW||oh!==VH)){setupStation(true);if(G.sh&&['face','aim','charge'].includes(G.phase))G.sh.pos=G.home.slice();}}
 window.addEventListener('resize',resize);
 
 /* ---------- 홈 ---------- */
@@ -670,15 +760,15 @@ function startPlay(){G.R=RX[G.rIdx];NID=1;const R=G.R,mob=window.innerWidth<700,
  $('#cd').style.display='none';if(G.diagPop)closeDiagPop();buildSide();setAimUI(false);hideFaceAsk();closeReplayUI();$('#banner').classList.remove('show');
  $('#spdBar').style.display=ob?'flex':'none';$$('.ospd').forEach(b=>b.classList.toggle('on',b.dataset.s==='1'));$('#obPause').textContent='⏸ 멈춤';$('#followBtn').style.display='none';
  setHelp();
- if(G.mode==='practice')showIntroPractice();else if(G.mode==='time')startCountdown();}
+ if(G.mode==='practice')showIntroPractice();else if(G.mode==='time')showIntroTime();}
 function show(id){if(id!=='play'&&G.diagPop)closeDiagPop();$$('.screen').forEach(s=>s.classList.toggle('active',s.id===id));G.scr=id;if(id==='home'){buildHome();resize();}}
 $('#backBtn').onclick=()=>{$('#cd').style.display='none';G.running=false;G.onModalClose=null;closeModal();show('home');};
 
 /* ---------- 발사대(카메라 고정 위치): 상자 전체가 화면에 들어오도록 ---------- */
-function setupStation(){const asp=(VW/VH)||1.5,B0=G.W.box,vh=27.5*Math.PI/180,hh=Math.atan(Math.tan(vh)*asp);
+function setupStation(keep){const asp=(VW/VH)||1.5,B0=G.W.box,vh=27.5*Math.PI/180,hh=Math.atan(Math.tan(vh)*asp);
  const D=Math.max((B0[0]/2+1)/Math.tan(hh),(B0[1]/2+1)/Math.tan(vh))+B0[2]/2+1.5;
  G.station={pos:[0,2.5,-D],tgt:[0,0,0]};
- const B=camBasis({pos:G.station.pos,tgt:G.station.tgt});G.home=add(add(G.station.pos,mul(B.f,7.8)),mul(B.u,-2.3));G.cursor=[VW/2,VH/2];}
+ const B=camBasis({pos:G.station.pos,tgt:G.station.tgt});G.home=add(add(G.station.pos,mul(B.f,7.8)),mul(B.u,-2.3));if(!keep||!G.cursor)G.cursor=[VW/2,VH/2];else G.cursor=[clamp(G.cursor[0],4,VW-4),clamp(G.cursor[1],4,VH-4)];}
 
 /* ---------- 사이드 패널 ---------- */
 function buildSide(){const R=G.R,sd=$('#side');let h='';
@@ -687,25 +777,25 @@ function buildSide(){const R=G.R,sd=$('#side');let h='';
    <div class="panel"><h4>🧪 농도 조절 (분자 수)</h4>
     <div class="conc">${[R.A,R.B].map(sp=>`<div><span>${SP[sp].f}</span><button class="btn" data-c="${sp}" data-d="-2">−</button><b id="cn_${sp}">${sp===R.A?G.W.nA:G.W.nB}</b><button class="btn" data-c="${sp}" data-d="2">+</button></div>`).join('')}</div>
     <div style="display:flex;gap:6px;margin-top:8px"><button class="btn" style="flex:1" id="concUp">둘 다 높이기 ▲</button><button class="btn" style="flex:1" id="concDown">둘 다 낮추기 ▼</button></div>
-    <button class="btn" style="width:100%;margin-top:6px" id="concReset">↺ 처음 상태로</button></div>
+    <button class="btn" style="width:100%;margin-top:6px" id="concReset">↺ 처음 상태로</button><p class="small" style="margin-top:8px">관찰하기 쉽도록 세 반응 모두 실제보다 반응이 잘 일어나게 맞췄어요. 실제로는 활성화 에너지가 클수록 같은 온도에서 유효 충돌 비율이 훨씬 작아요. 반응물이 줄면 충돌도 줄어드니 +로 다시 넣어 보세요.</p></div>
    <div class="panel" style="display:none"><h4>📊</h4><div class="kpis"><div><b id="kCol">0</b><small>반응물끼리 충돌</small></div><div><b id="kEff">0</b><small>유효 충돌</small></div><div><b id="kRate">0%</b><small>비율</small></div></div>
    <p class="small" style="margin-top:8px">충돌은 많아도 유효 충돌은 드물어요. 관찰하기 쉽도록 실제보다 반응이 잘 일어나게 조정했어요.</p></div>
    <div class="panel"><h4>📈 에너지 그래프 <button class="btn" id="popDiagBtn" style="float:right;padding:3px 10px;font-size:12px">⧉ 크게 띄우기</button></h4><canvas class="diag" id="diag"></canvas></div>
    <div class="panel"><h4>유효 충돌의 두 조건</h4><div class="cond"><div><b>① 방향</b> — ${R.explain}</div><div><b>② 에너지</b> — 충돌 에너지가 활성화 에너지(${R.src}) 이상이어야 해요.</div></div></div>`;}
  else if(G.mode==='practice'){
-  h+=`<div class="panel"><h4>🎯 연습</h4><p class="small">쏘는 분자 <b>${SP[R.A].f}</b>가 계속 주어져요. 상자 안의 표적 <b>${SP[R.B].f}</b>를 맞혀 반응시켜 보세요.<br>앞쪽 원자와 힘을 바꿔 가며 쏘아 보고, 반응하지 않았다면 기록표의 ▶로 까닭을 슬로 모션으로 확인해 보세요.</p></div>
+  h+=`<div class="panel"><h4>🎯 연습</h4><p class="small">쏘는 분자 <b>${SP[R.A].f}</b>가 계속 주어져요. 상자 안의 표적 <b>${SP[R.B].f}</b>를 맞혀 반응시켜 보세요.<br>앞쪽 원자와 에너지를 바꿔 가며 쏘아 보고, 반응하지 않았다면 기록표의 ▶로 까닭을 슬로 모션으로 확인해 보세요.</p></div>
    <div class="panel"><h4>🕹️ 조작 방법</h4><div class="cond">
     <div><b>① 원자 고르기</b> — 분자가 나올 때마다 앞으로 향할 원자를 골라요. 쏘기 전까지 ${G.touchUI?'왼쪽 위 버튼':'숫자 키 1·2'}로 바꿀 수 있어요.</div>
     <div><b>② 조준</b> — ${G.touchUI?'화면을 문지르거나 원자를 톡 눌러':'마우스를 움직여'} 조준 고리를 맞힐 원자 위에 대요. 흰 테두리가 생긴 원자를 맞혀요.</div>
-    <div><b>③ 힘 · 발사</b> — ${G.touchUI?'오른쪽 아래 버튼을':'마우스나 Space를'} 꾹 누르면 힘 게이지가 오르내려요. 흰 선(활성화 에너지) 위에서 떼면 발사!</div>
+    <div><b>③ 에너지 · 발사</b> — ${G.touchUI?'오른쪽 아래 버튼을':'마우스나 Space를'} 꾹 누르면 에너지 게이지가 오르내려요. 흰 선(활성화 에너지) 위에서 떼면 발사!</div>
     <div><b>④ 다시 보기</b> — 기록표의 ▶${G.touchUI?'':' 또는 R 키'}로 충돌 장면을 슬로 모션으로 볼 수 있어요.</div></div>
     <p class="small" style="margin-top:6px">원자의 가장자리를 아주 비스듬하게 스치면 충돌 에너지가 줄어요.</p></div>
    <div class="panel"><h4>📋 발사 기록표</h4><div class="logwrap"><table class="log"><thead><tr><th>#</th><th>앞쪽 원자</th><th>충돌 에너지<br>(kJ/mol)</th><th>결과</th><th>까닭</th><th></th></tr></thead><tbody id="logBody"><tr><td colspan="6" class="small" style="padding:12px">아직 발사 기록이 없어요</td></tr></tbody></table></div></div>
-   <div class="panel"><h4>📈 에너지 그래프</h4><canvas class="diag" id="diag"></canvas><p class="small" style="margin-top:6px">힘 게이지의 흰 선이 활성화 에너지예요.</p></div>`;}
+   <div class="panel"><h4>📈 에너지 그래프</h4><canvas class="diag" id="diag"></canvas><p class="small" style="margin-top:6px">에너지 게이지의 흰 선이 활성화 에너지예요.</p></div>`;}
  else{h+=`<div class="panel"><div class="tbig" id="tLeft">60.0</div><p class="small" style="text-align:center">남은 시간 (초)</p></div>
    <div class="panel" style="text-align:center"><div class="tbig" id="kScore" style="color:var(--accent2)">0</div><p class="small">점수 · 성공 +10점, 실패 −3점</p><p class="small" style="margin-top:4px">등급(점수) ${GRADES.slice(0,7).map(g=>`<b style="color:${g[2]}">${g[1]}</b> ${g[0]}`).join(' · ')} · <b style="color:#ff6b6b">F</b> 40 미만</p></div>
    <div class="panel"><div class="kpis"><div><b id="kSucc">0</b><small>반응 성공</small></div><div><b id="kFail">0</b><small>실패</small></div><div><b id="kRate">0%</b><small>성공률</small></div></div></div>
-   <div class="panel"><h4>📈 에너지 그래프</h4><canvas class="diag" id="diag"></canvas><p class="small" style="margin-top:6px">힘 게이지의 흰 선이 활성화 에너지예요. 방향도 꼭 맞춰야 해요!</p></div>
+   <div class="panel"><h4>📈 에너지 그래프</h4><canvas class="diag" id="diag"></canvas><p class="small" style="margin-top:6px">에너지 게이지의 흰 선이 활성화 에너지예요. 방향도 꼭 맞춰야 해요!</p></div>
    <div class="panel"><h4>🏆 이 반응 랭킹 TOP 5</h4><div id="rankMini"></div></div>`;}
  sd.innerHTML=h;
  $$('[data-demo]').forEach(b=>b.onclick=()=>runDemo(b.dataset.demo));
@@ -736,14 +826,14 @@ function setHelp(){const tu=G.touchUI;let t='';
  if(G.phase==='replay')t=tu?'드래그: 시점 회전':'드래그: 시점 회전 · 휠: 확대 · Space: 재생/멈춤 · Esc: 닫기';
  else if(G.mode==='observe')t=G.follow?'분자를 따라가며 보는 중 · 드래그: 시점 회전':(tu?'분자를 누르면 따라가며 확대 · 드래그: 시점 회전':'분자를 클릭하면 따라가며 확대 · 드래그: 시점 회전 · 휠: 확대 · Space: 멈춤 · ←: 1초 전');
  else if(G.phase==='face')t='🐢 슬로 모션 · 쏠 분자의 어느 원자를 앞으로 향하게 할지 고르세요';
- else if(G.phase==='aim'&&G.R.parallel&&G.sh&&curFace()&&curFace().type==='side')t='🐢 옆면: H₂가 조준한 I₂와 자동으로 나란해져요. I₂가 끝을 이쪽으로 향하지 않을 때(옆모습일 때) 쏘세요';
- else if(G.phase==='aim')t=tu?'🐢 화면을 문질러 조준 · 원하는 원자를 톡 · 발사 버튼을 꾹 눌렀다 떼기':'🐢 조준 고리를 맞힐 원자에 대고, 마우스(또는 Space)를 꾹 눌렀다 떼면 발사';
- else if(G.phase==='charge')t='힘 게이지가 오르내려요. 흰 선(활성화 에너지) 위에서 떼세요!';
+ else if(G.phase==='aim'&&G.R.parallel&&G.sh&&curFace()&&curFace().type==='side')t=tu?'🐢 옆면: I₂가 옆모습일 때 쏘세요':'🐢 옆면: H₂가 조준한 I₂와 자동으로 나란해져요. I₂가 끝을 이쪽으로 향하지 않을 때(옆모습일 때) 쏘세요';
+ else if(G.phase==='aim')t=tu?'🐢 문질러 조준 · 발사 버튼 꾹 눌렀다 떼기':'🐢 조준 고리를 맞힐 원자에 대고, 마우스(또는 Space)를 꾹 눌렀다 떼면 발사';
+ else if(G.phase==='charge')t='에너지 게이지가 오르내려요. 흰 선(활성화 에너지) 위에서 떼세요!';
  else t='';
  const h=$('#help');h.textContent=t;h.style.display=t?'block':'none';
  const k=$('#keys');const showK=!tu&&G.mode!=='observe'&&['face','aim','charge'].includes(G.phase)&&!G.keysHidden;k.style.display=showK?'block':'none';
  if(showK&&G.sh){const n=SP[G.sh.sp].faces.filter(f=>!f.hide).length;
-  k.innerHTML=`<b>⌨️ 단축키 (H: 숨기기)</b>마우스 이동 — 조준<br>마우스 꾹 / <kbd>Space</kbd> — 힘 모으기, 떼면 발사<br>${Array.from({length:n},(_,i)=>`<kbd>${i+1}</kbd>`).join('')}— 앞쪽 원자 바꾸기<br>${G.mode==='practice'?'<kbd>R</kbd>— 방금 발사 다시 보기<br>':''}<kbd>Esc</kbd>— 힘 모으기 취소`;}}
+  k.innerHTML=`<b>⌨️ 단축키 (H: 숨기기)</b>마우스 이동 — 조준<br>마우스 꾹 / <kbd>Space</kbd> — 에너지 모으기, 떼면 발사<br>${Array.from({length:n},(_,i)=>`<kbd>${i+1}</kbd>`).join('')}— 앞쪽 원자 바꾸기<br>${G.mode==='practice'?'<kbd>R</kbd>— 방금 발사 다시 보기<br>':''}<kbd>Esc</kbd>— 에너지 모으기 취소`;}}
 let bannerT=0;
 function banner(main,sub,ms,col){const b=$('#banner');b.innerHTML=`<span style="color:${col||'#fff'}">${main}</span>${sub?`<small>${sub}</small>`:''}`;b.classList.add('show');clearTimeout(bannerT);bannerT=setTimeout(()=>b.classList.remove('show'),ms||2600);}
 
@@ -787,7 +877,8 @@ function cursorHit(){const o=G.cam.pos,d=rayDir(G.cam,VW,VH,G.cursor[0],G.cursor
 // 옆면으로 쏠 때: 겨눈 분자의 막대 방향을 시선에 수직인 면에 투영해서 그 방향과 나란하게
 function sideAxis(t,d){if(!t)return null;const ax=qRot(t.q,[1,0,0]),pr=sub(ax,mul(d,dot(ax,d)));return len(pr)>.15?norm(pr):null;}
 function startCharge(){if(G.phase!=='aim')return;G.charge=0;G.power=0;G.phase='charge';$('#fireBtn').classList.add('hold');setHelp();}
-function cancelCharge(){if(G.phase!=='charge')return;G.phase='aim';G.charge=0;G.power=0;$('#fireBtn').classList.remove('hold');setHelp();}
+window.addEventListener('blur',()=>{G.kbCharge=false;cancelCharge();});
+function cancelCharge(){G.kbCharge=false;if(G.phase!=='charge')return;G.phase='aim';G.charge=0;G.power=0;$('#fireBtn').classList.remove('hold');setHelp();}
 function aimUpdate(dt){const m=G.sh;if(!m)return;
  if(G.phase==='face'){m.pos=G.home.slice();const f=curFace();if(f&&G.faceHover)orientMol(m,f,norm(sub(G.station.tgt,G.home)),0);return;}
  const r=cursorHit(),side=curFace().type==='side';G.hov=r.m?{id:r.m.id,i:r.i,all:side}:null;G.aimPt=r.pt;
@@ -835,7 +926,7 @@ const score=(succ,shots)=>succ*10-(shots-succ)*3;
 const entScore=e=>e.score!=null?e.score:score(e.count,e.shots);
 // 등급 기준 (점수): 성공 10점, 실패 −3점
 // 등급: 성공 횟수를 점수로 환산한 기준 (LEGEND 25번 성공 = 250점, SS 23번 = 230점, S 20번 = 200점 …)
-const GRADES=[[250,'LEGEND','#ff5ad8'],[230,'SS','#ffcc4d'],[200,'S','#ffb347'],[160,'A','#38d996'],[120,'B','#4fd1ff'],[80,'C','#a98bff'],[40,'D','#c8d5ee'],[-1e9,'F','#ff6b6b']];
+const GRADES=[[250,'LEGEND','#D6249F'],[230,'SS','#B45309'],[200,'S','#C2410C'],[160,'A','#0E9F6E'],[120,'B','#1B64DA'],[80,'C','#7C3AED'],[40,'D','#6B7280'],[-1e9,'F','#E5484D']];
 const gradeOf=sc=>GRADES.find(g=>sc>=g[0]);
 function startCountdown(){G.phase='countdown';G.cd=3.2;$('#cd').style.display='block';}
 function timeOver(){G.running=false;if(G.sh&&['face','aim','charge'].includes(G.phase)){removeMol(G.W,G.sh);G.sh=null;}G.phase='over';setAimUI(false);hideFaceAsk();setHelp();
@@ -853,7 +944,9 @@ function timeOver(){G.running=false;if(G.sh&&['face','aim','charge'].includes(G.
  $('#tRetry').onclick=()=>{closeModal();startPlay();};$('#tHome').onclick=()=>{closeModal();show('home');};}
 /* ---------- 랭킹: 이 기기(브라우저)에만 저장, 반응마다 상위 20개 보관 ---------- */
 // 이번 점수가 이 기기 랭킹에서 몇 위가 되는지 (같은 점수면 성공이 많은 쪽, 그다음 시도가 적은 쪽이 위)
-function rankBadge(rid,sc,succ,shots){const l=LS.get(RANK_KEY,{})[rid]||[];const better=e=>entScore(e)>sc||(entScore(e)===sc&&(e.count>succ||(e.count===succ&&e.shots<=shots)));
+const rankAll=()=>{const a=LS.get(RANK_KEY,{});return a&&typeof a==='object'&&!Array.isArray(a)?a:{};};
+const rankList=rid=>{const l=rankAll()[rid];return Array.isArray(l)?l.filter(e=>e&&typeof e==='object'&&isFinite(entScore(e))):[];};
+function rankBadge(rid,sc,succ,shots){const l=rankList(rid);const better=e=>entScore(e)>sc||(entScore(e)===sc&&(e.count>succ||(e.count===succ&&e.shots<=shots)));
  const rank=l.filter(better).length+1,best=l.length?Math.max(...l.map(entScore)):null;
  const box=(t,c,sub)=>`<div style="display:inline-block;margin-top:8px;padding:7px 16px;border-radius:99px;background:${c}22;border:1px solid ${c};color:${c};font-weight:900;font-size:17px">${t}</div>${sub?`<div class="small" style="margin-top:4px">${sub}</div>`:''}`;
  if(!l.length)return '';
@@ -862,9 +955,9 @@ function rankBadge(rid,sc,succ,shots){const l=LS.get(RANK_KEY,{})[rid]||[];const
  if(rank===3)return box('🥉 3위 기록','#e0a36b',`1위 ${best}점까지 ${best-sc}점`);
  if(rank<=20)return box(`${rank}위 기록`,'#4fd1ff',`1위 ${best}점까지 ${best-sc}점`);
  return box('20위 밖','#97a8c8',`20위 안에 들어야 랭킹에 남아요 · 1위 ${best}점`);}
-function saveRank(rid,e){const all=LS.get(RANK_KEY,{});const l=all[rid]||[];e.id=Date.now()+Math.random();l.push(e);
+function saveRank(rid,e){const all=rankAll();const l=rankList(rid);e.id=Date.now()+Math.random();l.push(e);
  l.sort((a,b)=>entScore(b)-entScore(a)||b.count-a.count||a.shots-b.shots);all[rid]=l.slice(0,20);LS.set(RANK_KEY,all);return e.id;}
-const localRows=rid=>(LS.get(RANK_KEY,{})[rid]||[]).map(e=>({id:e.id,name:e.name,score:entScore(e),succ:e.count,fail:e.shots-e.count,rate:e.rate}));
+const localRows=rid=>rankList(rid).map(e=>({id:e.id,name:e.name,score:entScore(e),succ:e.count,fail:e.shots-e.count,rate:e.rate}));
 function rowsTable(l,isMe,n=10){l=l.slice(0,n);if(!l.length)return '<p class="small">아직 기록이 없어요. 첫 번째 기록의 주인공이 되어 보세요!</p>';
  return `<table class="rk"><tr><th>순위</th><th>이름</th><th>등급</th><th>점수</th><th>성공</th><th>실패</th><th>성공률</th></tr>${l.map((e,i)=>`<tr class="${isMe&&isMe(e)?'me':''}"><td>${i+1}</td><td>${esc(e.name)}</td><td style="color:${gradeOf(e.score)[2]};font-weight:900">${gradeOf(e.score)[1]}</td><td><b>${e.score}</b></td><td>${e.succ}</td><td>${e.fail}</td><td>${e.rate}%</td></tr>`).join('')}</table>`;}
 function showRankIn(el,rid,me){if(el)el.innerHTML=rowsTable(localRows(rid),me?e=>e.id===me:null);}
@@ -883,14 +976,14 @@ $('#modal').onclick=e=>{if(e.target.id==='modal'&&!$('#modal').dataset.lock)clos
 const HOW=`<ul>
  <li><b>원자 고르기</b> — 처음에 쏘는 분자의 어느 원자를 앞으로 향하게 할지 골라요. 쏘기 전까지는 숫자 키(1, 2)나 왼쪽 위 버튼으로 언제든 바꿀 수 있어요.</li>
  <li><b>조준</b> — 조준 고리를 <b>맞히고 싶은 원자</b> 위에 대요. 고리 아래 원자에 하얀 테두리가 생기고 고리가 초록색으로 바뀌면 그 원자를 맞힐 수 있어요. 조준하는 동안 주변 분자는 슬로 모션으로 움직여요.</li>
- <li><b>힘 · 발사</b> — PC: 마우스(또는 Space)를 꾹 누르고 있다가 떼요. 휴대폰·태블릿: 오른쪽 아래 <b>꾹 눌러 발사</b> 버튼. 누르는 동안 힘 게이지가 빠르게 오르내리고, 흰 선이 활성화 에너지예요.</li>
+ <li><b>에너지 · 발사</b> — PC: 마우스(또는 Space)를 꾹 누르고 있다가 떼요. 휴대폰·태블릿: 오른쪽 아래 <b>꾹 눌러 발사</b> 버튼. 누르는 동안 에너지 게이지가 빠르게 오르내리고, 흰 선이 활성화 에너지예요.</li>
  <li><b>충돌 에너지</b> — 원자의 가장자리를 아주 비스듬하게 스치면 충돌 에너지가 줄어서, 흰 선을 넘겨 쏴도 반응하지 않을 수 있어요.</li>
  <li><b>휴대폰·태블릿 조준</b> — 화면을 문지르면 조준 고리가 따라 움직이고(손가락이 표적을 가리지 않아요), 원자를 톡 누르면 고리가 그 자리로 가요.</li></ul>`;
 function showHow(){openModal(`<h2>❓ 조작 방법</h2>${HOW}<div class="btns"><button class="btn pri" data-close>확인</button></div>`);}
 function showIntroPractice(){openModal(`<h2>🎯 연습 모드</h2><p style="font-size:18px;font-weight:800;color:#fff">${G.R.eq}</p>
  <p>쏘는 분자 <b>${SP[G.R.A].f}</b>가 계속 주어져요. 상자 안의 <b>${SP[G.R.B].f}</b>를 맞혀 반응시켜 보세요. 반응하려면 <b>알맞은 방향</b>과 <b>활성화 에너지 이상의 에너지</b>가 모두 필요해요.</p>${HOW}
  <div class="btns"><button class="btn pri" data-close>연습 시작!</button></div>`,true);G.onModalClose=()=>newShooter();}
-function showIntroTime(){openModal(`<h2>⏱️ 1분 챌린지</h2><p style="font-size:18px;font-weight:800;color:#fff">${G.R.eq}</p><p>1분 동안 최대한 많이 반응시키세요! 힘 게이지가 <b>흰 선(활성화 에너지)</b>보다 높을 때 떼고, <b>방향</b>을 맞추는 게 핵심이에요.</p>${HOW}<div class="btns"><button class="btn pri" data-close>준비 완료!</button></div>`,true);
+function showIntroTime(){openModal(`<h2>⏱️ 1분 챌린지</h2><p style="font-size:18px;font-weight:800;color:#fff">${G.R.eq}</p><p>1분 동안 최대한 많이 반응시키세요! 에너지 게이지가 <b>흰 선(활성화 에너지)</b>보다 높을 때 떼고, <b>방향</b>을 맞추는 게 핵심이에요.</p>${HOW}<div class="btns"><button class="btn pri" data-close>준비 완료!</button></div>`,true);
  G.onModalClose=startCountdown;}
 
 /* ---------- 관찰 모드: 확대 장면 만들기 ---------- */
@@ -907,7 +1000,7 @@ function runDemo(kind){const R=G.R;const W=newWorld({R,bg:'none',spawn:false});c
  if(G.phase==='replay')closeReplay();openReplay(W.rec.frames,W.ev?W.ev.c:[0,0,0],{yaw:.6,pitch:-.42,dist:13,title:`${title} · 충돌 에너지 ${fmtE(E)} kJ/mol`,speed:.5});}
 
 /* ---------- 다시 보기 ---------- */
-function openReplay(frames,c,o){if(!frames||!frames.length)return;if(G.phase==='charge')cancelCharge();
+function openReplay(frames,c,o){if(!frames||!frames.length)return;if(G.phase==='charge')cancelCharge();if(innerWidth<=900)$('#play').scrollIntoView({block:'start',behavior:'smooth'});
  G.rp={frames,t:0,T:frames[frames.length-1].t,speed:o.speed||.5,playing:true,c:c||[0,0,0],yaw:o.yaw||0,pitch:o.pitch!=null?o.pitch:-.22,dist:o.dist||11,prev:G.phase==='replay'?(G.rp?G.rp.prev:'select'):G.phase};
  G.phase='replay';hideFaceAsk();setAimUI(false);
  $('#rpBar').style.display='flex';$('#rpTitle').style.display='block';$('#rpDiagBox').style.display=G.diagPop?'none':'block';$('#rpTitle').textContent='🎬 '+(o.title||'다시 보기');
@@ -936,7 +1029,7 @@ $('#rpClose').onclick=()=>closeReplay();
 $$('.spd').forEach(b=>b.onclick=()=>rpSpeed(+b.dataset.s));
 const sl=$('#rpSlider');sl.oninput=()=>{if(!G.rp)return;sl.dragging=true;G.rp.t=sl.value/1000*G.rp.T;G.rp.playing=false;$('#rpPlay').textContent='▶ 재생';};sl.onchange=()=>{sl.dragging=false;};
 $$('.ospd').forEach(b=>b.onclick=()=>{G.speed=+b.dataset.s;G.paused=false;$('#obPause').textContent='⏸ 멈춤';$$('.ospd').forEach(x=>x.classList.toggle('on',x===b));});
-function snapWorld(W){W.hist=W.hist||[];const last=W.hist[W.hist.length-1];if(last&&W.t-last.t<.04*Math.max(1,G.speed))return;
+function snapWorld(W){if(typeof structuredClone!=='function')return;W.hist=W.hist||[];const last=W.hist[W.hist.length-1];if(last&&W.t-last.t<.04*Math.max(1,G.speed))return;
  W.hist.push({t:W.t,d:structuredClone({mols:W.mols,cx:W.cx,stats:W.stats})});while(W.hist.length&&W.t-W.hist[0].t>30)W.hist.shift();}
 function rewind(sec){const W=G.W;if(!W||!W.hist||!W.hist.length)return;const tgt=W.t-sec;let k=-1;for(let i=W.hist.length-1;i>=0;i--){if(W.hist[i].t<=tgt){k=i;break;}}if(k<0)k=0;
  const h=W.hist[k],d=structuredClone(h.d);W.mols=d.mols;W.cx=d.cx;W.stats=d.stats;W.fx=[];W.t=h.t;W.hist=W.hist.slice(0,k+1);
@@ -954,7 +1047,7 @@ function pickObserve(x,y){const pj=makeProj(G.cam,VW,VH);let best=null,bz=1e9;
  for(const m of G.W.mols){if(m.st!=='free'||m.al<.8)continue;molAtoms(m).forEach((p,i)=>{const q=pj(p);if(!q)return;const r=EL[SP[m.sp].E[i]].r*q[3]+6;if(Math.hypot(q[0]-x,q[1]-y)<r&&q[2]<bz){bz=q[2];best=m;}});}
  return best;}
 // 버튼을 누른 뒤 포커스가 남아 단축키(특히 Space)가 버튼을 눌러 버리지 않도록
-document.addEventListener('pointerup',()=>{const a=document.activeElement;if(a&&(a.tagName==='BUTTON'||(a.tagName==='INPUT'&&a.type==='checkbox')))a.blur();},true);
+document.addEventListener('pointerup',()=>{const a=document.activeElement;if(a&&(a.tagName==='BUTTON'||(a.tagName==='INPUT'&&(a.type==='checkbox'||a.type==='range'))))a.blur();},true);
 stage.addEventListener('contextmenu',e=>e.preventDefault());
 stage.addEventListener('pointerdown',e=>{if(e.target.closest('#fireBtn,#faceAsk,#faceMini,#rpBar,#spdBar,#followBtn'))return;
  const tu=e.pointerType!=='mouse';if(tu!==G.touchUI){G.touchUI=tu;setHelp();if(G.phase==='aim'||G.phase==='charge')setAimUI(true);}
@@ -1022,7 +1115,7 @@ function frame(dt){const W=G.W;if(!W)return;
   if(['face','aim','charge'].includes(G.phase))aimUpdate(dt);}
  if(G.mode==='time'){if(G.phase==='countdown'){G.cd-=dt;const cdv=$('#cd');cdv.textContent=G.cd>.2?Math.ceil(G.cd-.2):'시작!';
    if(G.cd<=-.4){cdv.style.display='none';G.running=true;newShooter();}}
-  else if(G.running){G.timeLeft-=dt;if(G.timeLeft<=0){G.timeLeft=0;timeOver();}}}
+  else if(G.running){G.timeLeft-=dt;if(G.timeLeft<=0){G.timeLeft=0;if(G.phase!=='fly')timeOver();}}}
  camUpdate(dt);snapStation();draw();placeReticle();
  G.hudT+=dt;if(G.hudT>.08){G.hudT=0;hud();}}
 function draw(){const W=G.W;let fr;

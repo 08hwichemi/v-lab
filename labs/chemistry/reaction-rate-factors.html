@@ -3,7 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>반응 속도 요인 관찰실</title>
+<title>반응 속도 요인 관찰실 · V-Lab</title>
+<style>
+/* V-Lab 공용 글꼴·색 토큰만 가져옴 (공용 클래스는 이 파일의 클래스 이름과 겹치므로 lab-theme.css 전체는 쓰지 않음) */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+/* 위·아래첨자(₆ ⁺ ⁻ …)는 한글 글꼴에 ₁₂₃₄ 만 들어 있어 화학식 숫자 크기가 들쭉날쭉해진다. 같은 계열 라틴 글꼴에서 첨자만 가져와 맨 앞에 둔다 */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&text=%E2%81%B0%C2%B9%C2%B2%C2%B3%E2%81%B4%E2%81%B5%E2%81%B6%E2%81%B7%E2%81%B8%E2%81%B9%E2%81%BA%E2%81%BB%E2%82%80%E2%82%81%E2%82%82%E2%82%83%E2%82%84%E2%82%85%E2%82%86%E2%82%87%E2%82%88%E2%82%89%E2%82%8A%E2%82%8B&display=swap');
+:root{--font: 'IBM Plex Sans', 'IBM Plex Sans KR', 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; --bg: #ffffff; --panel: #ffffff; --panel-2: #F7F8FA; --line: #E6E8EC; --line-2: #F0F1F3; --text: #111111; --text-2: #3F4652; --muted: #6B7280; --accent: #3182F6; --accent-soft: #EAF2FF; --ok: #12A66B; --warn: #F5A623; --err: #E5484D; --radius: 12px; --radius-sm: 8px;}
+</style>
 <style>
 :root{
   --bg:#eef2f8; --panel:#ffffff; --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb;
@@ -370,7 +377,7 @@ canvas.zoomable{cursor:zoom-in}
   .sim-head{margin-bottom:4px} .legend{margin-top:4px;font-size:12px}
   .sim-btns{margin-top:6px} .sim-btns .btn{padding:5px 9px;font-size:13px} .seg button{padding:5px 9px;font-size:13px}
   .factor-grid .stats{margin-top:6px;gap:5px} .factor-grid .stat{padding:4px 6px} .factor-grid .stat .v{font-size:15px} .stat .l{font-size:11px}
-  .avg-note{display:none}
+  .avg-note{display:block;font-size:12.5px;line-height:1.4}
   .note{padding:6px 10px;font-size:13px;line-height:1.45}
   .real-list li{margin:2px 0;font-size:13.5px}
   .prod-note{font-size:11px}
@@ -427,9 +434,88 @@ canvas.zoomable{cursor:zoom-in}
 
 @media (min-width:1400px){#calcClose{display:none}}
 
+/* ===== V-Lab 공용 테마에 맞춘 덮어쓰기 ===== */
+:root{--bg:#fff;--panel:#fff;--ink:#111;--muted:#6B7280;--line:#E6E8EC;--accent:#3182F6;--accent-soft:#EAF2FF}
+body{font-family:var(--font);letter-spacing:-0.012em;-webkit-font-smoothing:antialiased}
+header{background:#fff;color:#111;border-bottom:1px solid var(--line);box-shadow:none;padding:8px 16px}
+header h1{font-size:18px;font-weight:600;letter-spacing:-.02em}
+header .sub{color:var(--muted);opacity:1;font-size:13.5px}
+body.vlab-embed header>div:first-child{display:none}
+body.vlab-embed header{padding:6px 12px}
+.tab-btn{background:#fff;color:#3F4652;border-radius:8px;font-weight:600;font-size:15.5px}
+.tab-btn:hover{background:#F7F8FA;color:#111}
+.tab-btn.active{background:#111;color:#fff}
+main{padding:12px 16px}
+.card{border:1px solid var(--line);border-radius:12px;box-shadow:none;margin-bottom:12px}
+.card h2{font-weight:700}
+.small,.chip,.rx-card .meta,.calc-hist,.prod-note,.legend,.ghost-legend{font-size:13.5px}
+.badge,.tag,.stat .l,.calc-raw{font-size:13px}
+.btn{border-radius:8px;color:#111}
+.btn:hover{border-color:var(--line);background:#F7F8FA}
+.btn.primary{color:#fff}
+.btn.primary:hover{background:#1B64DA;border-color:#1B64DA}
+.seg{border-radius:8px}
+.seg button.on{background:#111;color:#fff}
+.badge.virtual,.tag{background:#EAF2FF;color:#1B64DA}
+.rx-card{border-radius:12px}
+.rx-card:hover{box-shadow:none;transform:none;border-color:var(--accent)}
+table.data th{background:#F7F8FA;color:#3F4652}
+table.data tbody tr:hover{background:#F7F8FA}
+table.data tbody tr.sel,table.rec-table tr.rec-row.picked td{background:#EAF2FF}
+table.rec-table tbody tr.rec-row.open{background:#F7F8FA}
+table.data tr.fold-row td{color:#1B64DA}
+table.data tr.fold-row:hover td{background:#EAF2FF}
+.compare{border-radius:12px;background:#F7F8FA;border-color:#D5D9E0}
+.compare.good{background:#EAF2FF;border-color:#A9C8F7}
+.ratelaw,.formula{font-family:var(--font);border-radius:12px}
+.kbox input,.kbox select,.term-row select,.form-grid input,.modal textarea{border-color:#D5D9E0;border-radius:8px}
+.mode-btn{border-width:1px;border-radius:8px;font-weight:700}
+.mode-btn.on{background:#111;border-color:#111;color:#fff}
+.sub-btn{border-radius:8px;color:#3F4652}
+.sub-btn.on{background:#111;border-color:#111;color:#fff}
+.stat{background:#F7F8FA;border-color:var(--line);border-radius:8px}
+.note{background:#F7F8FA;border-left-width:3px;border-radius:8px}
+.cnav button{box-shadow:none;border:1px solid var(--line);border-radius:8px;color:#3F4652}
+.cnav button.on{background:#111;color:#fff;border-color:#111}
+.box{border-radius:12px}
+table.ctable th{background:#F7F8FA}
+.modal-bg{background:rgba(17,17,17,.45)}
+.modal{border-radius:12px;box-shadow:none;border:1px solid var(--line)}
+.term{color:#1B64DA}
+#tip{background:#111;box-shadow:none;border-radius:8px;font-size:14px}
+.calc-col .card{box-shadow:none}
+@media (max-width:1399px){.calc-col .card{box-shadow:0 8px 28px rgba(17,17,17,.18)}#calcFab{box-shadow:0 4px 14px rgba(17,17,17,.25)}}
+.calc-screen{background:#111;border-radius:8px}
+.calc-keys button{border-radius:8px}
+.calc-keys button:hover{background:#F7F8FA;border-color:var(--line)}
+.calc-keys button.fn{background:#F7F8FA;color:#1B64DA}
+.calc-keys button.op{background:#EAF2FF;color:#1B64DA}
+.calc-keys button.eq{color:#fff}
+.calc-hist span.r{color:#1B64DA}
+.term-row{background:#F7F8FA;border-radius:8px}
+#toast{background:#111;box-shadow:none;border-radius:8px;font-weight:700}
+.mission-head.in-header{border:1px solid var(--line);border-radius:8px;background:#fff}
+.preview-bar{background:#111}
+.zoom-bg{background:rgba(17,17,17,.55)}
+.zoom-box{border-radius:12px;box-shadow:none}
+.report{font-family:var(--font)}
+/* 좁은 화면: 개념 창의 표가 칸을 밀어 화면 밖으로 나가지 않게 */
+@media (max-width:1100px){.csplit{grid-template-columns:minmax(0,1fr)}.csplit table.ctable{display:block;overflow-x:auto}}
+/* 검토 반영: 휴대폰 배치 */
+.concept-layout{grid-template-columns:220px minmax(0,1fr)}
+.concept-layout>*{min-width:0}
+@media (max-width:820px){
+  .concept-layout{grid-template-columns:minmax(0,1fr)}
+  .cnav{flex-wrap:wrap;overflow:visible}
+  .cnav button{flex:1 1 44%;text-align:center;white-space:normal}
+}
+@media (max-width:720px){header{position:static}header .sub{display:none}}
+@media (pointer:coarse){.seg button,.sub-btn,.rec-actions .btn,#clearGhost,.row-del{min-height:40px}.row-del{min-width:40px}}
+.report .rp-info th{white-space:nowrap}
 </style>
 </head>
 <body>
+<script>if(/embed/.test(location.hash))document.body.classList.add("vlab-embed");</script>
 <header>
   <div>
     <h1>🔬 반응 속도 요인 관찰실</h1>
@@ -470,14 +556,14 @@ canvas.zoomable{cursor:zoom-in}
           <button class="btn" id="simFull" style="margin-left:auto" title="입자 모형을 전체 화면으로 보기">⛶ 전체 화면</button>
         </div>
         <div class="stats" id="simStats"></div>
-        <p class="muted small avg-note" style="margin:8px 0 0">📊 숫자와 그래프는 같은 조건에서 <b>8번 반복한 실험의 평균</b>이에요. 화면에는 그중 1번이 보여요.</p>
+        <p class="muted small avg-note" style="margin:8px 0 0">📊 숫자와 그래프는 같은 조건에서 <b>8번 반복한 실험의 평균</b>이에요. 화면에는 그중 1번이 보여요. 충돌 수는 처음부터 센 <b>누적 횟수</b>라서, 반응이 빨라 반응물이 일찍 줄어들면 오히려 작게 나올 수 있어요. 조건을 비교할 때는 <b>유효 충돌 비율</b>과 생성물 그래프의 기울기를 보세요.</p>
       </div>
     </div>
 
     <div class="ga-mid">
     <div class="ga-prod">
       <div class="card">
-        <h2 class="prod-h"><span id="prodTitle">생성물의 양 – 시간 그래프</span><span class="prod-note">※ 입자는 무작위로 운동해서 같은 조건이어도 결과가 다르게 나타날 수 있어요. (8회 평균으로 편차를 줄였어요)</span></h2>
+        <h2 class="prod-h"><span id="prodTitle">생성물의 양 – 시간 그래프</span><span class="prod-note">※ 입자는 무작위로 운동해요. 같은 조건에서 8번 반복한 평균을 그려서 다시 해도 비슷하게 나와요.</span></h2>
         <canvas id="prodCanvas"></canvas>
         <div class="ghost-legend" id="prodLegend"></div>
         <div class="row" style="margin-top:8px;justify-content:space-between">
@@ -554,7 +640,7 @@ canvas.zoomable{cursor:zoom-in}
         <p>반응이 일어나기 위해 필요한 <b>최소한의 에너지</b>를 활성화 에너지라고 해요. 반응물은 에너지가 가장 높은 불안정한 <b>활성화 상태</b>를 거쳐 생성물이 돼요.</p>
         <ul>
           <li>활성화 에너지가 <b>클수록</b> 유효 충돌이 적어 반응 속도가 <b>느려요</b>.</li>
-          <li><b>반응 엔탈피(ΔH)</b> = 생성물의 엔탈피 − 반응물의 엔탈피 (발열: ΔH &lt; 0, 흡열: ΔH &gt; 0)</li>
+          <li><b>반응엔탈피(ΔH)</b> = 생성물의 엔탈피 − 반응물의 엔탈피 (발열: ΔH &lt; 0, 흡열: ΔH &gt; 0)</li>
           <li>역반응의 활성화 에너지 = 정반응의 활성화 에너지 − ΔH</li>
           <li>정촉매는 활성화 에너지를 <b>낮추고</b>, 부촉매는 활성화 에너지를 <b>높여요</b>.</li>
           <li>촉매는 활성화 에너지만 바꾸고, 반응물·생성물의 에너지와 <b>ΔH는 바꾸지 않아요</b>.</li>
@@ -873,8 +959,8 @@ function showTip(el){
   tipEl.style.left=x+'px'; tipEl.style.top=y+'px';
 }
 function hideTip(){ tipEl.classList.remove('show'); tipFor=null; }
-document.addEventListener('mouseover',e=>{ const t=e.target.closest('.term'); if(t) showTip(t); });
-document.addEventListener('mouseout',e=>{ const t=e.target.closest('.term'); if(t&&!t.contains(e.relatedTarget)) hideTip(); });
+document.addEventListener('mouseover',e=>{ if(!matchMedia('(hover:hover)').matches) return; const t=e.target.closest('.term'); if(t) showTip(t); });
+document.addEventListener('mouseout',e=>{ if(!matchMedia('(hover:hover)').matches) return; const t=e.target.closest('.term'); if(t&&!t.contains(e.relatedTarget)) hideTip(); });
 document.addEventListener('click',e=>{ const t=e.target.closest('.term'); if(t&&t.tagName==='BUTTON'){ hideTip(); return; } if(t){ e.stopPropagation(); tipFor===t?hideTip():showTip(t); } else hideTip(); },true);
 window.addEventListener('scroll',hideTip,{passive:true});
 const term=(w,label)=>`<span class="term" tabindex="0" data-term="${w}">${label||w}</span>`;
@@ -1238,7 +1324,7 @@ function statsHTML(){
   const surf=sim.cfg.kind==='surface';
   const ratio=AV.coll?(AV.eff/AV.coll*100):0;
   let s=`<div class="stat"><div class="v">${AV.t.toFixed(1)} s</div><div class="l">시간</div></div>
-    <div class="stat"><div class="v">${Math.round(AV.coll)}</div><div class="l">${surf?'H⁺–Mg 충돌':RX().a+'–'+RX().b+' 충돌'}</div></div>
+    <div class="stat"><div class="v">${Math.round(AV.coll)}</div><div class="l">${surf?'H⁺–Mg 충돌':RX().a+'–'+RX().b+' 충돌'} <span style="white-space:nowrap">(누적)</span></div></div>
     <div class="stat eff"><div class="v">${Math.round(AV.eff)}</div><div class="l">유효 충돌</div></div>
     <div class="stat"><div class="v">${ratio.toFixed(1)}%</div><div class="l">유효 충돌 비율</div></div>`;
   s+= surf?`<div class="stat"><div class="v">${Math.round(AV.exposed)}</div><div class="l">표면의 Mg 원자</div></div><div class="stat"><div class="v">${Math.round(AV.prod)}</div><div class="l">H₂ 분자</div></div>`
@@ -1280,7 +1366,7 @@ function drawSim(){
     ctx.fillStyle=a.hits?'#a8a29e':'#cbd5e1';
     ctx.beginPath(); ctx.arc(a.x,a.y,a.r-0.5,0,Math.PI*2); ctx.fill();
     if(ex){ ctx.strokeStyle='#fde047'; ctx.lineWidth=2; ctx.stroke(); }
-    ctx.fillStyle='#334155'; ctx.font=`700 7px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('Mg',a.x,a.y+0.5);
+    ctx.fillStyle='#334155'; if(sc>=0.8){ ctx.font=`700 7px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('Mg',a.x,a.y+0.5); }
   }
   const RXd=RX();
   for(const p of sim.p){
@@ -1294,7 +1380,8 @@ function drawSim(){
     const col={A:RXd.ca,B:RXd.cb,H:'#f43f5e',Mg:'#94a3b8'}[p.type];
     ctx.fillStyle=col; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
     ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='middle';
-    if(p.type==='A'||p.type==='B'){ ctx.font=`700 9px sans-serif`; ctx.fillText(p.type==='A'?RXd.a:RXd.b,p.x,p.y+0.5); }
+    if(sc<0.8){}
+    else if(p.type==='A'||p.type==='B'){ ctx.font=`700 9px sans-serif`; ctx.fillText(p.type==='A'?RXd.a:RXd.b,p.x,p.y+0.5); }
     else if(p.type==='H'){ ctx.font=`700 8px sans-serif`; ctx.fillText('+',p.x,p.y+0.5); }
   }
   for(const b of sim.bubbles){
@@ -1318,16 +1405,16 @@ function drawSim(){
       ctx.fillStyle=col; ctx.globalAlpha=0.85; ctx.beginPath();
       for(let k=0;k<6;k++){ const an=Math.PI/6+k*Math.PI/3; const px=c.x+Math.cos(an)*c.r, py=c.y+Math.sin(an)*c.r; k?ctx.lineTo(px,py):ctx.moveTo(px,py); }
       ctx.closePath(); ctx.fill(); ctx.globalAlpha=1;
-      ctx.fillStyle='#fff'; ctx.font=`700 9px ${FONT}`; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('촉',c.x,c.y+0.5);
+      ctx.fillStyle='#fff'; ctx.font=`700 9px ${FONT}`; ctx.textAlign='center'; ctx.textBaseline='middle'; if(sc>=0.8) ctx.fillText('촉',c.x,c.y+0.5);
     }
-    ctx.fillStyle=col; ctx.font=`700 13px ${FONT}`; ctx.textAlign='left'; ctx.textBaseline='top';
+    ctx.fillStyle=col; ctx.font=`700 ${Math.round(13/Math.min(1,sc))}px ${FONT}`; ctx.textAlign='left'; ctx.textBaseline='top';
     ctx.fillText(F.cat==='pos'?'⚗️ 정촉매 : 활성화 에너지 ↓':'⚗️ 부촉매 : 활성화 에너지 ↑',10,10);
   }
   ctx.restore();
   $('#simStats').innerHTML=statsHTML();
   const msg=$('#simMsg');
   if(!F.running&&sim.t===0){ msg.style.display='block'; msg.textContent='▶ 시작을 눌러 관찰해요'; }
-  else if(AV.done){ msg.style.display='block'; msg.innerHTML=`측정 완료!<br><span style="font-size:13px;font-weight:500">조건을 바꿔 다시 실험하고 그래프를 비교해 보세요</span>`; }
+  else if(AV.done){ msg.style.display='block'; msg.innerHTML=`측정 완료!<br><span style="font-size:13px;font-weight:500">↺ 처음부터를 누르거나 조건을 바꿔 다시 실험하고 그래프를 비교해 보세요</span>`; }
   else msg.style.display='none';
 }
 function drawProd(){
@@ -1357,7 +1444,7 @@ function drawEnergy(){
     drawDist(ctx,w,h,DA);
     const f0=fracAbove(EA_TEMP,k0)*100, f1=fracAbove(EA_TEMP,k1)*100;
     $('#energyNote').innerHTML=(F.T===25?`25 °C에서 Ea 이상의 에너지를 가진 입자 비율은 <b>${f0.toFixed(1)}%</b>예요. 슬라이더로 온도를 바꿔 보세요.<br>`
-      :`Ea 이상의 에너지를 가진 입자 비율: 25 °C에서 <b>${f0.toFixed(1)}%</b> → ${F.T} °C에서 <b style="color:#e11d48">${f1.toFixed(1)}%</b> (약 ${(f1/f0).toFixed(1)}배)<br>`)+`
+      :`Ea 이상의 에너지를 가진 입자 비율: 25 °C에서 <b>${f0.toFixed(1)}%</b> → ${F.T} °C에서 <b style="color:#e11d48">${f1.toFixed(1)}%</b> (약 ${(f1/f0).toFixed(1)}배) <span class="muted">— 아래 분포 그래프에서 색칠한 넓이예요. 입자 모형의 '유효 충돌 비율'과는 세는 방법이 달라 숫자가 같지 않아요.</span><br>`)+`
       온도가 높아지면 곡선이 오른쪽으로 퍼지면서 <b>활성화 에너지 이상의 에너지를 가진 입자 비율</b>이 커져요.<br>${term('활성화 에너지')} 자체는 변하지 않아요.`;
   } else if(F.mode==='cat'){
     $('#energyTitle').textContent='반응 경로와 활성화 에너지';
@@ -1378,9 +1465,9 @@ function drawEnergy(){
     drawDist(r.ctx,r.w,r.h,DB);
     const f0=fracAbove(EA_GAS,k)*100, f1=fracAbove(EaC,k)*100;
     $('#energyNote').innerHTML=F.cat==='pos'
-      ?`반응물 A가 정촉매 표면에 <b>붙잡히면(흡착)</b>, B가 부딪혔을 때 ${term('활성화 에너지')}가 더 <b>낮은</b> 경로로 쉽게 반응해요.<br>반응할 수 있는 입자 비율이 <b>${f0.toFixed(1)}% → <span style="color:#059669">${f1.toFixed(1)}%</span></b>로 늘어 반응이 빨라져요.<br>촉매는 반응이 끝나도 그대로 남고, 반응 엔탈피(ΔH)도 바꾸지 않아요.`
+      ?`반응물 A가 정촉매 표면에 <b>붙잡히면(흡착)</b>, B가 부딪혔을 때 ${term('활성화 에너지')}가 더 <b>낮은</b> 경로로 쉽게 반응해요.<br>반응할 수 있는 입자 비율이 <b>${f0.toFixed(1)}% → <span style="color:#059669">${f1.toFixed(1)}%</span></b>로 늘어 반응이 빨라져요.<br>촉매는 반응이 끝나도 그대로 남고, 반응엔탈피(ΔH)도 바꾸지 않아요.`
       :F.cat==='neg'
-      ?`부촉매에 붙잡힌 반응물 A는 B와 부딪혀도 ${term('활성화 에너지')}가 더 <b>높아</b> 거의 반응하지 못해요. 붙잡혀 있는 동안 다른 반응에도 참여하지 못해요.<br>반응할 수 있는 입자 비율이 <b>${f0.toFixed(1)}% → <span style="color:#dc2626">${f1.toFixed(1)}%</span></b>로 줄어 반응이 느려져요.<br>촉매는 반응이 끝나도 그대로 남고, 반응 엔탈피(ΔH)도 바꾸지 않아요.`
+      ?`부촉매에 붙잡힌 반응물 A는 B와 부딪혀도 ${term('활성화 에너지')}가 더 <b>높아</b> 거의 반응하지 못해요. 붙잡혀 있는 동안 다른 반응에도 참여하지 못해요.<br>반응할 수 있는 입자 비율이 <b>${f0.toFixed(1)}% → <span style="color:#dc2626">${f1.toFixed(1)}%</span></b>로 줄어 반응이 느려져요.<br>촉매는 반응이 끝나도 그대로 남고, 반응엔탈피(ΔH)도 바꾸지 않아요.`
       :`지금은 촉매가 없어요. ${term('활성화 에너지')}(Ea) 이상의 에너지를 가진 입자는 <b>${f0.toFixed(1)}%</b>예요.<br><b>정촉매</b>나 <b>부촉매</b>를 눌러 비교해 보세요.`;
   } else if(surf){
     $('#energyTitle').textContent='💡 왜 빨라질까?';
@@ -1429,6 +1516,8 @@ function loop(now){
    ========================================================= */
 const REC_KEY='rrf-records-v1', INFO_KEY='rrf-student-v1';
 let records=loadLS(REC_KEY,[]);
+if(!Array.isArray(records)) records=[];
+records=records.filter(r=>r&&r.id&&Array.isArray(r.series)&&r.series.length&&Array.isArray(r.controls)&&typeof r.ratio==='number'&&typeof r.prodLabel==='string');
 let recPick=[]; let recOpenId=null;
 const MODE_INFO={
   temp:{name:'온도',purpose:'온도가 반응 속도에 미치는 영향을 알아본다.'},
@@ -1541,7 +1630,7 @@ $('#clearRec').addEventListener('click',()=>{
 });
 $('#makeReport').addEventListener('click',()=>{
   const [a,b]=recPick.map(id=>records.find(r=>r.id===id)).sort((x,y)=>x.no-y.no);
-  const info=loadLS(INFO_KEY,{school:'',sid:'',name:''});
+  const info=loadLS(INFO_KEY,{school:'',sid:'',name:''})||{};
   const warn=a.key!==b.key?`<div class="box warn">⚠️ 두 실험의 조작 변인이 달라요 (${vn(a)} / ${vn(b)}). 한 가지 요인의 효과를 비교하려면 같은 조작 변인의 실험 2개를 고르는 것이 좋아요.</div>`
     :(a.value===b.value?`<div class="box warn">⚠️ 두 실험의 조건(${esc(a.value)})이 같아요. 조작 변인의 값이 다른 실험을 고르면 비교가 더 잘 돼요.</div>`:'');
   openModal(`<h2>📄 실험 보고서 만들기</h2>
@@ -1580,7 +1669,7 @@ function reportHTML(a,b,inf,conc){
   const rows=[
     ['조작 변인',`${vn(a)}: <b>${esc(a.value)}</b>`,`${vn(b)}: <b>${esc(b.value)}</b>`,'–'],
     ['측정 시간 (s)',a.t+(a.complete?'':' (중단)'),b.t+(b.complete?'':' (중단)'),'–'],
-    [cl,n(a.coll),n(b.coll),ratio(a.coll,b.coll)],
+    [cl+' (누적)',n(a.coll),n(b.coll),'–'],
     ['유효 충돌 횟수',n(a.eff),n(b.eff),ratio(a.eff,b.eff)],
     ['유효 충돌 비율 (%)',a.ratio.toFixed(1),b.ratio.toFixed(1),ratio(a.ratio,b.ratio)],
     [pl,n(a.prod),n(b.prod),ratio(a.prod,b.prod)]
@@ -1707,19 +1796,22 @@ function drawCollide(){
     {t:'③ 유효 충돌',s:'빠르고, N이 O₃를 향해 부딪혀요',fast:true,good:true,ok:true}
   ];
   const P=3.4, tt=((performance.now()-collideT0)/1000%P)/P;   // 0~1 반복
-  const rh=h/3, labW=Math.min(190,w*0.3), ax=labW+10, aw=w-ax-10;
+  const narrow=w<520;
+  const rh=h/3, labW=narrow?0:Math.min(190,w*0.3), ax=labW+10, aw=w-ax-10;
   const r=Math.max(9,Math.min(15,rh*0.11));
   const NOg=[{dx:-r*0.82,dy:0,el:'O'},{dx:r*0.82,dy:0,el:'N'}];       // N이 오른쪽(O3 쪽)
   const NOb=[{dx:-r*0.82,dy:0,el:'N'},{dx:r*0.82,dy:0,el:'O'}];       // O가 오른쪽
   const O3=[{dx:-r*0.9,dy:r*0.55,el:'O'},{dx:r*0.15,dy:-r*0.75,el:'O'},{dx:r*1.05,dy:r*0.45,el:'O'}];
   rows.forEach((row,i)=>{
-    const y0=i*rh, cy=y0+rh*0.55, cx=ax+aw/2;
+    const y0=i*rh, cy=y0+rh*(narrow?0.7:0.55), cx=ax+aw/2;
     ctx.fillStyle=row.ok?'#fefce8':'#f8fafc'; ctx.strokeStyle=row.ok?'#facc15':'#e2e8f0'; ctx.lineWidth=1.5;
     ctx.beginPath(); ctx.roundRect?ctx.roundRect(4,y0+4,w-8,rh-8,12):ctx.rect(4,y0+4,w-8,rh-8); ctx.fill(); ctx.stroke();
     ctx.textAlign='left'; ctx.textBaseline='middle';
-    ctx.fillStyle=row.ok?'#a16207':'#1f2937'; ctx.font=`800 ${Math.max(12,Math.min(15,w/48))}px ${FONT}`; ctx.fillText(row.t,16,y0+rh*0.4);
-    ctx.fillStyle='#64748b'; ctx.font=`600 ${Math.max(11,Math.min(12.5,w/58))}px ${FONT}`; ctx.fillText(row.s,16,y0+rh*0.62);
-    ctx.font=`800 15px ${FONT}`; ctx.fillStyle=row.ok?'#16a34a':'#dc2626'; ctx.fillText(row.ok?'반응 ○':'반응 ✕',16,y0+rh*0.82);
+    ctx.fillStyle=row.ok?'#a16207':'#1f2937'; ctx.font=`800 ${Math.max(12,Math.min(15,w/48))}px ${FONT}`; ctx.fillText(row.t,16,narrow?y0+20:y0+rh*0.4);
+    ctx.fillStyle='#64748b'; ctx.font=`600 ${narrow?12:Math.max(11,Math.min(12.5,w/58))}px ${FONT}`; ctx.fillText(row.s,16,narrow?y0+38:y0+rh*0.62);
+    ctx.font=`800 15px ${FONT}`; ctx.fillStyle=row.ok?'#16a34a':'#dc2626';
+    if(narrow){ ctx.textAlign='right'; ctx.fillText(row.ok?'반응 ○':'반응 ✕',w-16,y0+20); ctx.textAlign='left'; }
+    else ctx.fillText(row.ok?'반응 ○':'반응 ✕',16,y0+rh*0.82);
     // 움직임: 0~0.42 다가감, 0.42 충돌, 0.42~0.85 결과, 이후 잠시 멈춤
     const vFast=aw*0.95, vSlow=aw*0.32;           // 1회 주기 동안 이동 거리(픽셀/주기)
     const v=(row.fast?vFast:vSlow)/P;               // 픽셀/초
@@ -1751,12 +1843,12 @@ const OX=[
   {q:'모든 충돌은 화학 반응을 일으킨다.',a:false,e:'활성화 에너지 이상의 에너지를 가지고 알맞은 방향으로 충돌하는 유효 충돌만 반응을 일으켜요.'},
   {q:'온도를 높이면 활성화 에너지가 낮아져 반응 속도가 빨라진다.',a:false,e:'온도를 높여도 활성화 에너지는 그대로예요. 활성화 에너지 이상의 에너지를 가진 입자의 비율이 늘어나요.'},
   {q:'온도를 높이면 활성화 에너지 이상의 에너지를 가진 입자의 비율이 증가한다.',a:true,e:'에너지 분포 곡선이 오른쪽으로 퍼져 Ea 이상 부분의 넓이가 커져요.'},
-  {q:'촉매를 사용하면 반응 엔탈피(ΔH)가 작아진다.',a:false,e:'촉매는 활성화 에너지만 바꾸고 반응물과 생성물의 에너지, 즉 ΔH는 바꾸지 않아요.'},
+  {q:'촉매를 사용하면 반응엔탈피(ΔH)가 작아진다.',a:false,e:'촉매는 활성화 에너지만 바꾸고 반응물과 생성물의 에너지, 즉 ΔH는 바꾸지 않아요.'},
   {q:'촉매는 반응이 끝나면 모두 소모되어 없어진다.',a:false,e:'촉매는 반응 전후에 변하지 않고 그대로 남아요.'},
   {q:'부촉매를 사용하면 활성화 에너지가 높아져 반응 속도가 느려진다.',a:true,e:'부촉매는 활성화 에너지가 더 높은 경로로 반응하게 해서, 반응할 수 있는 입자 비율이 줄어요.'},
   {q:'고체를 가루로 만들면 표면적이 커져 반응 속도가 빨라진다.',a:true,e:'표면에 드러난 입자가 많아져 충돌 횟수가 늘어나요.'},
   {q:'기체 반응에서 부피를 줄여 압력을 높이면 반응 속도가 빨라진다.',a:true,e:'부피가 줄면 기체의 농도가 커져 충돌 횟수가 늘어나요.'},
-  {q:'높은 온도에서 반응 속도가 빠른 것은 분자들의 평균 속력이 빨라지기 때문이다.',a:false,e:'평균 속력이 빨라져 충돌 횟수가 조금 늘기는 하지만, 주된 이유는 활성화 에너지 이상의 에너지를 가진 분자의 비율이 크게 늘어나기 때문이에요.'}
+  {q:'온도를 높일 때 반응 속도가 빨라지는 주된 까닭은 충돌 횟수가 늘어나기 때문이다.',a:false,e:'평균 속력이 빨라져 충돌 횟수가 조금 늘기는 하지만, 주된 이유는 활성화 에너지 이상의 에너지를 가진 분자의 비율이 크게 늘어나기 때문이에요.'}
 ];
 const oxAns={};
 function renderOX(){
